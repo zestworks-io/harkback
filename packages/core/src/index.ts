@@ -9,3 +9,4 @@ export * from "./replay-concepts";
 export * from "./replay";
 export * from "./snapshot";
 export * from "./compact";
+export * from "./candidates";
