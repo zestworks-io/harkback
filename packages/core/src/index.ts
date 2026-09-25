@@ -6,3 +6,5 @@ export * from "./normalize";
 export * from "./state";
 export * from "./union-find";
 export * from "./replay-concepts";
+export * from "./replay";
+export * from "./snapshot";
