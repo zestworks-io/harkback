@@ -1,0 +1,151 @@
+import { MATCH_RULES } from "./constants";
+import { normalizeName, type Script } from "./normalize";
+import type { State } from "./state";
+
+const SEPARATOR = /[\s\-‐‑‒–—_]/;
+const SEPARATORS_G = /[\s\-‐‑‒–—_­]+/g;
+
+export interface PreparedText {
+  text: string;
+  map: number[];
+}
+
+export function prepareText(raw: string): PreparedText {
+  let text = "";
+  const map: number[] = [];
+  let pendingSpace = false;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i]!;
+    if (ch === "­") continue;
+    if (SEPARATOR.test(ch)) {
+      pendingSpace = text.length > 0;
+      continue;
+    }
+    if (pendingSpace) {
+      text += " ";
+      map.push(i);
+      pendingSpace = false;
+    }
+    const lower = ch.toLowerCase();
+    text += lower.length === 1 ? lower : ch;
+    map.push(i);
+  }
+  return { text, map };
+}
+
+export interface MatcherEntry {
+  pattern: string;
+  key: string;
+  script: Script;
+  caseKey: string | null;
+}
+
+export interface Hit {
+  key: string;
+  start: number;
+  end: number;
+  text: string;
+}
+
+interface Node {
+  next: Map<string, number>;
+  fail: number;
+  out: number[];
+}
+
+interface Entry extends MatcherEntry {
+  prepared: string;
+}
+
+const isLatinWordChar = (c: string | undefined) => c !== undefined && /[\p{Script=Latin}\p{N}]/u.test(c);
+
+export class Matcher {
+  private readonly nodes: Node[] = [{ next: new Map(), fail: 0, out: [] }];
+  private readonly entries: Entry[] = [];
+
+  constructor(entries: readonly MatcherEntry[]) {
+    for (const e of entries) this.insert(e);
+    this.build();
+  }
+
+  private insert(e: MatcherEntry): void {
+    const prepared = prepareText(e.pattern).text.trim();
+    if (!prepared) return;
+    if (e.script === "cjk" && Array.from(prepared).length < MATCH_RULES.cjkMinMatchLength) return;
+    const index = this.entries.push({ ...e, prepared }) - 1;
+    let s = 0;
+    for (let i = 0; i < prepared.length; i++) {
+      const ch = prepared[i]!;
+      let n = this.nodes[s]!.next.get(ch);
+      if (n === undefined) {
+        n = this.nodes.push({ next: new Map(), fail: 0, out: [] }) - 1;
+        this.nodes[s]!.next.set(ch, n);
+      }
+      s = n;
+    }
+    this.nodes[s]!.out.push(index);
+  }
+
+  private build(): void {
+    const queue: number[] = [...this.nodes[0]!.next.values()];
+    for (let qi = 0; qi < queue.length; qi++) {
+      const r = queue[qi]!;
+      for (const [ch, u] of this.nodes[r]!.next) {
+        queue.push(u);
+        let f = this.nodes[r]!.fail;
+        while (f !== 0 && !this.nodes[f]!.next.has(ch)) f = this.nodes[f]!.fail;
+        const candidate = this.nodes[f]!.next.get(ch);
+        const fail = candidate !== undefined && candidate !== u ? candidate : 0;
+        this.nodes[u]!.fail = fail;
+        this.nodes[u]!.out.push(...this.nodes[fail]!.out);
+      }
+    }
+  }
+
+  scan(raw: string): Hit[] {
+    const { text, map } = prepareText(raw);
+    const hits: Hit[] = [];
+    let s = 0;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i]!;
+      while (s !== 0 && !this.nodes[s]!.next.has(ch)) s = this.nodes[s]!.fail;
+      s = this.nodes[s]!.next.get(ch) ?? 0;
+      for (const index of this.nodes[s]!.out) {
+        const e = this.entries[index]!;
+        const startP = i - e.prepared.length + 1;
+        const endP = this.accept(e, text, startP, i, raw, map);
+        if (endP < 0) continue;
+        const start = map[startP]!;
+        const end = map[endP]! + 1;
+        hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
+      }
+    }
+    return hits;
+  }
+
+  /** Returns the accepted end index in prepared text (possibly extended by a plural "s"), or -1. */
+  private accept(e: Entry, text: string, startP: number, endP: number, raw: string, map: readonly number[]): number {
+    let end = endP;
+    if (e.script === "latin") {
+      if (isLatinWordChar(text[startP - 1])) return -1;
+      if (isLatinWordChar(text[end + 1])) {
+        if (text[end + 1] === "s" && !isLatinWordChar(text[end + 2])) end += 1;
+        else return -1;
+      }
+    }
+    if (e.caseKey) {
+      const original = raw.slice(map[startP]!, map[end]! + 1).replace(SEPARATORS_G, "");
+      if (original !== e.caseKey && original !== `${e.caseKey}s`) return -1;
+    }
+    return end;
+  }
+}
+
+export function matcherEntriesFromState(state: State): MatcherEntry[] {
+  return [...state.aliases.values()].map((a) => ({
+    pattern: a.display,
+    key: a.key,
+    script: a.script,
+    caseKey: normalizeName(a.display).caseKey,
+  }));
+}
