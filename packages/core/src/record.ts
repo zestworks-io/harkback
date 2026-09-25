@@ -136,10 +136,9 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
     if (known.has(key)) return conceptId;
     const batch = createdInBatch.get(key);
     if (batch) return batch;
-    const info = state.aliases.get(key);
-    const sameDomain = info?.conceptIds.find((cid) => state.concepts.get(cid)?.domain === domain);
+    // Only reuse a concept from the same domain; same names across domains are different concepts.
+    const sameDomain = state.aliases.get(key)?.conceptIds.find((cid) => state.concepts.get(cid)?.domain === domain);
     if (sameDomain) return sameDomain;
-    if (info?.conceptIds[0]) return info.conceptIds[0];
     const placeholderId = newId();
     createdInBatch.set(key, placeholderId);
     out.push(f.make("concept.created", { concept_id: placeholderId, canonical_name: name, aliases: [], domain }));

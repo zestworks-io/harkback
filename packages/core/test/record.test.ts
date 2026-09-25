@@ -141,3 +141,14 @@ describe("buildRecordEvents: field limits and sensitivity", () => {
     expect(() => buildRecordEvents(input({ selection: "→" }))).toThrow("empty selection");
   });
 });
+
+describe("buildRecordEvents: edge targets", () => {
+  it("does not link edges to a same-named concept in another domain", () => {
+    const prior = [concept(1, "Transformer", "physics")];
+    const events = buildRecordEvents(input({ parsed: parsed(card({ broader: [], variants: [], prerequisites: ["Transformer"] })) }, prior));
+    const edge = events.find((e) => e.type === "edge.proposed");
+    expect(edge?.type === "edge.proposed" && edge.payload.to).not.toBe(id(1));
+    const placeholder = events.find((e) => e.type === "concept.created" && e.payload.canonical_name === "Transformer");
+    expect(placeholder?.type === "concept.created" && placeholder.payload.domain).toBe("ml");
+  });
+});

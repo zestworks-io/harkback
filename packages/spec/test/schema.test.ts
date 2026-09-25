@@ -55,3 +55,9 @@ describe("JSON Schema", () => {
     expect(committed).toEqual(z.toJSONSchema(eventSchema));
   });
 });
+
+describe("parseEvent size limit", () => {
+  it("applies the 64KB limit to events from newer envelope versions too", () => {
+    expect(parseEvent({ ...conceptCreated, v: 2, pad: "x".repeat(70000) })).toEqual({ kind: "invalid", reason: "too_large" });
+  });
+});
