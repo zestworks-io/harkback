@@ -69,3 +69,18 @@ describe("Matcher", () => {
     expect(hits.length).toBe(6500);
   });
 });
+
+describe("Matcher: separators and overlaps", () => {
+  it("matches short acronyms written with slashes or dots, keeping case rules", () => {
+    const m = new Matcher(matcherEntriesFromState(replay([concept(1, "I/O", "systems"), concept(2, "CI/CD", "systems")])));
+    expect(m.scan("disk I/O is slow").map((h) => h.text)).toEqual(["I/O"]);
+    expect(m.scan("a CI/CD pipeline").map((h) => h.text)).toEqual(["CI/CD"]);
+    expect(m.scan("disk i/o is slow")).toEqual([]);
+  });
+
+  it("drops hits contained in a longer hit", () => {
+    const m = new Matcher(matcherEntriesFromState(replay([concept(1, "self-attention"), concept(2, "attention")])));
+    expect(m.scan("uses self-attention layers").map((h) => h.key)).toEqual(["selfattention"]);
+    expect(m.scan("self-attention and attention").map((h) => h.key)).toEqual(["selfattention", "attention"]);
+  });
+});

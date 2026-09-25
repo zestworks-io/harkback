@@ -24,8 +24,16 @@ export interface BuiltPrompt {
 
 const LIMITS = { selection: 200, paragraph: 2000, section: 200, title: 300, abstract: 500 } as const;
 
+const DELIMITER = /<\/?(?:page_content|selected)>/gi;
+
 function clean(s: string, max: number): string {
-  return s.replace(/<\/?page_content>/gi, "").replace(/<\/?selected>/gi, "").slice(0, max);
+  let out = s;
+  // Repeat until stable so nested fragments cannot reassemble a delimiter.
+  for (let prev = ""; prev !== out; ) {
+    prev = out;
+    out = out.replace(DELIMITER, "");
+  }
+  return out.slice(0, max);
 }
 
 function systemMessage(language: "zh" | "en"): string {
@@ -73,7 +81,7 @@ export function isSensitiveOnly(state: State, conceptId: string): boolean {
   const evidence = [...state.edges.values()]
     .filter((e) => e.from === conceptId || e.to === conceptId)
     .flatMap((e) => e.evidenceEncounterIds);
-  if (evidence.length === 0) return false;
+  // No surviving evidence (e.g. every encounter was deleted): the origin is unknown, so treat it as sensitive.
   return evidence.every((eid) => sourceIsSensitive(state, eid));
 }
 

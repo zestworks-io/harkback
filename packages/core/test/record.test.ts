@@ -117,3 +117,27 @@ describe("buildRecordEvents", () => {
     expect(() => buildRecordEvents(input({ selection: " ,.; " }))).toThrow("empty selection");
   });
 });
+
+describe("buildRecordEvents: field limits and sensitivity", () => {
+  it("clamps long fields so every event stays schema-valid", () => {
+    const longId = `url:https://intranet.example.com/${"p".repeat(600)}`;
+    const events = buildRecordEvents(
+      input({
+        source: { ...source, source_id: longId, title: "T".repeat(600), ids: { url: longId } },
+        locator: { exact: "LoRA", prefix: "p".repeat(80), suffix: "s".repeat(80), section: "S".repeat(300) },
+      }),
+    );
+    for (const e of events) expect(parseEvent(e).kind).toBe("event");
+  });
+
+  it("never downgrades a sensitive source to normal", () => {
+    const prior = [ev("source.seen", { ...source, sensitivity: "sensitive" })];
+    const events = buildRecordEvents(input({ source: { ...source, sensitivity: "normal" } }, prior));
+    expect(replay([...prior, ...events]).sources.get(source.source_id)?.sensitivity).toBe("sensitive");
+  });
+
+  it("rejects symbol-only selections", () => {
+    expect(() => buildRecordEvents(input({ selection: "**" }))).toThrow("empty selection");
+    expect(() => buildRecordEvents(input({ selection: "→" }))).toThrow("empty selection");
+  });
+});

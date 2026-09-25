@@ -15,7 +15,7 @@ import {
 export const ulidSchema = z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/);
 export const deviceIdSchema = z.string().regex(/^(dev|svc)_[0-9a-f]{4,32}$/);
 const nameSchema = z.string().min(1).max(CARD_LIMITS.maxNameLength);
-const sourceIdSchema = z.string().min(1).max(512);
+const sourceIdSchema = z.string().min(1).max(2048);
 
 export const sourceSeenPayload = z.object({
   source_id: sourceIdSchema,

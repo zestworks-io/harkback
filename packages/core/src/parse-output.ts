@@ -26,7 +26,7 @@ function block(raw: string, tag: string): string | null {
 function cleanName(v: unknown): string | null {
   if (typeof v !== "string") return null;
   const s = v.trim();
-  if (!s || s.length > CARD_LIMITS.maxNameLength || /[<>\n\r]/.test(s)) return null;
+  if (!s || s.length > CARD_LIMITS.maxNameLength || /[<>\n\r]/.test(s) || !/[\p{L}\p{N}]/u.test(s)) return null;
   return s;
 }
 

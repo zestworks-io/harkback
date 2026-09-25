@@ -77,3 +77,12 @@ describe("streamingExplanation", () => {
     expect(streamingExplanation("No tags at all")).toBe("No tags at all");
   });
 });
+
+describe("parseModelOutput: name content", () => {
+  it("drops card names without any letter or digit", () => {
+    const r = parseModelOutput(out(card({ broader: ["()"], variants: ["**", "QLoRA"] })), labels);
+    expect(r.card?.broader).toEqual([]);
+    expect(r.card?.variants).toEqual(["QLoRA"]);
+    expect(parseModelOutput(out(card({ canonical: "→" })), labels).card).toBeNull();
+  });
+});

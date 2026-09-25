@@ -1,4 +1,4 @@
-import { CARD_LIMITS, type Domain, type HarkEvent, type Locator, type PayloadOf, type Rel, type Tier } from "@harkback/spec";
+import { CARD_LIMITS, parseEvent, type Domain, type HarkEvent, type Locator, type PayloadOf, type Rel, type Tier } from "@harkback/spec";
 import type { Candidate } from "./candidates";
 import { THRESHOLDS } from "./constants";
 import type { EventFactory } from "./factory";
@@ -58,15 +58,34 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
   const { factory: f, state, parsed } = input;
   const newId = input.newId ?? (() => ulid());
   const selection = input.selection.trim().slice(0, CARD_LIMITS.maxSelectionLength);
-  if (!identityKey(selection)) throw new Error("empty selection");
+  if (!identityKey(selection) || !/[\p{L}\p{N}]/u.test(selection)) throw new Error("empty selection");
 
   const out: HarkEvent[] = [];
   const card = parsed.card;
 
   const prevSource = state.sources.get(input.source.source_id);
-  if (!prevSource || prevSource.sensitivity !== input.source.sensitivity || prevSource.title !== input.source.title) {
-    out.push(f.make("source.seen", input.source));
+  const ids = input.source.ids;
+  const source: PayloadOf<"source.seen"> = {
+    ...input.source,
+    ids: {
+      ...(ids.arxiv !== undefined && { arxiv: ids.arxiv.slice(0, 64) }),
+      ...(ids.doi !== undefined && { doi: ids.doi.slice(0, 256) }),
+      ...(ids.url !== undefined && { url: ids.url.slice(0, 2048) }),
+    },
+    title: input.source.title.slice(0, 500),
+    license: input.source.license.slice(0, 64),
+    // Recording never downgrades: only an explicit user action may mark a sensitive source normal again.
+    sensitivity: prevSource?.sensitivity === "sensitive" ? "sensitive" : input.source.sensitivity,
+  };
+  if (!prevSource || prevSource.sensitivity !== source.sensitivity || prevSource.title !== source.title) {
+    out.push(f.make("source.seen", source));
   }
+  const locator: Locator = {
+    exact: input.locator.exact.slice(0, 500),
+    prefix: input.locator.prefix.slice(-64),
+    suffix: input.locator.suffix.slice(0, 64),
+    ...(input.locator.section !== undefined && { section: input.locator.section.slice(0, 200) }),
+  };
 
   const known = new Set<string>();
   let conceptId: string;
@@ -97,7 +116,7 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
       encounter_id: encounterId,
       concept_id: conceptId,
       source_id: input.source.source_id,
-      locator: input.locator,
+      locator,
       selection,
       explanation: {
         text: parsed.explanation,
@@ -109,7 +128,7 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
     }),
   );
 
-  if (!card) return out;
+  if (!card) return validated(out);
 
   const createdInBatch = new Map<string, string>();
   const lookup = (name: string): string => {
@@ -135,5 +154,14 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
   for (const name of card.variants) propose(lookup(name), conceptId, "variant_of", card.confidence.variants);
   for (const name of card.prerequisites) propose(conceptId, lookup(name), "prerequisite", card.confidence.prerequisites);
 
-  return out;
+  return validated(out);
+}
+
+/** Refuses to hand back events that sync and JSONL import would later reject. */
+function validated(events: HarkEvent[]): HarkEvent[] {
+  for (const e of events) {
+    const r = parseEvent(e);
+    if (r.kind !== "event") throw new Error(`invalid ${e.type} event: ${r.kind === "invalid" ? r.reason : r.kind}`);
+  }
+  return events;
 }

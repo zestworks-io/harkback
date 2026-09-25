@@ -120,7 +120,7 @@ export class Matcher {
         hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
       }
     }
-    return hits;
+    return dropContained(hits);
   }
 
   /** Returns the accepted end index in prepared text (possibly extended by a plural "s"), or -1. */
@@ -135,10 +135,23 @@ export class Matcher {
     }
     if (e.caseKey) {
       const original = raw.slice(map[startP]!, map[end]! + 1).replace(SEPARATORS_G, "");
-      if (original !== e.caseKey && original !== `${e.caseKey}s`) return -1;
+      if (normalizeName(original).caseKey !== e.caseKey) return -1;
     }
     return end;
   }
+}
+
+/** Removes hits lying inside a strictly longer hit ("attention" inside "self-attention"); sorts by start. */
+function dropContained(hits: Hit[]): Hit[] {
+  hits.sort((a, b) => a.start - b.start || b.end - a.end);
+  const out: Hit[] = [];
+  let cover: Hit | null = null;
+  for (const h of hits) {
+    if (cover && h.end <= cover.end && h.end - h.start < cover.end - cover.start) continue;
+    out.push(h);
+    if (!cover || h.end > cover.end) cover = h;
+  }
+  return out;
 }
 
 export function matcherEntriesFromState(state: State): MatcherEntry[] {
