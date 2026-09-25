@@ -8,3 +8,4 @@ export * from "./union-find";
 export * from "./replay-concepts";
 export * from "./replay";
 export * from "./snapshot";
+export * from "./compact";
