@@ -1,0 +1,9 @@
+{
+  "name": "@harkback/spec",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "gen:schema": "tsx scripts/gen-schema.ts" }
+}
