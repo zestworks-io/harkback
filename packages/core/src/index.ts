@@ -11,3 +11,4 @@ export * from "./snapshot";
 export * from "./compact";
 export * from "./candidates";
 export * from "./matcher";
+export * from "./reunion";
