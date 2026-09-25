@@ -12,3 +12,4 @@ export * from "./compact";
 export * from "./candidates";
 export * from "./matcher";
 export * from "./reunion";
+export * from "./prompt";
