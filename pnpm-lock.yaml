@@ -30,7 +30,11 @@ importers:
         specifier: workspace:*
         version: link:../spec
 
-  packages/spec: {}
+  packages/spec:
+    dependencies:
+      zod:
+        specifier: ^4
+        version: 4.6.5
 
 packages:
 
@@ -1110,3 +1114,7 @@ packages:
     engines: {node: '>=20.11'}
     hasBin: true
     dev: true
+
+  /zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+    dev: false
