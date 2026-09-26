@@ -31,7 +31,7 @@ export interface StreamOptions {
   temperature?: number;
 }
 
-type Choice = { delta?: { content?: unknown }; message?: { content?: unknown } };
+type Choice = { delta?: { content?: unknown }; message?: { content?: unknown }; finish_reason?: unknown };
 
 function contentOf(json: unknown, streaming: boolean): string {
   const choice = (json as { choices?: Choice[] } | null)?.choices?.[0];
@@ -89,20 +89,25 @@ export async function streamChat(
         throw new ModelError("http", "unreadable response", res.status);
       }
       full = contentOf(json, false);
+      if (!full.trim()) throw new ModelError("http", "empty response", res.status);
       onText(full);
       return full;
     }
     const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
     const parser = new SseParser();
+    // Only a stream that says it finished counts as a complete answer.
+    let finished = false;
     const handle = (payloads: string[]): boolean => {
       for (const payload of payloads) {
-        if (payload.trim() === "[DONE]") return true;
+        if (payload.trim() === "[DONE]") return (finished = true);
         let json: unknown;
         try {
           json = JSON.parse(payload);
         } catch {
           continue;
         }
+        const reason = (json as { choices?: Choice[] } | null)?.choices?.[0]?.finish_reason;
+        if (typeof reason === "string" && reason) finished = true;
         const add = contentOf(json, true);
         if (add) {
           full += add;
@@ -123,6 +128,8 @@ export async function streamChat(
         break;
       }
     }
+    if (!finished) throw new ModelError("network", "the stream ended early");
+    if (!full.trim()) throw new ModelError("http", "empty response", res.status);
     return full;
   } catch (e) {
     if (e instanceof ModelError) throw e;

@@ -59,7 +59,7 @@ describe("streamChat", () => {
         auth: new Headers(init?.headers).get("authorization"),
         body: JSON.parse(String(init?.body)),
       };
-      return sse([`${delta("x")}\n\n`]);
+      return sse([`${delta("x")}\n\ndata: [DONE]\n\n`]);
     };
     await streamChat({ ...cfg, baseUrl: " https://api.example.com/v1/chat/completions/ ", apiKey: " sk-1\n", model: " gpt " }, messages, () => {}, { fetchImpl });
     expect(seen).toEqual({ url: "https://api.example.com/v1/chat/completions", auth: "Bearer sk-1", body: expect.objectContaining({ model: "gpt", stream: true }) });
@@ -70,10 +70,25 @@ describe("streamChat", () => {
     let auth: string | null = "unset";
     const fetchImpl = async (_: RequestInfo | URL, init?: RequestInit) => {
       auth = new Headers(init?.headers).get("authorization");
-      return sse([]);
+      return sse([`${delta("x")}\n\ndata: [DONE]\n\n`]);
     };
     await streamChat({ ...cfg, baseUrl: "http://127.0.0.1:11434/v1", apiKey: "  " }, messages, () => {}, { fetchImpl });
     expect(auth).toBeNull();
+  });
+
+  it("treats a stream that ends without a completion marker as interrupted", async () => {
+    const cut = async () => sse([`${delta("<explanation>half")}\n\n`]);
+    await expect(streamChat(cfg, messages, () => {}, { fetchImpl: cut })).rejects.toMatchObject({ code: "network" });
+    const finished = `data: ${JSON.stringify({ choices: [{ delta: { content: "done" }, finish_reason: "stop" }] })}\n\n`;
+    expect(await streamChat(cfg, messages, () => {}, { fetchImpl: async () => sse([finished]) })).toBe("done");
+  });
+
+  it("rejects replies with no content, such as errors sent with status 200", async () => {
+    const jsonError = async () =>
+      new Response(JSON.stringify({ error: { message: "quota" } }), { headers: { "content-type": "application/json" } });
+    await expect(streamChat(cfg, messages, () => {}, { fetchImpl: jsonError })).rejects.toMatchObject({ code: "http" });
+    const sseError = async () => sse([`data: ${JSON.stringify({ error: { message: "quota" } })}\n\ndata: [DONE]\n\n`]);
+    await expect(streamChat(cfg, messages, () => {}, { fetchImpl: sseError })).rejects.toMatchObject({ code: "http" });
   });
 
   it("classifies HTTP errors", async () => {
