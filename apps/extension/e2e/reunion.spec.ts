@@ -1,10 +1,9 @@
 import type { BrowserContext, Page } from "@playwright/test";
-import { expect, openArxiv, readEvents, seedSettings, stubSettings, test } from "./harness";
+import { expect, openArxiv, readEvents, seedSettings, selectAndExplain, stubSettings, test } from "./harness";
 
 async function lookUpLoraOnFirstPaper(context: BrowserContext): Promise<void> {
   const first = await openArxiv(context, "2106.09685");
-  await first.locator("#t-lora").dblclick();
-  await first.locator("[data-hb=explain-button]").click();
+  await selectAndExplain(first, "#t-lora");
   await expect(first.locator("[data-hb=understood]")).toBeEnabled();
 }
 

@@ -102,3 +102,13 @@ export async function openArxiv(context: BrowserContext, id: string): Promise<Pa
   await page.goto(`https://arxiv.org/html/${id}`);
   return page;
 }
+
+/** Selects a word and presses the explain button; retries the selection while the content script is still starting. */
+export async function selectAndExplain(page: Page, selector: string): Promise<void> {
+  const button = page.locator("[data-hb=explain-button]");
+  await expect(async () => {
+    await page.locator(selector).dblclick();
+    await expect(button).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await button.click();
+}

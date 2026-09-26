@@ -1,10 +1,7 @@
 import type { Page } from "@playwright/test";
-import { expect, openArxiv, readEvents, seedSettings, stubSettings, test } from "./harness";
+import { expect, openArxiv, readEvents, seedSettings, selectAndExplain, stubSettings, test } from "./harness";
 
-async function explainWord(page: Page, selector: string): Promise<void> {
-  await page.locator(selector).dblclick();
-  await page.locator("[data-hb=explain-button]").click();
-}
+const explainWord = (page: Page, selector: string): Promise<void> => selectAndExplain(page, selector);
 
 test("explains a selection, shows the tier and records it", async ({ context, sw, stub }) => {
   await seedSettings(sw, stubSettings(stub.url));
