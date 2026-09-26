@@ -17,7 +17,7 @@ test("lists, searches and deletes recorded explanations", async ({ context, sw, 
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLora(context);
   const page = await context.newPage();
-  await page.goto(`chrome-extension://${extensionId}/history.html`);
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
   await expect(page.locator("[data-hb=concept] h2")).toHaveText(["LoRA"]);
   await expect(page.locator("[data-hb=entry]")).toContainText("《LoRA: Low-Rank Adaptation of Large Language Models》");
   await expect(page.locator("[data-hb=entry]")).toContainText("LoRA 是一个测试解释。");
@@ -39,7 +39,7 @@ test("backs up the event log on demand", async ({ context, sw, stub, extensionId
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLora(context);
   const page = await context.newPage();
-  await page.goto(`chrome-extension://${extensionId}/history.html`);
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
   await page.locator("[data-hb=backup-now]").click();
   await expect(page.locator("[data-hb=status]")).toHaveText("已备份。");
   const state = await backupState(sw);

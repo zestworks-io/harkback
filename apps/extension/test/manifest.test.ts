@@ -15,6 +15,8 @@ describe.skipIf(!enabled)("production manifest", () => {
     expect(manifest.optional_host_permissions).toEqual(["*://*/*"]);
     expect(manifest.web_accessible_resources).toBeUndefined();
     expect(manifest.externally_connectable).toBeUndefined();
+    // Entrypoint names like "history" or "newtab" silently become browser page overrides.
+    expect(manifest.chrome_url_overrides).toBeUndefined();
     expect(manifest.content_scripts).toEqual([expect.objectContaining({ matches: ["https://arxiv.org/*"] })]);
     expect(manifest.commands["explain-selection"].suggested_key.default).toBe("Alt+E");
   });
