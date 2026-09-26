@@ -116,6 +116,11 @@ export class ExplainCard {
     this.render(this.answer, answer);
   }
 
+  /** A failed follow-up only affects its answer; the recorded explanation keeps its actions. */
+  followUpError(code: ErrorCode, retryAfterMs?: number): void {
+    this.answer.replaceChildren(h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs)));
+  }
+
   close(): void {
     if (this.closed) return;
     this.closed = true;

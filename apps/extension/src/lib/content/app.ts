@@ -202,6 +202,9 @@ export class ContentApp {
       case "followup_done":
         s.card.followUpDone(m.answer);
         break;
+      case "followup_error":
+        s.card.followUpError(m.code, m.retryAfterMs);
+        break;
       case "error":
         s.finished = true;
         s.card.error(m.code, m.retryAfterMs);

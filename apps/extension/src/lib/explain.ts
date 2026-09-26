@@ -16,7 +16,7 @@ import {
 import type { HarkEvent, Locator, Tier } from "@harkback/spec";
 import { cooccurrenceEdge, type LastLookup } from "./cooccurrence";
 import { chooseModel } from "./routing";
-import type { ModelConfig, Settings } from "./settings";
+import type { ModelConfig, Settings, SiteRule } from "./settings";
 import { effectiveRule } from "./site-rules";
 import type { DetectedSource } from "./source-id";
 
@@ -55,26 +55,58 @@ export interface ExplainPlan {
   candidates: Candidate[];
 }
 
-export function planExplain(
+/** Sources whose URL matches a sensitive site rule count as sensitive, even if they were recorded before the rule existed. */
+export function applySiteRules(state: State, rules: readonly SiteRule[]): State {
+  if (!rules.some((r) => r.sensitive)) return state;
+  const sources = new Map(state.sources);
+  for (const [id, src] of sources) {
+    if (src.sensitivity !== "sensitive" && src.ids.url && effectiveRule(rules, src.ids.url).sensitive) {
+      sources.set(id, { ...src, sensitivity: "sensitive" });
+    }
+  }
+  return { ...state, sources };
+}
+
+type Routed = { kind: "ok"; rule: ReturnType<typeof effectiveRule>; sensitive: boolean; model: ModelConfig; remote: boolean } | { kind: "error"; code: PlanError };
+
+function route(req: ExplainRequestMsg, ctx: PageContext, settings: Settings, state: State): Routed {
+  const rule = effectiveRule(settings.sites, ctx.url);
+  if (rule.disabled) return { kind: "error", code: "site_disabled" };
+  const sensitive = rule.sensitive || state.sources.get(req.source.source_id)?.sensitivity === "sensitive";
+  const chosen = chooseModel(settings, rule, sensitive);
+  if (chosen.kind === "error") return chosen;
+  return { kind: "ok", rule, sensitive, model: chosen.model, remote: chosen.remote };
+}
+
+/** Follow-ups re-check the route: the source may have been marked sensitive after the explanation. */
+export function routeFollowUp(
   req: ExplainRequestMsg,
   ctx: PageContext,
   settings: Settings,
   state: State,
+): { kind: "ok"; model: ModelConfig } | { kind: "error"; code: PlanError } {
+  const r = route(req, ctx, settings, applySiteRules(state, settings.sites));
+  return r.kind === "ok" ? { kind: "ok", model: r.model } : r;
+}
+
+export function planExplain(
+  req: ExplainRequestMsg,
+  ctx: PageContext,
+  settings: Settings,
+  recorded: State,
 ): { kind: "ok"; plan: ExplainPlan } | { kind: "error"; code: PlanError } {
   const selection = req.selection.trim();
   if (!/[\p{L}\p{N}]/u.test(selection)) return { kind: "error", code: "empty_selection" };
-  const rule = effectiveRule(settings.sites, ctx.url);
-  if (rule.disabled) return { kind: "error", code: "site_disabled" };
-  const sensitive = rule.sensitive || state.sources.get(req.source.source_id)?.sensitivity === "sensitive";
-  const route = chooseModel(settings, rule, sensitive);
-  if (route.kind === "error") return { kind: "error", code: route.code };
+  const state = applySiteRules(recorded, settings.sites);
+  const routed = route(req, ctx, settings, state);
+  if (routed.kind === "error") return routed;
 
   let earlier: { title: string; context: string; explanation: string } | undefined;
   if (req.mode === "compare" && req.earlierEncounterId) {
     const enc = state.encounters.get(req.earlierEncounterId);
     if (enc) {
       const source = state.sources.get(enc.sourceId);
-      if (source?.sensitivity === "sensitive" && route.remote) return { kind: "error", code: "sensitive_compare" };
+      if (source?.sensitivity === "sensitive" && routed.remote) return { kind: "error", code: "sensitive_compare" };
       earlier = {
         title: source?.title || enc.sourceId,
         context: `${enc.locator.prefix} ${enc.locator.exact} ${enc.locator.suffix}`.trim(),
@@ -90,12 +122,12 @@ export function planExplain(
     section: req.section,
     pageTitle: req.pageTitle,
     abstractFirstSentence: req.abstractFirstSentence,
-    candidates: candidatesForModel(state, candidates, route.remote),
+    candidates: candidatesForModel(state, candidates, routed.remote),
     language: settings.language,
     mode: req.mode,
     ...(earlier ? { earlier } : {}),
   });
-  return { kind: "ok", plan: { model: route.model, remote: route.remote, sensitive, prompt, candidates } };
+  return { kind: "ok", plan: { model: routed.model, remote: routed.remote, sensitive: routed.sensitive, prompt, candidates } };
 }
 
 export interface ExplainOutcome {

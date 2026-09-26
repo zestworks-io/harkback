@@ -84,6 +84,17 @@ describe("ExplainCard", () => {
     expect(q("link-open")).not.toBeNull();
   });
 
+  it("shows a failed follow-up in the answer area and keeps the recorded card's actions", () => {
+    const { card, handlers, q } = setup();
+    card.done(true);
+    q("followup-open")!.click();
+    card.followUpError("network");
+    expect(q("followup-answer")!.textContent).toContain("连不上模型服务");
+    expect(q("retry")).toBeNull();
+    q("understood")!.click();
+    expect(handlers.onAction).toHaveBeenCalledWith("marked_understood");
+  });
+
   it("sends follow-up questions and shows the answer", () => {
     const { card, handlers, q } = setup();
     card.done(true);

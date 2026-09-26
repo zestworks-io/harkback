@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEventFactory, replay, type Hit } from "@harkback/core";
 import { parseEvent } from "@harkback/spec";
 import { cooccurrenceEdge } from "../src/lib/cooccurrence";
-import { buildExplainRecord, daysSinceLastEncounter, finishExplain, planExplain, type ExplainPlan, type ExplainRequestMsg } from "../src/lib/explain";
+import { buildExplainRecord, daysSinceLastEncounter, finishExplain, planExplain, routeFollowUp, type ExplainPlan, type ExplainRequestMsg } from "../src/lib/explain";
 import { preview, reunionCards } from "../src/lib/reunion-cards";
 import { DEFAULT_SETTINGS, type ModelConfig, type Settings } from "../src/lib/settings";
 import { world } from "./helpers";
@@ -178,5 +178,30 @@ describe("reunion cards", () => {
     ]);
     expect(daysSinceLastEncounter(state, lora, Date.UTC(2026, 8, 13))).toBe(12);
     expect(preview("a ".repeat(200), 10)).toBe("a a a a a…");
+  });
+});
+
+describe("sensitivity decided after the fact", () => {
+  const wikiRule = { pattern: "wiki.corp.com", sensitive: true };
+
+  it("routes follow-ups to the local model once the source has been marked sensitive", () => {
+    expect(routeFollowUp(req(), ctx, settings(), world().state())).toEqual({ kind: "ok", model: remote });
+    const w = world();
+    w.source("arxiv:2305.14314", "sensitive");
+    expect(routeFollowUp(req(), ctx, settings(), w.state())).toEqual({ kind: "ok", model: local });
+    expect(routeFollowUp(req(), ctx, settings({ localModelId: null }), w.state())).toEqual({ kind: "error", code: "needs_local_model" });
+  });
+
+  it("applies a sensitive site rule added later to sources recorded before it", () => {
+    const w = world();
+    w.source("url:https://wiki.corp.com/lora", "normal", "Wiki", { url: "https://wiki.corp.com/lora" });
+    const lora = w.concept("LoRA");
+    const earlier = w.encounter(lora, "url:https://wiki.corp.com/lora", "internal note");
+    const state = w.state();
+    const s = settings({ sites: [wikiRule] });
+    expect(planExplain(req({ mode: "compare", earlierEncounterId: earlier }), ctx, s, state)).toEqual({ kind: "error", code: "sensitive_compare" });
+    const plan = planOf(planExplain(req(), ctx, s, state));
+    expect(plan.prompt.labels.size).toBe(0);
+    expect(plan.candidates.map((c) => c.conceptId)).toEqual([lora]);
   });
 });

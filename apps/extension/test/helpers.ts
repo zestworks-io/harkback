@@ -17,8 +17,8 @@ export function world(start = Date.UTC(2026, 8, 1)) {
     setTime(ms: number): void {
       clock = ms;
     },
-    source(sourceId: string, sensitivity: Sensitivity = "normal", title = sourceId): void {
-      add(f.make("source.seen", { source_id: sourceId, ids: {}, title, license: "unknown", sensitivity }));
+    source(sourceId: string, sensitivity: Sensitivity = "normal", title = sourceId, ids: { url?: string } = {}): void {
+      add(f.make("source.seen", { source_id: sourceId, ids, title, license: "unknown", sensitivity }));
     },
     concept(name: string, aliases: string[] = []): string {
       const conceptId = ulid();

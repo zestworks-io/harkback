@@ -67,3 +67,20 @@ test("asks whether a close match is the same concept", async ({ context, sw, stu
   expect(encounters).toHaveLength(2);
   expect(encounters[1]!.payload?.concept_id).toBe(encounters[0]!.payload?.concept_id);
 });
+
+test("a failed follow-up keeps the card's actions and records nothing more", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  const page = await openArxiv(context, "2106.09685");
+  await explainWord(page, "#t-lora");
+  const card = page.locator("[data-hb=card]");
+  await expect(card.locator("[data-hb=understood]")).toBeEnabled();
+  stub.queue.push({ status: 500 });
+  await card.locator("[data-hb=followup-open]").click();
+  await card.locator("[data-hb=followup-input]").fill("和全量微调比呢？");
+  await card.locator("[data-hb=followup-send]").click();
+  await expect(card.locator("[data-hb=followup-answer]")).toContainText("模型服务返回了错误");
+  await expect(card.locator("[data-hb=retry]")).toHaveCount(0);
+  await expect(card.locator("[data-hb=understood]")).toBeEnabled();
+  expect(stub.requests).toHaveLength(2);
+  expect((await readEvents(sw)).filter((e) => e.type === "encounter.created")).toHaveLength(1);
+});

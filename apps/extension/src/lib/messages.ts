@@ -23,6 +23,7 @@ export type PortOut =
   | { type: "done"; encounterId: string | null; recorded: boolean }
   | { type: "followup_delta"; text: string }
   | { type: "followup_done"; answer: string }
+  | { type: "followup_error"; code: ErrorCode; retryAfterMs?: number }
   | { type: "error"; code: ErrorCode; retryAfterMs?: number };
 
 export interface PageInfo {

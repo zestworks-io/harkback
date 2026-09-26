@@ -17,6 +17,7 @@ import {
   daysSinceLastEncounter,
   finishExplain,
   planExplain,
+  routeFollowUp,
   type ExplainOutcome,
   type ExplainPlan,
   type ExplainRecord,
@@ -164,9 +165,12 @@ export default defineBackground(() => {
       try {
         const settings = await loadSettings();
         const rate = await acquireRate(settings);
-        if (!rate.ok) return post({ type: "error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
+        if (!rate.ok) return post({ type: "followup_error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
+        // The source may have been marked sensitive since the explanation: route again.
+        const routed = routeFollowUp(l.req, { url, incognito }, settings, await getState());
+        if (routed.kind === "error") return post({ type: "followup_error", code: routed.code });
         const messages = buildFollowUpPrompt({ term: l.req.selection, paragraph: l.req.paragraph, explanation: l.explanation, question: q, language: settings.language });
-        const reply = await streamChat(l.plan.model, messages, (full) => post({ type: "followup_delta", text: full }), { signal: abort.signal });
+        const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), { signal: abort.signal });
         const encounterId = l.encounterId;
         if (encounterId && !incognito) {
           await append((f) => [
@@ -175,7 +179,7 @@ export default defineBackground(() => {
         }
         post({ type: "followup_done", answer: reply });
       } catch (e) {
-        fail(e);
+        post({ type: "followup_error", code: e instanceof ModelError ? e.code : "internal" });
       } finally {
         busy = false;
       }
