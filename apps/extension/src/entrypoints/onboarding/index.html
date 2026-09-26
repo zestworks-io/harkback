@@ -2,9 +2,19 @@
 <html lang="zh">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Harkback</title>
+    <style>
+      :root { color-scheme: light dark; font: 15px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      body { max-width: 720px; margin: 32px auto; padding: 0 16px; }
+      input[type="url"], input[type="text"], input[type="password"] { width: 100%; max-width: 480px; padding: 4px 8px; font: inherit; }
+      button { font: inherit; padding: 4px 12px; cursor: pointer; }
+      .result { white-space: pre-wrap; margin: 8px 0; }
+      small { opacity: 0.75; }
+    </style>
   </head>
   <body>
+    <main id="app"></main>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
