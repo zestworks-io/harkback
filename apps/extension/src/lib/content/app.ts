@@ -1,10 +1,13 @@
+import { Matcher, type Hit } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain";
-import { contextForRange, extractPage, type ExtractedPage } from "../extract";
+import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../extract";
 import { h } from "../dom";
 import type { PageInfo, PortIn, PortOut } from "../messages";
+import type { ReunionCard } from "../reunion-cards";
 import { detectSource } from "../source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
+import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
 import { t, type Lang } from "../ui/strings";
 import type { PortLike, Rpc } from "./rpc";
 
@@ -40,6 +43,7 @@ export class ContentApp {
   private trigger: HTMLButtonElement | null = null;
   private triggerRange: Range | null = null;
   private session: Session | null = null;
+  private layer: ReunionLayer | null = null;
 
   constructor(
     private readonly rpc: Rpc,
@@ -55,6 +59,7 @@ export class ContentApp {
     if (this.info.enabled && this.info.autoScan) await this.activate();
   }
 
+  /** Also the "rescan" action: the toolbar button calls it again. */
   async activate(): Promise<void> {
     this.info = await this.rpc.request({ type: "page-info" });
     if (!this.info.enabled) return;
@@ -63,6 +68,40 @@ export class ContentApp {
       document.addEventListener("mouseup", this.onMouseUp, true);
       document.addEventListener("mousedown", this.onMouseDown, true);
     }
+    await this.scan();
+  }
+
+  async scan(): Promise<void> {
+    const info = this.info;
+    if (!info?.scan || info.entries.length === 0) return;
+    await new Promise<void>((resolve) => {
+      if ("requestIdleCallback" in window) requestIdleCallback(() => resolve(), { timeout: 2000 });
+      else setTimeout(resolve, 50);
+    });
+    const page = extractPage(document, location.href);
+    this.page = page;
+    const firstPerKey = new Map<string, Hit>();
+    for (const hit of new Matcher(info.entries).scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
+    this.layer?.clear();
+    if (firstPerKey.size === 0) return;
+    const { cards } = await this.rpc.request({
+      type: "reunions",
+      sourceId: detectSource(location.href, document).source_id,
+      hits: [...firstPerKey.values()],
+    });
+    const entries = cards.flatMap((card) => {
+      const range = rangeFor(page, card.start, card.end);
+      return range ? [{ card, range }] : [];
+    });
+    if (entries.length === 0) return;
+    this.layer ??= new ReunionLayer(this.ensureOverlay(), this.lang, (card, action, range) => this.onReunionAction(card, action, range));
+    this.layer.show(entries);
+  }
+
+  private onReunionAction(card: ReunionCard, action: ReunionAction, range: Range): void {
+    if (action === "recalled") void this.rpc.request({ type: "action", encounterId: card.encounterId, action: "reunion_recalled" });
+    else if (action === "mute") void this.rpc.request({ type: "mute", conceptId: card.conceptId });
+    else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId });
   }
 
   async explainSelection(): Promise<void> {
