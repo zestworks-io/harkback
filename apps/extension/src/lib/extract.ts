@@ -60,7 +60,12 @@ export function firstSentence(text: string): string {
 function isHidden(el: Element): boolean {
   if (ownHosts.has(el) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true") return true;
   const style = (el as HTMLElement).style as CSSStyleDeclaration | undefined;
-  return style?.display === "none" || style?.visibility === "hidden";
+  if (style?.display === "none" || style?.visibility === "hidden") return true;
+  // On a live page, also honour stylesheets (class-based hiding, collapsed menus).
+  const view = el.ownerDocument.defaultView;
+  if (!view || !el.isConnected) return false;
+  const computed = view.getComputedStyle(el);
+  return computed.display === "none" || computed.visibility === "hidden";
 }
 
 function blockOf(node: Node, root: Element): Element {

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Understanding adapters | Example Blog</title>
 <meta name="description" content="A gentle introduction to adapters. It also covers LoRA.">
+<style>.gone { display: none; }</style>
 <link rel="canonical" href="https://blog.example.com/posts/adapters?utm_source=feed">
 </head>
 <body>
@@ -17,6 +18,7 @@
 <p id="p2">LoRA is a popular adapter that learns a low-rank update to existing weight matrices. Because the update can be merged back into the weights after training, it adds no inference latency, unlike bottleneck adapters that insert extra layers.</p>
 <div hidden>HiddenOnlyTerm</div>
 <p id="p3" style="display:none">InlineHiddenTerm</p>
+<p class="gone">ClassHiddenTerm</p>
 <p id="p4">Prefix tuning is another option: it prepends trainable vectors to the input of every attention layer. It is cheap to store, but it uses up part of the context window of the model.</p>
 </article></main>
 <footer>Footer FooterOnlyTerm</footer>

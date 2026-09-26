@@ -102,7 +102,7 @@ describe("extractPage: other sites", () => {
     expect(page.text).toContain("Adapters are small modules");
     expect(page.text).toContain("LoRA is a popular adapter");
     expect(page.text).toContain("Prefix tuning is another option");
-    for (const term of ["NavOnlyTerm", "AsideOnlyTerm", "ScriptOnlyTerm", "StyleOnlyTerm", "HiddenOnlyTerm", "InlineHiddenTerm", "FooterOnlyTerm", "OverlayOnlyTerm"]) {
+    for (const term of ["NavOnlyTerm", "AsideOnlyTerm", "ScriptOnlyTerm", "StyleOnlyTerm", "HiddenOnlyTerm", "InlineHiddenTerm", "ClassHiddenTerm", "FooterOnlyTerm", "OverlayOnlyTerm"]) {
       expect(page.text).not.toContain(term);
     }
     expect(page.abstractFirstSentence).toBe("A gentle introduction to adapters.");
