@@ -142,6 +142,7 @@ async function main(): Promise<void> {
 
     root.replaceChildren(
       h("h1", {}, L("Harkback 设置", "Harkback settings")),
+      h("p", {}, h("a", { href: browser.runtime.getURL("/history.html") }, L("查看历史与搜索", "History and search"))),
       h("p", {}, L("解释语言：", "Explanation language: "), language),
       h("h2", {}, L("模型", "Models")),
       h(

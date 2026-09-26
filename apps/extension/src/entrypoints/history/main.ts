@@ -1,0 +1,85 @@
+import { renderMarkdown as exportMarkdown, replay, type State } from "@harkback/core";
+import { browser } from "wxt/browser";
+import { h } from "../../lib/dom";
+import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
+import { renderMarkdown } from "../../lib/markdown";
+import { withDefaults } from "../../lib/settings";
+import { EventStore } from "../../lib/store";
+
+async function main(): Promise<void> {
+  const settings = withDefaults((await browser.storage.local.get("settings")).settings);
+  const L = (zh: string, en: string) => (settings.language === "zh" ? zh : en);
+  const store = await EventStore.open();
+  let state: State = replay(await store.all());
+
+  const root = document.getElementById("app")!;
+  const list = h("div", { "data-hb": "history" });
+  const status = h("div", { className: "result", "data-hb": "status" });
+  const search = h("input", { type: "search", "data-hb": "search", placeholder: L("搜索概念、原文或解释", "Search concepts, quotes or explanations") });
+
+  const entryView = (e: HistoryEntry): HTMLElement => {
+    const del = h("button", { type: "button", "data-hb": "delete" }, L("删除", "Delete"));
+    del.addEventListener("click", async () => {
+      if (del.dataset.confirm !== "1") {
+        del.dataset.confirm = "1";
+        del.textContent = L("确认删除", "Confirm delete");
+        return;
+      }
+      const r = (await browser.runtime.sendMessage({ type: "delete-encounter", encounterId: e.encounterId })) as { ok?: boolean } | undefined;
+      if (r?.ok) {
+        state = replay(await store.all());
+        draw();
+      }
+    });
+    const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
+    const body = h("div");
+    body.append(renderMarkdown(e.explanation));
+    return h(
+      "li",
+      { "data-hb": "entry" },
+      h("div", { className: "meta" }, `${e.date} · 《${e.sourceTitle}》 · ${tier} · 「${e.selection}」 `, del),
+      body,
+    );
+  };
+
+  const conceptView = (c: HistoryConcept): HTMLElement =>
+    h(
+      "section",
+      { "data-hb": "concept" },
+      h("h2", {}, c.name),
+      c.aliases.length > 0 ? h("div", { className: "aliases" }, c.aliases.join(" · ")) : null,
+      h("ul", {}, ...c.entries.map(entryView)),
+    );
+
+  function draw(): void {
+    const model = historyModel(state, search.value);
+    list.replaceChildren(...(model.length > 0 ? model.map(conceptView) : [h("p", { "data-hb": "empty" }, L("没有找到记录。", "No records found."))]));
+  }
+  search.addEventListener("input", draw);
+
+  const backupNow = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份 JSONL", "Back up JSONL now"));
+  backupNow.addEventListener("click", async () => {
+    status.textContent = L("正在备份…", "Backing up…");
+    const r = (await browser.runtime.sendMessage({ type: "backup-now" })) as { ok?: boolean; error?: string } | undefined;
+    status.textContent = r?.ok ? L("已备份。", "Backed up.") : `${L("备份失败：", "Backup failed: ")}${r?.error ?? ""}`;
+  });
+
+  const exportMd = h("button", { type: "button", "data-hb": "export-md" }, L("导出 Markdown", "Export Markdown"));
+  exportMd.addEventListener("click", () => {
+    const url = URL.createObjectURL(new Blob([exportMarkdown(state)], { type: "text/markdown" }));
+    const a = h("a", { href: url, download: `harkback-${new Date().toISOString().slice(0, 10)}.md` });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  });
+
+  root.replaceChildren(
+    h("h1", {}, L("Harkback · 历史", "Harkback · History")),
+    h("p", {}, search, " ", backupNow, " ", exportMd, " ", h("a", { href: browser.runtime.getURL("/options.html") }, L("设置", "Settings"))),
+    status,
+    list,
+    h("p", { className: "note" }, L("删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。", "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.")),
+  );
+  draw();
+}
+
+void main();
