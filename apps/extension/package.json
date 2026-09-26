@@ -1,0 +1,24 @@
+{
+  "name": "@harkback/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "postinstall": "wxt prepare",
+    "build": "wxt build",
+    "build:e2e": "wxt build --mode e2e",
+    "dev": "wxt",
+    "typecheck": "wxt prepare && tsc -p .",
+    "e2e": "wxt build --mode e2e && playwright test"
+  },
+  "dependencies": {
+    "@harkback/core": "workspace:*",
+    "@harkback/spec": "workspace:*",
+    "@mozilla/readability": "^0.6.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "wxt": "0.21.4"
+  }
+}

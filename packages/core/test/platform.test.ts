@@ -17,7 +17,7 @@ describe("platform guard", () => {
   });
 
   it("src files use no Node-only APIs", () => {
-    for (const root of ["packages/spec/src", "packages/core/src"]) {
+    for (const root of ["packages/spec/src", "packages/core/src", "apps/extension/src"]) {
       for (const file of tsFiles(root)) {
         const source = readFileSync(file, "utf8");
         expect(source, file).not.toMatch(/from\s+["']node:|require\(|\bprocess\.|\bBuffer\b/);

@@ -3,3 +3,7 @@ coverage/
 dist/
 .DS_Store
 docs/
+.output/
+.wxt/
+test-results/
+playwright-report/

@@ -8,11 +8,14 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -p packages/spec && tsc -p packages/core"
+    "typecheck": "tsc -p packages/spec && tsc -p packages/core && pnpm --filter @harkback/extension typecheck",
+    "e2e": "pnpm --filter @harkback/extension e2e"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
+    "fake-indexeddb": "^6.2.5",
     "fast-check": "^4.10.2",
+    "happy-dom": "^20.14.5",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
