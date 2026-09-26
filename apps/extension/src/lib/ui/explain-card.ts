@@ -157,7 +157,7 @@ export class ExplainCard {
     this.note.replaceChildren(
       h("span", { "data-hb": "link-confirm" }, t(this.lang, "openLink", { url })),
       " ",
-      h("button", { type: "button", "data-hb": "link-open", onclick: () => window.open(url, "_blank", "noopener,noreferrer") }, t(this.lang, "open")),
+      h("button", { type: "button", "data-hb": "link-open", onclick: () => window.open(url, "_blank", "noopener,noreferrer") }, t(this.lang, "openConfirm")),
     );
   }
 }
