@@ -1,12 +1,9 @@
 import {
   buildFollowUpPrompt,
   canonicalOrder,
-  clampSource,
-  matcherEntriesFromState,
   serializeJsonl,
   streamingExplanation,
   type EventFactory,
-  type Hit,
 } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { browser, type Browser } from "wxt/browser";
@@ -24,28 +21,21 @@ import {
   type ExplainRecord,
   type ExplainRequestMsg,
 } from "../lib/explain";
-import { isRequest, type PageInfo, type PortIn, type PortOut, type Request, type ResponseMap, type TabMessage } from "../lib/messages";
+import { isRequest, type PortIn, type PortOut, type TabMessage } from "../lib/messages";
 import { ModelError, streamChat } from "../lib/model-client";
 import { RateLimiter, type RateResult } from "../lib/rate-limit";
-import { reunionCards } from "../lib/reunion-cards";
-import { allowed, senderKind, type SenderInfo } from "../lib/sender-auth";
+import { handleRequest, type RequestDeps } from "../lib/requests";
+import { allowed, senderKind } from "../lib/sender-auth";
 import { withDefaults, type Settings } from "../lib/settings";
-import { effectiveRule, hostPermissionPatterns } from "../lib/site-rules";
-import { isArxivUrl } from "../lib/source-id";
+import { hostPermissionPatterns } from "../lib/site-rules";
 import { StateCache } from "../lib/state-cache";
 import { EventStore } from "../lib/store";
 
 const CONTENT_SCRIPT = "/content-scripts/content.js";
 const ALLOWLIST_SCRIPT_ID = "allowlist";
 const BACKUP_ALARM = "backup";
-const USER_ACTIONS = new Set(["marked_understood", "marked_confused", "reunion_recalled"]);
 
 type Pending = { outcome: ExplainOutcome; req: ExplainRequestMsg; plan: ExplainPlan };
-
-function isHit(h: unknown): h is Hit {
-  const x = h as Hit | null;
-  return typeof x?.key === "string" && typeof x.text === "string" && Number.isInteger(x.start) && Number.isInteger(x.end);
-}
 
 export default defineBackground(() => {
   const extensionOrigin = self.location.origin;
@@ -212,75 +202,28 @@ export default defineBackground(() => {
 
   // ---- one-shot requests --------------------------------------------------
 
-  async function pageInfo(url: string, incognito: boolean): Promise<PageInfo> {
-    const settings = await loadSettings();
-    const rule = effectiveRule(settings.sites, url);
-    const enabled = !rule.disabled;
-    const scan = enabled && !incognito;
-    return {
-      enabled,
-      autoScan: enabled && (rule.autoScan || isArxivUrl(url)),
-      scan,
-      incognito,
-      language: settings.language,
-      entries: scan ? matcherEntriesFromState(await getState()) : [],
-    };
-  }
-
-  async function handleRequest(msg: Request, sender: SenderInfo): Promise<ResponseMap[Request["type"]]> {
-    const incognito = sender.tab?.incognito === true;
-    switch (msg.type) {
-      case "page-info":
-        return pageInfo(sender.url ?? "", incognito);
-      case "reunions": {
-        const settings = await loadSettings();
-        if (incognito || effectiveRule(settings.sites, sender.url ?? "").disabled || !Array.isArray(msg.hits)) return { cards: [] };
-        const hits = msg.hits.filter(isHit).slice(0, 500);
-        return { cards: reunionCards(await getState(), hits, { sourceId: String(msg.sourceId), now: Date.now(), ...settings.reunion }) };
-      }
-      case "action": {
-        if (incognito || !USER_ACTIONS.has(msg.action) || !(await getState()).encounters.has(msg.encounterId)) return { ok: false };
-        await append((f) => [f.make("encounter.action", { encounter_id: msg.encounterId, action: msg.action })]);
-        return { ok: true };
-      }
-      case "mute": {
-        const rep = (await getState()).representative.get(msg.conceptId);
-        if (incognito || !rep) return { ok: false };
-        await append((f) => [f.make("concept.muted", { concept_id: rep })]);
-        return { ok: true };
-      }
-      case "mark-sensitive": {
-        if (incognito) return { ok: false };
-        await append((f) => [f.make("source.seen", clampSource(msg.source, "sensitive"))]);
-        return { ok: true };
-      }
-      case "delete-encounter": {
-        if (!(await getState()).encounters.has(msg.encounterId)) return { ok: false };
-        await append((f) => [f.make("encounter.deleted", { encounter_id: msg.encounterId })]);
-        const { store, cache } = await getServices();
-        await store.compact();
-        cache.invalidate();
-        return { ok: true };
-      }
-      case "backup-now":
-        try {
-          await runBackup();
-          return { ok: true };
-        } catch (e) {
-          return { ok: false, error: e instanceof Error ? e.message : String(e) };
-        }
-      case "settings-changed":
-        sync();
-        await syncing;
-        return { ok: true };
-    }
-  }
+  const requestDeps: RequestDeps = {
+    loadSettings,
+    getState,
+    append,
+    async compact() {
+      const { store, cache } = await getServices();
+      await store.compact();
+      cache.invalidate();
+    },
+    runBackup,
+    async syncContentScripts() {
+      sync();
+      await syncing;
+    },
+    now: Date.now,
+  };
 
   browser.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
     if (!isRequest(message)) return false;
     const kind = senderKind(sender, browser.runtime.id, extensionOrigin);
     if (!kind || !allowed(message.type, kind)) return false;
-    handleRequest(message, sender).then(sendResponse, () => sendResponse({ ok: false }));
+    handleRequest(requestDeps, message, sender).then(sendResponse, () => sendResponse({ ok: false }));
     return true;
   });
 
