@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -19,6 +19,12 @@ describe.skipIf(!enabled)("production manifest", () => {
     expect(manifest.chrome_url_overrides).toBeUndefined();
     expect(manifest.content_scripts).toEqual([expect.objectContaining({ matches: ["https://arxiv.org/*"] })]);
     expect(manifest.commands["explain-selection"].suggested_key.default).toBe("Alt+E");
+  });
+
+  it("keeps the schema library out of the script injected into web pages", () => {
+    const file = join(out, "content-scripts/content.js");
+    expect(readFileSync(file, "utf8")).not.toContain("ZodError");
+    expect(statSync(file).size).toBeLessThan(100_000);
   });
 
   it("uses closed shadow roots in the production content script", () => {

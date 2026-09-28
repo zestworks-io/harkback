@@ -9,7 +9,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p packages/spec && tsc -p packages/core && pnpm --filter @harkback/extension typecheck",
-    "e2e": "pnpm --filter @harkback/extension e2e"
+    "e2e": "pnpm --filter @harkback/extension e2e",
+    "check:build": "pnpm --filter @harkback/extension build && HB_CHECK_BUILD=1 vitest run apps/extension/test/manifest.test.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
