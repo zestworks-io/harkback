@@ -34,6 +34,7 @@ For development with live reload, run `pnpm --filter @harkback/extension dev`.
 
 ```sh
 pnpm typecheck     # all packages
+pnpm lint          # ESLint
 pnpm test          # unit tests
 pnpm check:build   # production build: manifest permissions and content-script size
 pnpm e2e           # end-to-end tests in Chromium (run `pnpm exec playwright install chromium` once)

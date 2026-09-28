@@ -12,7 +12,8 @@
     "e2e": "pnpm --filter @harkback/extension e2e",
     "check:build": "pnpm --filter @harkback/extension build && HB_CHECK_BUILD=1 vitest run apps/extension/test/manifest.test.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint": "tools/lint/node_modules/.bin/eslint -c tools/lint/eslint.config.js ."
   },
   "devDependencies": {
     "@types/node": "^26.6.2",

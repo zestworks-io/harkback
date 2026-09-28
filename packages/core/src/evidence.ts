@@ -5,7 +5,7 @@ function normalizeForEvidence(s: string): string {
     .normalize("NFKC")
     .replace(/\u00AD/g, "")
     .toLowerCase()
-    .replace(/[\-‐‑‒–—]/g, " ")
+    .replace(/[-‐‑‒–—]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

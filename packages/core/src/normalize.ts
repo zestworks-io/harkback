@@ -11,7 +11,7 @@ export interface NormalizedName {
 const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/u;
 const EDGE_CHARS = String.raw`\s"'` + "`" + String.raw`“”‘’«»()\[\]{}<>.,;:!?、。，；：！？《》「」『』（）【】`;
 const EDGE_PUNCT = new RegExp(`^[${EDGE_CHARS}]+|[${EDGE_CHARS}]+$`, "gu");
-const LATIN_SEP = /[\s\-‐‑‒–—_\/·.]+/u;
+const LATIN_SEP = /[\s\-‐‑‒–—_/·.]+/u;
 const CJK_SEP = /[\s·・‧•\-_]+/gu;
 
 const GREEK: Record<string, string> = {

@@ -12,11 +12,14 @@ Run all of these; they must pass:
 
 ```sh
 pnpm typecheck
+pnpm lint
 pnpm test
 pnpm format:check
 pnpm e2e            # when you touch anything under apps/extension
 pnpm check:build    # when you touch permissions, the manifest, or imports of the content script
 ```
+
+The ESLint setup lives in `tools/lint` with its own TypeScript 6, because typescript-eslint does not support TypeScript 7 yet; the rest of the repo compiles with TypeScript 7.
 
 ## Guidelines
 
