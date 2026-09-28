@@ -1,6 +1,9 @@
 import { compactDeleted, createEventFactory, newDeviceId, type EventFactory } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 
+/** Pages that show the records listen here; the background announces every write. */
+export const CHANGE_CHANNEL = "harkback-events";
+
 const EVENTS = "events";
 const META = "meta";
 const IDENTITY = "identity";

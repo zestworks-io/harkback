@@ -21,9 +21,10 @@ import { RateLimiter, type RateResult } from "../lib/rate-limit";
 import { handleRequest, type RequestDeps } from "../lib/requests";
 import { allowed, senderKind } from "../lib/sender-auth";
 import { withDefaults, type Settings } from "../lib/settings";
-import { hostPermissionPatterns } from "../lib/site-rules";
+import { hostPermissionPatterns, originPattern } from "../lib/site-rules";
+import { arxivHtmlUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
-import { EventStore } from "../lib/store";
+import { CHANGE_CHANNEL, EventStore } from "../lib/store";
 
 const CONTENT_SCRIPT = "/content-scripts/content.js";
 const ALLOWLIST_SCRIPT_ID = "allowlist";
@@ -36,6 +37,7 @@ export default defineBackground(() => {
   let services: Promise<{ store: EventStore; cache: StateCache }> | null = null;
   const getServices = () => (services ??= EventStore.open().then((store) => ({ store, cache: new StateCache(store) })));
   const getState = async () => (await getServices()).cache.get();
+  const changes = new BroadcastChannel(CHANGE_CHANNEL);
   const lastLookup = new Map<string, LastLookup>();
   const limiter = new RateLimiter();
   let limiterLoaded = false;
@@ -48,7 +50,14 @@ export default defineBackground(() => {
       return await store.append(build);
     } finally {
       cache.invalidate();
+      changes.postMessage("changed");
     }
+  }
+
+  /** Optional host permissions are granted at runtime; without one the request would fail with a vague network error. */
+  async function canReach(model: { baseUrl: string }): Promise<boolean> {
+    const origin = originPattern(model.baseUrl.trim());
+    return origin === null || (await browser.permissions.contains({ origins: [origin] }));
   }
 
   async function acquireRate(settings: Settings): Promise<RateResult> {
@@ -109,6 +118,7 @@ export default defineBackground(() => {
         const planned = planExplain(req, { url, incognito }, settings, state);
         if (planned.kind === "error") return post({ type: "error", code: planned.code });
         const { plan } = planned;
+        if (!(await canReach(plan.model))) return post({ type: "error", code: "no_permission" });
         const raw = await streamChat(
           plan.model,
           plan.prompt.messages,
@@ -159,6 +169,7 @@ export default defineBackground(() => {
         // The source may have been marked sensitive since the explanation: route again.
         const routed = routeFollowUp(l.req, { url, incognito }, settings, await getState());
         if (routed.kind === "error") return post({ type: "followup_error", code: routed.code });
+        if (!(await canReach(routed.model))) return post({ type: "followup_error", code: "no_permission" });
         const messages = buildFollowUpPrompt({
           term: l.req.selection,
           paragraph: l.req.paragraph,
@@ -259,12 +270,20 @@ export default defineBackground(() => {
     void ensureContent(tabId).then((ok) => (ok ? browser.tabs.sendMessage(tabId, message).catch(() => undefined) : undefined));
   }
 
+  /** A PDF has no text to work with: send an arXiv PDF tab to the HTML version of the same paper. */
+  function openHtmlVersion(tab: Browser.tabs.Tab): boolean {
+    const html = tab.id !== undefined && tab.url ? arxivHtmlUrl(tab.url) : null;
+    if (html) void browser.tabs.update(tab.id!, { url: html });
+    return html !== null;
+  }
+
   browser.commands.onCommand.addListener((command, tab) => {
-    if (command === "explain-selection" && tab?.id !== undefined) sendToTab(tab.id, { type: "explain-selection" });
+    if (command !== "explain-selection" || tab?.id === undefined || openHtmlVersion(tab)) return;
+    sendToTab(tab.id, { type: "explain-selection" });
   });
 
   browser.action.onClicked.addListener((tab) => {
-    if (tab.id !== undefined) sendToTab(tab.id, { type: "activate" });
+    if (tab.id !== undefined && !openHtmlVersion(tab)) sendToTab(tab.id, { type: "activate" });
   });
 
   async function syncContentScripts(): Promise<void> {

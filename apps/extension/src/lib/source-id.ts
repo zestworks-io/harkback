@@ -22,6 +22,15 @@ export function arxivIdFromUrl(url: string): string | null {
   return ARXIV_URL.exec(url)?.[1] ?? null;
 }
 
+const ARXIV_PDF =
+  /^https?:\/\/(?:www\.|export\.)?arxiv\.org\/pdf\/(\d{4}\.\d{4,5}(?:v\d+)?|[a-z-]+(?:\.[A-Z]{2})?\/\d{7}(?:v\d+)?)(?:\.pdf)?(?:[?#]|$)/i;
+
+/** The readable HTML version of an arXiv PDF address: the browser's PDF viewer has no page text to explain from. */
+export function arxivHtmlUrl(url: string): string | null {
+  const id = ARXIV_PDF.exec(url)?.[1];
+  return id ? `https://arxiv.org/html/${id}` : null;
+}
+
 export function isArxivUrl(url: string): boolean {
   try {
     const host = new URL(url).hostname;

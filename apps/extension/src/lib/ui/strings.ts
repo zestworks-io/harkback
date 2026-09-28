@@ -43,6 +43,7 @@ const zh = {
   err_insecure: "非本机模型地址必须使用 https。",
   err_aborted: "已取消。",
   err_local_rate: "解释太频繁了，请 {s} 秒后再试。",
+  err_no_permission: "还没有允许访问模型地址：请在设置中点“测试”或保存，并在弹窗中允许。",
   err_expired: "这次解释已失效，请重新解释。",
   err_internal: "出错了，请重试。",
 } as const;
@@ -90,6 +91,7 @@ const en: Record<StringKey, string> = {
   err_insecure: "Non-local model addresses must use https.",
   err_aborted: "Cancelled.",
   err_local_rate: "Too many explanations. Try again in {s} seconds.",
+  err_no_permission: "Access to the model address has not been granted. In settings, press Test or Save and allow the prompt.",
   err_expired: "This explanation expired. Please explain again.",
   err_internal: "Something went wrong. Try again.",
 };

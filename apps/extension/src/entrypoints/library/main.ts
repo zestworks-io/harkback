@@ -6,7 +6,7 @@ import { renderMarkdown } from "../../lib/markdown";
 import { backupNow, request } from "../../lib/pages/request";
 import { withDefaults } from "../../lib/settings";
 import { pick } from "../../lib/ui/strings";
-import { EventStore } from "../../lib/store";
+import { CHANGE_CHANNEL, EventStore } from "../../lib/store";
 
 async function main(): Promise<void> {
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
@@ -66,6 +66,14 @@ async function main(): Promise<void> {
     );
   }
   search.addEventListener("input", draw);
+  // Explanations are recorded on other tabs while this one stays open.
+  const refresh = async (): Promise<void> => {
+    state = replay(await store.all());
+    draw();
+  };
+  document.addEventListener("visibilitychange", () => document.hidden || void refresh());
+  window.addEventListener("focus", () => void refresh());
+  new BroadcastChannel(CHANGE_CHANNEL).addEventListener("message", () => void refresh());
 
   const backupButton = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份 JSONL", "Back up JSONL now"));
   backupButton.addEventListener("click", async () => {

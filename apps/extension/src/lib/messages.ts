@@ -6,7 +6,7 @@ import type { ReunionCard } from "./reunion-cards";
 import type { DetectedSource } from "./source-id";
 import type { Lang } from "./ui/strings";
 
-export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "expired" | "internal";
+export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "no_permission" | "expired" | "internal";
 
 /** Content script → background, on the "explain" port. */
 export type PortIn =

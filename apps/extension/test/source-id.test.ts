@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { arxivIdFromUrl, cleanUrl, detectSource, isArxivUrl } from "../src/lib/source-id";
+import { arxivHtmlUrl, arxivIdFromUrl, cleanUrl, detectSource, isArxivUrl } from "../src/lib/source-id";
 
 const load = (name: string) => new DOMParser().parseFromString(readFileSync(`apps/extension/fixtures/${name}`, "utf8"), "text/html");
 const html = (head: string) => new DOMParser().parseFromString(`<html><head>${head}</head><body></body></html>`, "text/html");
@@ -48,5 +48,19 @@ describe("detectSource", () => {
     expect(detectSource("https://plain.example.com/p?utm_campaign=z", html("<title>Plain</title>")).source_id).toBe(
       "url:https://plain.example.com/p",
     );
+  });
+});
+
+describe("arxivHtmlUrl", () => {
+  it("maps arXiv PDF addresses to the HTML version", () => {
+    expect(arxivHtmlUrl("https://arxiv.org/pdf/2106.09685")).toBe("https://arxiv.org/html/2106.09685");
+    expect(arxivHtmlUrl("https://arxiv.org/pdf/2106.09685v2.pdf")).toBe("https://arxiv.org/html/2106.09685v2");
+    expect(arxivHtmlUrl("https://arxiv.org/pdf/hep-th/9901001#page=3")).toBe("https://arxiv.org/html/hep-th/9901001");
+  });
+
+  it("leaves other addresses alone", () => {
+    expect(arxivHtmlUrl("https://arxiv.org/html/2106.09685")).toBeNull();
+    expect(arxivHtmlUrl("https://arxiv.org/abs/2106.09685")).toBeNull();
+    expect(arxivHtmlUrl("https://example.com/pdf/2106.09685")).toBeNull();
   });
 });

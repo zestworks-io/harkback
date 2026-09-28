@@ -249,7 +249,21 @@ async function main(): Promise<void> {
           h("li", {}, L("选中一个术语。", "Select a term.")),
           h("li", {}, L("点「解释」，或按 ", "Click “Explain”, or press "), h("kbd", {}, "Alt"), " + ", h("kbd", {}, "E"), L("。", ".")),
         ),
-        h("p", {}, h("a", { href: browser.runtime.getURL("/options.html") }, L("打开设置", "Open settings"))),
+        h(
+          "p",
+          {},
+          h("a", { href: browser.runtime.getURL("/library.html") }, L("查看历史与搜索", "History and search")),
+          " · ",
+          h("a", { href: browser.runtime.getURL("/options.html") }, L("打开设置", "Open settings")),
+        ),
+        h(
+          "p",
+          { className: "lede" },
+          L(
+            "arXiv 的 PDF 页面没有可读的文字：点工具栏按钮会打开同一篇论文的 HTML 版本。",
+            "arXiv PDF pages have no readable text: the toolbar button opens the HTML version of the same paper.",
+          ),
+        ),
       ),
     );
   };
