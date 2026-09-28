@@ -53,15 +53,48 @@ function transliterateGreek(s: string): string {
   return Array.from(s, (ch) => GREEK[ch] ?? ch).join("");
 }
 
+const DETERMINER = /^(?:the|an?|this|that|these|those|our|its|their|such)\s+(?=\S)/i;
+const POSSESSIVE = /['’]s$/i;
+
+/** Drops leading articles and a trailing possessive: "the LLM's" and "LLM" are the same term. */
+export function stripDeterminers(name: string): string {
+  let out = name.normalize("NFKC").replace(EDGE_PUNCT, "");
+  for (let prev = ""; prev !== out;) {
+    prev = out;
+    out = out.replace(DETERMINER, "").replace(POSSESSIVE, "").replace(EDGE_PUNCT, "");
+  }
+  return out;
+}
+
+const ACRONYM_STOP = new Set(["of", "the", "for", "and", "in", "on", "to", "a", "an", "with", "via", "from", "by", "at", "as"]);
+const WORD_SEP = /[\s\-‐‑‒–—_/]+/u;
+
+/** "Large Language Model" -> "LLM". Null for single words, CJK names, and words that do not start with a letter. */
+export function acronymOf(name: string): string | null {
+  const cleaned = stripDeterminers(name);
+  if (detectScript(cleaned) === "cjk") return null;
+  const words = cleaned.split(WORD_SEP).filter((w) => w && !ACRONYM_STOP.has(w.toLowerCase()));
+  if (words.length < 2) return null;
+  const letters = words.map((w) => w[0]!);
+  return letters.every((l) => /\p{L}/u.test(l)) ? letters.join("").toUpperCase() : null;
+}
+
+/** Lower-cased, singular words of a Latin name; empty for CJK names. */
+export function wordsOf(name: string): string[] {
+  const cleaned = stripDeterminers(name);
+  if (detectScript(cleaned) === "cjk") return [];
+  return cleaned.toLowerCase().split(LATIN_SEP).filter(Boolean).map(depluralize);
+}
+
 export function normalizeName(input: string): NormalizedName {
-  const cleaned = input.normalize("NFKC").replace(EDGE_PUNCT, "");
+  const cleaned = stripDeterminers(input);
   const script = detectScript(cleaned);
   if (script === "cjk") {
     return { norm: cleaned.toLowerCase().replace(CJK_SEP, ""), script, caseKey: null };
   }
   const words = transliterateGreek(cleaned.toLowerCase()).split(LATIN_SEP).filter(Boolean);
   const norm = words.map(depluralize).join("");
-  let core = cleaned.split(LATIN_SEP).join("");
+  let core = transliterateGreek(cleaned.split(LATIN_SEP).join(""));
   const upper = core.match(/[A-Z]/g)?.length ?? 0;
   if (core.length <= MATCH_RULES.shortAcronymMaxLength + 1 && core.endsWith("s") && upper >= 2) core = core.slice(0, -1);
   const caseKey = core.length > 0 && core.length <= MATCH_RULES.shortAcronymMaxLength ? core : null;

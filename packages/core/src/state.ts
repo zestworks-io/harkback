@@ -21,6 +21,8 @@ export interface AliasInfo {
   display: string;
   conceptIds: string[];
   ambiguous: boolean;
+  /** True when no concept has this name; it is the abbreviation of a multi-word name ("LLM" for "Large Language Model"). */
+  derived?: boolean;
 }
 
 export interface EncounterAction {

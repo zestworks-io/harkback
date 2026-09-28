@@ -1,8 +1,10 @@
 import type { Domain, HarkEvent } from "@harkback/spec";
 import { DEFAULT_AMBIGUOUS_ACRONYMS } from "./constants";
-import { identityKey, normalizeName } from "./normalize";
+import { acronymOf, identityKey, normalizeName } from "./normalize";
 import type { AliasInfo, ConceptState } from "./state";
 import { MinUnionFind } from "./union-find";
+
+const MIN_ACRONYM = 3;
 
 interface RawConcept {
   id: string;
@@ -87,6 +89,28 @@ export function resolveConcepts(
     }
   }
 
+  // An abbreviation and its full name are one concept ("LLM" / "Large Language Model"), unless several different
+  // full names in the same domain share the abbreviation ("GNN": graph vs generative), which is left alone.
+  const expansions = new Map<string, Map<string, string[]>>();
+  for (const cid of ids) {
+    const c = raw.get(cid)!;
+    for (const name of [c.canonicalName, ...c.aliases]) {
+      const acr = acronymOf(name);
+      const key = acr && acr.length >= MIN_ACRONYM ? domainKey(c.domain, acr) : null;
+      if (!key) continue;
+      const byName = expansions.get(key) ?? new Map<string, string[]>();
+      const owners = byName.get(identityKey(name)) ?? [];
+      owners.push(cid);
+      byName.set(identityKey(name), owners);
+      expansions.set(key, byName);
+    }
+  }
+  for (const [key, byName] of expansions) {
+    const holders = byCanonical.get(key);
+    if (!holders || byName.size !== 1) continue;
+    for (const owners of byName.values()) for (const cid of owners) uf.union(holders[0]!, cid);
+  }
+
   const representative = new Map<string, string>();
   const members = new Map<string, string[]>();
   for (const cid of ids) {
@@ -138,10 +162,29 @@ export function resolveConcepts(
       if (!info.conceptIds.includes(c.id)) info.conceptIds.push(c.id);
     }
   }
+  const derivedKeys = new Set<string>();
+  for (const c of concepts.values()) {
+    for (const name of c.names) {
+      const acr = acronymOf(name);
+      if (!acr || acr.length < MIN_ACRONYM) continue;
+      const key = identityKey(acr);
+      let info = aliases.get(key);
+      if (!info) {
+        const n = normalizeName(acr);
+        info = { key, norm: n.norm, script: n.script, display: acr, conceptIds: [], ambiguous: false, derived: true };
+        aliases.set(key, info);
+      }
+      if (!info.conceptIds.includes(c.id)) {
+        info.conceptIds.push(c.id);
+        derivedKeys.add(key);
+      }
+    }
+  }
   for (const info of aliases.values()) {
     info.conceptIds.sort();
     const domains = new Set(info.conceptIds.map((cid) => concepts.get(cid)!.domain));
-    info.ambiguous = domains.size > 1 || ambiguousAcronyms.has(info.key.toLowerCase());
+    info.ambiguous =
+      domains.size > 1 || ambiguousAcronyms.has(info.key.toLowerCase()) || (derivedKeys.has(info.key) && info.conceptIds.length > 1);
   }
 
   return { concepts, representative, aliases, warnings };

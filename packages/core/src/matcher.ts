@@ -1,5 +1,5 @@
 import { MATCH_RULES } from "./constants";
-import { normalizeName, type Script } from "./normalize";
+import { normalizeName, stripDeterminers, type Script } from "./normalize";
 import type { State } from "./state";
 
 const SEPARATOR = /[\s\-‐‑‒–—_]/;
@@ -8,6 +8,30 @@ const SEPARATORS_G = /[\s\-‐‑‒–—_\u00AD]+/g;
 export interface PreparedText {
   text: string;
   map: number[];
+}
+
+const GREEK_LATIN: Record<string, string> = {
+  α: "alpha",
+  β: "beta",
+  γ: "gamma",
+  δ: "delta",
+  ε: "epsilon",
+  θ: "theta",
+  λ: "lambda",
+  μ: "mu",
+  π: "pi",
+  σ: "sigma",
+  τ: "tau",
+  φ: "phi",
+  ω: "omega",
+};
+
+/** Compatibility forms ("ﬁ" -> "fi", full-width letters), Greek letter names, and lower case; may yield several characters. */
+function foldChar(ch: string): string {
+  const lower = ch.normalize("NFKC").toLowerCase();
+  let out = "";
+  for (const c of lower) out += GREEK_LATIN[c] ?? c;
+  return out.length > 0 ? out : ch;
 }
 
 export function prepareText(raw: string): PreparedText {
@@ -26,9 +50,9 @@ export function prepareText(raw: string): PreparedText {
       map.push(i);
       pendingSpace = false;
     }
-    const lower = ch.toLowerCase();
-    text += lower.length === 1 ? lower : ch;
-    map.push(i);
+    const folded = foldChar(ch);
+    text += folded;
+    for (let k = 0; k < folded.length; k++) map.push(i);
   }
   return { text, map };
 }
@@ -155,10 +179,8 @@ function dropContained(hits: Hit[]): Hit[] {
 }
 
 export function matcherEntriesFromState(state: State): MatcherEntry[] {
-  return [...state.aliases.values()].map((a) => ({
-    pattern: a.display,
-    key: a.key,
-    script: a.script,
-    caseKey: normalizeName(a.display).caseKey,
-  }));
+  return [...state.aliases.values()].map((a) => {
+    const pattern = stripDeterminers(a.display) || a.display;
+    return { pattern, key: a.key, script: a.script, caseKey: normalizeName(pattern).caseKey };
+  });
 }

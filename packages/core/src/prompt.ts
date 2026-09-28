@@ -75,10 +75,11 @@ function systemMessage(language: "zh" | "en"): string {
     "You explain technical terms to a reader who is in the middle of reading a document.",
     `Write the explanation in ${languageName(language)}; keep technical terms in their original form.`,
     UNTRUSTED,
+    "Name the concept, not the wording of the selection: drop articles and surrounding words, and treat an abbreviation and its full form as the same concept.",
     "Respond with exactly three blocks, in this order, and nothing else:",
     "<explanation>2-6 sentences explaining the selected term as it is used in this context.</explanation>",
     "<evidence>A verbatim quote of at most 300 characters from the page content that defines the term, or NONE if the page does not define it.</evidence>",
-    `<card>{"match": <a candidate label such as "c1" if the term is the same concept, otherwise null>, "canonical": <English canonical name>, "aliases": [<other names, including Chinese names>], "domain": <one of: ${DOMAINS.join(", ")}>, "broader": [<at most 1 concept this is a variant or kind of>], "variants": [<at most 3 well-known variants of this concept>], "prerequisites": [<at most 3 concepts to understand first>], "confidence": {"broader": <0-1>, "variants": <0-1>, "prerequisites": <0-1>}}</card>`,
+    `<card>{"match": <a candidate label such as "c1" if the term is the same concept, otherwise null>, "canonical": <English canonical name, spelled out in full when the term is an abbreviation>, "aliases": [<other names: the abbreviation and the full form, and Chinese names>], "domain": <one of: ${DOMAINS.join(", ")}>, "broader": [<at most 1 concept this is a variant or kind of>], "variants": [<at most 3 well-known variants of this concept>], "prerequisites": [<at most 3 concepts to understand first>], "confidence": {"broader": <0-1>, "variants": <0-1>, "prerequisites": <0-1>}}</card>`,
   ].join("\n");
 }
 
@@ -97,7 +98,7 @@ export function buildExplainPrompt(req: ExplainRequest): BuiltPrompt {
     `Paragraph: ${clean(req.paragraph, LIMITS.paragraph)}`,
     "</page_content>",
     `Selected term: <selected>${clean(req.selection, LIMITS.selection)}</selected>`,
-    "Known concept candidates (may be empty):",
+    "Known concept candidates (may be empty; a candidate may be the abbreviation or the full form of the selected term):",
     ...candidateLines,
   ];
   if (req.mode === "reexplain") {

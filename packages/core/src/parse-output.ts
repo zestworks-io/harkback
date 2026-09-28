@@ -18,9 +18,28 @@ export interface ParsedOutput {
   flags: EncounterFlag[];
 }
 
+/** The text of `<tag>…</tag>`; a block cut off by the token limit runs to the next tag or the end. */
 function block(raw: string, tag: string): string | null {
-  const m = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "i").exec(raw);
-  return m ? m[1]!.trim() : null;
+  const closed = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "i").exec(raw);
+  if (closed) return closed[1]!.trim();
+  const open = new RegExp(`<${tag}>([\\s\\S]*?)(?=<(?:explanation|evidence|card)>|$)`, "i").exec(raw);
+  return open ? open[1]!.trim() : null;
+}
+
+/** The outermost `{…}` of a card, so prose or code fences around it do not matter. */
+function jsonObject(text: string): unknown {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  const body = text.slice(start, end + 1);
+  for (const candidate of [body, body.replace(/,\s*([}\]])/g, "$1")]) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      // Try the next repair.
+    }
+  }
+  return null;
 }
 
 function cleanName(v: unknown): string | null {
@@ -31,8 +50,9 @@ function cleanName(v: unknown): string | null {
 }
 
 function names(v: unknown, max: number): string[] {
-  if (!Array.isArray(v)) return [];
-  return v
+  const list = typeof v === "string" ? [v] : v;
+  if (!Array.isArray(list)) return [];
+  return list
     .map(cleanName)
     .filter((x): x is string => x !== null)
     .slice(0, max);
@@ -45,13 +65,7 @@ function confidence(v: unknown): number {
 
 function parseCard(text: string | null, labels: ReadonlyMap<string, string>): ParsedCard | null {
   if (!text) return null;
-  const unfenced = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  let obj: unknown;
-  try {
-    obj = JSON.parse(unfenced);
-  } catch {
-    return null;
-  }
+  const obj = jsonObject(text);
   if (typeof obj !== "object" || obj === null || Array.isArray(obj)) return null;
   const o = obj as Record<string, unknown>;
   const canonical = cleanName(o.canonical);
@@ -59,7 +73,7 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>): Pa
   const domain = typeof o.domain === "string" && (DOMAINS as readonly string[]).includes(o.domain) ? (o.domain as Domain) : "other";
   const conf = typeof o.confidence === "object" && o.confidence !== null ? (o.confidence as Record<string, unknown>) : {};
   return {
-    matchConceptId: typeof o.match === "string" ? (labels.get(o.match) ?? null) : null,
+    matchConceptId: typeof o.match === "string" ? (labels.get(/c\d+/i.exec(o.match)?.[0]?.toLowerCase() ?? o.match) ?? null) : null,
     canonical,
     aliases: names(o.aliases, CARD_LIMITS.maxAliases),
     domain,
