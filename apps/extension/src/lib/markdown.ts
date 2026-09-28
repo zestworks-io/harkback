@@ -12,7 +12,7 @@ function safeUrl(raw: string): string | null {
   }
 }
 
-export function renderInline(text: string, parent: Node): void {
+function renderInline(text: string, parent: Node): void {
   let last = 0;
   for (const m of text.matchAll(INLINE)) {
     const at = m.index ?? 0;

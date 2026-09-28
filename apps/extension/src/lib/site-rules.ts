@@ -26,7 +26,7 @@ export function normalizePattern(raw: string): string | null {
   return /^(localhost|[a-z0-9-]+(\.[a-z0-9-]+)+)$/.test(domain) ? domain : null;
 }
 
-export function ruleMatches(pattern: string, url: URL): boolean {
+function ruleMatches(pattern: string, url: URL): boolean {
   const p = normalizePattern(pattern);
   if (!p) return false;
   if (isPrefix(p)) return url.href.startsWith(p);

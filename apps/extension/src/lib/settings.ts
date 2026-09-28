@@ -1,4 +1,5 @@
-import { modelUrlError, isLocalUrl } from "./routing";
+import { REUNION_DEFAULTS } from "@harkback/core";
+import { isLocalUrl, modelUrlError } from "./model-policy";
 import { normalizePattern } from "./site-rules";
 
 export interface ModelConfig {
@@ -43,7 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
   localModelId: null,
   sites: [],
   rateLimit: { perMinute: 10, perHour: 100 },
-  reunion: { minGapDays: 3, maxPerPage: 3 },
+  reunion: { ...REUNION_DEFAULTS },
   backup: { enabled: true },
 };
 
@@ -51,18 +52,48 @@ function obj(v: unknown): Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
 }
 
+const str = (v: unknown): string => (typeof v === "string" ? v : "");
+const strOrNull = (v: unknown): string | null => (typeof v === "string" ? v : null);
+const num = (v: unknown, fallback: number): number => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
+
+function cleanModel(raw: unknown): ModelConfig[] {
+  const m = obj(raw);
+  if (typeof m.id !== "string" || !m.id) return [];
+  return [{ id: m.id, label: str(m.label), baseUrl: str(m.baseUrl), apiKey: str(m.apiKey), model: str(m.model) }];
+}
+
+function cleanSite(raw: unknown): SiteRule[] {
+  const r = obj(raw);
+  if (typeof r.pattern !== "string") return [];
+  return [
+    {
+      pattern: r.pattern,
+      ...(r.autoScan === true && { autoScan: true }),
+      ...(r.sensitive === true && { sensitive: true }),
+      ...(r.disabled === true && { disabled: true }),
+      ...(typeof r.modelId === "string" && r.modelId && { modelId: r.modelId }),
+    },
+  ];
+}
+
+/** Turns whatever is in storage into valid settings: unknown or malformed fields fall back to their defaults. */
 export function withDefaults(raw: unknown): Settings {
-  const s = obj(raw) as Partial<Settings>;
+  const s = obj(raw);
+  const d = DEFAULT_SETTINGS;
+  const rate = obj(s.rateLimit);
+  const reunion = obj(s.reunion);
   return {
-    ...DEFAULT_SETTINGS,
-    ...s,
     version: 1,
+    onboarded: s.onboarded === true,
+    consentAt: strOrNull(s.consentAt),
     language: s.language === "en" ? "en" : "zh",
-    models: Array.isArray(s.models) ? s.models : [],
-    sites: Array.isArray(s.sites) ? s.sites : [],
-    rateLimit: { ...DEFAULT_SETTINGS.rateLimit, ...obj(s.rateLimit) },
-    reunion: { ...DEFAULT_SETTINGS.reunion, ...obj(s.reunion) },
-    backup: { ...DEFAULT_SETTINGS.backup, ...obj(s.backup) },
+    models: Array.isArray(s.models) ? s.models.flatMap(cleanModel) : [],
+    defaultModelId: strOrNull(s.defaultModelId),
+    localModelId: strOrNull(s.localModelId),
+    sites: Array.isArray(s.sites) ? s.sites.flatMap(cleanSite) : [],
+    rateLimit: { perMinute: num(rate.perMinute, d.rateLimit.perMinute), perHour: num(rate.perHour, d.rateLimit.perHour) },
+    reunion: { minGapDays: num(reunion.minGapDays, d.reunion.minGapDays), maxPerPage: num(reunion.maxPerPage, d.reunion.maxPerPage) },
+    backup: { enabled: obj(s.backup).enabled === false ? false : d.backup.enabled },
   };
 }
 

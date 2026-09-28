@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectScript, identityKey, nameSimilarity, normalizeName } from "../src";
+import { detectScript, identityKey, normalizeName } from "../src";
 
 describe("normalizeName", () => {
   it("folds case, separators and plurals for long Latin names", () => {
@@ -38,17 +38,5 @@ describe("normalizeName", () => {
 
   it("returns an empty key for punctuation-only input", () => {
     expect(identityKey(" ,.;") ).toBe("");
-  });
-});
-
-describe("nameSimilarity", () => {
-  it("scores related Latin names above 0.5 and unrelated below 0.2", () => {
-    expect(nameSimilarity("low rank adapter", "Low-Rank Adaptation")).toBeGreaterThan(0.5);
-    expect(nameSimilarity("attention", "LoRA")).toBeLessThan(0.2);
-    expect(nameSimilarity("LoRA", "LoRA")).toBe(1);
-  });
-
-  it("uses character bigrams for CJK", () => {
-    expect(nameSimilarity("低秩适配", "低秩自适应")).toBeGreaterThan(0);
   });
 });

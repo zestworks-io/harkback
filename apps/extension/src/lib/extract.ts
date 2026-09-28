@@ -49,7 +49,7 @@ export interface SelectionContext {
   locator: Locator;
 }
 
-export const normalizeWs = (s: string): string => s.replace(/\s+/g, " ").trim();
+const normalizeWs = (s: string): string => s.replace(/\s+/g, " ").trim();
 
 export function firstSentence(text: string): string {
   // CJK sentence ends need no following space.

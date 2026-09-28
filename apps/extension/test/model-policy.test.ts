@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RateLimiter } from "../src/lib/rate-limit";
-import { chooseModel, isLocalUrl, modelUrlError } from "../src/lib/routing";
+import { chooseModel, isLocalUrl, modelUrlError } from "../src/lib/model-policy";
 import { DEFAULT_SETTINGS, validateSettings, withDefaults, type ModelConfig, type Settings } from "../src/lib/settings";
 import { effectiveRule, hostPermissionPatterns, normalizePattern, originPattern } from "../src/lib/site-rules";
 
@@ -16,6 +16,21 @@ describe("settings", () => {
     expect(s.rateLimit).toEqual({ perMinute: 5, perHour: 100 });
     expect(s.models).toEqual([]);
     expect(withDefaults(undefined)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it("drops malformed models, sites and scalar values", () => {
+    const s = withDefaults({
+      onboarded: "yes",
+      models: [{ id: "a", baseUrl: "http://127.0.0.1:1/v1", model: 3 }, { label: "no id" }, null],
+      sites: [{ pattern: "a.com", sensitive: true, autoScan: "yes" }, { autoScan: true }],
+      rateLimit: { perMinute: "10", perHour: Infinity },
+      defaultModelId: 5,
+    });
+    expect(s.onboarded).toBe(false);
+    expect(s.models).toEqual([{ id: "a", label: "", baseUrl: "http://127.0.0.1:1/v1", apiKey: "", model: "" }]);
+    expect(s.sites).toEqual([{ pattern: "a.com", sensitive: true }]);
+    expect(s.rateLimit).toEqual(DEFAULT_SETTINGS.rateLimit);
+    expect(s.defaultModelId).toBeNull();
   });
 
   it("reports invalid fields by path", () => {

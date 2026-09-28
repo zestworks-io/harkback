@@ -1,6 +1,7 @@
 import {
   buildExplainPrompt,
   buildRecordEvents,
+  DAY_MS,
   candidatesForModel,
   findCandidates,
   parseModelOutput,
@@ -15,12 +16,10 @@ import {
 } from "@harkback/core";
 import type { HarkEvent, Locator, Tier } from "@harkback/spec";
 import { cooccurrenceEdge, type LastLookup } from "./cooccurrence";
-import { chooseModel } from "./routing";
+import { chooseModel } from "./model-policy";
 import type { ModelConfig, Settings, SiteRule } from "./settings";
 import { effectiveRule } from "./site-rules";
 import type { DetectedSource } from "./source-id";
-
-const DAY_MS = 86_400_000;
 
 export interface ExplainRequestMsg {
   mode: "explain" | "reexplain" | "compare";
@@ -56,7 +55,7 @@ export interface ExplainPlan {
 }
 
 /** Sources whose URL matches a sensitive site rule count as sensitive, even if they were recorded before the rule existed. */
-export function applySiteRules(state: State, rules: readonly SiteRule[]): State {
+function applySiteRules(state: State, rules: readonly SiteRule[]): State {
   if (!rules.some((r) => r.sensitive)) return state;
   const sources = new Map(state.sources);
   for (const [id, src] of sources) {

@@ -3,9 +3,11 @@ import { browser } from "wxt/browser";
 import { testConnection } from "../../lib/connection";
 import { h } from "../../lib/dom";
 import { PRIVACY } from "../../lib/pages/privacy";
+import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
 import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
+import { pick } from "../../lib/ui/strings";
 
 function input(value: string, onInput: (v: string) => void, attrs: Record<string, unknown> = {}): HTMLInputElement {
   const el = h("input", { type: "text", value, ...attrs });
@@ -37,7 +39,7 @@ async function main(): Promise<void> {
   const draft: Settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const root = document.getElementById("app")!;
   const status = h("div", { className: "result", "data-hb": "status" });
-  const L = (zh: string, en: string) => (draft.language === "zh" ? zh : en);
+  const L = (zh: string, en: string) => pick(draft.language, zh, en);
 
   async function save(): Promise<void> {
     const next = trimmed(draft);
@@ -52,11 +54,10 @@ async function main(): Promise<void> {
         ...next.sites.filter((r) => r.autoScan && !r.disabled).flatMap((r) => hostPermissionPatterns(r.pattern)),
       ]),
     ];
-    // Must be the first await: permission prompts need the click's user gesture.
-    if (origins.length > 0) await browser.permissions.request({ origins }).catch(() => false);
+    if (origins.length > 0) await requestOrigins(origins);
     Object.assign(draft, next);
     await browser.storage.local.set({ settings: next });
-    await browser.runtime.sendMessage({ type: "settings-changed" }).catch(() => undefined);
+    await request({ type: "settings-changed" });
     status.textContent = L("已保存。", "Saved.");
   }
 
@@ -68,11 +69,11 @@ async function main(): Promise<void> {
     });
 
     const modelRows = draft.models.map((m, i) => {
-      const result = h("div", { className: "result" });
-      const test = h("button", { type: "button" }, L("测试", "Test"));
+      const result = h("div", { className: "result", "data-hb": "model-result" });
+      const test = h("button", { type: "button", "data-hb": "model-test" }, L("测试", "Test"));
       test.addEventListener("click", async () => {
         const pattern = originPattern(m.baseUrl.trim());
-        if (pattern) await browser.permissions.request({ origins: [pattern] }).catch(() => false);
+        if (pattern) await requestOrigins([pattern]);
         result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
       });
       const remove = h("button", { type: "button" }, L("删除", "Delete"));
@@ -134,10 +135,9 @@ async function main(): Promise<void> {
 
     const saveButton = h("button", { type: "button", "data-hb": "save" }, L("保存", "Save"));
     saveButton.addEventListener("click", () => void save());
-    const backupNow = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份", "Back up now"));
-    backupNow.addEventListener("click", async () => {
-      const r = (await browser.runtime.sendMessage({ type: "backup-now" })) as { ok?: boolean; error?: string } | undefined;
-      status.textContent = r?.ok ? L("已备份。", "Backed up.") : `${L("备份失败：", "Backup failed: ")}${r?.error ?? ""}`;
+    const backupButton = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份", "Back up now"));
+    backupButton.addEventListener("click", async () => {
+      status.textContent = await backupNow(draft.language);
     });
 
     root.replaceChildren(
@@ -165,7 +165,7 @@ async function main(): Promise<void> {
       h("p", {}, L("每分钟最多解释 ", "At most "), numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }), L(" 次，每小时 ", " per minute and "), numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }), L(" 次", " per hour")),
       h("p", {}, L("重逢间隔至少 ", "Reunions at least "), numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }), L(" 天，每页最多 ", " days apart, at most "), numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }), L(" 条", " per page")),
       h("h2", {}, L("备份", "Backup")),
-      h("p", {}, h("label", {}, checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)), " ", L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week")), " ", backupNow),
+      h("p", {}, h("label", {}, checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)), " ", L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week")), " ", backupButton),
       h("h2", {}, L("隐私", "Privacy")),
       h("ul", { className: "note" }, ...PRIVACY[draft.language].map((line) => h("li", {}, line))),
       h("p", {}, saveButton),

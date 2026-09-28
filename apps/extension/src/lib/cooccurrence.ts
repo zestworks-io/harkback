@@ -5,7 +5,7 @@ export interface LastLookup {
   at: number;
 }
 
-export const COOCCURRENCE_WINDOW_MS = 30 * 60_000;
+const COOCCURRENCE_WINDOW_MS = 30 * 60_000;
 
 /** Two consecutive lookups in the same paragraph are weakly related; the edge direction is stable (smaller id first). */
 export function cooccurrenceEdge(prev: LastLookup | undefined, cur: LastLookup): { from: string; to: string } | null {

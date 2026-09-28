@@ -1,5 +1,5 @@
-import { normalizeBaseUrl } from "./model-client";
-import { isLocalUrl, modelUrlError } from "./routing";
+import { defaultFetch, normalizeBaseUrl, requestHeaders } from "./model-client";
+import { isLocalUrl, modelUrlError } from "./model-policy";
 
 export type ConnectionResult =
   | { kind: "ok"; models: string[] }
@@ -11,12 +11,10 @@ export type ConnectionResult =
 
 export async function testConnection(
   cfg: { baseUrl: string; apiKey: string },
-  fetchImpl: typeof fetch = (input, init) => fetch(input, init),
+  fetchImpl: typeof fetch = defaultFetch,
 ): Promise<ConnectionResult> {
   if (modelUrlError(cfg.baseUrl)) return { kind: "insecure" };
-  const headers: Record<string, string> = { accept: "application/json" };
-  const key = cfg.apiKey.trim();
-  if (key) headers.authorization = `Bearer ${key}`;
+  const headers = requestHeaders(cfg.apiKey, { accept: "application/json" });
   let res: Response;
   try {
     res = await fetchImpl(`${normalizeBaseUrl(cfg.baseUrl)}/models`, { headers });

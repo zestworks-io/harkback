@@ -1,3 +1,5 @@
+export const DAY_MS = 86_400_000;
+
 export const THRESHOLDS = {
   askUserSimilarity: 0.6,
   candidateMinSimilarity: 0.3,

@@ -1,7 +1,7 @@
-const DAY_MS = 86_400_000;
+import { DAY_MS } from "@harkback/core";
 
-export const BACKUP_KEEP = 4;
-export const BACKUP_INTERVAL_DAYS = 7;
+const BACKUP_KEEP = 4;
+const BACKUP_INTERVAL_DAYS = 7;
 
 export interface BackupState {
   lastAt: number | null;

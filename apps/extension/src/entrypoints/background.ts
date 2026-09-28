@@ -1,6 +1,7 @@
 import {
   buildFollowUpPrompt,
   canonicalOrder,
+  clampSource,
   matcherEntriesFromState,
   serializeJsonl,
   streamingExplanation,
@@ -27,10 +28,10 @@ import { isRequest, type PageInfo, type PortIn, type PortOut, type Request, type
 import { ModelError, streamChat } from "../lib/model-client";
 import { RateLimiter, type RateResult } from "../lib/rate-limit";
 import { reunionCards } from "../lib/reunion-cards";
-import { allowed, senderKind, type SenderInfo } from "../lib/router";
+import { allowed, senderKind, type SenderInfo } from "../lib/sender-auth";
 import { withDefaults, type Settings } from "../lib/settings";
 import { effectiveRule, hostPermissionPatterns } from "../lib/site-rules";
-import { clampSource, isArxivUrl } from "../lib/source-id";
+import { isArxivUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
 import { EventStore } from "../lib/store";
 
@@ -194,6 +195,7 @@ export default defineBackground(() => {
 
     port.onMessage.addListener((msg: PortIn) => {
       if (msg.type === "start" && !busy && !last) void start(msg.request);
+      else if (msg.type === "ping") return; // Keepalive: receiving it resets the service worker's idle timer.
       else if (msg.type === "answer") void answer(msg.sameConcept === true);
       else if (msg.type === "followup" && !busy && last) void followUp(String(msg.question));
     });
@@ -268,7 +270,8 @@ export default defineBackground(() => {
           return { ok: false, error: e instanceof Error ? e.message : String(e) };
         }
       case "settings-changed":
-        await syncContentScripts();
+        sync();
+        await syncing;
         return { ok: true };
     }
   }
@@ -323,7 +326,11 @@ export default defineBackground(() => {
     }
   }
 
-  const sync = () => void syncContentScripts().catch(() => undefined);
+  // Settings and permission events often arrive together; run the syncs one after another.
+  let syncing: Promise<void> = Promise.resolve();
+  const sync = () => {
+    syncing = syncing.then(syncContentScripts).catch(() => undefined);
+  };
 
   // ---- backup ---------------------------------------------------------------
 

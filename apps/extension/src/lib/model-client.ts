@@ -1,5 +1,5 @@
 import type { ChatMessage } from "@harkback/core";
-import { modelUrlError } from "./routing";
+import { modelUrlError } from "./model-policy";
 import type { ModelConfig } from "./settings";
 import { SseParser } from "./sse";
 
@@ -24,6 +24,14 @@ export function normalizeBaseUrl(raw: string): string {
     .replace(/\/+$/, "");
 }
 
+/** Wrapped so `fetch` keeps its `window`/worker receiver when passed around. */
+export const defaultFetch: typeof fetch = (input, init) => fetch(input, init);
+
+export function requestHeaders(apiKey: string, headers: Record<string, string>): Record<string, string> {
+  const key = apiKey.trim();
+  return key ? { ...headers, authorization: `Bearer ${key}` } : headers;
+}
+
 export interface StreamOptions {
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
@@ -46,7 +54,7 @@ export async function streamChat(
   opts: StreamOptions = {},
 ): Promise<string> {
   if (modelUrlError(cfg.baseUrl)) throw new ModelError("insecure", "model address rejected");
-  const fetchImpl = opts.fetchImpl ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
+  const fetchImpl = opts.fetchImpl ?? defaultFetch;
   const idleMs = opts.idleTimeoutMs ?? 30_000;
   const controller = new AbortController();
   let timedOut = false;
@@ -62,9 +70,7 @@ export async function streamChat(
   if (opts.signal?.aborted) controller.abort();
   opts.signal?.addEventListener("abort", onAbort);
 
-  const headers: Record<string, string> = { "content-type": "application/json", accept: "text/event-stream, application/json" };
-  const key = cfg.apiKey.trim();
-  if (key) headers.authorization = `Bearer ${key}`;
+  const headers = requestHeaders(cfg.apiKey, { "content-type": "application/json", accept: "text/event-stream, application/json" });
 
   let full = "";
   try {

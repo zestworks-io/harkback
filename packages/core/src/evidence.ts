@@ -3,7 +3,7 @@ import { THRESHOLDS } from "./constants";
 function normalizeForEvidence(s: string): string {
   return s
     .normalize("NFKC")
-    .replace(/­/g, "")
+    .replace(/\u00AD/g, "")
     .toLowerCase()
     .replace(/[\-‐‑‒–—]/g, " ")
     .replace(/\s+/g, " ")

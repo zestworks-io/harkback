@@ -7,7 +7,6 @@ export * from "./state";
 export * from "./union-find";
 export * from "./replay-concepts";
 export * from "./replay";
-export * from "./snapshot";
 export * from "./compact";
 export * from "./candidates";
 export * from "./matcher";

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { arxivIdFromUrl, clampSource, cleanUrl, detectSource, isArxivUrl } from "../src/lib/source-id";
+import { arxivIdFromUrl, cleanUrl, detectSource, isArxivUrl } from "../src/lib/source-id";
 
 const load = (name: string) => new DOMParser().parseFromString(readFileSync(`apps/extension/fixtures/${name}`, "utf8"), "text/html");
 const html = (head: string) => new DOMParser().parseFromString(`<html><head>${head}</head><body></body></html>`, "text/html");
@@ -42,12 +42,5 @@ describe("detectSource", () => {
     expect(blog.ids).toEqual({ url: "https://blog.example.com/posts/adapters?id=3" });
     expect(blog.title).toBe("Understanding adapters | Example Blog");
     expect(detectSource("https://plain.example.com/p?utm_campaign=z", html("<title>Plain</title>")).source_id).toBe("url:https://plain.example.com/p");
-  });
-
-  it("clamps source fields for the event payload", () => {
-    const payload = clampSource({ source_id: "url:x", ids: { url: `https://x/${"a".repeat(3000)}` }, title: "T".repeat(900), license: "unknown" }, "sensitive");
-    expect(payload.title).toHaveLength(500);
-    expect(payload.ids.url).toHaveLength(2048);
-    expect(payload.sensitivity).toBe("sensitive");
   });
 });

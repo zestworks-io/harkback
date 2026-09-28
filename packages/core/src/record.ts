@@ -1,4 +1,4 @@
-import { CARD_LIMITS, parseEvent, type Domain, type HarkEvent, type Locator, type PayloadOf, type Rel, type Tier } from "@harkback/spec";
+import { CARD_LIMITS, parseEvent, type Domain, type HarkEvent, type Locator, type PayloadOf, type Rel, type Sensitivity, type SourceIds, type Tier } from "@harkback/spec";
 import type { Candidate } from "./candidates";
 import { THRESHOLDS } from "./constants";
 import type { EventFactory } from "./factory";
@@ -50,6 +50,25 @@ function uniqueNames(candidates: readonly (string | undefined)[], known: Set<str
   return out;
 }
 
+/** Trims a detected source to the limits of the event schema and applies `sensitivity`. */
+export function clampSource(
+  src: { source_id: string; ids: SourceIds; title: string; license: string },
+  sensitivity: Sensitivity,
+): PayloadOf<"source.seen"> {
+  const { arxiv, doi, url } = src.ids;
+  return {
+    source_id: src.source_id,
+    ids: {
+      ...(arxiv !== undefined && { arxiv: arxiv.slice(0, 64) }),
+      ...(doi !== undefined && { doi: doi.slice(0, 256) }),
+      ...(url !== undefined && { url: url.slice(0, 2048) }),
+    },
+    title: src.title.slice(0, 500),
+    license: src.license.slice(0, 64),
+    sensitivity,
+  };
+}
+
 /**
  * Builds all events for one completed explanation. Edge directions:
  * `variant_of`: from is a variant or kind of to. `prerequisite`: from requires understanding to first.
@@ -64,19 +83,8 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
   const card = parsed.card;
 
   const prevSource = state.sources.get(input.source.source_id);
-  const ids = input.source.ids;
-  const source: PayloadOf<"source.seen"> = {
-    ...input.source,
-    ids: {
-      ...(ids.arxiv !== undefined && { arxiv: ids.arxiv.slice(0, 64) }),
-      ...(ids.doi !== undefined && { doi: ids.doi.slice(0, 256) }),
-      ...(ids.url !== undefined && { url: ids.url.slice(0, 2048) }),
-    },
-    title: input.source.title.slice(0, 500),
-    license: input.source.license.slice(0, 64),
-    // Recording never downgrades: only an explicit user action may mark a sensitive source normal again.
-    sensitivity: prevSource?.sensitivity === "sensitive" ? "sensitive" : input.source.sensitivity,
-  };
+  // Recording never downgrades: only an explicit user action may mark a sensitive source normal again.
+  const source = clampSource(input.source, prevSource?.sensitivity === "sensitive" ? "sensitive" : input.source.sensitivity);
   if (!prevSource || prevSource.sensitivity !== source.sensitivity || prevSource.title !== source.title) {
     out.push(f.make("source.seen", source));
   }

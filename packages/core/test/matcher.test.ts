@@ -12,7 +12,7 @@ const keys = (text: string) => matcher.scan(text).map((h) => h.key);
 
 describe("prepareText", () => {
   it("folds separators and keeps a map back to the original", () => {
-    const p = prepareText("Low-Rank  adap­tation");
+    const p = prepareText("Low-Rank  adap\u00ADtation");
     expect(p.text).toBe("low rank adaptation");
     // The folded space maps to the character that follows the separator run.
     expect(p.map[3]).toBe(4);
@@ -46,7 +46,7 @@ describe("Matcher", () => {
 
   it("matches hyphen and space variants and soft hyphens", () => {
     expect(keys("low rank adaptation works")).toEqual(["lowrankadaptation"]);
-    expect(keys("Low-Rank Adap­tation works")).toEqual(["lowrankadaptation"]);
+    expect(keys("Low-Rank Adap\u00ADtation works")).toEqual(["lowrankadaptation"]);
   });
 
   it("accepts a trailing plural s", () => {

@@ -105,6 +105,9 @@ export function t(lang: Lang, key: StringKey, vars: Record<string, string | numb
   return TABLE[lang][key].replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
 }
 
+/** Inline zh/en choice for pages that carry their own copy. */
+export const pick = (lang: Lang, zh: string, en: string): string => (lang === "zh" ? zh : en);
+
 export function errorText(lang: Lang, code: ErrorCode, retryAfterMs = 0): string {
   return t(lang, `err_${code}`, { s: Math.ceil(retryAfterMs / 1000) });
 }

@@ -77,11 +77,3 @@ export function jaccard(a: ReadonlySet<string>, b: ReadonlySet<string>): number 
   for (const g of a) if (b.has(g)) inter++;
   return inter / (a.size + b.size - inter);
 }
-
-export function nameSimilarity(a: string, b: string): number {
-  const na = normalizeName(a);
-  const nb = normalizeName(b);
-  if ((na.caseKey ?? na.norm) === (nb.caseKey ?? nb.norm)) return 1;
-  const script: Script = na.script === "cjk" || nb.script === "cjk" ? "cjk" : "latin";
-  return jaccard(grams(na.norm, script), grams(nb.norm, script));
-}

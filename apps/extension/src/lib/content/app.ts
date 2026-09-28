@@ -55,13 +55,14 @@ export class ContentApp {
   }
 
   async start(): Promise<void> {
-    this.info = await this.rpc.request({ type: "page-info" });
-    if (this.info.enabled && this.info.autoScan) await this.activate();
+    const info = await this.rpc.request({ type: "page-info" });
+    if (info.enabled && info.autoScan) await this.activate(info);
+    else this.info = info;
   }
 
-  /** Also the "rescan" action: the toolbar button calls it again. */
-  async activate(): Promise<void> {
-    this.info = await this.rpc.request({ type: "page-info" });
+  /** Also the "rescan" action: the toolbar button calls it again. `known` is a page-info answer that is still fresh. */
+  async activate(known?: PageInfo): Promise<void> {
+    this.info = known ?? (await this.rpc.request({ type: "page-info" }));
     if (!this.info.enabled) return;
     if (!this.listening) {
       this.listening = true;
@@ -108,7 +109,8 @@ export class ContentApp {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0).cloneRange();
-    await this.activate();
+    // The first press scans the page like the toolbar button; later presses reuse that scan.
+    if (!this.listening) await this.activate();
     if (this.info?.enabled) this.explain(range, { mode: "explain" });
   }
 

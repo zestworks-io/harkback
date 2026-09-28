@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allowed, senderKind } from "../src/lib/router";
+import { allowed, senderKind } from "../src/lib/sender-auth";
 
 const ID = "abcdefghijklmnopabcdefghijklmnop";
 const ORIGIN = `chrome-extension://${ID}`;

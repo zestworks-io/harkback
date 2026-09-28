@@ -153,7 +153,14 @@ export class ExplainCard {
   private render(target: HTMLElement, text: string): void {
     target.replaceChildren(renderMarkdown(text));
     for (const link of target.querySelectorAll<HTMLElement>(".hb-link")) {
-      link.addEventListener("click", () => this.confirmLink(link.dataset.url ?? ""));
+      const open = () => this.confirmLink(link.dataset.url ?? "");
+      link.addEventListener("click", open);
+      link.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
     }
   }
 

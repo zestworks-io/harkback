@@ -1,7 +1,5 @@
-import { selectReunions, type Hit, type State } from "@harkback/core";
+import { DAY_MS, selectReunions, type Hit, type State } from "@harkback/core";
 import type { Tier } from "@harkback/spec";
-
-const DAY_MS = 86_400_000;
 
 export interface ReunionCard {
   kind: "direct" | "related";

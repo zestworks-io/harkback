@@ -1,14 +1,16 @@
-import { renderMarkdown as exportMarkdown, replay, type State } from "@harkback/core";
+import { exportMarkdown, replay, type State } from "@harkback/core";
 import { browser } from "wxt/browser";
 import { h } from "../../lib/dom";
 import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
 import { renderMarkdown } from "../../lib/markdown";
+import { backupNow, request } from "../../lib/pages/request";
 import { withDefaults } from "../../lib/settings";
+import { pick } from "../../lib/ui/strings";
 import { EventStore } from "../../lib/store";
 
 async function main(): Promise<void> {
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
-  const L = (zh: string, en: string) => (settings.language === "zh" ? zh : en);
+  const L = (zh: string, en: string) => pick(settings.language, zh, en);
   const store = await EventStore.open();
   let state: State = replay(await store.all());
 
@@ -25,10 +27,12 @@ async function main(): Promise<void> {
         del.textContent = L("确认删除", "Confirm delete");
         return;
       }
-      const r = (await browser.runtime.sendMessage({ type: "delete-encounter", encounterId: e.encounterId })) as { ok?: boolean } | undefined;
-      if (r?.ok) {
+      const r = await request({ type: "delete-encounter", encounterId: e.encounterId });
+      if (r.ok) {
         state = replay(await store.all());
         draw();
+      } else {
+        status.textContent = L("删除失败。", "Delete failed.");
       }
     });
     const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
@@ -57,16 +61,15 @@ async function main(): Promise<void> {
   }
   search.addEventListener("input", draw);
 
-  const backupNow = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份 JSONL", "Back up JSONL now"));
-  backupNow.addEventListener("click", async () => {
+  const backupButton = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份 JSONL", "Back up JSONL now"));
+  backupButton.addEventListener("click", async () => {
     status.textContent = L("正在备份…", "Backing up…");
-    const r = (await browser.runtime.sendMessage({ type: "backup-now" })) as { ok?: boolean; error?: string } | undefined;
-    status.textContent = r?.ok ? L("已备份。", "Backed up.") : `${L("备份失败：", "Backup failed: ")}${r?.error ?? ""}`;
+    status.textContent = await backupNow(settings.language);
   });
 
   const exportMd = h("button", { type: "button", "data-hb": "export-md" }, L("导出 Markdown", "Export Markdown"));
   exportMd.addEventListener("click", () => {
-    const url = URL.createObjectURL(new Blob([exportMarkdown(state)], { type: "text/markdown" }));
+    const url = URL.createObjectURL(new Blob([exportMarkdown(state, settings.language)], { type: "text/markdown" }));
     const a = h("a", { href: url, download: `harkback-${new Date().toISOString().slice(0, 10)}.md` });
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
@@ -74,7 +77,7 @@ async function main(): Promise<void> {
 
   root.replaceChildren(
     h("h1", {}, L("Harkback · 历史", "Harkback · History")),
-    h("p", {}, search, " ", backupNow, " ", exportMd, " ", h("a", { href: browser.runtime.getURL("/options.html") }, L("设置", "Settings"))),
+    h("p", {}, search, " ", backupButton, " ", exportMd, " ", h("a", { href: browser.runtime.getURL("/options.html") }, L("设置", "Settings"))),
     status,
     list,
     h("p", { className: "note" }, L("删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。", "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.")),

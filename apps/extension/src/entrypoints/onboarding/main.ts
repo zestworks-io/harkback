@@ -3,11 +3,12 @@ import { browser } from "wxt/browser";
 import { testConnection, type ConnectionResult } from "../../lib/connection";
 import { h } from "../../lib/dom";
 import { PRIVACY } from "../../lib/pages/privacy";
+import { request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage, onboardingSettings, TEMPLATES } from "../../lib/pages/setup";
-import { modelUrlError } from "../../lib/routing";
+import { modelUrlError } from "../../lib/model-policy";
 import { withDefaults } from "../../lib/settings";
 import { originPattern } from "../../lib/site-rules";
-import type { Lang } from "../../lib/ui/strings";
+import { pick, type Lang } from "../../lib/ui/strings";
 
 type ResultState = "busy" | "ok" | "error" | "help";
 
@@ -20,7 +21,7 @@ async function main(): Promise<void> {
   let settings = withDefaults((await browser.storage.local.get("settings")).settings);
   let lang: Lang = settings.language;
   const root = document.getElementById("app")!;
-  const L = (zh: string, en: string) => (lang === "zh" ? zh : en);
+  const L = (zh: string, en: string) => pick(lang, zh, en);
   // Kept outside render() so switching language does not clear what was typed.
   const form = { templateId: TEMPLATES[0].id as string, baseUrl: TEMPLATES[0].baseUrl as string, apiKey: "", model: "", consent: false, models: [] as string[] };
 
@@ -75,8 +76,7 @@ async function main(): Promise<void> {
         show(connectionMessage(lang, { kind: "insecure" }, location.origin), "error");
         return;
       }
-      // Must be the first await: permission prompts need the click's user gesture.
-      await browser.permissions.request({ origins: [pattern] }).catch(() => false);
+      await requestOrigins([pattern]);
       show(L("正在连接…", "Connecting…"), "busy");
       const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value });
       show(connectionMessage(lang, r, location.origin), stateOf(r));
@@ -99,7 +99,7 @@ async function main(): Promise<void> {
         show(L("请填写有效的模型地址与模型名称。", "Enter a valid model address and model name."), "error");
         return;
       }
-      const granted = await browser.permissions.request({ origins: [pattern] }).catch(() => false);
+      const granted = await requestOrigins([pattern]);
       if (!granted) {
         show(L("需要允许访问模型地址。", "Access to the model address is required."), "error");
         return;
@@ -107,7 +107,7 @@ async function main(): Promise<void> {
       const label = TEMPLATES.find((x) => x.id === form.templateId)?.label ?? "Model";
       settings = onboardingSettings(settings, { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value }, new Date(), () => ulid());
       await browser.storage.local.set({ settings });
-      await browser.runtime.sendMessage({ type: "settings-changed" }).catch(() => undefined);
+      await request({ type: "settings-changed" });
       renderDone();
     });
 

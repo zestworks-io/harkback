@@ -37,9 +37,12 @@ export function parseJsonl(text: string): JsonlParseResult {
   return result;
 }
 
-const TIER_LABEL = { defined_in_source: "原文定义", external_knowledge: "外部知识" } as const;
+const TIER_LABEL = {
+  zh: { defined_in_source: "原文定义", external_knowledge: "外部知识" },
+  en: { defined_in_source: "Defined in source", external_knowledge: "External knowledge" },
+} as const;
 
-export function renderMarkdown(state: State): string {
+export function exportMarkdown(state: State, language: "zh" | "en" = "zh"): string {
   const lines = ["# Harkback export", ""];
   const concepts = [...state.concepts.values()]
     .filter((c) => !c.isPlaceholder)
@@ -52,7 +55,8 @@ export function renderMarkdown(state: State): string {
       const e = state.encounters.get(eid)!;
       const title = state.sources.get(e.sourceId)?.title || e.sourceId;
       const date = new Date(e.createdAt).toISOString().slice(0, 10);
-      lines.push(`- ${date} · 《${title}》 · ${TIER_LABEL[e.explanation.tier]}`);
+      const source = language === "zh" ? `《${title}》` : `“${title}”`;
+      lines.push(`- ${date} · ${source} · ${TIER_LABEL[language][e.explanation.tier]}`);
       lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
     }
     lines.push("");

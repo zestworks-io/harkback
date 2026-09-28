@@ -1,5 +1,5 @@
 import type { Domain } from "@harkback/spec";
-import { REUNION_DEFAULTS, THRESHOLDS } from "./constants";
+import { DAY_MS, REUNION_DEFAULTS, THRESHOLDS } from "./constants";
 import type { Hit } from "./matcher";
 import type { EncounterState, State } from "./state";
 
@@ -13,8 +13,6 @@ export interface ReunionContext {
 export type Reunion =
   | { kind: "direct"; conceptId: string; hit: Hit; encounter: EncounterState }
   | { kind: "related"; conceptId: string; viaConceptId: string; hit: Hit; encounter: EncounterState };
-
-const DAY_MS = 86_400_000;
 
 export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionContext): Reunion[] {
   const minGap = (ctx.minGapDays ?? REUNION_DEFAULTS.minGapDays) * DAY_MS;

@@ -3,7 +3,7 @@ import { normalizeName, type Script } from "./normalize";
 import type { State } from "./state";
 
 const SEPARATOR = /[\s\-‐‑‒–—_]/;
-const SEPARATORS_G = /[\s\-‐‑‒–—_­]+/g;
+const SEPARATORS_G = /[\s\-‐‑‒–—_\u00AD]+/g;
 
 export interface PreparedText {
   text: string;
@@ -16,7 +16,7 @@ export function prepareText(raw: string): PreparedText {
   let pendingSpace = false;
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i]!;
-    if (ch === "­") continue;
+    if (ch === "\u00AD") continue;
     if (SEPARATOR.test(ch)) {
       pendingSpace = text.length > 0;
       continue;
@@ -47,7 +47,7 @@ export interface Hit {
   text: string;
 }
 
-interface Node {
+interface TrieNode {
   next: Map<string, number>;
   fail: number;
   out: number[];
@@ -60,7 +60,7 @@ interface Entry extends MatcherEntry {
 const isLatinWordChar = (c: string | undefined) => c !== undefined && /[\p{Script=Latin}\p{N}]/u.test(c);
 
 export class Matcher {
-  private readonly nodes: Node[] = [{ next: new Map(), fail: 0, out: [] }];
+  private readonly nodes: TrieNode[] = [{ next: new Map(), fail: 0, out: [] }];
   private readonly entries: Entry[] = [];
 
   constructor(entries: readonly MatcherEntry[]) {

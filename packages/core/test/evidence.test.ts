@@ -19,7 +19,7 @@ describe("verifyEvidence", () => {
   it("accepts a quote with small differences, case, whitespace and soft hyphens", () => {
     expect(verifyEvidence("we freeze the pretrained model weights and inject trainable rank decomposition matrices", page)).toBe(true);
     expect(verifyEvidence("WE  FREEZE the pre-trained model weights", page)).toBe(true);
-    expect(verifyEvidence("inject trainable rank decom­position matrices", page)).toBe(true);
+    expect(verifyEvidence("inject trainable rank decom\u00ADposition matrices", page)).toBe(true);
   });
 
   it("rejects a fabricated quote", () => {

@@ -1,5 +1,5 @@
 import { ollamaOriginsHelp, type ConnectionResult } from "../connection";
-import { isLocalUrl } from "../routing";
+import { isLocalUrl } from "../model-policy";
 import type { ModelConfig, Settings } from "../settings";
 import type { Lang } from "../ui/strings";
 

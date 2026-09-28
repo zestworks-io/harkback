@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseJsonl, renderMarkdown, replay, serializeJsonl } from "../src";
+import { exportMarkdown, parseJsonl, replay, serializeJsonl } from "../src";
 import { concept, encounter, ev, id } from "./helpers";
 
 const events = [
@@ -35,14 +35,19 @@ describe("JSONL", () => {
   });
 });
 
-describe("renderMarkdown", () => {
+describe("exportMarkdown", () => {
   it("lists real concepts with their encounters and skips placeholders and deleted encounters", () => {
-    const md = renderMarkdown(replay(events));
+    const md = exportMarkdown(replay(events));
     expect(md).toContain("## LoRA");
     expect(md).toContain("Low-Rank Adaptation");
     expect(md).toContain("2026-09-10 · 《LoRA Paper》 · 外部知识");
     expect(md).toContain("explanation 10");
     expect(md).not.toContain("QLoRA");
     expect(md).not.toContain("Attention");
+  });
+
+  it("labels entries in the requested language", () => {
+    const md = exportMarkdown(replay(events), "en");
+    expect(md).toContain("2026-09-10 · “LoRA Paper” · External knowledge");
   });
 });

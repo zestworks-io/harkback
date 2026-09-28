@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseEvent, type HarkEvent } from "@harkback/spec";
-import { buildRecordEvents, createEventFactory, replay, resolveConcept, type ParsedOutput, type RecordInput } from "../src";
+import { buildRecordEvents, clampSource, createEventFactory, replay, resolveConcept, type ParsedOutput, type RecordInput } from "../src";
 import { concept, ev, id } from "./helpers";
 
 const source = { source_id: "arxiv:2305.14314", ids: { arxiv: "2305.14314" }, title: "QLoRA", license: "unknown", sensitivity: "normal" as const };
@@ -150,5 +150,14 @@ describe("buildRecordEvents: edge targets", () => {
     expect(edge?.type === "edge.proposed" && edge.payload.to).not.toBe(id(1));
     const placeholder = events.find((e) => e.type === "concept.created" && e.payload.canonical_name === "Transformer");
     expect(placeholder?.type === "concept.created" && placeholder.payload.domain).toBe("ml");
+  });
+});
+
+describe("clampSource", () => {
+  it("trims source fields to the event schema limits", () => {
+    const payload = clampSource({ source_id: "url:x", ids: { url: `https://x/${"a".repeat(3000)}` }, title: "T".repeat(900), license: "unknown" }, "sensitive");
+    expect(payload.title).toHaveLength(500);
+    expect(payload.ids.url).toHaveLength(2048);
+    expect(payload.sensitivity).toBe("sensitive");
   });
 });

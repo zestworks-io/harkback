@@ -1,4 +1,4 @@
-import type { PayloadOf, Sensitivity, SourceIds } from "@harkback/spec";
+import type { SourceIds } from "@harkback/spec";
 
 const TRACKING = /^(utm_[a-z_]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|si|spm|ref|ref_src|_hsenc|_hsmi|mkt_tok)$/i;
 const ARXIV_URL = /^https?:\/\/(?:www\.|export\.)?arxiv\.org\/(?:abs|pdf|html)\/(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})(?:v\d+)?/i;
@@ -60,19 +60,5 @@ export function detectSource(url: string, doc: Document): DetectedSource {
     ids: { url: cleaned, ...(arxiv ? { arxiv } : {}), ...(doi ? { doi } : {}) },
     title: title.replace(/\s+/g, " ").trim(),
     license: "unknown",
-  };
-}
-
-export function clampSource(src: DetectedSource, sensitivity: Sensitivity): PayloadOf<"source.seen"> {
-  return {
-    source_id: src.source_id,
-    ids: {
-      ...(src.ids.arxiv !== undefined ? { arxiv: src.ids.arxiv.slice(0, 64) } : {}),
-      ...(src.ids.doi !== undefined ? { doi: src.ids.doi.slice(0, 256) } : {}),
-      ...(src.ids.url !== undefined ? { url: src.ids.url.slice(0, 2048) } : {}),
-    },
-    title: src.title.slice(0, 500),
-    license: src.license.slice(0, 64),
-    sensitivity,
   };
 }

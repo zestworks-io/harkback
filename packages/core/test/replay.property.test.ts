@@ -1,7 +1,8 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import type { HarkEvent } from "@harkback/spec";
-import { compactDeleted, replay, snapshotState } from "../src";
+import { compactDeleted, replay } from "../src";
+import { snapshotState } from "./snapshot";
 import { id } from "./helpers";
 
 const conceptIds = [1, 2, 3, 4, 5].map(id);
