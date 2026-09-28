@@ -17,7 +17,11 @@ async function main(): Promise<void> {
   const root = document.getElementById("app")!;
   const list = h("div", { "data-hb": "history" });
   const status = h("div", { className: "result", "data-hb": "status" });
-  const search = h("input", { type: "search", "data-hb": "search", placeholder: L("搜索概念、原文或解释", "Search concepts, quotes or explanations") });
+  const search = h("input", {
+    type: "search",
+    "data-hb": "search",
+    placeholder: L("搜索概念、原文或解释", "Search concepts, quotes or explanations"),
+  });
 
   const entryView = (e: HistoryEntry): HTMLElement => {
     const del = h("button", { type: "button", "data-hb": "delete" }, L("删除", "Delete"));
@@ -57,7 +61,9 @@ async function main(): Promise<void> {
 
   function draw(): void {
     const model = historyModel(state, search.value);
-    list.replaceChildren(...(model.length > 0 ? model.map(conceptView) : [h("p", { "data-hb": "empty" }, L("没有找到记录。", "No records found."))]));
+    list.replaceChildren(
+      ...(model.length > 0 ? model.map(conceptView) : [h("p", { "data-hb": "empty" }, L("没有找到记录。", "No records found."))]),
+    );
   }
   search.addEventListener("input", draw);
 
@@ -77,10 +83,27 @@ async function main(): Promise<void> {
 
   root.replaceChildren(
     h("h1", {}, L("Harkback · 历史", "Harkback · History")),
-    h("p", {}, search, " ", backupButton, " ", exportMd, " ", h("a", { href: browser.runtime.getURL("/options.html") }, L("设置", "Settings"))),
+    h(
+      "p",
+      {},
+      search,
+      " ",
+      backupButton,
+      " ",
+      exportMd,
+      " ",
+      h("a", { href: browser.runtime.getURL("/options.html") }, L("设置", "Settings")),
+    ),
     status,
     list,
-    h("p", { className: "note" }, L("删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。", "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.")),
+    h(
+      "p",
+      { className: "note" },
+      L(
+        "删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。",
+        "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.",
+      ),
+    ),
   );
   draw();
 }

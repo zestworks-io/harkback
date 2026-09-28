@@ -38,7 +38,10 @@ function meta(doc: Document, selector: string): string | null {
 export function detectSource(url: string, doc: Document): DetectedSource {
   const cleaned = cleanUrl(url);
   const arxiv = arxivIdFromUrl(url) ?? meta(doc, 'meta[name="citation_arxiv_id"]')?.replace(/v\d+$/, "") ?? null;
-  const doi = meta(doc, 'meta[name="citation_doi"]')?.replace(/^(?:doi:|https?:\/\/(?:dx\.)?doi\.org\/)/i, "").toLowerCase() ?? null;
+  const doi =
+    meta(doc, 'meta[name="citation_doi"]')
+      ?.replace(/^(?:doi:|https?:\/\/(?:dx\.)?doi\.org\/)/i, "")
+      .toLowerCase() ?? null;
   let canonical: string | null = null;
   const href = doc.querySelector('link[rel="canonical"]')?.getAttribute("href");
   if (href) {

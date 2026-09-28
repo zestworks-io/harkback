@@ -16,7 +16,6 @@ const doc = load("arxiv-2106.09685.html");
 const page = extractPage(doc, ARXIV);
 
 describe("extractPage: arXiv", () => {
-
   it("reads the LaTeXML content, formulas as alttext, and nothing outside it", () => {
     expect(page.root.classList.contains("ltx_page_content")).toBe(true);
     expect(page.text).toContain("We apply LoRA to the attention weights");
@@ -50,7 +49,10 @@ describe("contextForRange", () => {
   };
 
   it("gives the paragraph, section and a quote selector for a word", () => {
-    const ctx = contextForRange(page, rangeOf((r) => r.selectNodeContents(doc.getElementById("t-lora")!)))!;
+    const ctx = contextForRange(
+      page,
+      rangeOf((r) => r.selectNodeContents(doc.getElementById("t-lora")!)),
+    )!;
     expect(ctx.selection).toBe("LoRA");
     expect(ctx.paragraph).toBe("Fine-tuning large models is expensive. We apply LoRA to the attention weights of the Transformer.");
     expect(ctx.section).toBe("1 Introduction");
@@ -63,31 +65,48 @@ describe("contextForRange", () => {
   it("uses both paragraphs when the selection spans two", () => {
     const intro = doc.getElementById("p-intro")!.firstChild!;
     const math = doc.getElementById("p-math")!.firstChild!;
-    const ctx = contextForRange(page, rangeOf((r) => {
-      r.setStart(intro, 0);
-      r.setEnd(math, 6);
-    }))!;
+    const ctx = contextForRange(
+      page,
+      rangeOf((r) => {
+        r.setStart(intro, 0);
+        r.setEnd(math, 6);
+      }),
+    )!;
     expect(ctx.paragraph).toContain("Fine-tuning large models");
     expect(ctx.paragraph).toContain("The update is W_0+BA");
-    const first = contextForRange(page, rangeOf((r) => r.selectNodeContents(doc.getElementById("t-lora")!)))!;
+    const first = contextForRange(
+      page,
+      rangeOf((r) => r.selectNodeContents(doc.getElementById("t-lora")!)),
+    )!;
     expect(ctx.paragraphId).toBe(first.paragraphId);
   });
 
   it("handles a selection inside a formula", () => {
-    const ctx = contextForRange(page, rangeOf((r) => r.selectNodeContents(doc.getElementById("m-w")!)))!;
+    const ctx = contextForRange(
+      page,
+      rangeOf((r) => r.selectNodeContents(doc.getElementById("m-w")!)),
+    )!;
     expect(ctx.selection).toBe("W");
     expect(ctx.paragraph).toContain("The update is W_0+BA where the rank is small.");
   });
 
   it("falls back to the nearest container for selections outside the content", () => {
     const nav = doc.querySelector("nav")!;
-    const ctx = contextForRange(page, rangeOf((r) => r.selectNodeContents(nav)))!;
+    const ctx = contextForRange(
+      page,
+      rangeOf((r) => r.selectNodeContents(nav)),
+    )!;
     expect(ctx.paragraph).toBe("Introduction navigation link");
     expect(ctx.paragraphId.startsWith("outside:")).toBe(true);
   });
 
   it("returns null for an empty selection", () => {
-    expect(contextForRange(page, rangeOf((r) => r.setStart(doc.body, 0)))).toBeNull();
+    expect(
+      contextForRange(
+        page,
+        rangeOf((r) => r.setStart(doc.body, 0)),
+      ),
+    ).toBeNull();
   });
 });
 
@@ -102,7 +121,17 @@ describe("extractPage: other sites", () => {
     expect(page.text).toContain("Adapters are small modules");
     expect(page.text).toContain("LoRA is a popular adapter");
     expect(page.text).toContain("Prefix tuning is another option");
-    for (const term of ["NavOnlyTerm", "AsideOnlyTerm", "ScriptOnlyTerm", "StyleOnlyTerm", "HiddenOnlyTerm", "InlineHiddenTerm", "ClassHiddenTerm", "FooterOnlyTerm", "OverlayOnlyTerm"]) {
+    for (const term of [
+      "NavOnlyTerm",
+      "AsideOnlyTerm",
+      "ScriptOnlyTerm",
+      "StyleOnlyTerm",
+      "HiddenOnlyTerm",
+      "InlineHiddenTerm",
+      "ClassHiddenTerm",
+      "FooterOnlyTerm",
+      "OverlayOnlyTerm",
+    ]) {
       expect(page.text).not.toContain(term);
     }
     expect(page.abstractFirstSentence).toBe("A gentle introduction to adapters.");

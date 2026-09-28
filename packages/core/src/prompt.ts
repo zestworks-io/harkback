@@ -59,7 +59,7 @@ const UNTRUSTED =
 function clean(s: string, max: number): string {
   let out = s;
   // Repeat until stable so nested fragments cannot reassemble a delimiter.
-  for (let prev = ""; prev !== out; ) {
+  for (let prev = ""; prev !== out;) {
     prev = out;
     out = out.replace(DELIMITER, "");
   }

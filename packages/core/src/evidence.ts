@@ -37,11 +37,7 @@ export function approxSubstringSimilarity(pattern: string, text: string): number
   return 1 - best / m;
 }
 
-export function verifyEvidence(
-  evidence: string | null,
-  pageText: string,
-  threshold: number = THRESHOLDS.evidenceSimilarity,
-): boolean {
+export function verifyEvidence(evidence: string | null, pageText: string, threshold: number = THRESHOLDS.evidenceSimilarity): boolean {
   if (!evidence) return false;
   const ev = normalizeForEvidence(evidence);
   if (ev.length < 8) return false;

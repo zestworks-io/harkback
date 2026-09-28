@@ -2,14 +2,28 @@ import { describe, expect, it } from "vitest";
 import { createEventFactory, replay, type Hit } from "@harkback/core";
 import { parseEvent } from "@harkback/spec";
 import { cooccurrenceEdge } from "../src/lib/cooccurrence";
-import { buildExplainRecord, daysSinceLastEncounter, finishExplain, planExplain, routeFollowUp, type ExplainPlan, type ExplainRequestMsg } from "../src/lib/explain";
+import {
+  buildExplainRecord,
+  daysSinceLastEncounter,
+  finishExplain,
+  planExplain,
+  routeFollowUp,
+  type ExplainPlan,
+  type ExplainRequestMsg,
+} from "../src/lib/explain";
 import { preview, reunionCards } from "../src/lib/reunion-cards";
 import { DEFAULT_SETTINGS, type ModelConfig, type Settings } from "../src/lib/settings";
 import { world } from "./helpers";
 
 const remote: ModelConfig = { id: "r", label: "Remote", baseUrl: "https://api.example.com/v1", apiKey: "k", model: "gpt" };
 const local: ModelConfig = { id: "l", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen" };
-const settings = (o: Partial<Settings> = {}): Settings => ({ ...DEFAULT_SETTINGS, models: [remote, local], defaultModelId: "r", localModelId: "l", ...o });
+const settings = (o: Partial<Settings> = {}): Settings => ({
+  ...DEFAULT_SETTINGS,
+  models: [remote, local],
+  defaultModelId: "r",
+  localModelId: "l",
+  ...o,
+});
 const ctx = { url: "https://arxiv.org/html/2305.14314", incognito: false };
 const req = (o: Partial<ExplainRequestMsg> = {}): ExplainRequestMsg => ({
   mode: "explain",
@@ -54,7 +68,10 @@ describe("planExplain", () => {
 
   it("uses only the local model for sensitive sites and sources marked sensitive", () => {
     const rule = { pattern: "arxiv.org", sensitive: true };
-    expect(planExplain(req(), ctx, settings({ sites: [rule], localModelId: null }), world().state())).toEqual({ kind: "error", code: "needs_local_model" });
+    expect(planExplain(req(), ctx, settings({ sites: [rule], localModelId: null }), world().state())).toEqual({
+      kind: "error",
+      code: "needs_local_model",
+    });
     expect(planOf(planExplain(req(), ctx, settings({ sites: [rule] }), world().state())).remote).toBe(false);
     const w = world();
     w.source("arxiv:2305.14314", "sensitive");
@@ -64,7 +81,10 @@ describe("planExplain", () => {
   });
 
   it("refuses disabled sites and selections without letters", () => {
-    expect(planExplain(req(), ctx, settings({ sites: [{ pattern: "arxiv.org", disabled: true }] }), world().state())).toEqual({ kind: "error", code: "site_disabled" });
+    expect(planExplain(req(), ctx, settings({ sites: [{ pattern: "arxiv.org", disabled: true }] }), world().state())).toEqual({
+      kind: "error",
+      code: "site_disabled",
+    });
     expect(planExplain(req({ selection: "→" }), ctx, settings(), world().state())).toEqual({ kind: "error", code: "empty_selection" });
   });
 
@@ -79,7 +99,10 @@ describe("planExplain", () => {
     const plan = planOf(planExplain(req({ mode: "compare", earlierEncounterId: normal }), ctx, settings(), state));
     expect(plan.prompt.messages[1]!.content).toContain("冻结权重旁加低秩矩阵");
     expect(plan.prompt.messages[1]!.content).toContain("Title: LoRA paper");
-    expect(planExplain(req({ mode: "compare", earlierEncounterId: secret }), ctx, settings(), state)).toEqual({ kind: "error", code: "sensitive_compare" });
+    expect(planExplain(req({ mode: "compare", earlierEncounterId: secret }), ctx, settings(), state)).toEqual({
+      kind: "error",
+      code: "sensitive_compare",
+    });
   });
 });
 
@@ -94,12 +117,15 @@ describe("finishExplain", () => {
     const out = finishExplain(raw, plan, req());
     expect(out.tier).toBe("defined_in_source");
     expect(out.resolution).toEqual({ kind: "existing", conceptId: lora });
-    expect(finishExplain("<explanation>x</explanation><evidence>made up quote here</evidence>", plan, req()).tier).toBe("external_knowledge");
+    expect(finishExplain("<explanation>x</explanation><evidence>made up quote here</evidence>", plan, req()).tier).toBe(
+      "external_knowledge",
+    );
   });
 });
 
 describe("buildExplainRecord", () => {
-  const plainCard = '<card>{"match":null,"canonical":"QLoRA","aliases":[],"domain":"ml","broader":[],"variants":[],"prerequisites":[],"confidence":{}}</card>';
+  const plainCard =
+    '<card>{"match":null,"canonical":"QLoRA","aliases":[],"domain":"ml","broader":[],"variants":[],"prerequisites":[],"confidence":{}}</card>';
 
   it("records the encounter and a co-occurrence edge with the previous lookup in the same paragraph", () => {
     const w = world();
@@ -107,15 +133,34 @@ describe("buildExplainRecord", () => {
     w.encounter(lora, "arxiv:2106.09685");
     const state = w.state();
     const plan = planOf(planExplain(req({ selection: "QLoRA" }), ctx, settings(), state));
-    const outcome = finishExplain(`<explanation>量化。</explanation><evidence>NONE</evidence>${plainCard}`, plan, req({ selection: "QLoRA" }));
+    const outcome = finishExplain(
+      `<explanation>量化。</explanation><evidence>NONE</evidence>${plainCard}`,
+      plan,
+      req({ selection: "QLoRA" }),
+    );
     let seq = 0;
     const f = createEventFactory({ device: "dev_bbbb", nextSeq: () => ++seq, now: () => Date.UTC(2026, 8, 25) });
     const previous = { sourceId: "arxiv:2305.14314", paragraphId: "b3", conceptId: lora, at: Date.UTC(2026, 8, 25) - 60_000 };
-    const record = buildExplainRecord(f, outcome, req({ selection: "QLoRA" }), null, { state, model: remote, sensitive: false, now: Date.UTC(2026, 8, 25), previous });
+    const record = buildExplainRecord(f, outcome, req({ selection: "QLoRA" }), null, {
+      state,
+      model: remote,
+      sensitive: false,
+      now: Date.UTC(2026, 8, 25),
+      previous,
+    });
     for (const e of record.events) expect(parseEvent(e).kind).toBe("event");
     const edge = record.events.find((e) => e.type === "edge.proposed" && e.payload.source === "cooccurrence");
-    expect(edge?.type === "edge.proposed" && edge.payload).toMatchObject({ rel: "related", confidence: 0.3, evidence: { encounter_id: record.encounterId } });
-    expect(record.lookup).toEqual({ sourceId: "arxiv:2305.14314", paragraphId: "b3", conceptId: record.conceptId, at: Date.UTC(2026, 8, 25) });
+    expect(edge?.type === "edge.proposed" && edge.payload).toMatchObject({
+      rel: "related",
+      confidence: 0.3,
+      evidence: { encounter_id: record.encounterId },
+    });
+    expect(record.lookup).toEqual({
+      sourceId: "arxiv:2305.14314",
+      paragraphId: "b3",
+      conceptId: record.conceptId,
+      at: Date.UTC(2026, 8, 25),
+    });
     const after = replay([...w.events, ...record.events]);
     expect(after.encounters.get(record.encounterId)?.explanation.model).toBe("gpt");
   });
@@ -130,7 +175,13 @@ describe("buildExplainRecord", () => {
     const outcome = finishExplain("<explanation>对比。</explanation><evidence>NONE</evidence>", plan, r);
     let seq = 0;
     const f = createEventFactory({ device: "dev_bbbb", nextSeq: () => ++seq });
-    const record = buildExplainRecord(f, outcome, r, lora, { state, model: remote, sensitive: false, now: Date.now(), previous: undefined });
+    const record = buildExplainRecord(f, outcome, r, lora, {
+      state,
+      model: remote,
+      sensitive: false,
+      now: Date.now(),
+      previous: undefined,
+    });
     const action = record.events.find((e) => e.type === "encounter.action");
     expect(action?.type === "encounter.action" && action.payload).toEqual({ encounter_id: earlier, action: "reunion_compare" });
   });
@@ -199,7 +250,10 @@ describe("sensitivity decided after the fact", () => {
     const earlier = w.encounter(lora, "url:https://wiki.corp.com/lora", "internal note");
     const state = w.state();
     const s = settings({ sites: [wikiRule] });
-    expect(planExplain(req({ mode: "compare", earlierEncounterId: earlier }), ctx, s, state)).toEqual({ kind: "error", code: "sensitive_compare" });
+    expect(planExplain(req({ mode: "compare", earlierEncounterId: earlier }), ctx, s, state)).toEqual({
+      kind: "error",
+      code: "sensitive_compare",
+    });
     const plan = planOf(planExplain(req(), ctx, s, state));
     expect(plan.prompt.labels.size).toBe(0);
     expect(plan.candidates.map((c) => c.conceptId)).toEqual([lora]);

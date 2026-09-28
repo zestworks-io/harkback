@@ -119,14 +119,11 @@ export async function selectAndExplain(page: Page, selector: string): Promise<vo
 
 /** Delivers a message from the service worker to the content script of the active tab, like the toolbar button and the shortcut do. */
 export async function sendToActiveTab(sw: Worker, message: { type: string }): Promise<void> {
-  await sw.evaluate(
-    async (message) => {
-      const chrome = (globalThis as unknown as { chrome: ChromeApi }).chrome;
-      const [tab] = await chrome.tabs.query({ active: true });
-      await chrome.tabs.sendMessage(tab!.id!, message);
-    },
-    message,
-  );
+  await sw.evaluate(async (message) => {
+    const chrome = (globalThis as unknown as { chrome: ChromeApi }).chrome;
+    const [tab] = await chrome.tabs.query({ active: true });
+    await chrome.tabs.sendMessage(tab!.id!, message);
+  }, message);
 }
 
 export async function eventsOf(sw: Worker, type: string): Promise<{ type: string; payload: Record<string, unknown> | null }[]> {

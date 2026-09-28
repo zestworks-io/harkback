@@ -37,6 +37,6 @@ describe("normalizeName", () => {
   });
 
   it("returns an empty key for punctuation-only input", () => {
-    expect(identityKey(" ,.;") ).toBe("");
+    expect(identityKey(" ,.;")).toBe("");
   });
 });

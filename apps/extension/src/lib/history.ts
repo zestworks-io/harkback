@@ -34,9 +34,7 @@ export function historyModel(state: State, query = ""): HistoryConcept[] {
       explanation: e.explanation.text,
     }));
     const nameHit = !q || c.names.some((n) => n.toLowerCase().includes(q));
-    const entries = nameHit
-      ? all
-      : all.filter((e) => [e.selection, e.explanation, e.sourceTitle].some((s) => s.toLowerCase().includes(q)));
+    const entries = nameHit ? all : all.filter((e) => [e.selection, e.explanation, e.sourceTitle].some((s) => s.toLowerCase().includes(q)));
     if (entries.length === 0) continue;
     out.push({
       conceptId: c.id,

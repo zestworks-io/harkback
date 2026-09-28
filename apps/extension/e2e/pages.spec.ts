@@ -10,7 +10,9 @@ interface StoredSettings {
 }
 
 async function storedSettings(sw: Worker): Promise<StoredSettings> {
-  return sw.evaluate(async () => (await (globalThis as unknown as { chrome: ChromeApi }).chrome.storage.local.get("settings")).settings) as Promise<StoredSettings>;
+  return sw.evaluate(
+    async () => (await (globalThis as unknown as { chrome: ChromeApi }).chrome.storage.local.get("settings")).settings,
+  ) as Promise<StoredSettings>;
 }
 
 test("onboarding connects to a local model and saves settings", async ({ context, sw, stub }) => {

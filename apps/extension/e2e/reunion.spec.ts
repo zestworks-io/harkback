@@ -21,7 +21,9 @@ test("shows a reunion on another paper and records that the reader remembers", a
   await expect(marks).toHaveCount(1);
   await hover(second, "#t-lora");
   const card = second.locator("[data-hb=reunion-card]");
-  await expect(card.locator("[data-hb=reunion-title]")).toHaveText("LoRA · 0 天前 · 《LoRA: Low-Rank Adaptation of Large Language Models》 §1 Introduction");
+  await expect(card.locator("[data-hb=reunion-title]")).toHaveText(
+    "LoRA · 0 天前 · 《LoRA: Low-Rank Adaptation of Large Language Models》 §1 Introduction",
+  );
   await expect(card).toContainText("当时的解释：LoRA 是一个测试解释。");
 
   await card.locator("[data-hb=recalled]").click();
@@ -60,6 +62,8 @@ test("compare from a reunion records a new explanation and marks the earlier one
   await hover(second, "#t-lora");
   await second.locator("[data-hb=reunion-card] [data-hb=compare]").click();
   await expect(second.locator("[data-hb=card]:not([data-hb=reunion-card]) [data-hb=explanation]")).toHaveText("LoRA 是一个测试解释。");
-  await expect.poll(async () => (await readEvents(sw)).some((e) => e.type === "encounter.action" && e.payload?.action === "reunion_compare")).toBe(true);
+  await expect
+    .poll(async () => (await readEvents(sw)).some((e) => e.type === "encounter.action" && e.payload?.action === "reunion_compare"))
+    .toBe(true);
   expect(stub.requests.at(-1)!.body.messages[1]!.content).toContain("<earlier_content>");
 });

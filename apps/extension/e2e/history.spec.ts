@@ -8,9 +8,9 @@ async function lookUpLora(context: BrowserContext): Promise<void> {
 }
 
 async function backupState(sw: Worker): Promise<{ lastAt: number | null; downloadIds: number[] } | undefined> {
-  return sw.evaluate(async () => (await (globalThis as unknown as { chrome: ChromeApi }).chrome.storage.local.get("backupState")).backupState) as Promise<
-    { lastAt: number | null; downloadIds: number[] } | undefined
-  >;
+  return sw.evaluate(
+    async () => (await (globalThis as unknown as { chrome: ChromeApi }).chrome.storage.local.get("backupState")).backupState,
+  ) as Promise<{ lastAt: number | null; downloadIds: number[] } | undefined>;
 }
 
 test("lists, searches and deletes recorded explanations", async ({ context, sw, stub, extensionId }) => {

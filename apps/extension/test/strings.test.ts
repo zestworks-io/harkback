@@ -3,8 +3,22 @@ import type { ErrorCode } from "../src/lib/messages";
 import { errorText, t } from "../src/lib/ui/strings";
 
 const codes: ErrorCode[] = [
-  "site_disabled", "no_model", "needs_local_model", "insecure_model", "sensitive_compare", "empty_selection",
-  "auth", "rate_limited", "timeout", "network", "http", "insecure", "aborted", "local_rate", "expired", "internal",
+  "site_disabled",
+  "no_model",
+  "needs_local_model",
+  "insecure_model",
+  "sensitive_compare",
+  "empty_selection",
+  "auth",
+  "rate_limited",
+  "timeout",
+  "network",
+  "http",
+  "insecure",
+  "aborted",
+  "local_rate",
+  "expired",
+  "internal",
 ];
 
 describe("strings", () => {

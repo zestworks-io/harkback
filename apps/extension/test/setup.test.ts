@@ -9,7 +9,13 @@ describe("onboardingSettings", () => {
 
   it("adds the model, makes it the default and, when local, the model for sensitive sources", () => {
     const s = onboardingSettings(DEFAULT_SETTINGS, input, new Date("2026-09-25T00:00:00Z"), () => "m1");
-    expect(s).toMatchObject({ onboarded: true, consentAt: "2026-09-25T00:00:00.000Z", language: "en", defaultModelId: "m1", localModelId: "m1" });
+    expect(s).toMatchObject({
+      onboarded: true,
+      consentAt: "2026-09-25T00:00:00.000Z",
+      language: "en",
+      defaultModelId: "m1",
+      localModelId: "m1",
+    });
     expect(s.models).toEqual([{ id: "m1", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen3" }]);
   });
 

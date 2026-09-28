@@ -61,8 +61,17 @@ describe("streamChat", () => {
       };
       return sse([`${delta("x")}\n\ndata: [DONE]\n\n`]);
     };
-    await streamChat({ ...cfg, baseUrl: " https://api.example.com/v1/chat/completions/ ", apiKey: " sk-1\n", model: " gpt " }, messages, () => {}, { fetchImpl });
-    expect(seen).toEqual({ url: "https://api.example.com/v1/chat/completions", auth: "Bearer sk-1", body: expect.objectContaining({ model: "gpt", stream: true }) });
+    await streamChat(
+      { ...cfg, baseUrl: " https://api.example.com/v1/chat/completions/ ", apiKey: " sk-1\n", model: " gpt " },
+      messages,
+      () => {},
+      { fetchImpl },
+    );
+    expect(seen).toEqual({
+      url: "https://api.example.com/v1/chat/completions",
+      auth: "Bearer sk-1",
+      body: expect.objectContaining({ model: "gpt", stream: true }),
+    });
     expect(normalizeBaseUrl("http://127.0.0.1:11434/v1/")).toBe("http://127.0.0.1:11434/v1");
   });
 
@@ -123,7 +132,9 @@ describe("streamChat", () => {
       if (init?.signal?.aborted) throw new DOMException("aborted", "AbortError");
       return sse([]);
     };
-    await expect(streamChat(cfg, messages, () => {}, { fetchImpl: aborting, signal: controller.signal })).rejects.toMatchObject({ code: "aborted" });
+    await expect(streamChat(cfg, messages, () => {}, { fetchImpl: aborting, signal: controller.signal })).rejects.toMatchObject({
+      code: "aborted",
+    });
   });
 
   it("refuses a remote http address without calling fetch", async () => {

@@ -52,9 +52,7 @@ test("marking a source sensitive keeps later follow-ups off non-local models", a
   const card = page.locator("[data-hb=card]");
   await expect(card.locator("[data-hb=understood]")).toBeEnabled();
   await card.locator("[data-hb=mark-sensitive]").click();
-  await expect
-    .poll(async () => (await eventsOf(sw, "source.seen")).some((e) => e.payload?.sensitivity === "sensitive"))
-    .toBe(true);
+  await expect.poll(async () => (await eventsOf(sw, "source.seen")).some((e) => e.payload?.sensitivity === "sensitive")).toBe(true);
 
   // No local model any more: the follow-up must not reach the stub.
   await seedSettings(sw, stubSettings(stub.url, { localModelId: null }));

@@ -1,9 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { parseModelOutput, streamingExplanation } from "../src";
 
-const labels = new Map([["c1", "CONCEPT_1"], ["c2", "CONCEPT_2"]]);
+const labels = new Map([
+  ["c1", "CONCEPT_1"],
+  ["c2", "CONCEPT_2"],
+]);
 const card = (o: Record<string, unknown>) =>
-  JSON.stringify({ match: null, canonical: "LoRA", aliases: [], domain: "ml", broader: [], variants: [], prerequisites: [], confidence: {}, ...o });
+  JSON.stringify({
+    match: null,
+    canonical: "LoRA",
+    aliases: [],
+    domain: "ml",
+    broader: [],
+    variants: [],
+    prerequisites: [],
+    confidence: {},
+    ...o,
+  });
 const out = (c: string, evidence = "NONE") => `<explanation>低秩适配。</explanation>\n<evidence>${evidence}</evidence>\n<card>${c}</card>`;
 
 describe("parseModelOutput", () => {

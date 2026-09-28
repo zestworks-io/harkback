@@ -63,7 +63,14 @@ export interface ResponseMap {
 export type TabMessage = { type: "hello" } | { type: "activate" } | { type: "explain-selection" };
 
 const REQUEST_TYPES = new Set<string>([
-  "page-info", "reunions", "action", "mute", "mark-sensitive", "delete-encounter", "backup-now", "settings-changed",
+  "page-info",
+  "reunions",
+  "action",
+  "mute",
+  "mark-sensitive",
+  "delete-encounter",
+  "backup-now",
+  "settings-changed",
 ]);
 
 export function isRequest(m: unknown): m is Request {

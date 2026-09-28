@@ -6,7 +6,13 @@ import { effectiveRule, hostPermissionPatterns, normalizePattern, originPattern 
 
 const remote: ModelConfig = { id: "r", label: "Remote", baseUrl: "https://api.example.com/v1", apiKey: "k", model: "m" };
 const local: ModelConfig = { id: "l", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen" };
-const settings = (o: Partial<Settings> = {}): Settings => ({ ...DEFAULT_SETTINGS, models: [remote, local], defaultModelId: "r", localModelId: "l", ...o });
+const settings = (o: Partial<Settings> = {}): Settings => ({
+  ...DEFAULT_SETTINGS,
+  models: [remote, local],
+  defaultModelId: "r",
+  localModelId: "l",
+  ...o,
+});
 const noRule = { autoScan: false, sensitive: false, disabled: false, modelId: null };
 
 describe("settings", () => {
@@ -65,7 +71,12 @@ describe("site rules", () => {
       { pattern: "https://intra.example.com/secret", sensitive: true, modelId: "l" },
       { pattern: "intra.example.com", modelId: "r" },
     ];
-    expect(effectiveRule(rules, "https://intra.example.com/secret/page")).toEqual({ autoScan: true, sensitive: true, disabled: false, modelId: "l" });
+    expect(effectiveRule(rules, "https://intra.example.com/secret/page")).toEqual({
+      autoScan: true,
+      sensitive: true,
+      disabled: false,
+      modelId: "l",
+    });
     expect(effectiveRule(rules, "https://other.org/")).toEqual(noRule);
     expect(effectiveRule(rules, "not a url")).toEqual(noRule);
   });
@@ -91,9 +102,15 @@ describe("routing", () => {
     expect(chooseModel(settings(), noRule, false)).toEqual({ kind: "ok", model: remote, remote: true });
     expect(chooseModel(settings(), noRule, true)).toEqual({ kind: "ok", model: local, remote: false });
     expect(chooseModel(settings({ localModelId: null }), noRule, true)).toEqual({ kind: "error", code: "needs_local_model" });
-    expect(chooseModel(settings(), { ...noRule, sensitive: true, modelId: "r" }, true)).toEqual({ kind: "error", code: "needs_local_model" });
+    expect(chooseModel(settings(), { ...noRule, sensitive: true, modelId: "r" }, true)).toEqual({
+      kind: "error",
+      code: "needs_local_model",
+    });
     expect(chooseModel(settings({ defaultModelId: null }), noRule, false)).toEqual({ kind: "error", code: "no_model" });
-    expect(chooseModel(settings({ models: [{ ...remote, baseUrl: "http://api.example.com" }] }), noRule, false)).toEqual({ kind: "error", code: "insecure_model" });
+    expect(chooseModel(settings({ models: [{ ...remote, baseUrl: "http://api.example.com" }] }), noRule, false)).toEqual({
+      kind: "error",
+      code: "insecure_model",
+    });
   });
 });
 

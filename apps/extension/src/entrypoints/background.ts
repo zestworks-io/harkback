@@ -1,10 +1,4 @@
-import {
-  buildFollowUpPrompt,
-  canonicalOrder,
-  serializeJsonl,
-  streamingExplanation,
-  type EventFactory,
-} from "@harkback/core";
+import { buildFollowUpPrompt, canonicalOrder, serializeJsonl, streamingExplanation, type EventFactory } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { browser, type Browser } from "wxt/browser";
 import { defineBackground } from "wxt/utils/define-background";
@@ -115,9 +109,14 @@ export default defineBackground(() => {
         const planned = planExplain(req, { url, incognito }, settings, state);
         if (planned.kind === "error") return post({ type: "error", code: planned.code });
         const { plan } = planned;
-        const raw = await streamChat(plan.model, plan.prompt.messages, (full) => post({ type: "delta", text: streamingExplanation(full) }), {
-          signal: abort.signal,
-        });
+        const raw = await streamChat(
+          plan.model,
+          plan.prompt.messages,
+          (full) => post({ type: "delta", text: streamingExplanation(full) }),
+          {
+            signal: abort.signal,
+          },
+        );
         const outcome = finishExplain(raw, plan, req);
         last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null };
         post({ type: "explained", explanation: outcome.parsed.explanation, tier: outcome.tier });
@@ -160,12 +159,24 @@ export default defineBackground(() => {
         // The source may have been marked sensitive since the explanation: route again.
         const routed = routeFollowUp(l.req, { url, incognito }, settings, await getState());
         if (routed.kind === "error") return post({ type: "followup_error", code: routed.code });
-        const messages = buildFollowUpPrompt({ term: l.req.selection, paragraph: l.req.paragraph, explanation: l.explanation, question: q, language: settings.language });
-        const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), { signal: abort.signal });
+        const messages = buildFollowUpPrompt({
+          term: l.req.selection,
+          paragraph: l.req.paragraph,
+          explanation: l.explanation,
+          question: q,
+          language: settings.language,
+        });
+        const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), {
+          signal: abort.signal,
+        });
         const encounterId = l.encounterId;
         if (encounterId && !incognito) {
           await append((f) => [
-            f.make("encounter.action", { encounter_id: encounterId, action: "followed_up", detail: { question: q, answer: reply.slice(0, 20000) } }),
+            f.make("encounter.action", {
+              encounter_id: encounterId,
+              action: "followed_up",
+              detail: { question: q, answer: reply.slice(0, 20000) },
+            }),
           ]);
         }
         post({ type: "followup_done", answer: reply });
@@ -185,7 +196,8 @@ export default defineBackground(() => {
 
     port.onMessage.addListener((msg: PortIn) => {
       if (msg.type === "start" && !busy && !last) void start(msg.request);
-      else if (msg.type === "ping") return; // Keepalive: receiving it resets the service worker's idle timer.
+      else if (msg.type === "ping")
+        return; // Keepalive: receiving it resets the service worker's idle timer.
       else if (msg.type === "answer") void answer(msg.sameConcept === true);
       else if (msg.type === "followup" && !busy && last) void followUp(String(msg.question));
     });
@@ -257,7 +269,9 @@ export default defineBackground(() => {
 
   async function syncContentScripts(): Promise<void> {
     const settings = await loadSettings();
-    const patterns = [...new Set(settings.sites.filter((r) => r.autoScan && !r.disabled).flatMap((r) => hostPermissionPatterns(r.pattern)))];
+    const patterns = [
+      ...new Set(settings.sites.filter((r) => r.autoScan && !r.disabled).flatMap((r) => hostPermissionPatterns(r.pattern))),
+    ];
     const granted: string[] = [];
     for (const p of patterns) if (await browser.permissions.contains({ origins: [p] })) granted.push(p);
     const existing = await browser.scripting.getRegisteredContentScripts({ ids: [ALLOWLIST_SCRIPT_ID] });
@@ -321,7 +335,8 @@ export default defineBackground(() => {
   }
 
   async function ensureAlarm(): Promise<void> {
-    if (!(await browser.alarms.get(BACKUP_ALARM))) await browser.alarms.create(BACKUP_ALARM, { delayInMinutes: 1, periodInMinutes: 24 * 60 });
+    if (!(await browser.alarms.get(BACKUP_ALARM)))
+      await browser.alarms.create(BACKUP_ALARM, { delayInMinutes: 1, periodInMinutes: 24 * 60 });
   }
 
   browser.alarms.onAlarm.addListener((alarm) => {

@@ -32,7 +32,10 @@ function cleanName(v: unknown): string | null {
 
 function names(v: unknown, max: number): string[] {
   if (!Array.isArray(v)) return [];
-  return v.map(cleanName).filter((x): x is string => x !== null).slice(0, max);
+  return v
+    .map(cleanName)
+    .filter((x): x is string => x !== null)
+    .slice(0, max);
 }
 
 function confidence(v: unknown): number {
@@ -56,7 +59,7 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>): Pa
   const domain = typeof o.domain === "string" && (DOMAINS as readonly string[]).includes(o.domain) ? (o.domain as Domain) : "other";
   const conf = typeof o.confidence === "object" && o.confidence !== null ? (o.confidence as Record<string, unknown>) : {};
   return {
-    matchConceptId: typeof o.match === "string" ? labels.get(o.match) ?? null : null,
+    matchConceptId: typeof o.match === "string" ? (labels.get(o.match) ?? null) : null,
     canonical,
     aliases: names(o.aliases, CARD_LIMITS.maxAliases),
     domain,
@@ -70,7 +73,10 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>): Pa
 export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string>): ParsedOutput {
   const explanation = block(raw, "explanation");
   if (explanation === null) {
-    const text = raw.replace(/<(evidence|card)>[\s\S]*?<\/\1>/gi, "").trim().slice(0, CARD_LIMITS.maxExplanationLength);
+    const text = raw
+      .replace(/<(evidence|card)>[\s\S]*?<\/\1>/gi, "")
+      .trim()
+      .slice(0, CARD_LIMITS.maxExplanationLength);
     return { explanation: text, evidence: null, card: null, flags: ["card_missing"] };
   }
   const ev = block(raw, "evidence");

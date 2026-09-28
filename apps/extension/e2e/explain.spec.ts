@@ -13,7 +13,11 @@ test("explains a selection, shows the tier and records it", async ({ context, sw
   await expect(card.locator("[data-hb=understood]")).toBeEnabled();
 
   const encounter = (await readEvents(sw)).find((e) => e.type === "encounter.created");
-  expect(encounter?.payload).toMatchObject({ selection: "LoRA", source_id: "arxiv:2106.09685", locator: { exact: "LoRA", section: "1 Introduction" } });
+  expect(encounter?.payload).toMatchObject({
+    selection: "LoRA",
+    source_id: "arxiv:2106.09685",
+    locator: { exact: "LoRA", section: "1 Introduction" },
+  });
   expect(stub.requests).toHaveLength(1);
   expect(stub.requests[0]!.body.messages[1]!.content).toContain("We apply LoRA to the attention weights of the Transformer.");
 

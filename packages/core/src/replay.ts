@@ -15,10 +15,7 @@ function definedOnly<T extends object>(o: T): Partial<T> {
 
 export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}): State {
   const sorted = canonicalOrder(events);
-  const { concepts, representative, aliases, warnings } = resolveConcepts(
-    sorted,
-    options.ambiguousAcronyms ?? DEFAULT_AMBIGUOUS_ACRONYMS,
-  );
+  const { concepts, representative, aliases, warnings } = resolveConcepts(sorted, options.ambiguousAcronyms ?? DEFAULT_AMBIGUOUS_ACRONYMS);
 
   const sources = new Map<string, SourceState>();
   const created = new Map<string, EventOf<"encounter.created">>();

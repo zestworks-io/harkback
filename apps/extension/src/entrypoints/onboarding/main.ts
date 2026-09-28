@@ -23,7 +23,14 @@ async function main(): Promise<void> {
   const root = document.getElementById("app")!;
   const L = (zh: string, en: string) => pick(lang, zh, en);
   // Kept outside render() so switching language does not clear what was typed.
-  const form = { templateId: TEMPLATES[0].id as string, baseUrl: TEMPLATES[0].baseUrl as string, apiKey: "", model: "", consent: false, models: [] as string[] };
+  const form = {
+    templateId: TEMPLATES[0].id as string,
+    baseUrl: TEMPLATES[0].baseUrl as string,
+    apiKey: "",
+    model: "",
+    consent: false,
+    models: [] as string[],
+  };
 
   const render = (): void => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
@@ -37,7 +44,12 @@ async function main(): Promise<void> {
       });
       return b;
     };
-    const language = h("div", { className: "seg", role: "group", "aria-label": L("解释语言", "Explanation language"), "data-hb": "language" }, langButton("zh", "中文"), langButton("en", "English"));
+    const language = h(
+      "div",
+      { className: "seg", role: "group", "aria-label": L("解释语言", "Explanation language"), "data-hb": "language" },
+      langButton("zh", "中文"),
+      langButton("en", "English"),
+    );
 
     const result = h("div", { className: "result", role: "status", "aria-live": "polite", "data-hb": "test-result" });
     const show = (text: string, state: ResultState): void => {
@@ -59,14 +71,27 @@ async function main(): Promise<void> {
           form.templateId = tp.id;
           form.baseUrl = baseUrl.value = tp.baseUrl;
         });
-        return h("label", {}, radio, h("span", {}, tp.label), h("small", {}, tp.id === "ollama" ? L("本机运行", "Runs locally") : L("云端服务", "Cloud service")));
+        return h(
+          "label",
+          {},
+          radio,
+          h("span", {}, tp.label),
+          h("small", {}, tp.id === "ollama" ? L("本机运行", "Runs locally") : L("云端服务", "Cloud service")),
+        );
       }),
     );
 
     const apiKey = h("input", { type: "password", "data-hb": "api-key", autocomplete: "off", value: form.apiKey });
     apiKey.addEventListener("input", () => (form.apiKey = apiKey.value));
     const modelList = h("datalist", { id: "models" }, ...form.models.map((m) => h("option", { value: m })));
-    const model = h("input", { type: "text", "data-hb": "model", list: "models", value: form.model, spellcheck: "false", placeholder: L("先测试连接，再从列表中选择", "Test the connection, then pick from the list") });
+    const model = h("input", {
+      type: "text",
+      "data-hb": "model",
+      list: "models",
+      value: form.model,
+      spellcheck: "false",
+      placeholder: L("先测试连接，再从列表中选择", "Test the connection, then pick from the list"),
+    });
     model.addEventListener("input", () => (form.model = model.value));
 
     const test = h("button", { type: "button", className: "btn", "data-hb": "test" }, L("测试连接", "Test connection"));
@@ -105,7 +130,12 @@ async function main(): Promise<void> {
         return;
       }
       const label = TEMPLATES.find((x) => x.id === form.templateId)?.label ?? "Model";
-      settings = onboardingSettings(settings, { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value }, new Date(), () => ulid());
+      settings = onboardingSettings(
+        settings,
+        { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value },
+        new Date(),
+        () => ulid(),
+      );
       await browser.storage.local.set({ settings });
       await request({ type: "settings-changed" });
       renderDone();
@@ -115,7 +145,14 @@ async function main(): Promise<void> {
       h("header", { className: "top" }, h("span", { className: "brand" }, "Harkback"), language),
       specimen(),
       h("h1", {}, L("开始使用 Harkback", "Set up Harkback")),
-      h("p", { className: "lede" }, L("两步：了解你的文字如何被处理，然后连接一个模型。解释会用上面选择的语言。", "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.")),
+      h(
+        "p",
+        { className: "lede" },
+        L(
+          "两步：了解你的文字如何被处理，然后连接一个模型。解释会用上面选择的语言。",
+          "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.",
+        ),
+      ),
       h(
         "section",
         { className: "step" },
@@ -137,11 +174,37 @@ async function main(): Promise<void> {
           "div",
           {},
           h("h2", {}, L("连接模型", "Connect a model")),
-          h("p", { className: "hint" }, L("本机的 Ollama 不会把文字发出这台电脑；云端服务需要 API key。", "Ollama keeps text on this computer; cloud services need an API key.")),
+          h(
+            "p",
+            { className: "hint" },
+            L(
+              "本机的 Ollama 不会把文字发出这台电脑；云端服务需要 API key。",
+              "Ollama keeps text on this computer; cloud services need an API key.",
+            ),
+          ),
           providers,
           h("label", { className: "field" }, h("span", {}, L("地址", "Address")), baseUrl),
-          h("label", { className: "field" }, h("span", {}, "API key"), apiKey, h("small", {}, L("保存在浏览器扩展存储中，未加密；本机模型可留空。", "Stored unencrypted in the extension's storage; leave empty for local models."))),
-          h("div", { className: "row" }, h("label", { className: "field" }, h("span", {}, L("模型名称", "Model name")), model), modelList, test),
+          h(
+            "label",
+            { className: "field" },
+            h("span", {}, "API key"),
+            apiKey,
+            h(
+              "small",
+              {},
+              L(
+                "保存在浏览器扩展存储中，未加密；本机模型可留空。",
+                "Stored unencrypted in the extension's storage; leave empty for local models.",
+              ),
+            ),
+          ),
+          h(
+            "div",
+            { className: "row" },
+            h("label", { className: "field" }, h("span", {}, L("模型名称", "Model name")), model),
+            modelList,
+            test,
+          ),
         ),
       ),
       h("div", { className: "finish" }, finish, result),
@@ -164,7 +227,10 @@ async function main(): Promise<void> {
         "figcaption",
         { className: "margin-note" },
         h("strong", {}, L("你见过这个词", "You've met this term")),
-        L("三周前在 2106.09685 中读到过。Harkback 会在新论文里把它标出来，并带回你当时的理解。", "You read about it in 2106.09685 three weeks ago. Harkback marks it in new papers and brings back what you understood then."),
+        L(
+          "三周前在 2106.09685 中读到过。Harkback 会在新论文里把它标出来，并带回你当时的理解。",
+          "You read about it in 2106.09685 three weeks ago. Harkback marks it in new papers and brings back what you understood then.",
+        ),
       ),
     );
 

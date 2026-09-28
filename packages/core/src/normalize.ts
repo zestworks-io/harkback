@@ -15,9 +15,27 @@ const LATIN_SEP = /[\s\-‐‑‒–—_\/·.]+/u;
 const CJK_SEP = /[\s·・‧•\-_]+/gu;
 
 const GREEK: Record<string, string> = {
-  α: "alpha", β: "beta", γ: "gamma", δ: "delta", ε: "epsilon", ζ: "zeta", η: "eta", θ: "theta",
-  κ: "kappa", λ: "lambda", μ: "mu", ν: "nu", ξ: "xi", π: "pi", ρ: "rho", σ: "sigma", τ: "tau",
-  φ: "phi", χ: "chi", ψ: "psi", ω: "omega",
+  α: "alpha",
+  β: "beta",
+  γ: "gamma",
+  δ: "delta",
+  ε: "epsilon",
+  ζ: "zeta",
+  η: "eta",
+  θ: "theta",
+  κ: "kappa",
+  λ: "lambda",
+  μ: "mu",
+  ν: "nu",
+  ξ: "xi",
+  π: "pi",
+  ρ: "rho",
+  σ: "sigma",
+  τ: "tau",
+  φ: "phi",
+  χ: "chi",
+  ψ: "psi",
+  ω: "omega",
 };
 
 export function detectScript(s: string): Script {

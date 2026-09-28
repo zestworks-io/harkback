@@ -66,7 +66,9 @@ function applySiteRules(state: State, rules: readonly SiteRule[]): State {
   return { ...state, sources };
 }
 
-type Routed = { kind: "ok"; rule: ReturnType<typeof effectiveRule>; sensitive: boolean; model: ModelConfig; remote: boolean } | { kind: "error"; code: PlanError };
+type Routed =
+  | { kind: "ok"; rule: ReturnType<typeof effectiveRule>; sensitive: boolean; model: ModelConfig; remote: boolean }
+  | { kind: "error"; code: PlanError };
 
 function route(req: ExplainRequestMsg, ctx: PageContext, settings: Settings, state: State): Routed {
   const rule = effectiveRule(settings.sites, ctx.url);
@@ -181,7 +183,13 @@ export function buildExplainRecord(
   const edge = cooccurrenceEdge(rc.previous, lookup);
   if (edge) {
     events.push(
-      f.make("edge.proposed", { ...edge, rel: "related", source: "cooccurrence", confidence: 0.3, evidence: { encounter_id: encounterId } }),
+      f.make("edge.proposed", {
+        ...edge,
+        rel: "related",
+        source: "cooccurrence",
+        confidence: 0.3,
+        evidence: { encounter_id: encounterId },
+      }),
     );
   }
   if (req.earlierEncounterId && req.mode !== "explain" && rc.state.encounters.has(req.earlierEncounterId)) {

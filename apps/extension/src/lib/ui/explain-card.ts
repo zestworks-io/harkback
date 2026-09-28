@@ -37,8 +37,21 @@ export class ExplainCard {
     private readonly handlers: ExplainCardHandlers,
   ) {
     this.body.textContent = t(lang, "loading");
-    const close = h("button", { className: "hb-close", type: "button", "data-hb": "close", "aria-label": t(lang, "close"), onclick: () => this.close() }, "×");
-    this.el = h("div", { className: "hb-card", "data-hb": "card", role: "dialog" }, close, this.meta, this.body, this.note, this.footer, this.followUp);
+    const close = h(
+      "button",
+      { className: "hb-close", type: "button", "data-hb": "close", "aria-label": t(lang, "close"), onclick: () => this.close() },
+      "×",
+    );
+    this.el = h(
+      "div",
+      { className: "hb-card", "data-hb": "card", role: "dialog" },
+      close,
+      this.meta,
+      this.body,
+      this.note,
+      this.footer,
+      this.followUp,
+    );
   }
 
   setStreaming(text: string): void {
@@ -104,7 +117,9 @@ export class ExplainCard {
     if (this.hasText) this.note.replaceChildren(box);
     else this.body.replaceChildren(box);
     if (RETRYABLE.has(code)) {
-      this.footer.replaceChildren(h("button", { type: "button", "data-hb": "retry", onclick: () => this.handlers.onRetry() }, t(this.lang, "retry")));
+      this.footer.replaceChildren(
+        h("button", { type: "button", "data-hb": "retry", onclick: () => this.handlers.onRetry() }, t(this.lang, "retry")),
+      );
     }
   }
 
@@ -134,7 +149,12 @@ export class ExplainCard {
 
   private openFollowUp(): void {
     if (this.followUp.childElementCount > 0) return;
-    const input = h("input", { type: "text", "data-hb": "followup-input", maxlength: "2000", placeholder: t(this.lang, "followUpPlaceholder") });
+    const input = h("input", {
+      type: "text",
+      "data-hb": "followup-input",
+      maxlength: "2000",
+      placeholder: t(this.lang, "followUpPlaceholder"),
+    });
     const send = () => {
       const question = input.value.trim();
       if (!question) return;
@@ -169,7 +189,11 @@ export class ExplainCard {
     this.note.replaceChildren(
       h("span", { "data-hb": "link-confirm" }, t(this.lang, "openLink", { url })),
       " ",
-      h("button", { type: "button", "data-hb": "link-open", onclick: () => window.open(url, "_blank", "noopener,noreferrer") }, t(this.lang, "openConfirm")),
+      h(
+        "button",
+        { type: "button", "data-hb": "link-open", onclick: () => window.open(url, "_blank", "noopener,noreferrer") },
+        t(this.lang, "openConfirm"),
+      ),
     );
   }
 }

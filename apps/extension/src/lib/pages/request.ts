@@ -19,5 +19,7 @@ export function requestOrigins(origins: string[]): Promise<boolean> {
 /** Runs a backup in the background page and returns the text to show. */
 export async function backupNow(lang: Lang): Promise<string> {
   const r = await request({ type: "backup-now" });
-  return r.ok ? pick(lang, "已备份。", "Backed up.") : `${pick(lang, "备份失败：", "Backup failed: ")}${"error" in r ? (r.error ?? "") : ""}`;
+  return r.ok
+    ? pick(lang, "已备份。", "Backed up.")
+    : `${pick(lang, "备份失败：", "Backup failed: ")}${"error" in r ? (r.error ?? "") : ""}`;
 }

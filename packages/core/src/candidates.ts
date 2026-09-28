@@ -11,12 +11,7 @@ export interface Candidate {
   isPlaceholder: boolean;
 }
 
-export function findCandidates(
-  state: State,
-  query: string,
-  k = 3,
-  minScore: number = THRESHOLDS.candidateMinSimilarity,
-): Candidate[] {
+export function findCandidates(state: State, query: string, k = 3, minScore: number = THRESHOLDS.candidateMinSimilarity): Candidate[] {
   const q = normalizeName(query);
   const qKey = q.caseKey ?? q.norm;
   if (!qKey) return [];

@@ -30,7 +30,13 @@ function checkbox(checked: boolean, onChange: (v: boolean) => void, attrs: Recor
 function trimmed(s: Settings): Settings {
   return {
     ...s,
-    models: s.models.map((m) => ({ ...m, label: m.label.trim(), baseUrl: m.baseUrl.trim(), apiKey: m.apiKey.trim(), model: m.model.trim() })),
+    models: s.models.map((m) => ({
+      ...m,
+      label: m.label.trim(),
+      baseUrl: m.baseUrl.trim(),
+      apiKey: m.apiKey.trim(),
+      model: m.model.trim(),
+    })),
     sites: s.sites.map((r) => ({ ...r, pattern: r.pattern.trim() })),
   };
 }
@@ -62,7 +68,12 @@ async function main(): Promise<void> {
   }
 
   function render(): void {
-    const language = h("select", {}, h("option", { value: "zh", selected: draft.language === "zh" }, "中文"), h("option", { value: "en", selected: draft.language === "en" }, "English"));
+    const language = h(
+      "select",
+      {},
+      h("option", { value: "zh", selected: draft.language === "zh" }, "中文"),
+      h("option", { value: "en", selected: draft.language === "en" }, "English"),
+    );
     language.addEventListener("change", () => {
       draft.language = language.value === "en" ? "en" : "zh";
       render();
@@ -90,10 +101,26 @@ async function main(): Promise<void> {
       return h(
         "tr",
         { "data-hb": "model-row" },
-        h("td", {}, input(m.label, (v) => (m.label = v))),
-        h("td", {}, input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" })),
-        h("td", {}, input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" })),
-        h("td", {}, input(m.model, (v) => (m.model = v), { "data-hb": "model-name" })),
+        h(
+          "td",
+          {},
+          input(m.label, (v) => (m.label = v)),
+        ),
+        h(
+          "td",
+          {},
+          input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
+        ),
+        h(
+          "td",
+          {},
+          input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }),
+        ),
+        h(
+          "td",
+          {},
+          input(m.model, (v) => (m.model = v), { "data-hb": "model-name" }),
+        ),
         h("td", {}, isDefault),
         h("td", {}, isLocal),
         h("td", {}, test, " ", remove, result),
@@ -106,7 +133,12 @@ async function main(): Promise<void> {
     });
 
     const siteRows = draft.sites.map((r, i) => {
-      const modelSelect = h("select", {}, h("option", { value: "" }, L("（默认）", "(default)")), ...draft.models.map((m) => h("option", { value: m.id, selected: r.modelId === m.id }, m.label)));
+      const modelSelect = h(
+        "select",
+        {},
+        h("option", { value: "" }, L("（默认）", "(default)")),
+        ...draft.models.map((m) => h("option", { value: m.id, selected: r.modelId === m.id }, m.label)),
+      );
       modelSelect.addEventListener("change", () => {
         if (modelSelect.value) r.modelId = modelSelect.value;
         else delete r.modelId;
@@ -119,10 +151,26 @@ async function main(): Promise<void> {
       return h(
         "tr",
         { "data-hb": "site-row" },
-        h("td", {}, input(r.pattern, (v) => (r.pattern = v), { "data-hb": "site-pattern", placeholder: "example.com" })),
-        h("td", {}, checkbox(r.autoScan === true, (v) => (r.autoScan = v), { "data-hb": "site-auto" })),
-        h("td", {}, checkbox(r.sensitive === true, (v) => (r.sensitive = v), { "data-hb": "site-sensitive" })),
-        h("td", {}, checkbox(r.disabled === true, (v) => (r.disabled = v), { "data-hb": "site-disabled" })),
+        h(
+          "td",
+          {},
+          input(r.pattern, (v) => (r.pattern = v), { "data-hb": "site-pattern", placeholder: "example.com" }),
+        ),
+        h(
+          "td",
+          {},
+          checkbox(r.autoScan === true, (v) => (r.autoScan = v), { "data-hb": "site-auto" }),
+        ),
+        h(
+          "td",
+          {},
+          checkbox(r.sensitive === true, (v) => (r.sensitive = v), { "data-hb": "site-sensitive" }),
+        ),
+        h(
+          "td",
+          {},
+          checkbox(r.disabled === true, (v) => (r.disabled = v), { "data-hb": "site-disabled" }),
+        ),
         h("td", {}, modelSelect),
         h("td", {}, remove),
       );
@@ -148,24 +196,82 @@ async function main(): Promise<void> {
       h(
         "table",
         {},
-        h("tr", {}, ...[L("名称", "Name"), L("地址", "Address"), "API key", L("模型", "Model"), L("默认", "Default"), L("敏感来源用", "For sensitive"), ""].map((x) => h("th", {}, x))),
+        h(
+          "tr",
+          {},
+          ...[
+            L("名称", "Name"),
+            L("地址", "Address"),
+            "API key",
+            L("模型", "Model"),
+            L("默认", "Default"),
+            L("敏感来源用", "For sensitive"),
+            "",
+          ].map((x) => h("th", {}, x)),
+        ),
         ...modelRows,
       ),
       h("p", {}, addModel),
-      h("p", { className: "note" }, L("非本机地址必须使用 https。API key 未加密保存在浏览器扩展存储中。敏感来源只能使用本机模型（127.0.0.1 / localhost）。", "Non-local addresses must use https. API keys are stored unencrypted in the extension's storage. Sensitive sources can only use local models (127.0.0.1 / localhost).")),
+      h(
+        "p",
+        { className: "note" },
+        L(
+          "非本机地址必须使用 https。API key 未加密保存在浏览器扩展存储中。敏感来源只能使用本机模型（127.0.0.1 / localhost）。",
+          "Non-local addresses must use https. API keys are stored unencrypted in the extension's storage. Sensitive sources can only use local models (127.0.0.1 / localhost).",
+        ),
+      ),
       h("h2", {}, L("网站", "Sites")),
       h(
         "table",
         {},
-        h("tr", {}, ...[L("域名或网址前缀", "Domain or URL prefix"), L("自动扫描", "Auto-scan"), L("敏感", "Sensitive"), L("停用", "Disabled"), L("模型", "Model"), ""].map((x) => h("th", {}, x))),
+        h(
+          "tr",
+          {},
+          ...[
+            L("域名或网址前缀", "Domain or URL prefix"),
+            L("自动扫描", "Auto-scan"),
+            L("敏感", "Sensitive"),
+            L("停用", "Disabled"),
+            L("模型", "Model"),
+            "",
+          ].map((x) => h("th", {}, x)),
+        ),
         ...siteRows,
       ),
       h("p", {}, addSite),
       h("h2", {}, L("限制与提示", "Limits and hints")),
-      h("p", {}, L("每分钟最多解释 ", "At most "), numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }), L(" 次，每小时 ", " per minute and "), numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }), L(" 次", " per hour")),
-      h("p", {}, L("重逢间隔至少 ", "Reunions at least "), numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }), L(" 天，每页最多 ", " days apart, at most "), numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }), L(" 条", " per page")),
+      h(
+        "p",
+        {},
+        L("每分钟最多解释 ", "At most "),
+        numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }),
+        L(" 次，每小时 ", " per minute and "),
+        numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
+        L(" 次", " per hour"),
+      ),
+      h(
+        "p",
+        {},
+        L("重逢间隔至少 ", "Reunions at least "),
+        numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
+        L(" 天，每页最多 ", " days apart, at most "),
+        numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
+        L(" 条", " per page"),
+      ),
       h("h2", {}, L("备份", "Backup")),
-      h("p", {}, h("label", {}, checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)), " ", L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week")), " ", backupButton),
+      h(
+        "p",
+        {},
+        h(
+          "label",
+          {},
+          checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
+          " ",
+          L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
+        ),
+        " ",
+        backupButton,
+      ),
       h("h2", {}, L("隐私", "Privacy")),
       h("ul", { className: "note" }, ...PRIVACY[draft.language].map((line) => h("li", {}, line))),
       h("p", {}, saveButton),

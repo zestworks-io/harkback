@@ -33,7 +33,9 @@ function renderInline(text: string, parent: Node): void {
       const label = lm?.[2] || lm?.[3] || tok;
       // Images are never loaded: they render as their alt text.
       const url = lm && !lm[1] ? safeUrl(lm[3] ?? "") : null;
-      parent.appendChild(url ? h("span", { className: "hb-link", "data-url": url, role: "link", tabindex: "0" }, label) : document.createTextNode(label));
+      parent.appendChild(
+        url ? h("span", { className: "hb-link", "data-url": url, role: "link", tabindex: "0" }, label) : document.createTextNode(label),
+      );
     }
     last = at + tok.length;
   }

@@ -6,12 +6,51 @@ import { isArxivUrl } from "./source-id";
 export const ownHosts = new WeakSet<Element>();
 
 const SKIP = new Set([
-  "script", "style", "noscript", "template", "nav", "header", "footer", "aside", "form",
-  "button", "select", "textarea", "input", "svg", "canvas", "iframe", "object", "video", "audio",
+  "script",
+  "style",
+  "noscript",
+  "template",
+  "nav",
+  "header",
+  "footer",
+  "aside",
+  "form",
+  "button",
+  "select",
+  "textarea",
+  "input",
+  "svg",
+  "canvas",
+  "iframe",
+  "object",
+  "video",
+  "audio",
 ]);
 const BLOCKS = new Set([
-  "p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "td", "th", "dd", "dt",
-  "figcaption", "caption", "summary", "div", "section", "article", "main", "figure", "details", "body",
+  "p",
+  "li",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "blockquote",
+  "pre",
+  "td",
+  "th",
+  "dd",
+  "dt",
+  "figcaption",
+  "caption",
+  "summary",
+  "div",
+  "section",
+  "article",
+  "main",
+  "figure",
+  "details",
+  "body",
 ]);
 const HEADING = /^h[1-6]$/;
 const INDEX_ATTR = "data-harkback-i";
@@ -230,13 +269,20 @@ function hash(s: string): string {
 }
 
 function outsideContext(range: Range, selection: string): SelectionContext {
-  let el: Element | null = range.startContainer.nodeType === ELEMENT ? (range.startContainer as Element) : range.startContainer.parentElement;
+  let el: Element | null =
+    range.startContainer.nodeType === ELEMENT ? (range.startContainer as Element) : range.startContainer.parentElement;
   while (el && !BLOCKS.has(el.localName) && !SKIP.has(el.localName)) el = el.parentElement;
   const paragraph = normalizeWs(el?.textContent ?? selection).slice(0, 2000);
   const at = paragraph.indexOf(selection);
   const prefix = at >= 0 ? paragraph.slice(Math.max(0, at - CONTEXT_CHARS), at).trim() : "";
   const suffix = at >= 0 ? paragraph.slice(at + selection.length, at + selection.length + CONTEXT_CHARS).trim() : "";
-  return { selection, paragraph, paragraphId: `outside:${hash(paragraph)}`, section: "", locator: { exact: selection.slice(0, 500), prefix, suffix } };
+  return {
+    selection,
+    paragraph,
+    paragraphId: `outside:${hash(paragraph)}`,
+    section: "",
+    locator: { exact: selection.slice(0, 500), prefix, suffix },
+  };
 }
 
 export function contextForRange(page: ExtractedPage, range: Range): SelectionContext | null {

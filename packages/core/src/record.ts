@@ -1,4 +1,15 @@
-import { CARD_LIMITS, parseEvent, type Domain, type HarkEvent, type Locator, type PayloadOf, type Rel, type Sensitivity, type SourceIds, type Tier } from "@harkback/spec";
+import {
+  CARD_LIMITS,
+  parseEvent,
+  type Domain,
+  type HarkEvent,
+  type Locator,
+  type PayloadOf,
+  type Rel,
+  type Sensitivity,
+  type SourceIds,
+  type Tier,
+} from "@harkback/spec";
 import type { Candidate } from "./candidates";
 import { THRESHOLDS } from "./constants";
 import type { EventFactory } from "./factory";
@@ -7,10 +18,7 @@ import { identityKey } from "./normalize";
 import type { ParsedOutput } from "./parse-output";
 import type { State } from "./state";
 
-export type Resolution =
-  | { kind: "existing"; conceptId: string }
-  | { kind: "new" }
-  | { kind: "ask_user"; candidate: Candidate };
+export type Resolution = { kind: "existing"; conceptId: string } | { kind: "new" } | { kind: "ask_user"; candidate: Candidate };
 
 export function resolveConcept(
   parsed: ParsedOutput,

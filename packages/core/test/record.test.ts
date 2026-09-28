@@ -3,7 +3,13 @@ import { parseEvent, type HarkEvent } from "@harkback/spec";
 import { buildRecordEvents, clampSource, createEventFactory, replay, resolveConcept, type ParsedOutput, type RecordInput } from "../src";
 import { concept, ev, id } from "./helpers";
 
-const source = { source_id: "arxiv:2305.14314", ids: { arxiv: "2305.14314" }, title: "QLoRA", license: "unknown", sensitivity: "normal" as const };
+const source = {
+  source_id: "arxiv:2305.14314",
+  ids: { arxiv: "2305.14314" },
+  title: "QLoRA",
+  license: "unknown",
+  sensitivity: "normal" as const,
+};
 const locator = { exact: "LoRA", prefix: "we apply ", suffix: " to", section: "3" };
 
 const parsed = (card: ParsedOutput["card"]): ParsedOutput => ({
@@ -81,11 +87,7 @@ describe("buildRecordEvents", () => {
   });
 
   it("adds only unknown aliases to an existing concept and reuses known concepts for edges", () => {
-    const prior = [
-      ev("source.seen", source),
-      concept(1, "LoRA", "ml", ["Low-Rank Adaptation"]),
-      concept(2, "PEFT"),
-    ];
+    const prior = [ev("source.seen", source), concept(1, "LoRA", "ml", ["Low-Rank Adaptation"]), concept(2, "PEFT")];
     const events = buildRecordEvents(input({ conceptId: id(1) }, prior));
     expect(events.filter((e) => e.type === "source.seen")).toHaveLength(0);
     const aliasEvents = events.filter((e) => e.type === "concept.alias_added");
@@ -109,7 +111,9 @@ describe("buildRecordEvents", () => {
   });
 
   it("skips edges that point back to the concept itself", () => {
-    const events = buildRecordEvents(input({ parsed: parsed(card({ broader: ["Low-Rank Adaptation"], variants: [], prerequisites: [] })) }));
+    const events = buildRecordEvents(
+      input({ parsed: parsed(card({ broader: ["Low-Rank Adaptation"], variants: [], prerequisites: [] })) }),
+    );
     expect(events.some((e) => e.type === "edge.proposed")).toBe(false);
   });
 
@@ -155,7 +159,10 @@ describe("buildRecordEvents: edge targets", () => {
 
 describe("clampSource", () => {
   it("trims source fields to the event schema limits", () => {
-    const payload = clampSource({ source_id: "url:x", ids: { url: `https://x/${"a".repeat(3000)}` }, title: "T".repeat(900), license: "unknown" }, "sensitive");
+    const payload = clampSource(
+      { source_id: "url:x", ids: { url: `https://x/${"a".repeat(3000)}` }, title: "T".repeat(900), license: "unknown" },
+      "sensitive",
+    );
     expect(payload.title).toHaveLength(500);
     expect(payload.ids.url).toHaveLength(2048);
     expect(payload.sensitivity).toBe("sensitive");

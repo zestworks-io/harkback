@@ -64,8 +64,16 @@ describe("replay: placeholders, mutes and sources", () => {
 
   it("merges source ids and keeps the latest sensitivity", () => {
     const s = replay([
-      ev("source.seen", { source_id: "arxiv:1", ids: { arxiv: "1" }, title: "Paper", license: "unknown", sensitivity: "normal" }, { ts: "2026-09-01T00:00:00Z" }),
-      ev("source.seen", { source_id: "arxiv:1", ids: { url: "https://arxiv.org/html/1" }, title: "Paper", license: "unknown", sensitivity: "sensitive" }, { ts: "2026-09-02T00:00:00Z" }),
+      ev(
+        "source.seen",
+        { source_id: "arxiv:1", ids: { arxiv: "1" }, title: "Paper", license: "unknown", sensitivity: "normal" },
+        { ts: "2026-09-01T00:00:00Z" },
+      ),
+      ev(
+        "source.seen",
+        { source_id: "arxiv:1", ids: { url: "https://arxiv.org/html/1" }, title: "Paper", license: "unknown", sensitivity: "sensitive" },
+        { ts: "2026-09-02T00:00:00Z" },
+      ),
     ]);
     expect(s.sources.get("arxiv:1")).toEqual({
       id: "arxiv:1",
@@ -83,9 +91,17 @@ describe("replay: edges", () => {
       concept(1, "LoRA"),
       concept(2, "Low-Rank Adaptation"),
       concept(3, "QLoRA"),
-      ev("edge.proposed", { from: id(3), to: id(2), rel: "variant_of", source: "llm_explain", confidence: 0.6, evidence: {} }, { ts: "2026-09-02T00:00:00Z" }),
+      ev(
+        "edge.proposed",
+        { from: id(3), to: id(2), rel: "variant_of", source: "llm_explain", confidence: 0.6, evidence: {} },
+        { ts: "2026-09-02T00:00:00Z" },
+      ),
       ev("edge.confirmed", { edge_id: edgeId(id(3), "variant_of", id(2)) }, { ts: "2026-09-03T00:00:00Z" }),
-      ev("edge.proposed", { from: id(3), to: id(1), rel: "variant_of", source: "user", confidence: 0.8, evidence: {} }, { ts: "2026-09-04T00:00:00Z" }),
+      ev(
+        "edge.proposed",
+        { from: id(3), to: id(1), rel: "variant_of", source: "user", confidence: 0.8, evidence: {} },
+        { ts: "2026-09-04T00:00:00Z" },
+      ),
       ev("concept.merged", { from: id(2), into: id(1) }, { ts: "2026-09-05T00:00:00Z" }),
     ]);
     expect([...s.edges.keys()]).toEqual([edgeId(id(3), "variant_of", id(1))]);

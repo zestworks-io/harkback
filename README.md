@@ -2,7 +2,7 @@
 
 A browser extension that explains terms while you read, remembers what you understood, and reconnects you with those explanations when you meet the same term again.
 
-- **Explain**: select a term (or press `Alt+E`) and get a short explanation from the model you configure, marked as *defined in source* or *external knowledge*.
+- **Explain**: select a term (or press `Alt+E`) and get a short explanation from the model you configure, marked as _defined in source_ or _external knowledge_.
 - **Remember**: every explanation is stored as an append-only event log in the browser (IndexedDB). Nothing is sent anywhere except the model request you trigger.
 - **Reunion**: on later pages, terms you have looked up are underlined; hover to see what you understood before.
 - **Private by default**: pages are scanned automatically only on arxiv.org. Sensitive sites can be forced onto a local model such as Ollama, and private windows never record or scan.
@@ -11,11 +11,11 @@ Explanations work with any OpenAI-compatible chat API (Ollama, OpenAI, OpenRoute
 
 ## Repository layout
 
-| Path | What it is |
-| --- | --- |
-| `packages/spec` | The event format: constants, zod schemas, and the generated JSON schema. |
-| `packages/core` | Pure logic with no browser dependencies: replay, concept matching, reunion selection, prompts, JSONL and Markdown export. |
-| `apps/extension` | The Chrome extension, built with [WXT](https://wxt.dev). |
+| Path             | What it is                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `packages/spec`  | The event format: constants, zod schemas, and the generated JSON schema.                                                  |
+| `packages/core`  | Pure logic with no browser dependencies: replay, concept matching, reunion selection, prompts, JSONL and Markdown export. |
+| `apps/extension` | The Chrome extension, built with [WXT](https://wxt.dev).                                                                  |
 
 ## Getting started
 

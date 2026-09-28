@@ -1,10 +1,7 @@
 import { ENVELOPE_VERSION, LIMITS } from "./constants";
 import { eventSchema, type HarkEvent } from "./schema";
 
-export type ParseEventResult =
-  | { kind: "event"; event: HarkEvent }
-  | { kind: "future"; raw: unknown }
-  | { kind: "invalid"; reason: string };
+export type ParseEventResult = { kind: "event"; event: HarkEvent } | { kind: "future"; raw: unknown } | { kind: "invalid"; reason: string };
 
 const encoder = new TextEncoder();
 

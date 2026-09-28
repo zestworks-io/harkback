@@ -46,11 +46,21 @@ describe("page-info", () => {
 
   it("does not scan or send entries in a private window", async () => {
     const { deps } = setup();
-    expect(await pageInfo(deps, "https://arxiv.org/abs/2", true)).toMatchObject({ enabled: true, scan: false, incognito: true, entries: [] });
+    expect(await pageInfo(deps, "https://arxiv.org/abs/2", true)).toMatchObject({
+      enabled: true,
+      scan: false,
+      incognito: true,
+      entries: [],
+    });
   });
 
   it("reports a disabled site and scans an allow-listed one only when asked", async () => {
-    const { deps } = setup({ sites: [{ pattern: "off.example.com", disabled: true }, { pattern: "blog.example.com", autoScan: true }] });
+    const { deps } = setup({
+      sites: [
+        { pattern: "off.example.com", disabled: true },
+        { pattern: "blog.example.com", autoScan: true },
+      ],
+    });
     expect(await pageInfo(deps, "https://off.example.com/x", false)).toMatchObject({ enabled: false, scan: false, entries: [] });
     expect(await pageInfo(deps, "https://blog.example.com/x", false)).toMatchObject({ enabled: true, autoScan: true });
     expect(await pageInfo(deps, "https://other.example.com/x", false)).toMatchObject({ enabled: true, autoScan: false });

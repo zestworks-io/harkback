@@ -24,8 +24,7 @@ export function modelUrlError(url: string): "invalid" | "insecure" | null {
 }
 
 export type Route =
-  | { kind: "ok"; model: ModelConfig; remote: boolean }
-  | { kind: "error"; code: "no_model" | "needs_local_model" | "insecure_model" };
+  { kind: "ok"; model: ModelConfig; remote: boolean } | { kind: "error"; code: "no_model" | "needs_local_model" | "insecure_model" };
 
 export function chooseModel(settings: Settings, rule: EffectiveRule, sensitive: boolean): Route {
   const id = rule.modelId ?? (sensitive ? settings.localModelId : settings.defaultModelId);

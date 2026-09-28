@@ -35,12 +35,18 @@ describe("detectSource", () => {
   });
 
   it("uses meta ids, then the canonical link, then the cleaned URL", () => {
-    expect(detectSource("https://pub.example.com/x", html('<meta name="citation_doi" content="10.1000/ABC">')).source_id).toBe("doi:10.1000/abc");
-    expect(detectSource("https://mirror.example.com/x", html('<meta name="citation_arxiv_id" content="2106.09685v3">')).source_id).toBe("arxiv:2106.09685");
+    expect(detectSource("https://pub.example.com/x", html('<meta name="citation_doi" content="10.1000/ABC">')).source_id).toBe(
+      "doi:10.1000/abc",
+    );
+    expect(detectSource("https://mirror.example.com/x", html('<meta name="citation_arxiv_id" content="2106.09685v3">')).source_id).toBe(
+      "arxiv:2106.09685",
+    );
     const blog = detectSource("https://blog.example.com/posts/adapters?utm_source=x&id=3#top", load("blog.html"));
     expect(blog.source_id).toBe("url:https://blog.example.com/posts/adapters");
     expect(blog.ids).toEqual({ url: "https://blog.example.com/posts/adapters?id=3" });
     expect(blog.title).toBe("Understanding adapters | Example Blog");
-    expect(detectSource("https://plain.example.com/p?utm_campaign=z", html("<title>Plain</title>")).source_id).toBe("url:https://plain.example.com/p");
+    expect(detectSource("https://plain.example.com/p?utm_campaign=z", html("<title>Plain</title>")).source_id).toBe(
+      "url:https://plain.example.com/p",
+    );
   });
 });

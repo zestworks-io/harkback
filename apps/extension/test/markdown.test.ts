@@ -10,7 +10,9 @@ const render = (src: string) => {
 
 describe("renderMarkdown", () => {
   it("renders paragraphs, emphasis, code, lists, code blocks and formulas", () => {
-    const div = render("First **bold** and *em* with `code` and $x^2$.\nSame paragraph.\n\n- one\n- two\n\n1. first\n\n```\nconst a = 1;\n```\n\n$$E = mc^2$$");
+    const div = render(
+      "First **bold** and *em* with `code` and $x^2$.\nSame paragraph.\n\n- one\n- two\n\n1. first\n\n```\nconst a = 1;\n```\n\n$$E = mc^2$$",
+    );
     expect(div.querySelectorAll("p")).toHaveLength(1);
     expect(div.querySelector("p")!.textContent).toBe("First bold and em with code and x^2. Same paragraph.");
     expect(div.querySelector("strong")!.textContent).toBe("bold");

@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Matcher, matcherEntriesFromState, prepareText, replay } from "../src";
 import { concept } from "./helpers";
 
-const state = replay([
-  concept(1, "LoRA", "ml", ["Low-Rank Adaptation", "低秩适配"]),
-  concept(2, "LLM"),
-  concept(3, "微调"),
-]);
+const state = replay([concept(1, "LoRA", "ml", ["Low-Rank Adaptation", "低秩适配"]), concept(2, "LLM"), concept(3, "微调")]);
 const matcher = new Matcher(matcherEntriesFromState(state));
 const keys = (text: string) => matcher.scan(text).map((h) => h.key);
 

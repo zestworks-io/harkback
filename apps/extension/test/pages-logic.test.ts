@@ -21,7 +21,10 @@ describe("backup", () => {
 });
 
 describe("testConnection", () => {
-  const json = (body: unknown, status = 200) => async () => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  const json =
+    (body: unknown, status = 200) =>
+    async () =>
+      new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
   it("lists models on success and sends the trimmed key", async () => {
     let auth: string | null = null;
@@ -29,14 +32,20 @@ describe("testConnection", () => {
       auth = new Headers(init?.headers).get("authorization");
       return new Response(JSON.stringify({ data: [{ id: "b" }, { id: "a" }] }));
     };
-    expect(await testConnection({ baseUrl: "https://api.example.com/v1/", apiKey: " k " }, fetchImpl)).toEqual({ kind: "ok", models: ["a", "b"] });
+    expect(await testConnection({ baseUrl: "https://api.example.com/v1/", apiKey: " k " }, fetchImpl)).toEqual({
+      kind: "ok",
+      models: ["a", "b"],
+    });
     expect(auth).toBe("Bearer k");
   });
 
   it("tells a blocked Ollama origin apart from a bad key", async () => {
     expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "" }, json({}, 403))).toEqual({ kind: "origin_blocked" });
     expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 401))).toEqual({ kind: "auth" });
-    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 500))).toEqual({ kind: "http", status: 500 });
+    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 500))).toEqual({
+      kind: "http",
+      status: 500,
+    });
     expect(await testConnection({ baseUrl: "http://api.example.com/v1", apiKey: "k" }, json({}))).toEqual({ kind: "insecure" });
     const down = async () => {
       throw new TypeError("Failed to fetch");

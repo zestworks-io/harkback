@@ -50,8 +50,7 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
     }
   }
 
-  const encountersOf = (conceptId: string) =>
-    (state.encountersByConcept.get(conceptId) ?? []).map((eid) => state.encounters.get(eid)!);
+  const encountersOf = (conceptId: string) => (state.encountersByConcept.get(conceptId) ?? []).map((eid) => state.encounters.get(eid)!);
   const lastTouched = (conceptId: string) => Math.max(...encountersOf(conceptId).map((e) => e.lastTouchedAt));
 
   const eligible = (conceptId: string): EncounterState | null => {

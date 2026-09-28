@@ -5,12 +5,7 @@ export interface EventFactory {
   make<T extends EventType>(type: T, payload: PayloadOf<T>): EventOf<T>;
 }
 
-export function createEventFactory(o: {
-  device: string;
-  nextSeq: () => number;
-  now?: () => number;
-  newId?: () => string;
-}): EventFactory {
+export function createEventFactory(o: { device: string; nextSeq: () => number; now?: () => number; newId?: () => string }): EventFactory {
   const now = o.now ?? Date.now;
   const newId = o.newId ?? (() => ulid());
   return {

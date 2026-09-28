@@ -17,9 +17,19 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
   return h(
     "div",
     { className: "hb-card hb-reunion", "data-hb": "reunion-card" },
-    h("div", { className: "hb-meta" }, h("span", { "data-hb": "reunion-title" }, title), " ", h("span", { className: `hb-tier hb-${card.tier}` }, tier)),
+    h(
+      "div",
+      { className: "hb-meta" },
+      h("span", { "data-hb": "reunion-title" }, title),
+      " ",
+      h("span", { className: `hb-tier hb-${card.tier}` }, tier),
+    ),
     h("div", { className: "hb-body" }, t(lang, "thenExplained", { text: card.preview })),
-    h("div", { className: "hb-footer" }, ...ACTIONS.map((a) => h("button", { type: "button", "data-hb": a, onclick: () => act(a) }, t(lang, a)))),
+    h(
+      "div",
+      { className: "hb-footer" },
+      ...ACTIONS.map((a) => h("button", { type: "button", "data-hb": a, onclick: () => act(a) }, t(lang, a))),
+    ),
   );
 }
 
