@@ -12,11 +12,12 @@ const extensionPath = [".output/chrome-mv3-e2e", ".output/chrome-mv3"]
 /** The subset of chrome.* used inside sw.evaluate callbacks (they run in the service worker). */
 export interface ChromeApi {
   storage: { local: { set(items: Record<string, unknown>): Promise<void>; get(key: string): Promise<Record<string, unknown>> } };
-  alarms: { get(name: string): Promise<unknown> };
+  alarms: { get(name: string): Promise<unknown>; create(name: string, info: { when: number }): Promise<void> };
+  tabs: { query(q: Record<string, unknown>): Promise<{ id?: number }[]>; sendMessage(id: number, m: unknown): Promise<unknown> };
   downloads: { search(query: Record<string, unknown>): Promise<{ filename: string; state: string }[]> };
 }
 
-export function fixture(name: string): string {
+function fixture(name: string): string {
   return readFileSync(path.join(root, "fixtures", name), "utf8");
 }
 
@@ -40,6 +41,9 @@ export const test = base.extend<{ stub: StubServer; context: BrowserContext; sw:
       }
       return route.fulfill({ status: 404, body: "not found" });
     });
+    await context.route("https://blog.example.com/**", (route) =>
+      route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("blog.html") }),
+    );
     await use(context);
     await context.close();
   },
@@ -111,4 +115,20 @@ export async function selectAndExplain(page: Page, selector: string): Promise<vo
     await expect(button).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 15_000 });
   await button.click();
+}
+
+/** Delivers a message from the service worker to the content script of the active tab, like the toolbar button and the shortcut do. */
+export async function sendToActiveTab(sw: Worker, message: { type: string }): Promise<void> {
+  await sw.evaluate(
+    async (message) => {
+      const chrome = (globalThis as unknown as { chrome: ChromeApi }).chrome;
+      const [tab] = await chrome.tabs.query({ active: true });
+      await chrome.tabs.sendMessage(tab!.id!, message);
+    },
+    message,
+  );
+}
+
+export async function eventsOf(sw: Worker, type: string): Promise<{ type: string; payload: Record<string, unknown> | null }[]> {
+  return (await readEvents(sw)).filter((e) => e.type === type);
 }
