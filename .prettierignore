@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+packages/spec/schema
+apps/extension/fixtures
+apps/extension/.output
+apps/extension/.wxt
+*.html
