@@ -1,0 +1,46 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 777 >>
+stream
+BT /F1 10 Tf 72 700 Td (The left column opens the page and) Tj ET
+BT /F1 10 Tf 72 688 Td (explains attention in a few plain lines) Tj ET
+BT /F1 10 Tf 72 676 Td (so that the reader can follow the rest) Tj ET
+BT /F1 10 Tf 72 664 Td (of the argument without any detours.) Tj ET
+BT /F1 10 Tf 82 640 Td (A new paragraph begins here and talks) Tj ET
+BT /F1 10 Tf 72 628 Td (about softmax over the scores of every) Tj ET
+BT /F1 10 Tf 72 616 Td (query and key pair in the sequence.) Tj ET
+BT /F1 10 Tf 330 700 Td (The right column continues after the left) Tj ET
+BT /F1 10 Tf 330 688 Td (one and describes the feed-forward block) Tj ET
+BT /F1 10 Tf 330 676 Td (that follows attention in each layer of the) Tj ET
+BT /F1 10 Tf 330 664 Td (network, applied to every position alone.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Title (Two Column Notes) >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+0000001139 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R /Info 6 0 R >>
+startxref
+1186
+%%EOF

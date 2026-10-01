@@ -4,7 +4,7 @@ import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../e
 import { h } from "../dom";
 import type { PageInfo, PortIn, PortOut } from "../messages";
 import type { ReunionCard } from "../reunion-cards";
-import { detectSource } from "../source-id";
+import { detectSource, type DetectedSource } from "../source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
@@ -35,6 +35,14 @@ function lastRect(range: Range): DOMRect | null {
   return r.width === 0 && r.height === 0 ? null : r;
 }
 
+/** Where a page's text and identity come from when it is not an ordinary web page. */
+export interface PageSource {
+  /** The address that site rules and history refer to. */
+  url: string;
+  detect(): DetectedSource;
+  root(): Element;
+}
+
 export class ContentApp {
   private info: PageInfo | null = null;
   private page: ExtractedPage | null = null;
@@ -44,11 +52,29 @@ export class ContentApp {
   private triggerRange: Range | null = null;
   private session: Session | null = null;
   private layer: ReunionLayer | null = null;
+  private rescan: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     private readonly rpc: Rpc,
     private readonly shadowMode: "open" | "closed",
+    private readonly source?: PageSource,
   ) {}
+
+  private extract(): ExtractedPage {
+    return extractPage(document, this.source?.url ?? location.href, this.source?.root());
+  }
+
+  private detect(): DetectedSource {
+    return this.source?.detect() ?? detectSource(location.href, document);
+  }
+
+  /** The page text changed (more of a PDF was drawn): read it again before the next use, and refresh the reunion marks. */
+  invalidate(): void {
+    this.page = null;
+    if (!this.listening) return;
+    clearTimeout(this.rescan);
+    this.rescan = setTimeout(() => void this.scan().catch(() => undefined), 400);
+  }
 
   private get lang(): Lang {
     return this.info?.language ?? "zh";
@@ -79,7 +105,7 @@ export class ContentApp {
       if ("requestIdleCallback" in window) requestIdleCallback(() => resolve(), { timeout: 2000 });
       else setTimeout(resolve, 50);
     });
-    const page = extractPage(document, location.href);
+    const page = this.extract();
     this.page = page;
     const firstPerKey = new Map<string, Hit>();
     for (const hit of new Matcher(info.entries).scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
@@ -87,7 +113,7 @@ export class ContentApp {
     if (firstPerKey.size === 0) return;
     const { cards } = await this.rpc.request({
       type: "reunions",
-      sourceId: detectSource(location.href, document).source_id,
+      sourceId: this.detect().source_id,
       hits: [...firstPerKey.values()],
     });
     const entries = cards.flatMap((card) => {
@@ -115,7 +141,7 @@ export class ContentApp {
   }
 
   explain(range: Range, opts: ExplainOptions): void {
-    const page = (this.page ??= extractPage(document, location.href));
+    const page = (this.page ??= this.extract());
     const ctx = contextForRange(page, range);
     if (!ctx) return;
     const selection = ctx.selection.slice(0, MAX_SELECTION);
@@ -124,7 +150,7 @@ export class ContentApp {
     if (this.session?.key === key) return;
     this.endSession();
 
-    const source = detectSource(location.href, document);
+    const source = this.detect();
     const request: ExplainRequestMsg = {
       mode: opts.mode,
       selection,

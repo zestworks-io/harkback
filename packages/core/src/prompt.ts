@@ -19,6 +19,8 @@ export interface ExplainRequest {
   /** "reexplain": explain again from another angle; "compare": contrast with `earlier`. Defaults to "explain". */
   mode?: "explain" | "reexplain" | "compare";
   earlier?: EarlierEncounter;
+  /** Concept ids among `candidates` that the reader has marked as understood. */
+  understood?: ReadonlySet<string>;
 }
 
 export interface FollowUpRequest {
@@ -88,7 +90,8 @@ export function buildExplainPrompt(req: ExplainRequest): BuiltPrompt {
   const candidateLines = req.candidates.map((c, i) => {
     const label = `c${i + 1}`;
     labels.set(label, c.conceptId);
-    return `${label}: ${clean(c.canonicalName, 80)} (${c.domain})`;
+    const mark = req.understood?.has(c.conceptId) ? " [the reader already understands this]" : "";
+    return `${label}: ${clean(c.canonicalName, 80)} (${c.domain})${mark}`;
   });
   const lines = [
     "<page_content>",
@@ -101,6 +104,9 @@ export function buildExplainPrompt(req: ExplainRequest): BuiltPrompt {
     "Known concept candidates (may be empty; a candidate may be the abbreviation or the full form of the selected term):",
     ...candidateLines,
   ];
+  if (req.candidates.some((c) => req.understood?.has(c.conceptId))) {
+    lines.push("You may build on candidates the reader already understands, for example by saying how the term relates to them, without explaining those again.");
+  }
   if (req.mode === "reexplain") {
     lines.push("The reader asked for this term to be explained again: use a different angle and simpler words than before.");
   }

@@ -17,9 +17,13 @@ import {
 } from "../lib/explain";
 import { isRequest, type PortIn, type PortOut, type TabMessage } from "../lib/messages";
 import { ModelError, streamChat } from "../lib/model-client";
+import { reviewQueue } from "../lib/review";
+import { badgeFor } from "../lib/review-badge";
 import { RateLimiter, type RateResult } from "../lib/rate-limit";
 import { handleRequest, type RequestDeps } from "../lib/requests";
-import { allowed, senderKind } from "../lib/sender-auth";
+import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
+import { putHandoff } from "../lib/pdf/handoff";
+import { allowed, readerSource, senderKind } from "../lib/sender-auth";
 import { withDefaults, type Settings } from "../lib/settings";
 import { hostPermissionPatterns, originPattern } from "../lib/site-rules";
 import { arxivHtmlUrl } from "../lib/source-id";
@@ -29,6 +33,7 @@ import { CHANGE_CHANNEL, EventStore } from "../lib/store";
 const CONTENT_SCRIPT = "/content-scripts/content.js";
 const ALLOWLIST_SCRIPT_ID = "allowlist";
 const BACKUP_ALARM = "backup";
+const BADGE_ALARM = "badge";
 
 type Pending = { outcome: ExplainOutcome; req: ExplainRequestMsg; plan: ExplainPlan };
 
@@ -51,6 +56,18 @@ export default defineBackground(() => {
     } finally {
       cache.invalidate();
       changes.postMessage("changed");
+      void refreshBadge();
+    }
+  }
+
+  /** The toolbar badge counts concepts due for review; it never carries any text from the records. */
+  async function refreshBadge(): Promise<void> {
+    try {
+      const { text, title } = badgeFor(reviewQueue(await getState(), Date.now()).length, (await loadSettings()).language);
+      await browser.action.setBadgeText({ text });
+      await browser.action.setTitle({ title });
+    } catch {
+      // The badge is a convenience; a failure must never affect recording.
     }
   }
 
@@ -76,7 +93,9 @@ export default defineBackground(() => {
   function handleExplainPort(port: Browser.runtime.Port): void {
     const tabKey = String(port.sender?.tab?.id ?? -1);
     const incognito = port.sender?.tab?.incognito === true;
-    const url = port.sender?.url ?? port.sender?.tab?.url ?? "";
+    const senderUrl = port.sender?.url ?? port.sender?.tab?.url ?? "";
+    // Site rules and history refer to the PDF the reader shows, not to the reader page.
+    const url = senderKind(port.sender ?? {}, browser.runtime.id, extensionOrigin) === "reader" ? readerSource(senderUrl) : senderUrl;
     const abort = new AbortController();
     let pending: Pending | null = null;
     let last: { req: ExplainRequestMsg; plan: ExplainPlan; explanation: string; encounterId: string | null } | null = null;
@@ -216,7 +235,8 @@ export default defineBackground(() => {
 
   browser.runtime.onConnect.addListener((port) => {
     if (port.name !== "explain") return;
-    if (senderKind(port.sender ?? {}, browser.runtime.id, extensionOrigin) !== "content") {
+    const kind = senderKind(port.sender ?? {}, browser.runtime.id, extensionOrigin);
+    if (kind !== "content" && kind !== "reader") {
       port.disconnect();
       return;
     }
@@ -246,7 +266,8 @@ export default defineBackground(() => {
     if (!isRequest(message)) return false;
     const kind = senderKind(sender, browser.runtime.id, extensionOrigin);
     if (!kind || !allowed(message.type, kind)) return false;
-    handleRequest(requestDeps, message, sender).then(sendResponse, () => sendResponse({ ok: false }));
+    const from = kind === "reader" ? { ...sender, url: readerSource(sender.url) } : sender;
+    handleRequest(requestDeps, message, from).then(sendResponse, () => sendResponse({ ok: false }));
     return true;
   });
 
@@ -270,21 +291,46 @@ export default defineBackground(() => {
     void ensureContent(tabId).then((ok) => (ok ? browser.tabs.sendMessage(tabId, message).catch(() => undefined) : undefined));
   }
 
-  /** A PDF has no text to work with: send an arXiv PDF tab to the HTML version of the same paper. */
+  /** An arXiv paper has a better version than its PDF: send the tab to the HTML version. */
   function openHtmlVersion(tab: Browser.tabs.Tab): boolean {
     const html = tab.id !== undefined && tab.url ? arxivHtmlUrl(tab.url) : null;
     if (html) void browser.tabs.update(tab.id!, { url: html });
     return html !== null;
   }
 
+  const openDeps: OpenDeps = {
+    readerPage: browser.runtime.getURL("/reader.html"),
+    async isPdf(tabId) {
+      const [r] = await browser.scripting.executeScript({ target: { tabId }, func: () => document.contentType });
+      return r?.result === "application/pdf";
+    },
+    async download(tabId) {
+      const [r] = await browser.scripting.executeScript({ target: { tabId }, func: fetchAsDataUrl });
+      return r?.result ?? null;
+    },
+    stash: (dataUrl) => putHandoff(dataUrl),
+    async navigate(tabId, url) {
+      await browser.tabs.update(tabId, { url });
+    },
+  };
+
+  /** The browser's own PDF viewer hides the text from extensions, so a PDF tab is sent to the reader page. */
+  const openPdf = (tab: Browser.tabs.Tab): Promise<boolean> => openReader(tab, openDeps).catch(() => false);
+
+  /** Toolbar button and shortcut on a tab: an arXiv PDF goes to its HTML version, any other PDF to the reader, a web page is scanned. */
+  function activateTab(tab: Browser.tabs.Tab, message: TabMessage): void {
+    if (tab.id === undefined || openHtmlVersion(tab)) return;
+    const id = tab.id;
+    void openPdf(tab).then((opened) => {
+      if (!opened) sendToTab(id, message);
+    });
+  }
+
   browser.commands.onCommand.addListener((command, tab) => {
-    if (command !== "explain-selection" || tab?.id === undefined || openHtmlVersion(tab)) return;
-    sendToTab(tab.id, { type: "explain-selection" });
+    if (command === "explain-selection" && tab) activateTab(tab, { type: "explain-selection" });
   });
 
-  browser.action.onClicked.addListener((tab) => {
-    if (tab.id !== undefined && !openHtmlVersion(tab)) sendToTab(tab.id, { type: "activate" });
-  });
+  browser.action.onClicked.addListener((tab) => activateTab(tab, { type: "activate" }));
 
   async function syncContentScripts(): Promise<void> {
     const settings = await loadSettings();
@@ -356,10 +402,12 @@ export default defineBackground(() => {
   async function ensureAlarm(): Promise<void> {
     if (!(await browser.alarms.get(BACKUP_ALARM)))
       await browser.alarms.create(BACKUP_ALARM, { delayInMinutes: 1, periodInMinutes: 24 * 60 });
+    if (!(await browser.alarms.get(BADGE_ALARM))) await browser.alarms.create(BADGE_ALARM, { delayInMinutes: 1, periodInMinutes: 60 });
   }
 
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === BACKUP_ALARM) void maybeBackup().catch(() => undefined);
+    if (alarm.name === BADGE_ALARM) void refreshBadge();
   });
 
   // ---- lifecycle ------------------------------------------------------------
@@ -374,8 +422,13 @@ export default defineBackground(() => {
     sync();
   });
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && "settings" in changes) sync();
+    if (area === "local" && "settings" in changes) {
+      sync();
+      void refreshBadge();
+    }
   });
+  // The worker is restarted on demand; keep the badge right whenever it comes up.
+  void refreshBadge();
   browser.permissions.onAdded.addListener(sync);
   browser.permissions.onRemoved.addListener(sync);
 });

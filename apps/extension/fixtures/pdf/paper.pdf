@@ -1,0 +1,57 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 894 >>
+stream
+BT /F1 16 Tf 72 730 Td (Adapters for Small Language Models) Tj ET
+BT /F1 13 Tf 72 690 Td (1 Introduction) Tj ET
+BT /F1 10 Tf 72 668 Td (Low-rank adaptation \(LoRA\) freezes the pretrained weights and injects small trainable) Tj ET
+BT /F1 10 Tf 72 656 Td (matrices into every layer, which keeps the number of trainable parameters tiny. We study) Tj ET
+BT /F1 10 Tf 72 644 Td (how this choice affects fine-tuning quality on small language models and report that the) Tj ET
+BT /F1 10 Tf 72 632 Td (results hold across three model families.) Tj ET
+BT /F1 10 Tf 82 596 Td (A second paragraph starts with an indent and compares the method with full fine-) Tj ET
+BT /F1 10 Tf 72 584 Td (tuning on a comparable budget of trainable parameters. The gap stays small on every task) Tj ET
+BT /F1 10 Tf 72 572 Td (we tried, even when the rank is reduced to a single dimension for all attention layers.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 282 >>
+stream
+BT /F1 13 Tf 72 730 Td (2 Method) Tj ET
+BT /F1 10 Tf 72 708 Td (Each adapted layer adds a product of two thin matrices to its frozen weight. LoRA needs no) Tj ET
+BT /F1 10 Tf 72 696 Td (extra inference latency because the product can be merged into the weight after training.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Title (Adapters for Small Language Models) >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000191 00000 n 
+0000000317 00000 n 
+0000001262 00000 n 
+0000001388 00000 n 
+0000001721 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R /Info 8 0 R >>
+startxref
+1786
+%%EOF

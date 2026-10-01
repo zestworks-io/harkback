@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Harkback · PDF</title>
+    <style>
+      :root { color-scheme: light dark; font: 15px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+      body { margin: 0; background: #e9e9ec; }
+      @media (prefers-color-scheme: dark) { body { background: #2b2b2e; } }
+      #notice { max-width: 640px; margin: 24px auto; padding: 12px 16px; border-radius: 6px; background: Canvas; color: CanvasText; }
+      #notice[hidden] { display: none; }
+      #notice p { margin: 4px 0; }
+      .hb-pages { padding: 12px 0 48px; }
+      .hb-page { position: relative; margin: 12px auto; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+      .hb-page canvas { display: block; width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="notice" hidden></div>
+    <main id="pages" class="hb-pages"></main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

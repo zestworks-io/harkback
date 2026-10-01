@@ -75,6 +75,18 @@ describe("streamChat", () => {
     expect(normalizeBaseUrl("http://127.0.0.1:11434/v1/")).toBe("http://127.0.0.1:11434/v1");
   });
 
+  it("omits temperature unless the caller sets one", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetchImpl = async (_: RequestInfo | URL, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return sse([`${delta("x")}\n\ndata: [DONE]\n\n`]);
+    };
+    await streamChat(cfg, messages, () => {}, { fetchImpl });
+    await streamChat(cfg, messages, () => {}, { fetchImpl, temperature: 0.5 });
+    expect(bodies[0]).not.toHaveProperty("temperature");
+    expect(bodies[1]).toHaveProperty("temperature", 0.5);
+  });
+
   it("sends no authorization header without a key", async () => {
     let auth: string | null = "unset";
     const fetchImpl = async (_: RequestInfo | URL, init?: RequestInit) => {

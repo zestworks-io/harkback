@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { arxivHtmlUrl, arxivIdFromUrl, cleanUrl, detectSource, isArxivUrl } from "../src/lib/source-id";
+import { arxivHtmlUrl, arxivIdFromUrl, cleanUrl, detectPdfSource, detectSource, isArxivUrl, type PdfFacts } from "../src/lib/source-id";
 
 const load = (name: string) => new DOMParser().parseFromString(readFileSync(`apps/extension/fixtures/${name}`, "utf8"), "text/html");
 const html = (head: string) => new DOMParser().parseFromString(`<html><head>${head}</head><body></body></html>`, "text/html");
@@ -62,5 +62,51 @@ describe("arxivHtmlUrl", () => {
     expect(arxivHtmlUrl("https://arxiv.org/html/2106.09685")).toBeNull();
     expect(arxivHtmlUrl("https://arxiv.org/abs/2106.09685")).toBeNull();
     expect(arxivHtmlUrl("https://example.com/pdf/2106.09685")).toBeNull();
+  });
+});
+
+describe("detectPdfSource", () => {
+  const facts = (over: Partial<PdfFacts> = {}): PdfFacts => ({
+    url: "https://example.com/files/paper.pdf",
+    title: "",
+    firstPageText: "",
+    ...over,
+  });
+
+  it("uses the arXiv id from the address or from the stamp on the first page", () => {
+    expect(detectPdfSource(facts({ url: "https://arxiv.org/pdf/2106.09685v2" })).source_id).toBe("arxiv:2106.09685");
+    const stamped = detectPdfSource(facts({ firstPageText: "Preprint. arXiv:2305.14314v1 [cs.LG] 23 May 2023" }));
+    expect(stamped.source_id).toBe("arxiv:2305.14314");
+    expect(stamped.ids.arxiv).toBe("2305.14314");
+  });
+
+  it("uses a DOI only when the text labels it as one", () => {
+    expect(detectPdfSource(facts({ firstPageText: "Published online. DOI: 10.1145/3313831.3376727." })).source_id).toBe(
+      "doi:10.1145/3313831.3376727",
+    );
+    expect(detectPdfSource(facts({ firstPageText: "https://doi.org/10.1000/XYZ-9)" })).source_id).toBe("doi:10.1000/xyz-9");
+    expect(detectPdfSource(facts({ firstPageText: "see 10.1145/3313831.3376727 for details" })).source_id).toBe(
+      "url:https://example.com/files/paper.pdf",
+    );
+    expect(detectPdfSource(facts({ metadataDoi: "doi:10.5555/AbC" })).source_id).toBe("doi:10.5555/abc");
+  });
+
+  it("falls back to the cleaned address, dropping tracking parameters", () => {
+    const s = detectPdfSource(facts({ url: "https://example.com/p.pdf?utm_source=x&page=2#page=3" }));
+    expect(s.source_id).toBe("url:https://example.com/p.pdf?page=2");
+    expect(s.ids.url).toBe("https://example.com/p.pdf?page=2");
+  });
+
+  it("identifies a local file by its contents and never records its path", () => {
+    const s = detectPdfSource(facts({ url: "file:///Users/me/Downloads/paper.pdf", contentHash: "ab12cd" }));
+    expect(s.source_id).toBe("pdf:sha256:ab12cd");
+    expect(s.ids).toEqual({});
+    expect(JSON.stringify(s)).not.toContain("Users");
+  });
+
+  it("titles the source from the PDF metadata, else from the file name", () => {
+    expect(detectPdfSource(facts({ title: "  Low-Rank\n Adaptation " })).title).toBe("Low-Rank Adaptation");
+    expect(detectPdfSource(facts({ url: "https://example.com/a/My%20Paper_v2.pdf" })).title).toBe("My Paper_v2");
+    expect(detectPdfSource(facts({ url: "file:///x/notes.pdf", contentHash: "1" })).title).toBe("notes");
   });
 });

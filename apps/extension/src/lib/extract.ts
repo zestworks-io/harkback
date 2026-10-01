@@ -152,8 +152,9 @@ function contentRoot(doc: Document, url: string): Element {
   return readabilityRoot(doc) ?? doc.querySelector("article, main, [role='main']") ?? doc.body ?? doc.documentElement;
 }
 
-export function extractPage(doc: Document, url: string): ExtractedPage {
-  const root = contentRoot(doc, url);
+/** `rootOverride` is for pages that already know where their text is, such as the PDF reader. */
+export function extractPage(doc: Document, url: string, rootOverride?: Element): ExtractedPage {
+  const root = rootOverride ?? contentRoot(doc, url);
   let text = "";
   const segments: Segment[] = [];
   const blocks: Block[] = [];

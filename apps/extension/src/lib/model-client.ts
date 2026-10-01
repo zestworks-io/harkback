@@ -78,7 +78,13 @@ export async function streamChat(
     const res = await fetchImpl(`${normalizeBaseUrl(cfg.baseUrl)}/chat/completions`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ model: cfg.model.trim(), messages, stream: true, temperature: opts.temperature ?? 0.2 }),
+      // Some models reject any non-default temperature, so only send one when asked to.
+      body: JSON.stringify({
+        model: cfg.model.trim(),
+        messages,
+        stream: true,
+        ...(opts.temperature !== undefined && { temperature: opts.temperature }),
+      }),
       signal: controller.signal,
     });
     if (!res.ok) {

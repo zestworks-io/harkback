@@ -71,6 +71,10 @@
       .field > span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
       .field input { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 11px; }
       .field input:focus { border-color: var(--mark); outline: none; box-shadow: 0 0 0 3px var(--mark-soft); }
+      .secret { display: flex; gap: 8px; }
+      .secret input { flex: 1; min-width: 0; }
+      .secret .reveal { font: inherit; font-size: 13px; font-weight: 600; min-width: 64px; border-radius: 8px; cursor: pointer; border: 1px solid var(--rule); background: var(--field); color: var(--ink); }
+      .secret .reveal:hover { border-color: var(--muted); }
       .field small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 6px; }
       .row { display: flex; gap: 8px; align-items: flex-end; max-width: 520px; }
       .row .field { flex: 1; margin-bottom: 16px; }

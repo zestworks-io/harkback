@@ -7,6 +7,7 @@ import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
 import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
+import { secretInput } from "../../lib/ui/secret-input";
 import { pick } from "../../lib/ui/strings";
 
 function input(value: string, onInput: (v: string) => void, attrs: Record<string, unknown> = {}): HTMLInputElement {
@@ -79,15 +80,27 @@ async function main(): Promise<void> {
       render();
     });
 
+    const field = (label: string, control: HTMLElement, cls = "") =>
+      h("label", { className: `field ${cls}`.trim() }, h("span", {}, label), control);
+    const choice = (control: HTMLElement, label: string) => h("label", { className: "choice" }, control, label);
+    const card = (title: string, desc: string | null, body: (Node | null)[], foot: Node[] = []) =>
+      h(
+        "section",
+        { className: "card" },
+        h("div", { className: "card-head" }, h("h2", {}, title), desc ? h("p", {}, desc) : null),
+        h("div", { className: "card-body" }, ...body),
+        foot.length > 0 ? h("div", { className: "card-foot" }, ...foot) : null,
+      );
+
     const modelRows = draft.models.map((m, i) => {
       const result = h("div", { className: "result", "data-hb": "model-result" });
-      const test = h("button", { type: "button", "data-hb": "model-test" }, L("测试", "Test"));
+      const test = h("button", { type: "button", className: "small", "data-hb": "model-test" }, L("测试连接", "Test connection"));
       test.addEventListener("click", async () => {
         const pattern = originPattern(m.baseUrl.trim());
         if (pattern) await requestOrigins([pattern]);
         result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
       });
-      const remove = h("button", { type: "button" }, L("删除", "Delete"));
+      const remove = h("button", { type: "button", className: "small ghost" }, L("删除", "Delete"));
       remove.addEventListener("click", () => {
         draft.models.splice(i, 1);
         if (draft.defaultModelId === m.id) draft.defaultModelId = null;
@@ -99,34 +112,46 @@ async function main(): Promise<void> {
       const isLocal = h("input", { type: "radio", name: "local-model", checked: draft.localModelId === m.id });
       isLocal.addEventListener("change", () => (draft.localModelId = m.id));
       return h(
-        "tr",
-        { "data-hb": "model-row" },
+        "div",
+        { className: "item", "data-hb": "model-row" },
         h(
-          "td",
-          {},
-          input(m.label, (v) => (m.label = v)),
+          "div",
+          { className: "grid" },
+          field(
+            L("名称", "Name"),
+            input(m.label, (v) => (m.label = v)),
+          ),
+          field(
+            L("模型", "Model"),
+            input(m.model, (v) => (m.model = v), { "data-hb": "model-name", placeholder: "gpt-4o-mini" }),
+          ),
+          field(
+            L("地址", "Address"),
+            input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
+            "wide",
+          ),
+          field(
+            "API key",
+            secretInput(input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }), {
+              show: L("显示", "Show"),
+              hide: L("隐藏", "Hide"),
+            }),
+            "wide",
+          ),
         ),
         h(
-          "td",
-          {},
-          input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
+          "div",
+          { className: "item-foot" },
+          choice(isDefault, L("默认模型", "Default")),
+          choice(isLocal, L("敏感来源用", "For sensitive sources")),
+          h("span", { className: "spacer" }),
+          test,
+          remove,
         ),
-        h(
-          "td",
-          {},
-          input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }),
-        ),
-        h(
-          "td",
-          {},
-          input(m.model, (v) => (m.model = v), { "data-hb": "model-name" }),
-        ),
-        h("td", {}, isDefault),
-        h("td", {}, isLocal),
-        h("td", {}, test, " ", remove, result),
+        result,
       );
     });
-    const addModel = h("button", { type: "button", "data-hb": "add-model" }, L("添加模型", "Add model"));
+    const addModel = h("button", { type: "button", className: "add", "data-hb": "add-model" }, L("+ 添加模型", "+ Add model"));
     addModel.addEventListener("click", () => {
       draft.models.push({ id: ulid(), label: "Model", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "" });
       render();
@@ -136,146 +161,146 @@ async function main(): Promise<void> {
       const modelSelect = h(
         "select",
         {},
-        h("option", { value: "" }, L("（默认）", "(default)")),
+        h("option", { value: "" }, L("（默认模型）", "(default model)")),
         ...draft.models.map((m) => h("option", { value: m.id, selected: r.modelId === m.id }, m.label)),
       );
       modelSelect.addEventListener("change", () => {
         if (modelSelect.value) r.modelId = modelSelect.value;
         else delete r.modelId;
       });
-      const remove = h("button", { type: "button" }, L("删除", "Delete"));
+      const remove = h("button", { type: "button", className: "small ghost" }, L("删除", "Delete"));
       remove.addEventListener("click", () => {
         draft.sites.splice(i, 1);
         render();
       });
       return h(
-        "tr",
-        { "data-hb": "site-row" },
+        "div",
+        { className: "site", "data-hb": "site-row" },
         h(
-          "td",
-          {},
+          "div",
+          { className: "pattern" },
           input(r.pattern, (v) => (r.pattern = v), { "data-hb": "site-pattern", placeholder: "example.com" }),
         ),
-        h(
-          "td",
-          {},
+        choice(
           checkbox(r.autoScan === true, (v) => (r.autoScan = v), { "data-hb": "site-auto" }),
+          L("自动扫描", "Auto-scan"),
         ),
-        h(
-          "td",
-          {},
+        choice(
           checkbox(r.sensitive === true, (v) => (r.sensitive = v), { "data-hb": "site-sensitive" }),
+          L("敏感", "Sensitive"),
         ),
-        h(
-          "td",
-          {},
+        choice(
           checkbox(r.disabled === true, (v) => (r.disabled = v), { "data-hb": "site-disabled" }),
+          L("停用", "Disabled"),
         ),
-        h("td", {}, modelSelect),
-        h("td", {}, remove),
+        modelSelect,
+        remove,
       );
     });
-    const addSite = h("button", { type: "button", "data-hb": "add-site" }, L("添加网站", "Add site"));
+    const addSite = h("button", { type: "button", className: "add", "data-hb": "add-site" }, L("+ 添加网站", "+ Add site"));
     addSite.addEventListener("click", () => {
       draft.sites.push({ pattern: "" });
       render();
     });
 
-    const saveButton = h("button", { type: "button", "data-hb": "save" }, L("保存", "Save"));
+    const saveButton = h("button", { type: "button", className: "primary", "data-hb": "save" }, L("保存", "Save changes"));
     saveButton.addEventListener("click", () => void save());
-    const backupButton = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份", "Back up now"));
+    const backupButton = h("button", { type: "button", className: "small", "data-hb": "backup-now" }, L("立即备份", "Back up now"));
     backupButton.addEventListener("click", async () => {
       status.textContent = await backupNow(draft.language);
     });
 
     root.replaceChildren(
-      h("h1", {}, L("Harkback 设置", "Harkback settings")),
-      h("p", {}, h("a", { href: browser.runtime.getURL("/library.html") }, L("查看历史与搜索", "History and search"))),
-      h("p", {}, L("解释语言：", "Explanation language: "), language),
-      h("h2", {}, L("模型", "Models")),
       h(
-        "table",
-        {},
+        "div",
+        { className: "page-head" },
         h(
-          "tr",
+          "div",
           {},
-          ...[
-            L("名称", "Name"),
-            L("地址", "Address"),
-            "API key",
-            L("模型", "Model"),
-            L("默认", "Default"),
-            L("敏感来源用", "For sensitive"),
-            "",
-          ].map((x) => h("th", {}, x)),
+          h("h1", {}, L("Harkback 设置", "Harkback settings")),
+          h("p", { className: "sub" }, L("模型、网站与隐私。", "Models, sites and privacy.")),
         ),
-        ...modelRows,
+        h(
+          "div",
+          { className: "head-tools" },
+          h("a", { href: browser.runtime.getURL("/library.html") }, L("历史与搜索", "History and search")),
+          language,
+        ),
       ),
-      h("p", {}, addModel),
-      h(
-        "p",
-        { className: "note" },
+      card(
+        L("模型", "Models"),
         L(
-          "非本机地址必须使用 https。API key 未加密保存在浏览器扩展存储中。敏感来源只能使用本机模型（127.0.0.1 / localhost）。",
-          "Non-local addresses must use https. API keys are stored unencrypted in the extension's storage. Sensitive sources can only use local models (127.0.0.1 / localhost).",
+          "非本机地址必须使用 https。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
+          "Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked \"For sensitive sources\" is the one used for sensitive sources; they never use any other model.",
         ),
+        [
+          ...modelRows,
+          addModel,
+          h(
+            "p",
+            { className: "note" },
+            L(
+              "API key 未加密保存在浏览器扩展存储中：其他网站和扩展读不到，但能读取本机磁盘的人可以。它只会发送到你填写的模型地址，不会写入备份或日志。建议使用有额度限制的 key，或使用本机模型（无需 key）。",
+              "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).",
+            ),
+          ),
+        ],
       ),
-      h("h2", {}, L("网站", "Sites")),
-      h(
-        "table",
-        {},
+      card(
+        L("网站", "Sites"),
+        L(
+          "默认只在 arxiv.org 自动扫描。其他网站可以在这里允许，或标为敏感。",
+          "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.",
+        ),
+        [
+          h(
+            "p",
+            { className: "note" },
+            L(
+              "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源用」。",
+              "\"Sensitive\" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick \"For sensitive sources\" first.",
+            ),
+          ),
+          ...siteRows,
+          draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
+          addSite,
+        ],
+      ),
+      card(L("限制与提示", "Limits and hints"), null, [
         h(
-          "tr",
-          {},
-          ...[
-            L("域名或网址前缀", "Domain or URL prefix"),
-            L("自动扫描", "Auto-scan"),
-            L("敏感", "Sensitive"),
-            L("停用", "Disabled"),
-            L("模型", "Model"),
-            "",
-          ].map((x) => h("th", {}, x)),
+          "div",
+          { className: "grid four" },
+          field(
+            L("每分钟解释上限（次）", "Explanations per minute"),
+            numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }),
+          ),
+          field(
+            L("每小时解释上限（次）", "Explanations per hour"),
+            numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
+          ),
+          field(
+            L("重逢间隔（天）", "Reunion gap (days)"),
+            numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
+          ),
+          field(
+            L("每页重逢上限（条）", "Reunions per page"),
+            numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
+          ),
         ),
-        ...siteRows,
+      ]),
+      card(
+        L("备份", "Backup"),
+        null,
+        [
+          choice(
+            checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
+            L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
+          ),
+        ],
+        [backupButton],
       ),
-      h("p", {}, addSite),
-      h("h2", {}, L("限制与提示", "Limits and hints")),
-      h(
-        "p",
-        {},
-        L("每分钟最多解释 ", "At most "),
-        numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }),
-        L(" 次，每小时 ", " per minute and "),
-        numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
-        L(" 次", " per hour"),
-      ),
-      h(
-        "p",
-        {},
-        L("重逢间隔至少 ", "Reunions at least "),
-        numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
-        L(" 天，每页最多 ", " days apart, at most "),
-        numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
-        L(" 条", " per page"),
-      ),
-      h("h2", {}, L("备份", "Backup")),
-      h(
-        "p",
-        {},
-        h(
-          "label",
-          {},
-          checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
-          " ",
-          L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
-        ),
-        " ",
-        backupButton,
-      ),
-      h("h2", {}, L("隐私", "Privacy")),
-      h("ul", { className: "note" }, ...PRIVACY[draft.language].map((line) => h("li", {}, line))),
-      h("p", {}, saveButton),
-      status,
+      card(L("隐私", "Privacy"), null, [h("ul", { className: "privacy" }, ...PRIVACY[draft.language].map((line) => h("li", {}, line)))]),
+      h("div", { className: "savebar" }, h("div", { className: "savebar-inner" }, saveButton, status)),
     );
   }
   render();

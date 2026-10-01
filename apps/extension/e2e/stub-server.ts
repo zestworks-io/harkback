@@ -1,5 +1,10 @@
+import { existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
+
+const pdfDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../fixtures/pdf");
 
 export interface StubReply {
   status?: number;
@@ -38,6 +43,13 @@ export async function startStubServer(): Promise<StubServer> {
     const raw = new TextDecoder().decode(Buffer.concat(chunks));
     if (req.method === "OPTIONS") {
       res.writeHead(204, cors).end();
+      return;
+    }
+    const pdf = req.method === "GET" ? /^\/pdf\/([a-z-]+\.pdf)$/.exec(req.url ?? "")?.[1] : undefined;
+    if (pdf) {
+      const file = path.join(pdfDir, pdf);
+      if (existsSync(file)) res.writeHead(200, { "content-type": "application/pdf" }).end(readFileSync(file));
+      else res.writeHead(404).end("not found");
       return;
     }
     if (req.method === "GET" && req.url === "/v1/models") {

@@ -32,6 +32,21 @@ describe("buildExplainPrompt", () => {
     expect(p.messages[1]!.content).toContain("c1: LoRA (ml)");
   });
 
+  it("marks candidates the reader already understands and lets the model build on them", () => {
+    const user = buildExplainPrompt({ ...req, understood: new Set([id(1)]) }).messages[1]!.content;
+    expect(user).toContain("c1: LoRA (ml) [the reader already understands this]");
+    expect(user).toContain("c2: Adapter (ml)\n");
+    expect(user).toContain("build on");
+  });
+
+  it("adds nothing about understanding when no candidate is understood", () => {
+    for (const understood of [undefined, new Set<string>(), new Set([id(9)])]) {
+      const user = buildExplainPrompt({ ...req, ...(understood ? { understood } : {}) }).messages[1]!.content;
+      expect(user).not.toContain("understands");
+      expect(user).not.toContain("build on");
+    }
+  });
+
   it("wraps page content in delimiters and strips delimiter injection", () => {
     const user = buildExplainPrompt(req).messages[1]!.content;
     expect(user.match(/<\/page_content>/g)).toHaveLength(1);

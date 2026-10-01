@@ -28,7 +28,18 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
     h(
       "div",
       { className: "hb-footer" },
-      ...ACTIONS.map((a) => h("button", { type: "button", "data-hb": a, onclick: () => act(a) }, t(lang, a))),
+      ...ACTIONS.map((a) =>
+        h(
+          "button",
+          {
+            type: "button",
+            className: a === "recalled" ? "hb-primary" : a === "mute" ? "hb-quiet" : null,
+            "data-hb": a,
+            onclick: () => act(a),
+          },
+          t(lang, a),
+        ),
+      ),
     ),
   );
 }

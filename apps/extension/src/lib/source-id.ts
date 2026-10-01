@@ -74,3 +74,50 @@ export function detectSource(url: string, doc: Document): DetectedSource {
     license: "unknown",
   };
 }
+
+export interface PdfFacts {
+  url: string;
+  /** The title in the PDF's own metadata. */
+  title: string;
+  firstPageText: string;
+  metadataDoi?: string;
+  /** Hex digest of the file; identifies a local file whose address says nothing about its contents. */
+  contentHash?: string;
+}
+
+const ARXIV_STAMP = /arXiv:\s*(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})(?:v\d+)?/i;
+const LABELLED_DOI = /(?:\bdoi\b\s*[:=]?\s*|doi\.org\/)(10\.\d{4,9}\/[^\s"<>]+)/i;
+
+function normalizeDoi(raw: string): string {
+  return raw
+    .replace(/^(?:doi:|https?:\/\/(?:dx\.)?doi\.org\/)/i, "")
+    .replace(/[.,;:)\]}]+$/, "")
+    .toLowerCase();
+}
+
+function pdfTitle(f: PdfFacts): string {
+  const fromMeta = f.title.replace(/\s+/g, " ").trim();
+  if (fromMeta) return fromMeta;
+  try {
+    const name = new URL(f.url).pathname.split("/").pop() ?? "";
+    return decodeURIComponent(name).replace(/\.pdf$/i, "");
+  } catch {
+    return "";
+  }
+}
+
+export function detectPdfSource(f: PdfFacts): DetectedSource {
+  const arxiv = arxivIdFromUrl(f.url) ?? ARXIV_STAMP.exec(f.firstPageText)?.[1] ?? null;
+  const rawDoi = f.metadataDoi ?? LABELLED_DOI.exec(f.firstPageText)?.[1] ?? null;
+  const doi = rawDoi ? normalizeDoi(rawDoi) : null;
+  const local = f.url.startsWith("file:");
+  const cleaned = local ? null : cleanUrl(f.url);
+  const source_id = arxiv ? `arxiv:${arxiv}` : doi ? `doi:${doi}` : local ? `pdf:sha256:${f.contentHash ?? ""}` : `url:${cleaned}`;
+  return {
+    source_id,
+    // A local path names the user's folders; keep it out of the record.
+    ids: { ...(cleaned ? { url: cleaned } : {}), ...(arxiv ? { arxiv } : {}), ...(doi ? { doi } : {}) },
+    title: pdfTitle(f),
+    license: "unknown",
+  };
+}

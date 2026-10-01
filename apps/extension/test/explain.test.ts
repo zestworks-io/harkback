@@ -56,6 +56,18 @@ describe("planExplain", () => {
     expect(plan.prompt.messages[1]!.content).toContain("c1: LoRA (ml)");
   });
 
+  it("tells the model which candidates the reader already understands", () => {
+    const w = world();
+    w.source("arxiv:2106.09685");
+    const lora = w.concept("LoRA", ["Low-Rank Adaptation"]);
+    const enc = w.encounter(lora, "arxiv:2106.09685");
+    const unmarked = planOf(planExplain(req(), ctx, settings(), w.state()));
+    expect(unmarked.prompt.messages[1]!.content).not.toContain("already understands");
+    w.events.push(w.f.make("encounter.action", { encounter_id: enc, action: "marked_understood" }));
+    const marked = planOf(planExplain(req(), ctx, settings(), w.state()));
+    expect(marked.prompt.messages[1]!.content).toContain("c1: LoRA (ml) [the reader already understands this]");
+  });
+
   it("keeps sensitive-only concepts out of remote prompts but still returns them for the local question", () => {
     const w = world();
     w.source("intranet:1", "sensitive");

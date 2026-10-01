@@ -37,6 +37,7 @@ export class ExplainCard {
     private readonly handlers: ExplainCardHandlers,
   ) {
     this.body.textContent = t(lang, "loading");
+    this.body.classList.add("hb-loading");
     const close = h(
       "button",
       { className: "hb-close", type: "button", "data-hb": "close", "aria-label": t(lang, "close"), onclick: () => this.close() },
@@ -46,22 +47,21 @@ export class ExplainCard {
       "div",
       { className: "hb-card", "data-hb": "card", role: "dialog" },
       close,
-      this.meta,
-      this.body,
-      this.note,
-      this.footer,
-      this.followUp,
+      h("div", { className: "hb-scroll" }, this.meta, this.body, this.note, this.footer, this.followUp),
     );
+    document.addEventListener("keydown", this.onKeyDown, true);
   }
 
   setStreaming(text: string): void {
     if (!text) return;
     this.hasText = true;
+    this.body.classList.remove("hb-loading");
     this.render(this.body, text);
   }
 
   setExplained(text: string, tier: Tier): void {
     this.hasText = true;
+    this.body.classList.remove("hb-loading");
     this.render(this.body, text);
     const label = t(this.lang, tier === "defined_in_source" ? "tierDefined" : "tierExternal");
     this.meta.replaceChildren(h("span", { className: `hb-tier hb-${tier}`, "data-hb": "tier" }, label));
@@ -80,7 +80,7 @@ export class ExplainCard {
         "div",
         { className: "hb-ask", "data-hb": "ask" },
         h("span", {}, t(this.lang, "askSame", { name, days: daysAgo })),
-        h("button", { type: "button", "data-hb": "ask-yes", onclick: () => reply(true) }, t(this.lang, "yes")),
+        h("button", { type: "button", className: "hb-primary", "data-hb": "ask-yes", onclick: () => reply(true) }, t(this.lang, "yes")),
         h("button", { type: "button", "data-hb": "ask-no", onclick: () => reply(false) }, t(this.lang, "no")),
       ),
     );
@@ -97,7 +97,11 @@ export class ExplainCard {
       });
       return button;
     };
-    const sensitive = h("button", { type: "button", "data-hb": "mark-sensitive", disabled: !recorded }, t(this.lang, "markSensitive"));
+    const sensitive = h(
+      "button",
+      { type: "button", className: "hb-quiet", "data-hb": "mark-sensitive", disabled: !recorded },
+      t(this.lang, "markSensitive"),
+    );
     sensitive.addEventListener("click", () => {
       sensitive.disabled = true;
       this.note.textContent = t(this.lang, "markedSensitive");
@@ -106,7 +110,12 @@ export class ExplainCard {
     this.footer.replaceChildren(
       choice("understood", "marked_understood", "understood"),
       choice("confused", "marked_confused", "confused"),
-      h("button", { type: "button", "data-hb": "followup-open", onclick: () => this.openFollowUp() }, t(this.lang, "followUp")),
+      h("span", { className: "hb-spacer" }),
+      h(
+        "button",
+        { type: "button", className: "hb-quiet", "data-hb": "followup-open", onclick: () => this.openFollowUp() },
+        t(this.lang, "followUp"),
+      ),
       sensitive,
     );
   }
@@ -118,7 +127,11 @@ export class ExplainCard {
     else this.body.replaceChildren(box);
     if (RETRYABLE.has(code)) {
       this.footer.replaceChildren(
-        h("button", { type: "button", "data-hb": "retry", onclick: () => this.handlers.onRetry() }, t(this.lang, "retry")),
+        h(
+          "button",
+          { type: "button", className: "hb-primary", "data-hb": "retry", onclick: () => this.handlers.onRetry() },
+          t(this.lang, "retry"),
+        ),
       );
     }
   }
@@ -139,6 +152,7 @@ export class ExplainCard {
   close(): void {
     if (this.closed) return;
     this.closed = true;
+    document.removeEventListener("keydown", this.onKeyDown, true);
     if (this.asking) {
       this.asking = false;
       this.handlers.onAnswer(false);
@@ -146,6 +160,10 @@ export class ExplainCard {
     this.el.remove();
     this.handlers.onClose();
   }
+
+  private readonly onKeyDown = (e: KeyboardEvent): void => {
+    if (e.key === "Escape" && e.isTrusted) this.close();
+  };
 
   private openFollowUp(): void {
     if (this.followUp.childElementCount > 0) return;
@@ -165,7 +183,11 @@ export class ExplainCard {
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") send();
     });
-    const button = h("button", { type: "button", "data-hb": "followup-send", onclick: send }, t(this.lang, "send"));
+    const button = h(
+      "button",
+      { type: "button", className: "hb-primary", "data-hb": "followup-send", onclick: send },
+      t(this.lang, "send"),
+    );
     this.followUp.replaceChildren(h("div", { className: "hb-row" }, input, button), this.answer);
     input.focus();
   }

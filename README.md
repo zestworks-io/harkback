@@ -30,8 +30,11 @@ Harkback is a Chrome extension for people who read papers and technical document
 - **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, then mark it remembered, explain it again, compare the two usages, or mute it.
 - **One concept, many spellings.** `LLM`, `LLMs`, `the LLM`, `large language model` and `Large-Language Models` are the same concept. So are `β-VAE` and `beta-VAE`, and `fine-tuning` and `ﬁne-tuning` with a ligature. Near matches are put to you as "is this the term you looked up 3 days ago?".
 - **Related terms.** If a model says `QLoRA` is a variant of `LoRA`, a page that only mentions `QLoRA` reminds you of what you understood about `LoRA`.
+- **Concept pages.** Open any term in History to see how well you understood it, what it builds on (prerequisites), its variants and related terms, and every time you met it. You can add an alias, merge two concepts that are the same, remove a wrong relation, or mute a term.
+- **Review.** History shows a _Review_ button with the number of terms due. Terms you were confused about come back after a day; terms you remembered come back after 3, 7, 14, 30 and 60 days. The toolbar icon shows the same number.
+- **Builds on what you know.** When a term you look up is close to one you already understand, the model is told so and can explain the difference instead of starting over.
 - **Private by design.** Automatic scanning is limited to arxiv.org. Sensitive sites can be forced onto a local model, and private windows never record or scan.
-- **Portable records.** Export everything as Markdown, or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`.
+- **Portable records.** Export everything as Markdown, or as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`.
 - **Any OpenAI-compatible model.** Ollama, OpenAI, OpenRouter, Anthropic's compatible endpoint, or your own server.
 
 ## How it works
@@ -87,16 +90,16 @@ then restart Ollama.
 
 ## Using Harkback
 
-| You want to                       | Do this                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------ |
-| Explain a term                    | Select it and click **Explain**, or press `Alt+E`.                                         |
-| Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.      |
-| Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans. |
-| Read an arXiv PDF                 | Click the toolbar button: it opens the HTML version of the same paper.                     |
-| See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live.      |
-| Keep your records                 | History page → **Export Markdown** or **Back up JSONL now**.                               |
-| Stop a term from being underlined | Hover the underline → **Don't show again**.                                                |
-| Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.     |
+| You want to                       | Do this                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Explain a term                    | Select it and click **Explain**, or press `Alt+E`.                                             |
+| Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.          |
+| Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.     |
+| Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader. |
+| See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live.          |
+| Keep your records                 | History page → **Export Markdown** or **Back up JSONL now**.                                   |
+| Stop a term from being underlined | Hover the underline → **Don't show again**.                                                    |
+| Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.         |
 
 ## Privacy
 
@@ -124,7 +127,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 
 - Chrome (Manifest V3) only.
 - Explanations depend on the model you choose; small local models may produce weaker concept cards, which lowers recall quality but never breaks recording.
-- Text in a browser's built-in PDF viewer cannot be read. On arXiv, Harkback redirects to the HTML version; other PDFs are not supported.
+- Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs have no text and are not supported, there is no OCR, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs "Allow access to file URLs" turned on for Harkback in `chrome://extensions`.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
 - Chinese, Japanese and Korean names must be at least three characters to be underlined, to avoid false positives.
 

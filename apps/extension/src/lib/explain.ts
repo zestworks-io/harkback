@@ -15,6 +15,7 @@ import {
   type State,
 } from "@harkback/core";
 import type { HarkEvent, Locator, Tier } from "@harkback/spec";
+import { understandingOf } from "./concept-detail";
 import { cooccurrenceEdge, type LastLookup } from "./cooccurrence";
 import { chooseModel } from "./model-policy";
 import type { ModelConfig, Settings, SiteRule } from "./settings";
@@ -117,13 +118,15 @@ export function planExplain(
   }
 
   const candidates = findCandidates(state, selection);
+  const forModel = candidatesForModel(state, candidates, routed.remote);
   const prompt = buildExplainPrompt({
     selection,
     paragraph: req.paragraph,
     section: req.section,
     pageTitle: req.pageTitle,
     abstractFirstSentence: req.abstractFirstSentence,
-    candidates: candidatesForModel(state, candidates, routed.remote),
+    candidates: forModel,
+    understood: new Set(forModel.filter((c) => understandingOf(state, c.conceptId) === "understood").map((c) => c.conceptId)),
     language: settings.language,
     mode: req.mode,
     ...(earlier ? { earlier } : {}),

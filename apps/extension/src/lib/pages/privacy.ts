@@ -9,7 +9,7 @@ export const PRIVACY: Record<Lang, string[]> = {
     "处理保密材料时，请在设置中把该网站标为敏感并使用本机模型（如 Ollama）；敏感来源的内容不会发给非本机模型。",
     "无痕窗口默认不启用；启用后只解释、不记录、不显示重逢。",
     "删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。建议开启全盘加密。",
-    "API key 保存在浏览器扩展存储中，未加密。",
+    "API key 保存在浏览器扩展存储中，未加密；只发送到你填写的模型地址，不进入备份或日志。建议使用有额度限制的 key。",
   ],
   en: [
     "When you ask for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service you choose, under that provider's terms.",
@@ -19,6 +19,6 @@ export const PRIVACY: Record<Lang, string[]> = {
     "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.",
     "Private windows are off by default; when enabled, the extension explains but records nothing and shows no reunions.",
     "Deletion takes effect in the app; traces may remain on disk and exported backups cannot be recalled. Full-disk encryption is recommended.",
-    "API keys are stored unencrypted in the extension's storage.",
+    "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.",
   ],
 };

@@ -1,4 +1,4 @@
-import { createEventFactory, type EventFactory } from "@harkback/core";
+import { createEventFactory, edgeId, type EventFactory } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { describe, expect, it } from "vitest";
 import type { Request } from "../src/lib/messages";
@@ -29,7 +29,7 @@ function setup(settings: unknown = {}) {
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
-  return { deps, written, calls, conceptId, encounterId };
+  return { deps, written, calls, conceptId, encounterId, w };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -123,6 +123,116 @@ describe("page-only requests", () => {
     expect(written.map((e) => e.type)).toEqual(["encounter.deleted"]);
     expect(calls.compact).toBe(1);
     expect(await handleRequest(deps, { type: "delete-encounter", encounterId: "missing" }, extensionPage)).toEqual({ ok: false });
+  });
+
+  it("records a review answer on the concept's latest encounter", async () => {
+    const { deps, written, conceptId } = setup();
+    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "marked_understood" }, extensionPage)).toEqual({
+      ok: true,
+    });
+    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "marked_confused" }, extensionPage)).toEqual({ ok: true });
+    expect(written.map((e) => [e.type, (e.payload as { action?: string }).action])).toEqual([
+      ["encounter.action", "marked_understood"],
+      ["encounter.action", "marked_confused"],
+    ]);
+  });
+
+  it("refuses a review answer for an unknown concept or an action it cannot take", async () => {
+    const { deps, written, conceptId } = setup();
+    expect(await handleRequest(deps, { type: "review-answer", conceptId: "missing", action: "marked_understood" }, extensionPage)).toEqual({
+      ok: false,
+    });
+    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "followed_up" as never }, extensionPage)).toEqual({
+      ok: false,
+    });
+    expect(written).toEqual([]);
+  });
+
+  describe("corrections", () => {
+    it("merges one concept into another through their representatives", async () => {
+      const { deps, written, conceptId, w } = setup();
+      const other = w.concept("Low-Rank Adaptation Method");
+      w.encounter(other, "arxiv:1");
+      expect(await handleRequest(deps, { type: "merge-concepts", fromId: other, intoId: conceptId }, extensionPage)).toEqual({ ok: true });
+      expect(written.map((e) => [e.type, e.payload])).toEqual([["concept.merged", { from: other, into: conceptId }]]);
+    });
+
+    it("refuses to merge a concept with itself or an unknown one", async () => {
+      const { deps, written, conceptId } = setup();
+      expect(await handleRequest(deps, { type: "merge-concepts", fromId: conceptId, intoId: conceptId }, extensionPage)).toEqual({
+        ok: false,
+      });
+      expect(await handleRequest(deps, { type: "merge-concepts", fromId: "missing", intoId: conceptId }, extensionPage)).toEqual({
+        ok: false,
+      });
+      expect(written).toEqual([]);
+    });
+
+    it("adds a trimmed alias once", async () => {
+      const { deps, written, conceptId } = setup();
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: "  Low-rank adapters " }, extensionPage)).toEqual({
+        ok: true,
+      });
+      expect(written.map((e) => [e.type, e.payload])).toEqual([
+        ["concept.alias_added", { concept_id: conceptId, alias: "Low-rank adapters" }],
+      ]);
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: " LoRA " }, extensionPage)).toEqual({ ok: true });
+      expect(written).toHaveLength(1);
+    });
+
+    it("refuses an alias that would merge the concept with another one", async () => {
+      const { deps, written, conceptId, w } = setup();
+      const other = w.concept("Matrix rank");
+      w.encounter(other, "arxiv:1");
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: "matrix  RANK" }, extensionPage)).toEqual({
+        ok: false,
+        collides: true,
+      });
+      const llm = w.concept("LLM");
+      w.encounter(llm, "arxiv:1");
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: "Large Language Model" }, extensionPage)).toEqual({
+        ok: false,
+        collides: true,
+      });
+      expect(written).toEqual([]);
+    });
+
+    it("refuses an empty, oversized or unknown alias", async () => {
+      const { deps, written, conceptId } = setup();
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: "   " }, extensionPage)).toEqual({ ok: false });
+      expect(await handleRequest(deps, { type: "add-alias", conceptId, alias: "x".repeat(500) }, extensionPage)).toEqual({ ok: false });
+      expect(await handleRequest(deps, { type: "add-alias", conceptId: "missing", alias: "ok" }, extensionPage)).toEqual({ ok: false });
+      expect(written).toEqual([]);
+    });
+
+    it("rejects a relation that exists and refuses one that does not", async () => {
+      const { deps, written, conceptId, w } = setup();
+      const other = w.concept("Matrix rank");
+      w.encounter(other, "arxiv:1");
+      w.events.push(
+        w.f.make("edge.proposed", {
+          from: conceptId,
+          to: other,
+          rel: "prerequisite",
+          source: "llm_explain",
+          confidence: 0.9,
+          evidence: {},
+        }),
+      );
+      const id = edgeId(conceptId, "prerequisite", other);
+      expect(await handleRequest(deps, { type: "reject-edge", edgeId: id }, extensionPage)).toEqual({ ok: true });
+      expect(written.map((e) => [e.type, e.payload])).toEqual([["edge.rejected", { edge_id: id }]]);
+      expect(await handleRequest(deps, { type: "reject-edge", edgeId: "nope" }, extensionPage)).toEqual({ ok: false });
+      expect(written).toHaveLength(1);
+    });
+
+    it("mutes and unmutes a concept", async () => {
+      const { deps, written, conceptId } = setup();
+      expect(await handleRequest(deps, { type: "set-muted", conceptId, muted: true }, extensionPage)).toEqual({ ok: true });
+      expect(await handleRequest(deps, { type: "set-muted", conceptId, muted: false }, extensionPage)).toEqual({ ok: true });
+      expect(await handleRequest(deps, { type: "set-muted", conceptId: "missing", muted: true }, extensionPage)).toEqual({ ok: false });
+      expect(written.map((e) => e.type)).toEqual(["concept.muted", "concept.unmuted"]);
+    });
   });
 
   it("reports a failed backup with its message", async () => {

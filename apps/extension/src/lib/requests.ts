@@ -1,5 +1,5 @@
-import { clampSource, matcherEntriesFromState, type EventFactory, type Hit, type State } from "@harkback/core";
-import type { HarkEvent } from "@harkback/spec";
+import { acronymOf, clampSource, identityKey, matcherEntriesFromState, type EventFactory, type Hit, type State } from "@harkback/core";
+import { CARD_LIMITS, type HarkEvent } from "@harkback/spec";
 import type { PageInfo, Request, ResponseMap } from "./messages";
 import { reunionCards } from "./reunion-cards";
 import type { SenderInfo } from "./sender-auth";
@@ -74,6 +74,48 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       if (!(await deps.getState()).encounters.has(msg.encounterId)) return { ok: false };
       await deps.append((f) => [f.make("encounter.deleted", { encounter_id: msg.encounterId })]);
       await deps.compact();
+      return { ok: true };
+    }
+    case "review-answer": {
+      const state = await deps.getState();
+      const rep = state.representative.get(msg.conceptId);
+      const encounterId = rep ? state.encountersByConcept.get(rep)?.at(-1) : undefined;
+      if (!encounterId || (msg.action !== "marked_understood" && msg.action !== "marked_confused")) return { ok: false };
+      await deps.append((f) => [f.make("encounter.action", { encounter_id: encounterId, action: msg.action })]);
+      return { ok: true };
+    }
+    case "merge-concepts": {
+      const { representative } = await deps.getState();
+      const from = representative.get(msg.fromId);
+      const into = representative.get(msg.intoId);
+      if (!from || !into || from === into) return { ok: false };
+      await deps.append((f) => [f.make("concept.merged", { from, into })]);
+      return { ok: true };
+    }
+    case "add-alias": {
+      const state = await deps.getState();
+      const rep = state.representative.get(msg.conceptId);
+      const alias = typeof msg.alias === "string" ? msg.alias.trim() : "";
+      if (!rep || !alias || alias.length > CARD_LIMITS.maxNameLength) return { ok: false };
+      const key = identityKey(alias);
+      if (!key) return { ok: false };
+      if (state.concepts.get(rep)!.names.some((n) => identityKey(n) === key)) return { ok: true };
+      // Replay merges concepts that share a name or an abbreviation, so such an alias would merge them without asking.
+      const acronym = acronymOf(alias);
+      const keys = [key, ...(acronym && acronym.length >= 3 ? [identityKey(acronym)] : [])];
+      if (keys.some((k) => state.aliases.get(k)?.conceptIds.some((id) => id !== rep))) return { ok: false, collides: true };
+      await deps.append((f) => [f.make("concept.alias_added", { concept_id: rep, alias })]);
+      return { ok: true };
+    }
+    case "reject-edge": {
+      if (!(await deps.getState()).edges.has(String(msg.edgeId))) return { ok: false };
+      await deps.append((f) => [f.make("edge.rejected", { edge_id: msg.edgeId })]);
+      return { ok: true };
+    }
+    case "set-muted": {
+      const rep = (await deps.getState()).representative.get(msg.conceptId);
+      if (incognito || !rep) return { ok: false };
+      await deps.append((f) => [f.make(msg.muted === true ? "concept.muted" : "concept.unmuted", { concept_id: rep })]);
       return { ok: true };
     }
     case "backup-now":

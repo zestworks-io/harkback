@@ -7,6 +7,7 @@ import { request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage, onboardingSettings, TEMPLATES } from "../../lib/pages/setup";
 import { modelUrlError } from "../../lib/model-policy";
 import { withDefaults } from "../../lib/settings";
+import { secretInput } from "../../lib/ui/secret-input";
 import { originPattern } from "../../lib/site-rules";
 import { pick, type Lang } from "../../lib/ui/strings";
 
@@ -188,13 +189,13 @@ async function main(): Promise<void> {
             "label",
             { className: "field" },
             h("span", {}, "API key"),
-            apiKey,
+            secretInput(apiKey, { show: L("显示", "Show"), hide: L("隐藏", "Hide") }),
             h(
               "small",
               {},
               L(
-                "保存在浏览器扩展存储中，未加密；本机模型可留空。",
-                "Stored unencrypted in the extension's storage; leave empty for local models.",
+                "未加密保存在本机浏览器扩展存储中，只发送到上面的模型地址；建议使用有额度限制的 key。本机模型可留空。",
+                "Stored unencrypted in this browser's extension storage and only sent to the address above; prefer a key with a spending limit. Leave empty for local models.",
               ),
             ),
           ),
@@ -260,8 +261,8 @@ async function main(): Promise<void> {
           "p",
           { className: "lede" },
           L(
-            "arXiv 的 PDF 页面没有可读的文字：点工具栏按钮会打开同一篇论文的 HTML 版本。",
-            "arXiv PDF pages have no readable text: the toolbar button opens the HTML version of the same paper.",
+            "PDF 也可以读：在 PDF 页面点工具栏按钮，arXiv 的论文会打开 HTML 版本，其他 PDF 会在 Harkback 的阅读页中打开。本地 PDF 需要先在 chrome://extensions 中为 Harkback 开启「允许访问文件网址」。",
+            'PDFs work too: click the toolbar button on a PDF. An arXiv paper opens its HTML version; any other PDF opens in Harkback\'s reader. For a PDF on your computer, first turn on "Allow access to file URLs" for Harkback in chrome://extensions.',
           ),
         ),
       ),
