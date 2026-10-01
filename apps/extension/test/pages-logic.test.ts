@@ -89,3 +89,33 @@ describe("historyModel", () => {
     expect(historyModel(state, "nothing matches")).toEqual([]);
   });
 });
+
+describe("historyModel follow-ups", () => {
+  const w = world(Date.UTC(2026, 8, 1));
+  w.source("arxiv:1", "normal", "BLEU paper");
+  const bleu = w.concept("BLEU");
+  const first = w.encounter(bleu, "arxiv:1", "A metric for translations.");
+  const other = w.encounter(bleu, "arxiv:1", "Second look.");
+  const ask = (encounterId: string, question: string, answer: string) =>
+    w.events.push(w.f.make("encounter.action", { encounter_id: encounterId, action: "followed_up", detail: { question, answer } }));
+  w.setTime(Date.UTC(2026, 8, 2));
+  ask(first, "How is it calculated?", "Using modified n-gram precision.");
+  w.setTime(Date.UTC(2026, 8, 3));
+  ask(first, "When should I use it?", "For corpus-level comparison.");
+  w.events.push(w.f.make("encounter.action", { encounter_id: other, action: "marked_understood" }));
+  const state = w.state();
+
+  it("keeps the whole conversation of an explanation, oldest question first", () => {
+    const entries = historyModel(state)[0]!.entries;
+    const withChat = entries.find((e) => e.encounterId === first)!;
+    expect(withChat.followUps.map((f) => f.question)).toEqual(["How is it calculated?", "When should I use it?"]);
+    expect(withChat.followUps[0]!.answer).toBe("Using modified n-gram precision.");
+    expect(entries.find((e) => e.encounterId === other)!.followUps).toEqual([]);
+  });
+
+  it("finds entries by what was asked or answered", () => {
+    expect(historyModel(state, "corpus-level")[0]!.entries.map((e) => e.encounterId)).toEqual([first]);
+    expect(historyModel(state, "how is it calculated")[0]!.entries.map((e) => e.encounterId)).toEqual([first]);
+    expect(historyModel(state, "nothing like this")).toEqual([]);
+  });
+});

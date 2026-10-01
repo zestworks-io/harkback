@@ -83,6 +83,27 @@ test("selects several explanations and deletes them together", async ({ context,
   expect(events.filter((e) => e.type === "encounter.deleted")).toHaveLength(2);
 });
 
+test("shows the follow-up conversation in the history and finds it by search", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  const reader = await openArxiv(context, "2106.09685");
+  await selectAndExplain(reader, "#t-lora");
+  await expect(reader.locator("[data-hb=understood]")).toBeEnabled();
+  stub.queue.push({ body: "和全量微调相比，它只训练很少的参数。" });
+  await reader.locator("[data-hb=followup-open]").click();
+  await reader.locator("[data-hb=followup-input]").fill("和全量微调比呢？");
+  await reader.locator("[data-hb=followup-send]").click();
+  await expect(reader.locator("[data-hb=followup-answer]")).toHaveText("和全量微调相比，它只训练很少的参数。");
+
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
+  await expect(page.locator("[data-hb=chat-question]")).toHaveText("和全量微调比呢？");
+  await expect(page.locator("[data-hb=chat-answer]")).toHaveText("和全量微调相比，它只训练很少的参数。");
+  await page.locator("[data-hb=search]").fill("很少的参数");
+  await expect(page.locator("[data-hb=entry]")).toHaveCount(1);
+  await page.locator("[data-hb=search]").fill("没有这个词");
+  await expect(page.locator("[data-hb=empty]")).toBeVisible();
+});
+
 test("opens a concept page from the list and returns", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLora(context);

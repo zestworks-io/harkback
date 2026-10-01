@@ -136,6 +136,19 @@ async function main(): Promise<void> {
     const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
     const body = h("div", { className: "explanation" });
     body.append(renderMarkdown(e.explanation));
+    const chat =
+      e.followUps.length === 0
+        ? null
+        : h(
+            "div",
+            { className: "chat", "data-hb": "chat" },
+            h("div", { className: "chat-title" }, L(`追问 · ${e.followUps.length}`, `Follow-up conversation · ${e.followUps.length}`)),
+            ...e.followUps.flatMap((f) => {
+              const answer = h("div", { className: "explanation chat-a", "data-hb": "chat-answer" });
+              answer.append(renderMarkdown(f.answer));
+              return [h("div", { className: "chat-q", "data-hb": "chat-question" }, f.question), answer];
+            }),
+          );
     const choose = selecting
       ? checkbox(
           e.encounterId,
@@ -162,6 +175,7 @@ async function main(): Promise<void> {
       ),
       h("blockquote", { className: "quote" }, e.selection),
       body,
+      chat,
     );
   };
 

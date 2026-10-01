@@ -1,6 +1,13 @@
 import type { State } from "@harkback/core";
 import type { Domain, Tier } from "@harkback/spec";
 
+/** One follow-up question asked on the card and the answer it got. */
+export interface FollowUp {
+  at: number;
+  question: string;
+  answer: string;
+}
+
 export interface HistoryEntry {
   encounterId: string;
   date: string;
@@ -8,6 +15,8 @@ export interface HistoryEntry {
   tier: Tier;
   selection: string;
   explanation: string;
+  /** The conversation after the explanation, oldest first. */
+  followUps: FollowUp[];
 }
 
 export interface HistoryConcept {
@@ -30,6 +39,9 @@ export function historyEntries(state: State, conceptId: string): HistoryEntry[] 
       tier: e.explanation.tier,
       selection: e.selection,
       explanation: e.explanation.text,
+      followUps: e.actions.flatMap((a) =>
+        a.action === "followed_up" && a.detail?.question ? [{ at: a.at, question: a.detail.question, answer: a.detail.answer ?? "" }] : [],
+      ),
     };
   });
 }
@@ -42,7 +54,13 @@ export function historyModel(state: State, query = ""): HistoryConcept[] {
     const encounters = (state.encountersByConcept.get(c.id) ?? []).map((id) => state.encounters.get(id)!);
     const all = historyEntries(state, c.id);
     const nameHit = !q || c.names.some((n) => n.toLowerCase().includes(q));
-    const entries = nameHit ? all : all.filter((e) => [e.selection, e.explanation, e.sourceTitle].some((s) => s.toLowerCase().includes(q)));
+    const entries = nameHit
+      ? all
+      : all.filter((e) =>
+          [e.selection, e.explanation, e.sourceTitle, ...e.followUps.flatMap((f) => [f.question, f.answer])].some((s) =>
+            s.toLowerCase().includes(q),
+          ),
+        );
     if (entries.length === 0) continue;
     out.push({
       conceptId: c.id,
