@@ -39,6 +39,52 @@ describe("testConnection", () => {
     expect(auth).toBe("Bearer k");
   });
 
+  it("lists Anthropic models with x-api-key", async () => {
+    let seen: { url: string; headers: Headers } | null = null;
+    const fetchImpl = async (url: RequestInfo | URL, init?: RequestInit) => {
+      seen = { url: String(url), headers: new Headers(init?.headers) };
+      return new Response(JSON.stringify({ data: [{ id: "claude-b" }, { id: "claude-a" }] }));
+    };
+    expect(await testConnection({ baseUrl: "https://api.anthropic.com/v1", apiKey: " k ", apiType: "anthropic" }, fetchImpl)).toEqual({
+      kind: "ok",
+      models: ["claude-a", "claude-b"],
+    });
+    expect(seen!.url).toBe("https://api.anthropic.com/v1/models?limit=1000");
+    expect(seen!.headers.get("x-api-key")).toBe("k");
+    expect(seen!.headers.get("anthropic-version")).toBe("2023-06-01");
+    expect(seen!.headers.get("authorization")).toBeNull();
+  });
+
+  it("lists Gemini models that can generate content, without the models/ prefix, and reads 400 as a bad key", async () => {
+    let seen: { url: string; headers: Headers } | null = null;
+    const body = {
+      models: [
+        { name: "models/gemini-2.5-flash", supportedGenerationMethods: ["generateContent"] },
+        { name: "models/text-embedding-004", supportedGenerationMethods: ["embedContent"] },
+        { name: "models/gemini-2.5-pro", supportedGenerationMethods: ["generateContent", "countTokens"] },
+      ],
+    };
+    const fetchImpl = async (url: RequestInfo | URL, init?: RequestInit) => {
+      seen = { url: String(url), headers: new Headers(init?.headers) };
+      return new Response(JSON.stringify(body));
+    };
+    const cfgG = { baseUrl: "https://generativelanguage.googleapis.com/v1beta", apiKey: "g", apiType: "gemini" as const };
+    expect(await testConnection(cfgG, fetchImpl)).toEqual({ kind: "ok", models: ["gemini-2.5-flash", "gemini-2.5-pro"] });
+    expect(seen!.url).toBe("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000");
+    expect(seen!.headers.get("x-goog-api-key")).toBe("g");
+    expect(await testConnection(cfgG, json({}, 400))).toEqual({ kind: "auth" });
+  });
+
+  it("works out the API type from the address when none is given", async () => {
+    let url = "";
+    const fetchImpl = async (u: RequestInfo | URL) => {
+      url = String(u);
+      return new Response(JSON.stringify({ data: [] }));
+    };
+    await testConnection({ baseUrl: "https://api.anthropic.com/v1", apiKey: "k" }, fetchImpl);
+    expect(url).toBe("https://api.anthropic.com/v1/models?limit=1000");
+  });
+
   it("tells a blocked Ollama origin apart from a bad key", async () => {
     expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "" }, json({}, 403))).toEqual({ kind: "origin_blocked" });
     expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 401))).toEqual({ kind: "auth" });

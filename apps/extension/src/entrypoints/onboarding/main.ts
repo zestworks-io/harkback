@@ -4,7 +4,8 @@ import { testConnection, type ConnectionResult } from "../../lib/connection";
 import { h } from "../../lib/dom";
 import { PRIVACY } from "../../lib/pages/privacy";
 import { request, requestOrigins } from "../../lib/pages/request";
-import { connectionMessage, onboardingSettings, TEMPLATES } from "../../lib/pages/setup";
+import { connectionMessage, onboardingSettings } from "../../lib/pages/setup";
+import { API_TYPE_LABELS, API_TYPES, detectApiType, isApiType, PROVIDERS, providerById, type ApiType } from "../../lib/providers";
 import { modelUrlError } from "../../lib/model-policy";
 import { withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
@@ -27,8 +28,11 @@ async function main(): Promise<void> {
   const L = (zh: string, en: string) => pick(lang, zh, en);
   // Kept outside render() so switching language does not clear what was typed.
   const form = {
-    templateId: TEMPLATES[0].id as string,
-    baseUrl: TEMPLATES[0].baseUrl as string,
+    templateId: PROVIDERS[0]!.id,
+    baseUrl: PROVIDERS[0]!.baseUrl,
+    apiType: PROVIDERS[0]!.apiType as ApiType,
+    /** Set once the format is chosen by hand, so typing an address no longer changes it. */
+    typeChosen: false,
     apiKey: "",
     model: "",
     consent: false,
@@ -64,22 +68,42 @@ async function main(): Promise<void> {
     consent.addEventListener("change", () => (form.consent = consent.checked));
 
     const baseUrl = h("input", { type: "url", "data-hb": "base-url", value: form.baseUrl, spellcheck: "false" });
-    baseUrl.addEventListener("input", () => (form.baseUrl = baseUrl.value));
+    const apiType = h(
+      "select",
+      { "data-hb": "api-type" },
+      ...API_TYPES.map((t) => h("option", { value: t, selected: form.apiType === t }, API_TYPE_LABELS[t])),
+    );
+    apiType.addEventListener("change", () => {
+      form.apiType = isApiType(apiType.value) ? apiType.value : "openai";
+      form.typeChosen = true;
+    });
+    baseUrl.addEventListener("input", () => {
+      form.baseUrl = baseUrl.value;
+      if (!form.typeChosen) form.apiType = apiType.value = detectApiType(baseUrl.value);
+    });
     const providers = h(
       "div",
       { className: "providers", role: "radiogroup", "aria-label": L("模型服务", "Model service"), "data-hb": "template" },
-      ...TEMPLATES.map((tp) => {
+      ...PROVIDERS.map((tp) => {
         const radio = h("input", { type: "radio", name: "template", value: tp.id, checked: form.templateId === tp.id });
         radio.addEventListener("change", () => {
           form.templateId = tp.id;
-          form.baseUrl = baseUrl.value = tp.baseUrl;
+          form.typeChosen = false;
+          // "Custom" keeps whatever address was typed; the others fill in theirs and the format that goes with it.
+          if (tp.baseUrl) form.baseUrl = baseUrl.value = tp.baseUrl;
+          form.apiType = apiType.value = tp.baseUrl ? tp.apiType : detectApiType(form.baseUrl);
+          model.placeholder = tp.modelHint || L("先测试连接，再从列表中选择", "Test the connection, then pick from the list");
         });
         return h(
           "label",
           {},
           radio,
           h("span", {}, tp.label),
-          h("small", {}, tp.id === "ollama" ? L("本机运行", "Runs locally") : L("云端服务", "Cloud service")),
+          h(
+            "small",
+            {},
+            tp.local ? L("本机运行", "Runs locally") : tp.id === "custom" ? L("其他地址", "Any address") : L("云端服务", "Cloud service"),
+          ),
         );
       }),
     );
@@ -106,7 +130,7 @@ async function main(): Promise<void> {
       }
       await requestOrigins([pattern]);
       show(L("正在连接…", "Connecting…"), "busy");
-      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value });
+      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, apiType: form.apiType });
       show(connectionMessage(lang, r, location.origin), stateOf(r));
       if (r.kind === "ok") {
         form.models = r.models;
@@ -132,10 +156,10 @@ async function main(): Promise<void> {
         show(L("需要允许访问模型地址。", "Access to the model address is required."), "error");
         return;
       }
-      const label = TEMPLATES.find((x) => x.id === form.templateId)?.label ?? "Model";
+      const label = providerById(form.templateId)?.label ?? "Model";
       settings = onboardingSettings(
         settings,
-        { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value },
+        { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value, apiType: form.apiType },
         new Date(),
         () => ulid(),
       );
@@ -187,6 +211,20 @@ async function main(): Promise<void> {
           ),
           providers,
           h("label", { className: "field" }, h("span", {}, L("地址", "Address")), baseUrl),
+          h(
+            "label",
+            { className: "field" },
+            h("span", {}, L("接口类型", "API type")),
+            apiType,
+            h(
+              "small",
+              {},
+              L(
+                "根据地址自动选择；大多数服务（包括 OpenRouter、Grok、Ollama）使用 OpenAI 兼容格式。",
+                "Chosen from the address. Most services, including OpenRouter, Grok and Ollama, use the OpenAI-compatible format.",
+              ),
+            ),
+          ),
           h(
             "label",
             { className: "field" },

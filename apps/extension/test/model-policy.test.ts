@@ -33,7 +33,7 @@ describe("settings", () => {
       defaultModelId: 5,
     });
     expect(s.onboarded).toBe(false);
-    expect(s.models).toEqual([{ id: "a", label: "", baseUrl: "http://127.0.0.1:1/v1", apiKey: "", model: "" }]);
+    expect(s.models).toEqual([{ id: "a", label: "", baseUrl: "http://127.0.0.1:1/v1", apiKey: "", model: "", apiType: "openai" }]);
     expect(s.sites).toEqual([{ pattern: "a.com", sensitive: true }]);
     expect(s.rateLimit).toEqual(DEFAULT_SETTINGS.rateLimit);
     expect(s.defaultModelId).toBeNull();

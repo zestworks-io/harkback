@@ -1,5 +1,7 @@
 import { defaultFetch, normalizeBaseUrl, requestHeaders } from "./model-client";
 import { isLocalUrl, modelUrlError } from "./model-policy";
+import type { ApiType } from "./providers";
+import { apiTypeOf } from "./settings";
 
 export type ConnectionResult =
   | { kind: "ok"; models: string[] }
@@ -9,26 +11,60 @@ export type ConnectionResult =
   | { kind: "http"; status: number }
   | { kind: "unreachable" };
 
+/** Lists the models of an address: the request and where to find the names depend on the API type. */
+function listRequest(cfg: { baseUrl: string; apiKey: string; apiType?: ApiType }): { url: string; headers: Record<string, string> } {
+  const base = normalizeBaseUrl(cfg.baseUrl);
+  const key = cfg.apiKey.trim();
+  switch (apiTypeOf({ baseUrl: cfg.baseUrl, apiType: cfg.apiType })) {
+    case "anthropic":
+      return {
+        url: `${base}/models?limit=1000`,
+        headers: {
+          accept: "application/json",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+          ...(key && { "x-api-key": key }),
+        },
+      };
+    case "gemini":
+      return { url: `${base}/models?pageSize=1000`, headers: { accept: "application/json", ...(key && { "x-goog-api-key": key }) } };
+    default:
+      return { url: `${base}/models`, headers: requestHeaders(cfg.apiKey, { accept: "application/json" }) };
+  }
+}
+
+function modelNames(type: ApiType, json: unknown): string[] {
+  if (type === "gemini") {
+    const list = (json as { models?: { name?: unknown; supportedGenerationMethods?: unknown }[] } | null)?.models ?? [];
+    return list
+      .filter((m) => !Array.isArray(m.supportedGenerationMethods) || m.supportedGenerationMethods.includes("generateContent"))
+      .map((m) => (typeof m.name === "string" ? m.name.replace(/^models\//, "") : ""))
+      .filter(Boolean);
+  }
+  const list = (json as { data?: { id?: unknown }[] } | null)?.data ?? [];
+  return list.map((m) => m.id).filter((id): id is string => typeof id === "string");
+}
+
 export async function testConnection(
-  cfg: { baseUrl: string; apiKey: string },
+  cfg: { baseUrl: string; apiKey: string; apiType?: ApiType },
   fetchImpl: typeof fetch = defaultFetch,
 ): Promise<ConnectionResult> {
   if (modelUrlError(cfg.baseUrl)) return { kind: "insecure" };
-  const headers = requestHeaders(cfg.apiKey, { accept: "application/json" });
+  const type = apiTypeOf({ baseUrl: cfg.baseUrl, apiType: cfg.apiType });
+  const { url, headers } = listRequest(cfg);
   let res: Response;
   try {
-    res = await fetchImpl(`${normalizeBaseUrl(cfg.baseUrl)}/models`, { headers });
+    res = await fetchImpl(url, { headers });
   } catch {
     return { kind: "unreachable" };
   }
   // Ollama answers 403 to origins that are not in OLLAMA_ORIGINS.
   if (res.status === 403 && isLocalUrl(cfg.baseUrl)) return { kind: "origin_blocked" };
-  if (res.status === 401 || res.status === 403) return { kind: "auth" };
+  // Gemini answers a wrong key with 400.
+  if (res.status === 401 || res.status === 403 || (type === "gemini" && res.status === 400)) return { kind: "auth" };
   if (!res.ok) return { kind: "http", status: res.status };
   try {
-    const json = (await res.json()) as { data?: { id?: unknown }[] };
-    const models = (json.data ?? []).map((m) => m.id).filter((id): id is string => typeof id === "string");
-    return { kind: "ok", models: models.sort() };
+    return { kind: "ok", models: modelNames(type, await res.json()).sort() };
   } catch {
     return { kind: "ok", models: [] };
   }

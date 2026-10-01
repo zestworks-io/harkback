@@ -161,3 +161,161 @@ describe("streamChat", () => {
     expect(called).toBe(false);
   });
 });
+
+const system = { role: "system" as const, content: "be brief" };
+const claude: ModelConfig = { ...cfg, baseUrl: "https://api.anthropic.com/v1", model: "claude-sonnet-5-5", apiType: "anthropic" };
+const gem: ModelConfig = {
+  ...cfg,
+  baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+  model: "gemini-2.5-flash",
+  apiKey: " g-key ",
+  apiType: "gemini",
+};
+
+function capture(response: () => Response) {
+  const calls: { url: string; headers: Headers; body: Record<string, unknown> }[] = [];
+  const fetchImpl = async (url: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: String(url), headers: new Headers(init?.headers), body: JSON.parse(String(init?.body)) });
+    return response();
+  };
+  return { calls, fetchImpl };
+}
+
+const event = (type: string, data: unknown) => `event: ${type}\ndata: ${JSON.stringify({ type, ...(data as object) })}\n\n`;
+
+describe("streamChat with the Anthropic API", () => {
+  const okStream = () =>
+    sse([
+      event("message_start", { message: { id: "m" } }),
+      event("content_block_start", { index: 0, content_block: { type: "text", text: "" } }),
+      event("content_block_delta", { index: 0, delta: { type: "text_delta", text: "<explanation>低秩" } }),
+      event("ping", {}),
+      event("content_block_delta", { index: 0, delta: { type: "text_delta", text: "适配</explanation>" } }),
+      event("message_delta", { delta: { stop_reason: "end_turn" } }),
+      event("message_stop", {}),
+    ]);
+
+  it("posts to /messages with the key in x-api-key, the system prompt apart and max_tokens set", async () => {
+    const { calls, fetchImpl } = capture(okStream);
+    const seen: string[] = [];
+    const full = await streamChat({ ...claude, apiKey: " sk-ant " }, [system, ...messages], (t) => seen.push(t), { fetchImpl });
+    expect(full).toBe("<explanation>低秩适配</explanation>");
+    expect(seen.at(-1)).toBe(full);
+    const call = calls[0]!;
+    expect(call.url).toBe("https://api.anthropic.com/v1/messages");
+    expect(call.headers.get("x-api-key")).toBe("sk-ant");
+    expect(call.headers.get("anthropic-version")).toBe("2023-06-01");
+    expect(call.headers.get("authorization")).toBeNull();
+    expect(call.body).toMatchObject({
+      model: "claude-sonnet-5-5",
+      stream: true,
+      system: "be brief",
+      messages: [{ role: "user", content: "hi" }],
+    });
+    expect(call.body.max_tokens).toBeGreaterThan(0);
+  });
+
+  it("only sends a temperature when asked and tolerates a pasted /messages address", async () => {
+    const { calls, fetchImpl } = capture(okStream);
+    await streamChat({ ...claude, baseUrl: "https://api.anthropic.com/v1/messages" }, messages, () => {}, { fetchImpl });
+    expect(calls[0]!.url).toBe("https://api.anthropic.com/v1/messages");
+    expect(calls[0]!.body.temperature).toBeUndefined();
+    const second = capture(okStream);
+    await streamChat(claude, messages, () => {}, { fetchImpl: second.fetchImpl, temperature: 0.2 });
+    expect(second.calls[0]!.body.temperature).toBe(0.2);
+  });
+
+  it("treats a stream without message_stop as interrupted", async () => {
+    const cut = async () => sse([event("content_block_delta", { delta: { type: "text_delta", text: "half" } })]);
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: cut })).rejects.toMatchObject({ code: "network" });
+  });
+
+  it("classifies errors sent inside the stream and HTTP errors", async () => {
+    const inStream = (kind: string) => async () => sse([event("error", { error: { type: kind, message: "x" } })]);
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: inStream("authentication_error") })).rejects.toMatchObject({
+      code: "auth",
+    });
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: inStream("rate_limit_error") })).rejects.toMatchObject({
+      code: "rate_limited",
+    });
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: inStream("overloaded_error") })).rejects.toMatchObject({
+      code: "http",
+    });
+    const status = (s: number) => async () => new Response("no", { status: s });
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: status(401) })).rejects.toMatchObject({ code: "auth" });
+    await expect(streamChat(claude, messages, () => {}, { fetchImpl: status(429) })).rejects.toMatchObject({ code: "rate_limited" });
+  });
+
+  it("reads a reply that was not streamed", async () => {
+    const json = async () =>
+      new Response(
+        JSON.stringify({
+          content: [
+            { type: "text", text: "plain " },
+            { type: "text", text: "answer" },
+          ],
+        }),
+        {
+          headers: { "content-type": "application/json" },
+        },
+      );
+    expect(await streamChat(claude, messages, () => {}, { fetchImpl: json })).toBe("plain answer");
+  });
+});
+
+describe("streamChat with the Gemini API", () => {
+  const part = (t: string, extra: object = {}) =>
+    `data: ${JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ text: t }] }, ...extra }] })}\n\n`;
+
+  it("posts to streamGenerateContent with the key in x-goog-api-key and the system prompt as systemInstruction", async () => {
+    const { calls, fetchImpl } = capture(() => sse([part("<explanation>低秩"), part("适配</explanation>", { finishReason: "STOP" })]));
+    const full = await streamChat(gem, [system, ...messages], () => {}, { fetchImpl });
+    expect(full).toBe("<explanation>低秩适配</explanation>");
+    const call = calls[0]!;
+    expect(call.url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse");
+    expect(call.headers.get("x-goog-api-key")).toBe("g-key");
+    expect(call.headers.get("authorization")).toBeNull();
+    expect(call.body).toEqual({
+      systemInstruction: { parts: [{ text: "be brief" }] },
+      contents: [{ role: "user", parts: [{ text: "hi" }] }],
+    });
+  });
+
+  it("accepts a model written as models/<name>, adds a temperature only when asked, and skips thought parts", async () => {
+    const thought = `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: "thinking", thought: true }, { text: "answer" }] }, finishReason: "STOP" }] })}\n\n`;
+    const { calls, fetchImpl } = capture(() => sse([thought]));
+    const full = await streamChat({ ...gem, model: "models/gemini-2.5-pro" }, messages, () => {}, { fetchImpl, temperature: 0.3 });
+    expect(full).toBe("answer");
+    expect(calls[0]!.url).toContain("/models/gemini-2.5-pro:streamGenerateContent");
+    expect(calls[0]!.body.generationConfig).toEqual({ temperature: 0.3 });
+    expect(calls[0]!.body.systemInstruction).toBeUndefined();
+  });
+
+  it("treats a stream without a finish reason as interrupted", async () => {
+    const cut = async () => sse([part("half")]);
+    await expect(streamChat(gem, messages, () => {}, { fetchImpl: cut })).rejects.toMatchObject({ code: "network" });
+  });
+
+  it("reports blocked prompts, in-stream errors and a wrong key", async () => {
+    const blocked = async () => sse([`data: ${JSON.stringify({ promptFeedback: { blockReason: "SAFETY" } })}\n\n`]);
+    await expect(streamChat(gem, messages, () => {}, { fetchImpl: blocked })).rejects.toMatchObject({ code: "http" });
+    const quota = async () =>
+      sse([`data: ${JSON.stringify({ error: { code: 429, status: "RESOURCE_EXHAUSTED", message: "quota" } })}\n\n`]);
+    await expect(streamChat(gem, messages, () => {}, { fetchImpl: quota })).rejects.toMatchObject({ code: "rate_limited" });
+    const badKey = async () =>
+      new Response(JSON.stringify({ error: { status: "INVALID_ARGUMENT", message: "API key not valid." } }), { status: 400 });
+    await expect(streamChat(gem, messages, () => {}, { fetchImpl: badKey })).rejects.toMatchObject({ code: "auth" });
+    const other = async () => new Response("bad request", { status: 400 });
+    await expect(streamChat(gem, messages, () => {}, { fetchImpl: other })).rejects.toMatchObject({ code: "http", status: 400 });
+  });
+});
+
+describe("streamChat for a Grok or other OpenAI-compatible address", () => {
+  it("uses the OpenAI format with a bearer key", async () => {
+    const { calls, fetchImpl } = capture(() => sse([`${delta("ok")}\n\ndata: [DONE]\n\n`]));
+    await streamChat({ ...cfg, baseUrl: "https://api.x.ai/v1", model: "grok-4" }, messages, () => {}, { fetchImpl });
+    expect(calls[0]!.url).toBe("https://api.x.ai/v1/chat/completions");
+    expect(calls[0]!.headers.get("authorization")).toBe("Bearer sk-1");
+    expect(calls[0]!.body).toMatchObject({ model: "grok-4", messages, stream: true });
+  });
+});

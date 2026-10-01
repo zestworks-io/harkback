@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
 import type { ConnectionResult } from "../src/lib/connection";
 import { PRIVACY } from "../src/lib/pages/privacy";
-import { connectionMessage, onboardingSettings, TEMPLATES } from "../src/lib/pages/setup";
+import { connectionMessage, onboardingSettings } from "../src/lib/pages/setup";
+import { PROVIDERS } from "../src/lib/providers";
 import { DEFAULT_SETTINGS } from "../src/lib/settings";
 
 describe("onboardingSettings", () => {
-  const input = { language: "en" as const, label: "Ollama", baseUrl: " http://127.0.0.1:11434/v1 ", apiKey: " ", model: " qwen3 " };
+  const input = {
+    language: "en" as const,
+    label: "Ollama",
+    baseUrl: " http://127.0.0.1:11434/v1 ",
+    apiKey: " ",
+    model: " qwen3 ",
+    apiType: "openai" as const,
+  };
 
   it("adds the model, makes it the default and, when local, the model for sensitive sources", () => {
     const s = onboardingSettings(DEFAULT_SETTINGS, input, new Date("2026-09-25T00:00:00Z"), () => "m1");
@@ -16,7 +24,9 @@ describe("onboardingSettings", () => {
       defaultModelId: "m1",
       localModelId: "m1",
     });
-    expect(s.models).toEqual([{ id: "m1", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen3" }]);
+    expect(s.models).toEqual([
+      { id: "m1", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen3", apiType: "openai" },
+    ]);
   });
 
   it("does not use a remote model for sensitive sources", () => {
@@ -48,8 +58,8 @@ describe("connectionMessage", () => {
 });
 
 describe("page content", () => {
-  it("offers the four model templates and privacy notes in both languages", () => {
-    expect(TEMPLATES.map((t) => t.id)).toEqual(["ollama", "openai", "anthropic", "openrouter"]);
+  it("offers the model providers and privacy notes in both languages", () => {
+    expect(PROVIDERS.map((t) => t.id)).toEqual(["ollama", "openai", "anthropic", "gemini", "grok", "openrouter", "custom"]);
     expect(PRIVACY.zh.length).toBe(PRIVACY.en.length);
     expect(PRIVACY.zh.join("")).toContain("未加密");
   });

@@ -5,8 +5,9 @@ import { h } from "../../lib/dom";
 import { PRIVACY } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
-import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
+import { apiTypeOf, validateSettings, withDefaults, type Settings } from "../../lib/settings";
 import { applyTheme } from "../../lib/theme";
+import { API_TYPE_LABELS, API_TYPES, detectApiType, isApiType, PROVIDERS, providerById, providerForAddress } from "../../lib/providers";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { pick } from "../../lib/ui/strings";
@@ -106,13 +107,52 @@ async function main(): Promise<void> {
         foot.length > 0 ? h("div", { className: "card-foot" }, ...foot) : null,
       );
 
+    // Models whose API type was picked by hand; the others follow their address.
+    const typeChosen = new Set(draft.models.filter((m) => m.apiType && m.apiType !== detectApiType(m.baseUrl)).map((m) => m.id));
+
     const modelRows = draft.models.map((m, i) => {
+      const provider = h(
+        "select",
+        { "data-hb": "model-provider", "aria-label": L("服务", "Provider") },
+        ...PROVIDERS.map((p) =>
+          h(
+            "option",
+            { value: p.id, selected: providerForAddress(m.baseUrl).id === p.id },
+            p.id === "custom" ? L("自定义", "Custom") : p.label,
+          ),
+        ),
+      );
+      const apiType = h(
+        "select",
+        { "data-hb": "model-api-type", "aria-label": L("接口类型", "API type") },
+        ...API_TYPES.map((t) => h("option", { value: t, selected: apiTypeOf(m) === t }, API_TYPE_LABELS[t])),
+      );
+      provider.addEventListener("change", () => {
+        const p = providerById(provider.value);
+        if (!p) return;
+        const previous = providerForAddress(m.baseUrl);
+        if (p.baseUrl) {
+          m.baseUrl = p.baseUrl;
+          m.apiType = p.apiType;
+          if (!m.label.trim() || m.label === "Model" || m.label === previous.label) m.label = p.label;
+        } else {
+          m.apiType = detectApiType(m.baseUrl);
+        }
+        typeChosen.delete(m.id);
+        render();
+      });
+      apiType.addEventListener("change", () => {
+        m.apiType = isApiType(apiType.value) ? apiType.value : "openai";
+        if (m.apiType === detectApiType(m.baseUrl)) typeChosen.delete(m.id);
+        else typeChosen.add(m.id);
+      });
+      const preset = providerForAddress(m.baseUrl);
       const result = h("div", { className: "result", "data-hb": "model-result" });
       const test = h("button", { type: "button", className: "small", "data-hb": "model-test" }, L("测试连接", "Test connection"));
       test.addEventListener("click", async () => {
         const pattern = originPattern(m.baseUrl.trim());
         if (pattern) await requestOrigins([pattern]);
-        result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
+        result.textContent = connectionMessage(draft.language, await testConnection({ ...m, apiType: apiTypeOf(m) }), location.origin);
       });
       const remove = h("button", { type: "button", className: "small ghost" }, L("删除", "Delete"));
       remove.addEventListener("click", () => {
@@ -131,17 +171,27 @@ async function main(): Promise<void> {
         h(
           "div",
           { className: "grid" },
+          field(L("服务", "Provider"), provider),
+          field(L("接口类型", "API type"), apiType),
           field(
             L("名称", "Name"),
             input(m.label, (v) => (m.label = v)),
           ),
           field(
             L("模型", "Model"),
-            input(m.model, (v) => (m.model = v), { "data-hb": "model-name", placeholder: "gpt-4o-mini" }),
+            input(m.model, (v) => (m.model = v), { "data-hb": "model-name", placeholder: preset.modelHint || "gpt-4o-mini" }),
           ),
           field(
             L("地址", "Address"),
-            input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
+            input(
+              m.baseUrl,
+              (v) => {
+                m.baseUrl = v;
+                if (!typeChosen.has(m.id)) apiType.value = m.apiType = detectApiType(v);
+                provider.value = providerForAddress(v).id;
+              },
+              { "data-hb": "model-base-url" },
+            ),
             "wide",
           ),
           field(
@@ -170,7 +220,7 @@ async function main(): Promise<void> {
     });
     const addModel = h("button", { type: "button", className: "add", "data-hb": "add-model" }, L("+ 添加模型", "+ Add model"));
     addModel.addEventListener("click", () => {
-      draft.models.push({ id: ulid(), label: "Model", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "" });
+      draft.models.push({ id: ulid(), label: "Model", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "", apiType: "openai" });
       render();
     });
 

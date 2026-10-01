@@ -58,7 +58,7 @@
       .check { display: flex; gap: 10px; align-items: center; font-weight: 550; cursor: pointer; width: fit-content; }
       .check input { width: 18px; height: 18px; accent-color: var(--mark); margin: 0; }
 
-      .providers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 20px; }
+      .providers { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 20px; }
       .providers label { position: relative; display: block; border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--field); }
       .providers input { position: absolute; opacity: 0; pointer-events: none; }
       .providers span { display: block; font-weight: 600; }
@@ -68,6 +68,7 @@
 
       .field { display: block; margin-bottom: 16px; max-width: 520px; }
       .field > span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+      .field select { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 11px; }
       .field input { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 11px; }
       .field input:focus { border-color: var(--mark); outline: none; box-shadow: 0 0 0 3px var(--mark-soft); }
       .secret { display: flex; gap: 8px; }

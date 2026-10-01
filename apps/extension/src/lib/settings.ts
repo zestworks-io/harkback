@@ -1,5 +1,6 @@
 import { REUNION_DEFAULTS } from "@harkback/core";
 import { isLocalUrl, modelUrlError } from "./model-policy";
+import { detectApiType, isApiType, type ApiType } from "./providers";
 import { normalizePattern } from "./site-rules";
 
 export interface ModelConfig {
@@ -8,7 +9,12 @@ export interface ModelConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
+  /** The wire format of the address; when missing (older settings) it is worked out from the address. */
+  apiType?: ApiType;
 }
+
+/** The format to use for a model, whether or not it was saved with one. */
+export const apiTypeOf = (m: Pick<ModelConfig, "baseUrl" | "apiType">): ApiType => m.apiType ?? detectApiType(m.baseUrl);
 
 export interface SiteRule {
   /** A domain ("example.com", covers subdomains) or a URL prefix ("https://example.com/docs"). */
@@ -64,7 +70,17 @@ const num = (v: unknown, fallback: number): number => (typeof v === "number" && 
 function cleanModel(raw: unknown): ModelConfig[] {
   const m = obj(raw);
   if (typeof m.id !== "string" || !m.id) return [];
-  return [{ id: m.id, label: str(m.label), baseUrl: str(m.baseUrl), apiKey: str(m.apiKey), model: str(m.model) }];
+  const baseUrl = str(m.baseUrl);
+  return [
+    {
+      id: m.id,
+      label: str(m.label),
+      baseUrl,
+      apiKey: str(m.apiKey),
+      model: str(m.model),
+      apiType: isApiType(m.apiType) ? m.apiType : detectApiType(baseUrl),
+    },
+  ];
 }
 
 function cleanSite(raw: unknown): SiteRule[] {

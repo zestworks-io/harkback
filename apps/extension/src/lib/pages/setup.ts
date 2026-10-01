@@ -1,18 +1,12 @@
 import { ollamaOriginsHelp, type ConnectionResult } from "../connection";
 import { isLocalUrl } from "../model-policy";
 import type { ModelConfig, Settings } from "../settings";
+import type { ApiType } from "../providers";
 import type { Lang } from "../ui/strings";
-
-export const TEMPLATES = [
-  { id: "ollama", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1" },
-  { id: "openai", label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
-  { id: "anthropic", label: "Anthropic", baseUrl: "https://api.anthropic.com/v1" },
-  { id: "openrouter", label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1" },
-] as const;
 
 export function onboardingSettings(
   current: Settings,
-  input: { language: Lang; label: string; baseUrl: string; apiKey: string; model: string },
+  input: { language: Lang; label: string; baseUrl: string; apiKey: string; model: string; apiType: ApiType },
   now: Date,
   newId: () => string,
 ): Settings {
@@ -22,6 +16,7 @@ export function onboardingSettings(
     baseUrl: input.baseUrl.trim(),
     apiKey: input.apiKey.trim(),
     model: input.model.trim(),
+    apiType: input.apiType,
   };
   return {
     ...current,

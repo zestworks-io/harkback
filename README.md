@@ -40,7 +40,7 @@ You can paste a term into a chatbot and get a good answer. Harkback does not try
 | **Structure**      | A pile of transcripts                            | Concepts with aliases, prerequisites, variants and related terms                                  |
 | **Retention**      | None                                             | A review queue: confused terms return after a day, remembered ones after 3, 7, 14, 30 and 60 days |
 | **Your records**   | Live in the provider's account                   | Stay in your browser; export Markdown, Obsidian notes or JSONL                                    |
-| **Model and cost** | One service, one plan                            | Any OpenAI-compatible model: local Ollama costs nothing, or use your own API key                  |
+| **Model and cost** | One service, one plan                            | Any of the supported models: local Ollama costs nothing, or use your own API key                  |
 
 Harkback is free and open source (Apache-2.0), has no server and no subscription. It does need a model to write the explanations: a local model is free, and a hosted one is billed by its provider to your own key.
 
@@ -57,7 +57,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **Builds on what you know.** When a term you look up is close to one you already understand, the model is told so and can explain the difference instead of starting over.
 - **Private by design.** Automatic scanning is limited to arxiv.org. Sensitive sites can be forced onto a local model, and private windows never record or scan.
 - **Portable records.** Export everything as Markdown, or as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`.
-- **Any OpenAI-compatible model.** Ollama, OpenAI, OpenRouter, Anthropic's compatible endpoint, or your own server.
+- **Your choice of model.** Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
 
 ## Your knowledge graph
 
@@ -106,13 +106,17 @@ Onboarding walks you through this, and you can change it later on the settings p
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider   | Base URL                       | Notes                                 |
-| ---------- | ------------------------------ | ------------------------------------- |
-| Ollama     | `http://127.0.0.1:11434/v1`    | Local, no key. See below.             |
-| OpenAI     | `https://api.openai.com/v1`    | Needs an API key.                     |
-| OpenRouter | `https://openrouter.ai/api/v1` | Needs an API key.                     |
-| Anthropic  | `https://api.anthropic.com/v1` | Needs an API key.                     |
-| Custom     | any `/v1` endpoint             | Non-local addresses must use `https`. |
+| Provider      | API type           | Base URL                                           | Notes                                 |
+| ------------- | ------------------ | -------------------------------------------------- | ------------------------------------- |
+| Ollama        | OpenAI-compatible  | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.             |
+| OpenAI        | OpenAI-compatible  | `https://api.openai.com/v1`                        | Needs an API key.                     |
+| Anthropic     | Anthropic Messages | `https://api.anthropic.com/v1`                     | Needs an API key.                     |
+| Google Gemini | Google Gemini      | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                     |
+| xAI Grok      | OpenAI-compatible  | `https://api.x.ai/v1`                              | Needs an API key.                     |
+| OpenRouter    | OpenAI-compatible  | `https://openrouter.ai/api/v1`                     | Needs an API key.                     |
+| Custom        | your choice        | any address                                        | Non-local addresses must use `https`. |
+
+The **API type** is the wire format the address speaks. Picking a provider fills in the address and the type, and typing an address picks the type from its host: `api.anthropic.com` is Anthropic Messages, `generativelanguage.googleapis.com` is Google Gemini, and everything else, including gateways such as OpenRouter and company proxies, is OpenAI-compatible. The model name is never used for this, because the same model is served through several formats. You can change the type by hand for an unusual address. Google's OpenAI-compatible endpoint (`.../v1beta/openai/`) stays OpenAI-compatible.
 
 Chrome asks you to allow access to the model's address the first time you test or save it. If you decline, the explain card says so instead of failing with a network error.
 
