@@ -11,6 +11,7 @@
     "typecheck": "tsc -p packages/spec && tsc -p packages/core && pnpm --filter @harkback/extension typecheck",
     "e2e": "pnpm --filter @harkback/extension e2e",
     "zip": "pnpm --filter @harkback/extension zip",
+    "release": "tools/package.sh",
     "check:build": "pnpm --filter @harkback/extension build && HB_CHECK_BUILD=1 vitest run apps/extension/test/manifest.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -158,7 +158,7 @@ pnpm e2e           # end-to-end tests in Chromium (run `pnpm exec playwright ins
 pnpm format:check  # formatting
 ```
 
-To package a release for the Chrome Web Store, bump `version` in `apps/extension/package.json`, then run `pnpm zip`. The archive is written to `apps/extension/.output/`.
+To package a release for the Chrome Web Store, bump `version` in `apps/extension/package.json`, then run `pnpm release`. It runs the checks, builds the production extension, verifies the package and writes `apps/extension/.output/harkback-<version>-chrome.zip`. Use `tools/package.sh --skip-checks` to only build the zip.
 
 The end-to-end tests load the built extension into Chromium, serve arXiv pages from `apps/extension/fixtures`, and talk to a local stub model server. They cover the whole loop: reading a paper, explaining, recording, the history page, and reunions on other papers. See `apps/extension/e2e`.
 
