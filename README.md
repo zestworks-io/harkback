@@ -8,9 +8,15 @@ Harkback is a Chrome extension for people who read papers and technical document
 
 > "harken back": to return to an earlier point.
 
+[![Harkback explaining BLEU in a PDF, answering a follow-up question and typesetting the formula](assets/demo.gif)](assets/demo.mp4)
+
+_Select a term in a PDF, ask a follow-up, and the whole conversation is kept. Click the animation for the full-quality video._
+
 ## Contents
 
+- [Why not just ask ChatGPT?](#why-not-just-ask-chatgpt)
 - [Features](#features)
+- [Your knowledge graph](#your-knowledge-graph)
 - [How it works](#how-it-works)
 - [Install](#install)
 - [Connect a model](#connect-a-model)
@@ -23,10 +29,26 @@ Harkback is a Chrome extension for people who read papers and technical document
 - [Contributing](#contributing)
 - [License](#license)
 
+## Why not just ask ChatGPT?
+
+You can paste a term into a chatbot and get a good answer. Harkback does not try to give a better answer. It adds the part a chat window lacks: **memory**. Every term you look up becomes a record tied to the page, the quote and the date, and the records are connected into a knowledge graph that belongs to you.
+
+|                    | Asking a chatbot                                 | Harkback                                                                                          |
+| ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Context**        | Copy the term and some text, switch tabs         | Select the term on the page; its paragraph and section go with it, and the quote is verified      |
+| **Next time**      | A new chat starts empty, or you forget you asked | The term is underlined on later pages, with what you understood last time                         |
+| **Structure**      | A pile of transcripts                            | Concepts with aliases, prerequisites, variants and related terms                                  |
+| **Retention**      | None                                             | A review queue: confused terms return after a day, remembered ones after 3, 7, 14, 30 and 60 days |
+| **Your records**   | Live in the provider's account                   | Stay in your browser; export Markdown, Obsidian notes or JSONL                                    |
+| **Model and cost** | One service, one plan                            | Any OpenAI-compatible model: local Ollama costs nothing, or use your own API key                  |
+
+Harkback is free and open source (Apache-2.0), has no server and no subscription. It does need a model to write the explanations: a local model is free, and a hosted one is billed by its provider to your own key.
+
 ## Features
 
 - **Explain in context.** Select a term, click _Explain_ or press `Alt+E`. The answer streams in from the model you configured and is marked _defined in source_ (the page defines the term, and the quote is verified against the page text) or _external knowledge_.
 - **Remember.** Each explanation, follow-up question and "got it / still confused" mark is stored as an event in IndexedDB. Nothing leaves your browser except the model request you trigger.
+- **Follow-up conversations.** Ask more on the card; each question stays above its answer, and the conversation is saved with the explanation. History shows it in full, and search finds it. Formulas are typeset.
 - **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, then mark it remembered, explain it again, compare the two usages, or mute it.
 - **One concept, many spellings.** `LLM`, `LLMs`, `the LLM`, `large language model` and `Large-Language Models` are the same concept. So are `β-VAE` and `beta-VAE`, and `fine-tuning` and `ﬁne-tuning` with a ligature. Near matches are put to you as "is this the term you looked up 3 days ago?".
 - **Related terms.** If a model says `QLoRA` is a variant of `LoRA`, a page that only mentions `QLoRA` reminds you of what you understood about `LoRA`.
@@ -36,6 +58,18 @@ Harkback is a Chrome extension for people who read papers and technical document
 - **Private by design.** Automatic scanning is limited to arxiv.org. Sensitive sites can be forced onto a local model, and private windows never record or scan.
 - **Portable records.** Export everything as Markdown, or as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`.
 - **Any OpenAI-compatible model.** Ollama, OpenAI, OpenRouter, Anthropic's compatible endpoint, or your own server.
+
+## Your knowledge graph
+
+Each look-up adds to a graph of what you have read, built from your own reading rather than from a general-purpose model's memory.
+
+- **Concepts are the nodes.** `LoRA` is one node, whatever spelling a page uses (`LoRA`, `low-rank adaptation`). It keeps its aliases, its field and how well you understood it.
+- **Relations are the edges.** A model proposes `variant_of`, `prerequisite` and `related` links when you look a term up, for example `QLoRA` is a variant of `LoRA`. You can remove a wrong one, merge two concepts that are the same, or add an alias.
+- **Everything points back to evidence.** A concept lists every encounter: the page, the quote, the date, your explanation and the follow-up conversation.
+- **The graph does work.** A page that only mentions `QLoRA` reminds you of `LoRA`, the model is told what you already know so it can explain the difference, and review is scheduled per concept.
+- **It is yours.** Export a folder of linked notes (`[[links]]`, one file per concept) and open it in Obsidian to see the graph there, or export the full event log as JSONL.
+
+There is no built-in graph view yet. You browse the graph through concept pages in History, and through Obsidian after exporting.
 
 ## How it works
 
@@ -69,6 +103,8 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 ## Connect a model
 
 Onboarding walks you through this, and you can change it later on the settings page.
+
+![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
 | Provider   | Base URL                       | Notes                                 |
 | ---------- | ------------------------------ | ------------------------------------- |
