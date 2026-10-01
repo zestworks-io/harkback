@@ -105,4 +105,38 @@ describe("ExplainCard", () => {
     card.followUpDone("省下 99% 参数。");
     expect(q("followup-answer")!.textContent).toBe("省下 99% 参数。");
   });
+
+  it("shows each question above its answer, keeps earlier ones and locks sending until the answer arrives", () => {
+    const { card, handlers, q } = setup();
+    card.done(true);
+    q("followup-open")!.click();
+    const input = q("followup-input") as HTMLInputElement;
+    const send = q("followup-send") as HTMLButtonElement;
+    input.value = "第一个问题";
+    send.click();
+    expect(q("followup-question")!.textContent).toBe("第一个问题");
+    expect(send.disabled).toBe(true);
+    input.value = "太快了";
+    send.click();
+    expect(handlers.onFollowUp).toHaveBeenCalledTimes(1);
+    card.followUpDelta("答案一");
+    card.followUpDone("答案一。");
+    expect(send.disabled).toBe(false);
+
+    input.value = "第二个问题";
+    send.click();
+    card.followUpDone("答案二。");
+    expect(handlers.onFollowUp).toHaveBeenLastCalledWith("第二个问题");
+    const thread = [...card.el.querySelectorAll(".hb-thread > div")].map((el) => el.textContent);
+    expect(thread).toEqual(["第一个问题", "答案一。", "第二个问题", "答案二。"]);
+    expect(card.el.querySelectorAll('[data-hb="followup-answer"]')).toHaveLength(1);
+  });
+
+  it("keeps the question box outside the scrolling part of the card", () => {
+    const { card, q } = setup();
+    card.done(true);
+    q("followup-open")!.click();
+    expect(card.el.querySelector(".hb-scroll")!.contains(q("followup-input"))).toBe(false);
+    expect(card.el.querySelector(".hb-compose")!.contains(q("followup-send"))).toBe(true);
+  });
 });

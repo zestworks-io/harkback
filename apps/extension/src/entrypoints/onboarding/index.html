@@ -14,11 +14,10 @@
         --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
       @media (prefers-color-scheme: dark) {
-        :root {
-          --paper: #141922; --ink: #e3e8ef; --muted: #98a2b3; --rule: #2c3442; --field: #1b212c;
-          --mark: #8ea2ff; --mark-soft: rgba(142, 162, 255, 0.1); --ok: #6cc38a; --err: #ff8a80;
-        }
+        :root:not([data-theme="light"]) { --paper: #141922; --ink: #e3e8ef; --muted: #98a2b3; --rule: #2c3442; --field: #1b212c; --mark: #8ea2ff; --mark-soft: rgba(142, 162, 255, 0.1); --ok: #6cc38a; --err: #ff8a80; color-scheme: dark; }
       }
+      :root[data-theme="dark"] { --paper: #141922; --ink: #e3e8ef; --muted: #98a2b3; --rule: #2c3442; --field: #1b212c; --mark: #8ea2ff; --mark-soft: rgba(142, 162, 255, 0.1); --ok: #6cc38a; --err: #ff8a80; color-scheme: dark; }
+      :root[data-theme="light"] { color-scheme: light; }
       * { box-sizing: border-box; }
       /* Chrome gives extension pages body { font-size: 75% }; set the size here, not on :root. */
       body { margin: 0; font: 15px/1.6 var(--sans); background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
@@ -83,7 +82,8 @@
       button.btn { font: inherit; font-weight: 600; border-radius: 8px; padding: 8px 16px; cursor: pointer; border: 1px solid var(--rule); background: var(--field); color: var(--ink); white-space: nowrap; }
       button.btn:hover { border-color: var(--muted); }
       button.primary { background: var(--mark); border-color: var(--mark); color: #fff; padding: 10px 22px; }
-      @media (prefers-color-scheme: dark) { button.primary { color: #10152a; } }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.primary { color: #10152a; } }
+      :root[data-theme="dark"] button.primary { color: #10152a; }
       button.primary:hover { filter: brightness(1.08); border-color: var(--mark); }
 
       .result { white-space: pre-wrap; font-size: 14px; max-width: 620px; }

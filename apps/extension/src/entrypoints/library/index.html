@@ -15,13 +15,10 @@
         --serif: Charter, "Iowan Old Style", "Palatino Linotype", "Songti SC", "Noto Serif CJK SC", Georgia, serif;
       }
       @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f;
-          --primary: #fafafa; --primary-fg: #18181b; --accent: #8ea2ff; --accent-soft: rgba(142, 162, 255, 0.12);
-          --defined: #4ade80; --defined-soft: rgba(74, 222, 128, 0.12); --external: #facc15; --external-soft: rgba(250, 204, 21, 0.12);
-          --ring: rgba(250, 250, 250, 0.16); --err: #f87171;
-        }
+        :root:not([data-theme="light"]) { --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f; --primary: #fafafa; --primary-fg: #18181b; --accent: #8ea2ff; --accent-soft: rgba(142, 162, 255, 0.12); --defined: #4ade80; --defined-soft: rgba(74, 222, 128, 0.12); --external: #facc15; --external-soft: rgba(250, 204, 21, 0.12); --ring: rgba(250, 250, 250, 0.16); --err: #f87171; color-scheme: dark; }
       }
+      :root[data-theme="dark"] { --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f; --primary: #fafafa; --primary-fg: #18181b; --accent: #8ea2ff; --accent-soft: rgba(142, 162, 255, 0.12); --defined: #4ade80; --defined-soft: rgba(74, 222, 128, 0.12); --external: #facc15; --external-soft: rgba(250, 204, 21, 0.12); --ring: rgba(250, 250, 250, 0.16); --err: #f87171; color-scheme: dark; }
+      :root[data-theme="light"] { color-scheme: light; }
       * { box-sizing: border-box; }
       /* Chrome gives extension pages body { font-size: 75% }; set the size here, not on :root. */
       body { margin: 0; font: 14px/1.6 var(--sans); background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }

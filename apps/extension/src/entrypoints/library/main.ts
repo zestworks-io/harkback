@@ -9,10 +9,12 @@ import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
 import { reviewQueue } from "../../lib/review";
 import { withDefaults } from "../../lib/settings";
+import { initTheme } from "../../lib/theme";
 import { pick } from "../../lib/ui/strings";
 import { CHANGE_CHANNEL, EventStore } from "../../lib/store";
 
 async function main(): Promise<void> {
+  void initTheme();
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const L = (zh: string, en: string) => pick(settings.language, zh, en);
   const store = await EventStore.open();

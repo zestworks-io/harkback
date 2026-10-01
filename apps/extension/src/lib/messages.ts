@@ -3,6 +3,7 @@ import type { Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "./explain";
 import type { ModelErrorCode } from "./model-client";
 import type { ReunionCard } from "./reunion-cards";
+import type { Theme } from "./settings";
 import type { DetectedSource } from "./source-id";
 import type { Lang } from "./ui/strings";
 
@@ -35,6 +36,7 @@ export interface PageInfo {
   scan: boolean;
   incognito: boolean;
   language: Lang;
+  theme: Theme;
   entries: MatcherEntry[];
 }
 

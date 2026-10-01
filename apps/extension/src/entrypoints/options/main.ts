@@ -6,6 +6,7 @@ import { PRIVACY } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
 import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
+import { applyTheme } from "../../lib/theme";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { pick } from "../../lib/ui/strings";
@@ -44,6 +45,7 @@ function trimmed(s: Settings): Settings {
 
 async function main(): Promise<void> {
   const draft: Settings = withDefaults((await browser.storage.local.get("settings")).settings);
+  applyTheme(draft.theme);
   const root = document.getElementById("app")!;
   const status = h("div", { className: "result", "data-hb": "status" });
   const L = (zh: string, en: string) => pick(draft.language, zh, en);
@@ -78,6 +80,18 @@ async function main(): Promise<void> {
     language.addEventListener("change", () => {
       draft.language = language.value === "en" ? "en" : "zh";
       render();
+    });
+
+    const theme = h(
+      "select",
+      { "aria-label": L("外观", "Appearance") },
+      h("option", { value: "system", selected: draft.theme === "system" }, L("跟随系统", "System")),
+      h("option", { value: "light", selected: draft.theme === "light" }, L("浅色", "Light")),
+      h("option", { value: "dark", selected: draft.theme === "dark" }, L("深色", "Dark")),
+    );
+    theme.addEventListener("change", () => {
+      draft.theme = theme.value === "light" || theme.value === "dark" ? theme.value : "system";
+      applyTheme(draft.theme);
     });
 
     const field = (label: string, control: HTMLElement, cls = "") =>
@@ -132,10 +146,13 @@ async function main(): Promise<void> {
           ),
           field(
             "API key",
-            secretInput(input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }), {
-              show: L("显示", "Show"),
-              hide: L("隐藏", "Hide"),
-            }),
+            secretInput(
+              input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }),
+              {
+                show: L("显示", "Show"),
+                hide: L("隐藏", "Hide"),
+              },
+            ),
             "wide",
           ),
         ),
@@ -224,6 +241,7 @@ async function main(): Promise<void> {
           "div",
           { className: "head-tools" },
           h("a", { href: browser.runtime.getURL("/library.html") }, L("历史与搜索", "History and search")),
+          theme,
           language,
         ),
       ),
@@ -231,7 +249,7 @@ async function main(): Promise<void> {
         L("模型", "Models"),
         L(
           "非本机地址必须使用 https。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
-          "Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked \"For sensitive sources\" is the one used for sensitive sources; they never use any other model.",
+          'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
         ),
         [
           ...modelRows,
@@ -258,7 +276,7 @@ async function main(): Promise<void> {
             { className: "note" },
             L(
               "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源用」。",
-              "\"Sensitive\" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick \"For sensitive sources\" first.",
+              '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.',
             ),
           ),
           ...siteRows,

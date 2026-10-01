@@ -14,11 +14,10 @@
         --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
       @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f;
-          --primary: #60a5fa; --primary-fg: #08111f; --ring: rgba(96, 165, 250, 0.28); --ok: #4ade80; --err: #f87171;
-        }
+        :root:not([data-theme="light"]) { --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f; --primary: #60a5fa; --primary-fg: #08111f; --ring: rgba(96, 165, 250, 0.28); --ok: #4ade80; --err: #f87171; color-scheme: dark; }
       }
+      :root[data-theme="dark"] { --bg: #09090b; --card: #111113; --fg: #fafafa; --muted: #a1a1aa; --border: #27272a; --subtle: #1b1b1f; --primary: #60a5fa; --primary-fg: #08111f; --ring: rgba(96, 165, 250, 0.28); --ok: #4ade80; --err: #f87171; color-scheme: dark; }
+      :root[data-theme="light"] { color-scheme: light; }
       * { box-sizing: border-box; }
       /* Chrome gives extension pages body { font-size: 75% }; set the size here, not on :root. */
       body { margin: 0; font: 14px/1.55 var(--sans); background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
@@ -29,7 +28,9 @@
       .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
       h1 { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 4px; }
       .sub { color: var(--muted); margin: 0; }
-      .head-tools { display: flex; gap: 8px; align-items: center; }
+      .head-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .head-tools a { white-space: nowrap; margin-right: 4px; }
+      .head-tools select { width: auto; min-width: 104px; }
 
       .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
       .card-head { padding: 20px 24px 0; }

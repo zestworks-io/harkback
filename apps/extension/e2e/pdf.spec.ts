@@ -104,7 +104,8 @@ test("says why a PDF could not be opened", async ({ context, sw, stub, extension
 
   const local = await context.newPage();
   await local.goto(readerUrl(extensionId, "file:///nonexistent/paper.pdf"));
-  await expect(local.locator("#notice")).toContainText("Allow access to file URLs");
+  await expect(local.locator("#notice")).toContainText("needs access to local files");
+  await expect(local.locator("#notice button")).toHaveText("Allow local files");
 
   const none = await context.newPage();
   await none.goto(readerUrl(extensionId, "javascript:alert(1)"));

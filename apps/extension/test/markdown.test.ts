@@ -14,14 +14,26 @@ describe("renderMarkdown", () => {
       "First **bold** and *em* with `code` and $x^2$.\nSame paragraph.\n\n- one\n- two\n\n1. first\n\n```\nconst a = 1;\n```\n\n$$E = mc^2$$",
     );
     expect(div.querySelectorAll("p")).toHaveLength(1);
-    expect(div.querySelector("p")!.textContent).toBe("First bold and em with code and x^2. Same paragraph.");
+    expect(div.querySelector("p")!.textContent).toBe("First bold and em with code and x2. Same paragraph.");
     expect(div.querySelector("strong")!.textContent).toBe("bold");
     expect(div.querySelector("em")!.textContent).toBe("em");
-    expect(div.querySelector("code.hb-math")!.textContent).toBe("x^2");
+    expect(div.querySelector("span.hb-math sup")!.textContent).toBe("2");
     expect([...div.querySelectorAll("ul li")].map((li) => li.textContent)).toEqual(["one", "two"]);
     expect(div.querySelector("ol li")!.textContent).toBe("first");
     expect(div.querySelector("pre code")!.textContent).toBe("const a = 1;");
-    expect(div.querySelector(".hb-math-block")!.textContent).toBe("E = mc^2");
+    expect(div.querySelector(".hb-math-block")!.textContent).toBe("E=mc2");
+  });
+
+  it("typesets \\( \\) and \\[ \\] formulas instead of showing the TeX or turning _ and * into emphasis", () => {
+    const div = render(
+      "Use \\(\\exp(\\sum_{n} w_n \\log p_n)\\) where \\(p_n\\) is the precision and \\(\\alpha * \\beta\\).\n\n\\[ \\frac{a}{b} \\leq \\sqrt{x} \\]",
+    );
+    expect(div.querySelector("em")).toBeNull();
+    expect(div.querySelector("p")!.textContent).toContain("exp(∑nwnlogpn)");
+    expect(div.querySelector("p")!.textContent).not.toContain("\\");
+    expect(div.querySelectorAll("p sub").length).toBeGreaterThan(1);
+    expect(div.querySelector(".hb-math-block .hb-frac .hb-num")!.textContent).toBe("a");
+    expect(div.querySelector(".hb-math-block")!.textContent).toContain("≤");
   });
 
   it("never creates HTML from the text", () => {

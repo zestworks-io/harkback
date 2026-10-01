@@ -252,6 +252,7 @@ export class ContentApp {
 
   private ensureOverlay(): Overlay {
     this.overlay ??= createOverlay(this.shadowMode);
+    this.overlay.host.setAttribute("data-theme", this.info?.theme ?? "system");
     return this.overlay;
   }
 

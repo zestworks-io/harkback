@@ -1,6 +1,8 @@
 import { h } from "./dom";
+import { renderMath } from "./math";
 
-const INLINE = /(`[^`\n]+`)|(\$[^$\n]+\$)|(\*\*[^*\n]+\*\*|__[^_\n]+__)|(\*[^*\s][^*\n]*\*|_[^_\s][^_\n]*_)|(!?\[[^\]\n]*\]\([^)\s]*\))/g;
+const INLINE =
+  /(`[^`\n]+`)|(\$[^$\n]+\$|\\\([^\n]+?\\\))|(\*\*[^*\n]+\*\*|__[^_\n]+__)|(\*[^*\s][^*\n]*\*|_[^_\s][^_\n]*_)|(!?\[[^\]\n]*\]\([^)\s]*\))/g;
 const LINK = /^(!?)\[([^\]\n]*)\]\(([^)\s]*)\)$/;
 
 function safeUrl(raw: string): string | null {
@@ -19,7 +21,7 @@ function renderInline(text: string, parent: Node): void {
     if (at > last) parent.appendChild(document.createTextNode(text.slice(last, at)));
     const tok = m[0];
     if (m[1]) parent.appendChild(h("code", {}, tok.slice(1, -1)));
-    else if (m[2]) parent.appendChild(h("code", { className: "hb-math" }, tok.slice(1, -1)));
+    else if (m[2]) parent.appendChild(renderMath(tok.startsWith("$") ? tok.slice(1, -1) : tok.slice(2, -2), false));
     else if (m[3]) {
       const strong = h("strong");
       renderInline(tok.slice(2, -2), strong);
@@ -43,7 +45,8 @@ function renderInline(text: string, parent: Node): void {
 }
 
 const isFence = (l: string) => /^\s*```/.test(l);
-const isMathFence = (l: string) => /^\s*\$\$/.test(l);
+const isMathFence = (l: string) => /^\s*(\$\$|\\\[)/.test(l);
+const mathClose = (open: string) => (/^\s*\\\[/.test(open) ? /\\\]\s*$/ : /\$\$\s*$/);
 const isList = (l: string) => /^\s*[-*+]\s+/.test(l);
 const isOrdered = (l: string) => /^\s*\d+[.)]\s+/.test(l);
 const isHeading = (l: string) => /^\s*#{1,6}\s+/.test(l);
@@ -60,19 +63,20 @@ export function renderMarkdown(src: string): DocumentFragment {
       i++;
       continue;
     }
-    const oneLineMath = /^\s*\$\$(.+)\$\$\s*$/.exec(line);
+    const oneLineMath = /^\s*(?:\$\$(.+)\$\$|\\\[(.+)\\\])\s*$/.exec(line);
     if (oneLineMath) {
-      frag.append(h("div", { className: "hb-math-block" }, oneLineMath[1]!.trim()));
+      frag.append(renderMath((oneLineMath[1] ?? oneLineMath[2])!.trim(), true));
       i++;
       continue;
     }
     if (isFence(line) || isMathFence(line)) {
       const math = isMathFence(line);
+      const closes = math ? mathClose(line) : null;
       const body: string[] = [];
       i++;
-      while (i < lines.length && !(math ? isMathFence(lines[i]!) : isFence(lines[i]!))) body.push(lines[i++]!);
+      while (i < lines.length && !(closes ? closes.test(lines[i]!) : isFence(lines[i]!))) body.push(lines[i++]!);
       i++;
-      frag.append(math ? h("div", { className: "hb-math-block" }, body.join("\n")) : h("pre", {}, h("code", {}, body.join("\n"))));
+      frag.append(math ? renderMath(body.join(" ").trim(), true) : h("pre", {}, h("code", {}, body.join("\n"))));
       continue;
     }
     if (isList(line) || isOrdered(line)) {

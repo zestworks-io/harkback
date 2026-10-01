@@ -7,6 +7,7 @@ import { request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage, onboardingSettings, TEMPLATES } from "../../lib/pages/setup";
 import { modelUrlError } from "../../lib/model-policy";
 import { withDefaults } from "../../lib/settings";
+import { initTheme } from "../../lib/theme";
 import { secretInput } from "../../lib/ui/secret-input";
 import { originPattern } from "../../lib/site-rules";
 import { pick, type Lang } from "../../lib/ui/strings";
@@ -19,6 +20,7 @@ function stateOf(r: ConnectionResult): ResultState {
 }
 
 async function main(): Promise<void> {
+  void initTheme();
   let settings = withDefaults((await browser.storage.local.get("settings")).settings);
   let lang: Lang = settings.language;
   const root = document.getElementById("app")!;

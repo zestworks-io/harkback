@@ -19,11 +19,15 @@ export interface SiteRule {
   modelId?: string;
 }
 
+export type Theme = "system" | "light" | "dark";
+
 export interface Settings {
   version: 1;
   onboarded: boolean;
   consentAt: string | null;
   language: "zh" | "en";
+  /** "system" follows the operating system. */
+  theme: Theme;
   models: ModelConfig[];
   defaultModelId: string | null;
   /** Model used for sensitive sources; must be a local address. */
@@ -39,6 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   onboarded: false,
   consentAt: null,
   language: "zh",
+  theme: "system",
   models: [],
   defaultModelId: null,
   localModelId: null,
@@ -87,6 +92,7 @@ export function withDefaults(raw: unknown): Settings {
     onboarded: s.onboarded === true,
     consentAt: strOrNull(s.consentAt),
     language: s.language === "en" ? "en" : "zh",
+    theme: s.theme === "light" || s.theme === "dark" ? s.theme : "system",
     models: Array.isArray(s.models) ? s.models.flatMap(cleanModel) : [],
     defaultModelId: strOrNull(s.defaultModelId),
     localModelId: strOrNull(s.localModelId),

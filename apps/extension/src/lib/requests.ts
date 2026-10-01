@@ -38,6 +38,7 @@ export async function pageInfo(deps: RequestDeps, url: string, incognito: boolea
     scan,
     incognito,
     language: settings.language,
+    theme: settings.theme,
     entries: scan ? matcherEntriesFromState(await deps.getState()) : [],
   };
 }

@@ -8,6 +8,7 @@ import { listenForTabMessages } from "../../lib/content/tab-messages";
 import { takeHandoff } from "../../lib/pdf/handoff";
 import { mountViewer } from "../../lib/pdf/viewer";
 import { withDefaults } from "../../lib/settings";
+import { initTheme } from "../../lib/theme";
 import { detectPdfSource, type PdfFacts } from "../../lib/source-id";
 import { pick } from "../../lib/ui/strings";
 
@@ -59,6 +60,7 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 }
 
 async function main(): Promise<void> {
+  void initTheme();
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const L = (zh: string, en: string) => pick(settings.language, zh, en);
   const notice = document.getElementById("notice")!;
