@@ -127,7 +127,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 
 - Chrome (Manifest V3) only.
 - Explanations depend on the model you choose; small local models may produce weaker concept cards, which lowers recall quality but never breaks recording.
-- Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs have no text and are not supported, there is no OCR, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs "Allow access to file URLs" turned on for Harkback in `chrome://extensions`.
+- Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs have no text and are not supported, there is no OCR, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
 - Chinese, Japanese and Korean names must be at least three characters to be underlined, to avoid false positives.
 

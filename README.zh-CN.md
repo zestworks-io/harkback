@@ -126,7 +126,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<你的扩展 ID>"
 
 - 仅支持 Chrome（Manifest V3）。
 - 解释质量取决于你选的模型；较小的本机模型可能生成较弱的概念卡片，这会降低回想质量，但不会影响记录。
-- 无法读取浏览器内置 PDF 阅读器中的文字，所以 Harkback 会在自己的阅读页中打开 PDF（arXiv 论文则跳转到 HTML 版本）。扫描件没有文字，不支持，也没有 OCR；表格、含文字的图、三栏及以上等复杂版式的段落识别只是近似。本地 PDF 需要先在 `chrome://extensions` 中为 Harkback 开启「允许访问文件网址」。
+- 无法读取浏览器内置 PDF 阅读器中的文字，所以 Harkback 会在自己的阅读页中打开 PDF（arXiv 论文则跳转到 HTML 版本）。扫描件没有文字，不支持，也没有 OCR；表格、含文字的图、三栏及以上等复杂版式的段落识别只是近似。本地 PDF 需要两步授权：先在 `chrome://extensions` 中为 Harkback 开启「允许访问文件网址」，首次打开时再在阅读页点「允许读取本地文件」。
 - 自动缩写匹配要求全称至少有三个词（如 `Large Language Model` 得到 `LLM`）。同一领域里对应不同全称的缩写（例如两个不同的「GNN」）会保持为不同概念。
 - 中日韩名称至少需要三个字符才会加下划线，以避免误报。
 

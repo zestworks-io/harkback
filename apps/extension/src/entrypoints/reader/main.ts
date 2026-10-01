@@ -21,11 +21,29 @@ class ReaderError extends Error {
   }
 }
 
+/** `fetch` refuses file: URLs, but an extension that was allowed file access can read them with XHR. */
+function readLocalFile(src: string): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", src);
+    xhr.responseType = "arraybuffer";
+    xhr.onload = () =>
+      xhr.response instanceof ArrayBuffer && xhr.response.byteLength > 0
+        ? resolve(new Uint8Array(xhr.response))
+        : reject(new ReaderError("file-access"));
+    xhr.onerror = () => reject(new ReaderError("file-access"));
+    xhr.send();
+  });
+}
+
+const LOCAL_FILES = "file:///*";
+
 async function loadBytes(src: string, handoff: string | null): Promise<Uint8Array> {
   if (handoff) {
     const dataUrl = await takeHandoff(handoff).catch(() => null);
     if (dataUrl) return new Uint8Array(await (await fetch(dataUrl)).arrayBuffer());
   }
+  if (src.startsWith("file:")) return readLocalFile(src);
   try {
     const res = await fetch(src, { credentials: "include" });
     if (!res.ok) throw new ReaderError("download");
@@ -45,8 +63,9 @@ async function main(): Promise<void> {
   const L = (zh: string, en: string) => pick(settings.language, zh, en);
   const notice = document.getElementById("notice")!;
   const host = document.getElementById("pages")!;
-  const say = (...lines: string[]) => {
-    notice.replaceChildren(...lines.map((l) => Object.assign(document.createElement("p"), { textContent: l })));
+  const say = (title: string, ...lines: string[]) => {
+    const h = Object.assign(document.createElement("h1"), { textContent: title });
+    notice.replaceChildren(h, ...lines.map((l) => Object.assign(document.createElement("p"), { textContent: l })));
     notice.hidden = false;
   };
 
@@ -71,13 +90,35 @@ async function main(): Promise<void> {
   } catch (e) {
     const kind = e instanceof ReaderError ? e.kind : (e as { name?: string }).name === "PasswordException" ? "password" : "invalid";
     if (kind === "file-access") {
-      return say(
-        L("无法读取这个本地文件。", "Cannot read this local file."),
+      if (await browser.permissions.contains({ origins: [LOCAL_FILES] })) {
+        say(
+          L("无法读取这个本地文件", "Cannot read this local file"),
+          L(
+            "请在 chrome://extensions 中打开 Harkback 的详情，开启「允许访问文件网址」，然后再点一次工具栏按钮。",
+            'Open Harkback\'s details in chrome://extensions, turn on "Allow access to file URLs", then click the toolbar button again.',
+          ),
+        );
+        return;
+      }
+      say(
+        L("需要读取本地文件的权限", "Harkback needs access to local files"),
         L(
-          "请在 chrome://extensions 中打开 Harkback 的详情，开启「允许访问文件网址」，然后再点一次工具栏按钮。",
-          'Open Harkback\'s details in chrome://extensions, turn on "Allow access to file URLs", then click the toolbar button again.',
+          "这个 PDF 在你的电脑上。允许后，Harkback 才能读取它来标注术语；文件不会被上传。",
+          "This PDF is on your computer. Allow access so Harkback can read it and mark terms. The file is never uploaded.",
         ),
       );
+      const allow = Object.assign(document.createElement("button"), {
+        type: "button",
+        textContent: L("允许读取本地文件", "Allow local files"),
+      });
+      allow.onclick = () => {
+        allow.disabled = true;
+        void browser.permissions.request({ origins: [LOCAL_FILES] }).then((ok) => (ok ? location.reload() : (allow.disabled = false)));
+      };
+      const actions = Object.assign(document.createElement("div"), { className: "actions" });
+      actions.append(allow);
+      notice.append(actions);
+      return;
     }
     if (kind === "download") {
       return say(

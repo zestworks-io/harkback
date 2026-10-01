@@ -261,8 +261,8 @@ async function main(): Promise<void> {
           "p",
           { className: "lede" },
           L(
-            "PDF 也可以读：在 PDF 页面点工具栏按钮，arXiv 的论文会打开 HTML 版本，其他 PDF 会在 Harkback 的阅读页中打开。本地 PDF 需要先在 chrome://extensions 中为 Harkback 开启「允许访问文件网址」。",
-            'PDFs work too: click the toolbar button on a PDF. An arXiv paper opens its HTML version; any other PDF opens in Harkback\'s reader. For a PDF on your computer, first turn on "Allow access to file URLs" for Harkback in chrome://extensions.',
+            "PDF 也可以读：在 PDF 页面点工具栏按钮，arXiv 的论文会打开 HTML 版本，其他 PDF 会在 Harkback 的阅读页中打开。本地 PDF 需要两步授权：先在 chrome://extensions 中为 Harkback 开启「允许访问文件网址」，再在阅读页点「允许读取本地文件」。",
+            'PDFs work too: click the toolbar button on a PDF. An arXiv paper opens its HTML version; any other PDF opens in Harkback\'s reader. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in chrome://extensions, then click "Allow local files" on the reader page.',
           ),
         ),
       ),
