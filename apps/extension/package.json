@@ -11,7 +11,8 @@
     "build:e2e": "wxt build --mode e2e",
     "dev": "wxt",
     "typecheck": "wxt prepare && tsc -p .",
-    "e2e": "wxt build --mode e2e && playwright test"
+    "e2e": "wxt build --mode e2e && playwright test",
+    "store-assets": "wxt build --mode e2e && playwright test -c playwright.store.config.ts"
   },
   "dependencies": {
     "@harkback/core": "workspace:*",
