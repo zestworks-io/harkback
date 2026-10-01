@@ -7,6 +7,8 @@ export type Understanding = "understood" | "confused" | "new";
 export interface RelatedConcept {
   conceptId: string;
   name: string;
+  /** Other names, so the link can be shown in the reader's language. */
+  aliases: string[];
   /** True when the concept has at least one recorded explanation. */
   studied: boolean;
   /** The relation between the two concepts, so it can be rejected. */
@@ -46,11 +48,21 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
   const concept = state.concepts.get(id);
   if (!concept || concept.isPlaceholder) return null;
 
-  const groups = { prerequisites: new Map<string, RelatedConcept>(), variants: new Map<string, RelatedConcept>(), related: new Map<string, RelatedConcept>() };
+  const groups = {
+    prerequisites: new Map<string, RelatedConcept>(),
+    variants: new Map<string, RelatedConcept>(),
+    related: new Map<string, RelatedConcept>(),
+  };
   const add = (group: Map<string, RelatedConcept>, otherId: string, edgeId: string): void => {
     const other = state.concepts.get(otherId);
     if (!other || otherId === id || group.has(otherId)) return;
-    group.set(otherId, { conceptId: otherId, name: other.canonicalName, studied: !other.isPlaceholder, edgeId });
+    group.set(otherId, {
+      conceptId: otherId,
+      name: other.canonicalName,
+      aliases: other.names.filter((n) => n !== other.canonicalName),
+      studied: !other.isPlaceholder,
+      edgeId,
+    });
   };
   for (const edge of state.edges.values()) {
     if (edge.from !== id && edge.to !== id) continue;

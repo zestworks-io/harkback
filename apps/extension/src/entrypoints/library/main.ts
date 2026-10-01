@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import { h } from "../../lib/dom";
 import type { Request } from "../../lib/messages";
 import { conceptDetail, understandingOf, type ConceptDetail, type RelatedConcept, type Understanding } from "../../lib/concept-detail";
+import { localizeNames } from "../../lib/names";
 import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
 import { renderMarkdown } from "../../lib/markdown";
 import { backupNow, request } from "../../lib/pages/request";
@@ -179,6 +180,9 @@ async function main(): Promise<void> {
     );
   };
 
+  /** Name and other names of a concept, in the language chosen in settings. */
+  const names = (canonical: string, aliases: readonly string[]) => localizeNames(canonical, aliases, settings.language);
+
   const conceptHref = (id: string): string => `#concept=${encodeURIComponent(id)}`;
   const badge = (u: Understanding): HTMLElement =>
     h(
@@ -210,20 +214,22 @@ async function main(): Promise<void> {
     return box;
   };
 
-  const conceptView = (c: HistoryConcept): HTMLElement =>
-    h(
+  const conceptView = (c: HistoryConcept): HTMLElement => {
+    const n = names(c.name, c.aliases);
+    return h(
       "section",
       { className: "concept", "data-hb": "concept" },
       h(
         "div",
         { className: "concept-head" },
         conceptPick(c.entries.map((e) => e.encounterId)),
-        h("h2", {}, h("a", { href: conceptHref(c.conceptId) }, c.name)),
+        h("h2", {}, h("a", { href: conceptHref(c.conceptId) }, n.name)),
         badge(understandingOf(state, c.conceptId)),
       ),
-      c.aliases.length > 0 ? h("div", { className: "aliases" }, c.aliases.join(" · ")) : null,
+      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
       h("ul", { className: "entries" }, ...c.entries.map(entryView)),
     );
+  };
 
   /** Sends a correction, then re-reads the records and draws again. */
   async function correct(
@@ -245,9 +251,10 @@ async function main(): Promise<void> {
   }
 
   const chip = (r: RelatedConcept): HTMLElement => {
-    const label = r.studied
-      ? h("a", { href: conceptHref(r.conceptId), "data-hb": "related" }, r.name)
-      : h("span", { title: L("还没解释过", "Not explained yet"), "data-hb": "related" }, r.name);
+    const label = names(r.name, r.aliases).name;
+    const link = r.studied
+      ? h("a", { href: conceptHref(r.conceptId), "data-hb": "related" }, label)
+      : h("span", { title: L("还没解释过", "Not explained yet"), "data-hb": "related" }, label);
     const remove = h(
       "button",
       {
@@ -260,7 +267,7 @@ async function main(): Promise<void> {
       "×",
     );
     remove.addEventListener("click", () => void correct({ type: "reject-edge", edgeId: r.edgeId }));
-    return h("span", { className: `chip${r.studied ? "" : " muted"}` }, label, remove);
+    return h("span", { className: `chip${r.studied ? "" : " muted"}` }, link, remove);
   };
 
   const editTools = (d: ConceptDetail): HTMLElement => {
@@ -282,8 +289,9 @@ async function main(): Promise<void> {
     // A searchable list: type part of a name and pick it. Equal names get a number so each choice is unique.
     const choices = new Map<string, string>();
     for (const c of historyModel(state).filter((c) => c.conceptId !== d.conceptId)) {
-      let label = c.name;
-      for (let n = 2; choices.has(label); n++) label = `${c.name} (${n})`;
+      const shown = names(c.name, c.aliases).name;
+      let label = shown;
+      for (let n = 2; choices.has(label); n++) label = `${shown} (${n})`;
       choices.set(label, c.conceptId);
     }
     const listId = `merge-choices-${d.conceptId}`;
@@ -322,21 +330,22 @@ async function main(): Promise<void> {
   const relatedGroup = (title: string, items: RelatedConcept[]): HTMLElement | null =>
     items.length === 0 ? null : h("div", { className: "group" }, h("h3", {}, title), h("div", { className: "chips" }, ...items.map(chip)));
 
-  const detailView = (d: ConceptDetail): HTMLElement =>
-    h(
+  const detailView = (d: ConceptDetail): HTMLElement => {
+    const n = names(d.name, d.aliases);
+    return h(
       "section",
       { className: "concept detail", "data-hb": "concept-detail" },
       h(
         "div",
         { className: "concept-head" },
         conceptPick(d.entries.map((e) => e.encounterId)),
-        h("h2", {}, d.name),
+        h("h2", {}, n.name),
         badge(d.understanding),
         h("span", { className: "domain" }, d.domain),
         h("span", { className: "spacer" }),
         selectToggle(),
       ),
-      d.aliases.length > 0 ? h("div", { className: "aliases" }, d.aliases.join(" · ")) : null,
+      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
       d.muted
         ? h(
             "p",
@@ -350,6 +359,7 @@ async function main(): Promise<void> {
       relatedGroup(L("相关", "Related"), d.related),
       h("ul", { className: "entries" }, ...d.entries.map(entryView)),
     );
+  };
 
   const backLink = h("a", { className: "back", href: "#", "data-hb": "back" }, L("← 所有概念", "← All concepts"));
 
@@ -400,11 +410,12 @@ async function main(): Promise<void> {
     };
     const explanation = h("div", { className: "explanation" });
     explanation.append(renderMarkdown(item.explanation));
+    const n = names(item.name, item.aliases);
     return h(
       "section",
       { className: "concept review", "data-hb": "review-card" },
-      h("div", { className: "concept-head" }, h("h2", {}, item.name), badge(item.understanding)),
-      item.aliases.length > 0 ? h("div", { className: "aliases" }, item.aliases.join(" · ")) : null,
+      h("div", { className: "concept-head" }, h("h2", {}, n.name), badge(item.understanding)),
+      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
       h(
         "div",
         { className: "meta" },

@@ -111,8 +111,8 @@ describe("conceptDetail", () => {
     edge(lora, "related", ft);
     const d = conceptDetail(w.state(), lora)!;
     expect(d.prerequisites).toEqual([
-      { conceptId: matrix, name: "Matrix rank", studied: true, edgeId: edgeId(lora, "prerequisite", matrix) },
-      { conceptId: peft, name: "PEFT", studied: false, edgeId: edgeId(lora, "prerequisite", peft) },
+      { conceptId: matrix, name: "Matrix rank", aliases: [], studied: true, edgeId: edgeId(lora, "prerequisite", matrix) },
+      { conceptId: peft, name: "PEFT", aliases: [], studied: false, edgeId: edgeId(lora, "prerequisite", peft) },
     ]);
     expect(d.variants.find((r) => r.name === "QLoRA")?.edgeId).toBe(edgeId(qlora, "variant_of", lora));
     expect(d.variants.map((r) => r.name).sort()).toEqual(["Fine-tuning", "QLoRA"]);
