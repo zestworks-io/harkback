@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>隐私政策 · Harkback</title>
+<meta name="description" content="Harkback 如何处理你的数据：记录保存在浏览器中，只有你触发的请求会发送给你选择的模型。">
+<link rel="icon" href="../../favicon.png">
+<link rel="alternate" hreflang="en" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../zh/"><img src="../../icon.png" alt="" width="24" height="24">Harkback</a>
+<nav class="site"><a href="../../zh/">首页</a><a href="../../zh/privacy/" aria-current="page">隐私政策</a><a href="../../zh/terms/">使用条款</a><a href="../../privacy/" lang="en">English</a></nav>
+</div></header>
+<main><div class="wrap">
+
+<h1>隐私政策</h1>
+<p class="meta">最后更新：2026 年 10 月 1 日</p>
+<p>Harkback 是一个浏览器扩展：阅读时解释术语，并记住你理解了什么。它没有自己的服务器，开发者不会接收、存储或看到你的任何数据。</p>
+
+<h2>Harkback 保存什么</h2>
+<ul>
+<li><strong>你的记录</strong>（解释、追问、笔记、“懂了 / 还没懂”标记以及它们的来源）保存在你的浏览器中，即扩展的本地存储。它们不会发送给开发者。</li>
+<li><strong>你的设置</strong>，包括你填写的模型 API key，保存在浏览器的扩展存储中。key <strong>未加密</strong>，只会发送到你填写的模型地址。</li>
+<li><strong>备份。</strong>Harkback 每周把一份包含你记录的 JSONL 文件保存到你电脑的 <code>下载/harkback</code> 文件夹。备份只含记录，不含设置或 API key。你也可以在历史页自行导出数据。</li>
+</ul>
+
+<h2>哪些内容会离开你的浏览器</h2>
+<p>只有你触发的请求。当你请求解释时，Harkback 会把选中的文字、所在段落、章节和页面标题发送给<strong>你配置的模型服务</strong>（例如云端 API 或 Ollama 这样的本机服务）。该服务按其自己的条款和隐私政策处理这些数据。你标为敏感的来源，其内容绝不会发给非本机模型。</p>
+<p>Harkback 不含统计分析、广告或跟踪，也不会出售或分享你的数据。</p>
+
+<h2>权限</h2>
+<ul>
+<li><strong>网站访问（可选）。</strong>只有当你选择扫描某个网站或把它加入允许列表时，Harkback 才会请求访问该网站；它还会请求访问你模型的地址，以便发送你的请求。在 arxiv.org 上会自动运行。</li>
+<li><strong>本地文件（可选）。</strong>要读取电脑上的 PDF，你可以允许访问本地文件。文件只在浏览器中读取，不会上传。</li>
+<li><strong>其他权限。</strong><code>storage</code> 用于保存记录和设置；<code>alarms</code> 用于安排每周备份并刷新工具栏图标上的待复习数量；<code>downloads</code> 用于写入备份；<code>offscreen</code> 用于生成备份文件；<code>scripting</code> 和 <code>activeTab</code> 让工具栏按钮可以读取你当前所在的页面。</li>
+</ul>
+
+<h2>无痕窗口</h2>
+<p>无痕窗口默认关闭。启用后，Harkback 只解释，不记录、不扫描、也不显示提醒。</p>
+
+<h2>删除你的数据</h2>
+<p>可在历史页删除记录，或卸载扩展以清除它在浏览器中保存的全部内容。已保存到你磁盘上的备份和导出文件，由你自行删除。</p>
+
+<h2>本政策的变更</h2>
+<p>如果 Harkback 处理数据的方式发生变化，会在变更发布前更新本页和上方日期。历史记录公开在<a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">代码仓库</a>中。</p>
+
+<h2>联系方式</h2>
+<p>如有疑问，请在 <a href="https://github.com/zestworks-io/harkback/issues">github.com/zestworks-io/harkback/issues</a> 提交 issue。</p>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<span>© 2026 Zestworks · Apache-2.0</span>
+<span><a href="https://github.com/zestworks-io/harkback">GitHub</a> · <a href="https://github.com/zestworks-io/harkback/issues">反馈</a></span>
+</div></footer>
+</body>
+</html>

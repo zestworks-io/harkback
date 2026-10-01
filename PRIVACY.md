@@ -1,6 +1,8 @@
 # Harkback privacy policy
 
-_Last updated: 2026-09-30_
+_Last updated: 2026-10-01_
+
+The published copy is at https://zestworks-io.github.io/harkback/privacy/ (source: [`site/privacy`](site/privacy/index.html), [`site/zh/privacy`](site/zh/privacy/index.html)). Keep them in sync.
 
 Harkback is a browser extension that explains terms while you read and remembers what you understood. It has no server of its own. The developer does not receive, store or see any of your data.
 
@@ -20,7 +22,7 @@ Harkback does not include analytics, advertising or tracking, and does not sell 
 
 - **Site access (optional).** Harkback asks for access to a website only when you choose to scan it or add it to the allowed list, and it asks for your model's address so it can send your requests. On arxiv.org it runs automatically.
 - **Local files (optional).** To read a PDF on your computer, you can allow access to local files. The file is read in your browser and is never uploaded.
-- **Other permissions.** `storage` keeps your records and settings; `alarms` schedules the weekly backup; `downloads` writes that backup; `offscreen` creates the backup file; `scripting` and `activeTab` let the toolbar button read the page you are on.
+- **Other permissions.** `storage` keeps your records and settings; `alarms` schedules the weekly backup and refreshes the review count on the toolbar icon; `downloads` writes that backup; `offscreen` creates the backup file; `scripting` and `activeTab` let the toolbar button read the page you are on.
 
 ## Private windows
 
