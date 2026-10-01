@@ -139,4 +139,19 @@ describe("ExplainCard", () => {
     expect(card.el.querySelector(".hb-scroll")!.contains(q("followup-input"))).toBe(false);
     expect(card.el.querySelector(".hb-compose")!.contains(q("followup-send"))).toBe(true);
   });
+
+  it("keeps the tier and the action buttons above the scrolling explanation and hides Ask more once the question box is open", () => {
+    const { card, q } = setup();
+    card.setExplained("低秩适配。", "defined_in_source");
+    card.done(true);
+    const head = card.el.querySelector(".hb-head")!;
+    expect(head.contains(q("tier"))).toBe(true);
+    expect(head.contains(q("understood"))).toBe(true);
+    expect(head.nextElementSibling!.contains(q("explanation"))).toBe(true);
+    q("followup-open")!.click();
+    expect(q("followup-open")).toBeNull();
+    card.done(true);
+    expect(q("followup-open")).toBeNull();
+    expect(q("understood")).not.toBeNull();
+  });
 });

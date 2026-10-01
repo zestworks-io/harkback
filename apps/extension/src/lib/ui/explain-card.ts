@@ -52,7 +52,9 @@ export class ExplainCard {
       "div",
       { className: "hb-card", "data-hb": "card", role: "dialog" },
       close,
-      h("div", { className: "hb-scroll" }, this.meta, this.body, this.note, this.footer, this.thread),
+      // The tier and the Got it / Still confused buttons stay pinned above the explanation.
+      h("div", { className: "hb-head" }, this.meta, this.footer),
+      h("div", { className: "hb-scroll" }, this.body, this.note, this.thread),
       this.compose,
     );
     document.addEventListener("keydown", this.onKeyDown, true);
@@ -113,15 +115,16 @@ export class ExplainCard {
       this.note.textContent = t(this.lang, "markedSensitive");
       this.handlers.onMarkSensitive();
     });
+    const askMore = h(
+      "button",
+      { type: "button", className: "hb-quiet", "data-hb": "followup-open", onclick: () => this.openFollowUp() },
+      t(this.lang, "followUp"),
+    );
     this.footer.replaceChildren(
       choice("understood", "marked_understood", "understood"),
       choice("confused", "marked_confused", "confused"),
       h("span", { className: "hb-spacer" }),
-      h(
-        "button",
-        { type: "button", className: "hb-quiet", "data-hb": "followup-open", onclick: () => this.openFollowUp() },
-        t(this.lang, "followUp"),
-      ),
+      ...(this.compose.childElementCount > 0 ? [] : [askMore]),
       sensitive,
     );
   }
@@ -203,6 +206,8 @@ export class ExplainCard {
     );
     this.input = input;
     this.sendButton = button;
+    // The question box is open, so the button that opened it is no longer needed.
+    this.footer.querySelector('[data-hb="followup-open"]')?.remove();
     this.compose.replaceChildren(h("div", { className: "hb-row" }, input, button));
     input.focus();
   }

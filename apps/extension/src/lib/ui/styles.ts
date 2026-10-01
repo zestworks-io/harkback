@@ -32,6 +32,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
   animation: hb-in 140ms ease-out;
 }
 @keyframes hb-in { from { opacity: 0; transform: translateY(4px) scale(0.985); } }
+.hb-head { display: none; flex: none; padding: 14px 18px 10px; border-bottom: 1px solid var(--hb-border); }
+.hb-head:has(> :not(:empty)) { display: block; }
 .hb-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px 18px 14px; }
 .hb-close {
   z-index: 1;
@@ -39,7 +41,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
   background: none; color: var(--hb-muted); font-size: 18px; line-height: 1; cursor: pointer;
 }
 .hb-close:hover { background: var(--hb-subtle); color: var(--hb-fg); }
-.hb-meta { color: var(--hb-muted); font-size: 12.5px; margin: 0 28px 10px 0; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.hb-meta { color: var(--hb-muted); font-size: 12.5px; margin: 0 28px 8px 0; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 .hb-meta:empty { display: none; }
 .hb-tier { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 550; }
 .hb-tier::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -71,7 +73,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-note:empty { display: none; }
 .hb-error { color: var(--hb-error); font-size: 13.5px; }
 
-.hb-footer { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hb-border); }
+.hb-footer { display: flex; flex-wrap: wrap; gap: 6px; }
 .hb-footer:empty { display: none; }
 .hb-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 button {
@@ -107,7 +109,8 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-answer:empty { display: none; }
 
 .hb-reunion { width: 360px; border-left: 3px solid var(--hb-accent); padding: 14px 18px 14px; }
-.hb-reunion .hb-meta { margin-right: 0; }
+.hb-reunion .hb-meta { margin: 0 0 10px; }
+.hb-reunion .hb-footer { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hb-border); }
 .hb-reunion [data-hb="reunion-title"] { color: var(--hb-fg); font-weight: 600; }
 .hb-reunion .hb-body { color: var(--hb-muted); font-size: 13.5px; }
 
