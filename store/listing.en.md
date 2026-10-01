@@ -26,7 +26,7 @@ PDFs AND PAPERS
 arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset. Other websites are scanned only when you click the toolbar button or allow the site.
 
 YOU CHOOSE THE MODEL
-Harkback has no server and no account. You connect your own model: Ollama on your computer (text never leaves it), or OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter or any OpenAI-compatible service with your own API key.
+Harkback has no server and no account. You connect your own model: either one that runs on your computer, so your text never leaves it, or a hosted service that you use with your own API key.
 
 PRIVACY
 • Your records stay in your browser. The developer receives nothing.
@@ -37,6 +37,6 @@ PRIVACY
 • API keys are stored unencrypted in the extension's storage; use a key with a spending limit.
 
 LANGUAGES
-The interface is available in English, Simplified and Traditional Chinese, Japanese, Korean, Spanish, French, German and Brazilian Portuguese. Explanations can be written in 16 languages.
+The interface is available in nine languages, and explanations can be written in 16.
 
 Source code, privacy policy and support: see the links on this page.
