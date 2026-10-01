@@ -35,6 +35,54 @@ test("lists, searches and deletes recorded explanations", async ({ context, sw, 
   expect(events.find((e) => e.type === "encounter.created")?.payload).toBeNull();
 });
 
+test("selects several explanations and deletes them together", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await lookUpLora(context);
+  const again = await openArxiv(context, "2106.09685");
+  await selectAndExplain(again, "#t-lora");
+  await again.locator("[data-hb=ask-yes]").click();
+  await expect(again.locator("[data-hb=understood]")).toBeEnabled();
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
+  const entries = page.locator("[data-hb=entry]");
+  await expect(entries).toHaveCount(2);
+
+  // The timeline dot is centred on the 2px line.
+  const geometry = await page.evaluate(() => {
+    const dot = getComputedStyle(document.querySelector(".entry")!, "::before");
+    return { box: dot.boxSizing, centre: parseFloat(dot.left) + parseFloat(dot.width) / 2 };
+  });
+  expect(geometry.box).toBe("border-box");
+  expect(geometry.centre).toBe(-18 + 1); // the list's content starts 18px in; the line's centre is 1px in
+
+  await page.locator("[data-hb=select-mode]").first().click();
+  await expect(page.locator("[data-hb=selection-bar]")).toBeVisible();
+  await expect(page.locator("[data-hb=delete-selected]")).toBeDisabled();
+  await page.locator("[data-hb=select-entry]").first().check();
+  await expect(page.locator("[data-hb=selection-count]")).toHaveText("1 selected");
+  await page.locator("[data-hb=select-all]").click();
+  await expect(page.locator("[data-hb=selection-count]")).toHaveText("2 selected");
+  await page.locator("[data-hb=select-concept]").uncheck();
+  await expect(page.locator("[data-hb=selection-count]")).toHaveText("0 selected");
+  await page.locator("[data-hb=select-concept]").check();
+  await expect(page.locator("[data-hb=selection-count]")).toHaveText("2 selected");
+
+  await page.locator("[data-hb=select-entry]").first().uncheck();
+  await page.locator("[data-hb=delete-selected]").click();
+  await expect(page.locator("[data-hb=delete-selected]")).toHaveText("Confirm delete 1");
+  await page.locator("[data-hb=delete-selected]").click();
+  await expect(entries).toHaveCount(1);
+  await expect(page.locator("[data-hb=selection-bar]")).toBeHidden();
+
+  await page.locator("[data-hb=select-mode]").first().click();
+  await page.locator("[data-hb=select-all]").click();
+  await page.locator("[data-hb=delete-selected]").click();
+  await page.locator("[data-hb=delete-selected]").click();
+  await expect(page.locator("[data-hb=empty]")).toBeVisible();
+  const events = await readEvents(sw);
+  expect(events.filter((e) => e.type === "encounter.deleted")).toHaveLength(2);
+});
+
 test("opens a concept page from the list and returns", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLora(context);

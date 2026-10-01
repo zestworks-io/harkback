@@ -29,6 +29,93 @@ async function main(): Promise<void> {
     placeholder: L("搜索概念、原文或解释", "Search concepts, quotes or explanations"),
   });
 
+  // Multi-select: `selecting` shows checkboxes; `visibleIds` are the entries on screen, which "Select all" covers.
+  let selecting = false;
+  const selected = new Set<string>();
+  let visibleIds: string[] = [];
+
+  const checkbox = (id: string, onChange: (checked: boolean) => void, hb: string, label: string): HTMLInputElement => {
+    const box = h("input", { type: "checkbox", className: "pick", "data-hb": hb, "data-id": id, "aria-label": label });
+    box.checked = selected.has(id);
+    box.addEventListener("change", () => onChange(box.checked));
+    return box;
+  };
+
+  /** Entry ids of one concept, for its "select all" box. */
+  const idsOf = (el: Element): string[] => (el.getAttribute("data-ids") ?? "").split(",").filter(Boolean);
+
+  const selectToggle = (): HTMLButtonElement => {
+    const b = h("button", { type: "button", "data-hb": "select-mode" }, "");
+    b.addEventListener("click", () => {
+      selecting = !selecting;
+      selected.clear();
+      draw();
+    });
+    return b;
+  };
+
+  const countLabel = (n: number) => L(`已选 ${n} 条`, `${n} selected`);
+  const bar = h("div", { className: "selbar", "data-hb": "selection-bar", hidden: true });
+
+  /** Brings checkboxes, highlights and the bar in step with `selected` without redrawing the list. */
+  function syncSelection(): void {
+    for (const box of list.querySelectorAll<HTMLInputElement>('input[data-hb="select-entry"]')) {
+      box.checked = selected.has(box.dataset.id ?? "");
+      box.closest(".entry")?.classList.toggle("selected", box.checked);
+    }
+    for (const box of list.querySelectorAll<HTMLInputElement>('input[data-hb="select-concept"]')) {
+      const ids = idsOf(box);
+      const n = ids.filter((id) => selected.has(id)).length;
+      box.checked = n > 0 && n === ids.length;
+      box.indeterminate = n > 0 && n < ids.length;
+    }
+    renderBar();
+  }
+
+  function renderBar(): void {
+    bar.hidden = !selecting;
+    for (const b of document.querySelectorAll<HTMLElement>('[data-hb="select-mode"]'))
+      b.textContent = selecting ? L("完成", "Done") : L("选择", "Select");
+    if (!selecting) return bar.replaceChildren();
+    const n = selected.size;
+    const all = h("button", { type: "button", "data-hb": "select-all" }, L("全选", "Select all"));
+    all.addEventListener("click", () => {
+      for (const id of visibleIds) selected.add(id);
+      syncSelection();
+    });
+    const none = h("button", { type: "button", "data-hb": "select-none", disabled: n === 0 }, L("清除", "Clear"));
+    none.addEventListener("click", () => {
+      selected.clear();
+      syncSelection();
+    });
+    const del = h("button", { type: "button", className: "danger", "data-hb": "delete-selected", disabled: n === 0 }, L("删除", "Delete"));
+    del.addEventListener("click", async () => {
+      if (del.dataset.confirm !== "1") {
+        del.dataset.confirm = "1";
+        del.textContent = L(`确认删除 ${n} 条`, `Confirm delete ${n}`);
+        return;
+      }
+      del.disabled = true;
+      await deleteSelected();
+    });
+    bar.replaceChildren(h("span", { className: "count", "data-hb": "selection-count" }, countLabel(n)), all, none, del);
+  }
+
+  async function deleteSelected(): Promise<void> {
+    const ids = [...selected];
+    let failed = 0;
+    for (const encounterId of ids) {
+      const r = await request({ type: "delete-encounter", encounterId }).catch(() => ({ ok: false }));
+      if (r.ok) selected.delete(encounterId);
+      else failed++;
+    }
+    state = replay(await store.all());
+    status.textContent = failed > 0 ? L(`${failed} 条删除失败。`, `${failed} could not be deleted.`) : "";
+    if (failed === 0) selecting = false;
+    if (currentConceptId() && !conceptDetail(state, currentConceptId()!)) location.hash = "";
+    else draw();
+  }
+
   const entryView = (e: HistoryEntry): HTMLElement => {
     const del = h("button", { type: "button", className: "small", "data-hb": "delete" }, L("删除", "Delete"));
     del.addEventListener("click", async () => {
@@ -49,16 +136,29 @@ async function main(): Promise<void> {
     const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
     const body = h("div", { className: "explanation" });
     body.append(renderMarkdown(e.explanation));
+    const choose = selecting
+      ? checkbox(
+          e.encounterId,
+          (on) => {
+            if (on) selected.add(e.encounterId);
+            else selected.delete(e.encounterId);
+            syncSelection();
+          },
+          "select-entry",
+          L("选择这条记录", "Select this entry"),
+        )
+      : null;
     return h(
       "li",
-      { className: "entry", "data-hb": "entry" },
+      { className: `entry${selecting && selected.has(e.encounterId) ? " selected" : ""}`, "data-hb": "entry" },
       h(
         "div",
         { className: "meta" },
+        choose,
         h("span", { className: "src" }, `《${e.sourceTitle}》`),
         h("span", {}, e.date),
         h("span", { className: `tier ${e.tier}` }, tier),
-        del,
+        selecting ? null : del,
       ),
       h("blockquote", { className: "quote" }, e.selection),
       body,
@@ -73,6 +173,29 @@ async function main(): Promise<void> {
       u === "understood" ? L("已理解", "Understood") : u === "confused" ? L("仍困惑", "Confused") : L("新", "New"),
     );
 
+  /** Selects or clears every entry of one concept. */
+  const conceptPick = (ids: string[]): HTMLElement | null => {
+    if (!selecting) return null;
+    const box = h("input", {
+      type: "checkbox",
+      className: "pick",
+      "data-hb": "select-concept",
+      "data-ids": ids.join(","),
+      "aria-label": L("选择这个概念的全部记录", "Select all entries of this concept"),
+    });
+    const n = ids.filter((id) => selected.has(id)).length;
+    box.checked = n > 0 && n === ids.length;
+    box.indeterminate = n > 0 && n < ids.length;
+    box.addEventListener("change", () => {
+      for (const id of ids) {
+        if (box.checked) selected.add(id);
+        else selected.delete(id);
+      }
+      syncSelection();
+    });
+    return box;
+  };
+
   const conceptView = (c: HistoryConcept): HTMLElement =>
     h(
       "section",
@@ -80,6 +203,7 @@ async function main(): Promise<void> {
       h(
         "div",
         { className: "concept-head" },
+        conceptPick(c.entries.map((e) => e.encounterId)),
         h("h2", {}, h("a", { href: conceptHref(c.conceptId) }, c.name)),
         badge(understandingOf(state, c.conceptId)),
       ),
@@ -188,7 +312,16 @@ async function main(): Promise<void> {
     h(
       "section",
       { className: "concept detail", "data-hb": "concept-detail" },
-      h("div", { className: "concept-head" }, h("h2", {}, d.name), badge(d.understanding), h("span", { className: "domain" }, d.domain)),
+      h(
+        "div",
+        { className: "concept-head" },
+        conceptPick(d.entries.map((e) => e.encounterId)),
+        h("h2", {}, d.name),
+        badge(d.understanding),
+        h("span", { className: "domain" }, d.domain),
+        h("span", { className: "spacer" }),
+        selectToggle(),
+      ),
       d.aliases.length > 0 ? h("div", { className: "aliases" }, d.aliases.join(" · ")) : null,
       d.muted
         ? h(
@@ -293,6 +426,15 @@ async function main(): Promise<void> {
 
   function draw(): void {
     const id = currentConceptId();
+    if (location.hash === "#review") selecting = false;
+    // Entries that no longer exist cannot stay selected.
+    const alive = new Set(historyModel(state).flatMap((c) => c.entries.map((e) => e.encounterId)));
+    for (const s of [...selected]) if (!alive.has(s)) selected.delete(s);
+    visibleIds =
+      id !== null
+        ? (conceptDetail(state, id)?.entries.map((e) => e.encounterId) ?? [])
+        : historyModel(state, search.value).flatMap((c) => c.entries.map((e) => e.encounterId));
+    queueMicrotask(renderBar);
     toolbar.hidden = !onList();
     reviewLink.textContent = L(`复习 (${dueItems().length})`, `Review (${dueItems().length})`);
     if (location.hash === "#review") {
@@ -389,7 +531,7 @@ async function main(): Promise<void> {
   });
 
   const reviewLink = h("a", { className: "button", href: "#review", "data-hb": "review-link" }, "");
-  const toolbar = h("div", { className: "toolbar" }, search, reviewLink, exportMd, exportNotes, backupButton);
+  const toolbar = h("div", { className: "toolbar" }, search, reviewLink, selectToggle(), exportMd, exportNotes, backupButton);
 
   root.replaceChildren(
     h(
@@ -406,6 +548,7 @@ async function main(): Promise<void> {
     toolbar,
     status,
     list,
+    bar,
     h(
       "p",
       { className: "note" },
