@@ -20,6 +20,7 @@ export default defineConfig({
       }
     },
   },
+  zip: { artifactTemplate: "harkback-{{version}}-{{browser}}.zip" },
   manifest: ({ mode }) => ({
     name: "Harkback",
     description: "Explain terms while you read, remember what you understood, and reconnect when you meet them again.",

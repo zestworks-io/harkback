@@ -7,6 +7,7 @@
   "scripts": {
     "postinstall": "wxt prepare",
     "build": "wxt build",
+    "zip": "wxt zip",
     "build:e2e": "wxt build --mode e2e",
     "dev": "wxt",
     "typecheck": "wxt prepare && tsc -p .",

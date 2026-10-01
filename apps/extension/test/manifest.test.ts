@@ -12,7 +12,7 @@ describe.skipIf(!enabled)("production manifest", () => {
   it("asks for no host access up front and exposes nothing to web pages", () => {
     expect(manifest.manifest_version).toBe(3);
     expect(manifest.host_permissions ?? []).toEqual([]);
-    expect(manifest.optional_host_permissions).toEqual(["*://*/*"]);
+    expect(manifest.optional_host_permissions).toEqual(["*://*/*", "file:///*"]);
     expect(manifest.web_accessible_resources).toBeUndefined();
     expect(manifest.externally_connectable).toBeUndefined();
     // Entrypoint names like "history" or "newtab" silently become browser page overrides.
