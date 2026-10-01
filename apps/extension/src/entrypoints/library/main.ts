@@ -8,7 +8,8 @@ import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/
 import { renderMarkdown } from "../../lib/markdown";
 import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
-import { reviewQueue } from "../../lib/review";
+import { dueText, daysText } from "../../lib/due";
+import { dueAtOf, intervalDays, nextDueAt, reviewQueue } from "../../lib/review";
 import { withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
 import { pick } from "../../lib/ui/strings";
@@ -191,6 +192,25 @@ async function main(): Promise<void> {
       u === "understood" ? L("已理解", "Understood") : u === "confused" ? L("仍困惑", "Confused") : L("新", "New"),
     );
 
+  /** When the concept is next up for review; nothing for muted concepts. */
+  const dueBadge = (conceptId: string): HTMLElement | null => {
+    const at = dueAtOf(state, conceptId);
+    if (at === null) return null;
+    const now = Date.now();
+    return h(
+      "span",
+      {
+        className: `due${at <= now ? " now" : ""}`,
+        "data-hb": "due",
+        title: L(
+          "新术语查词一天后进入复习；每次记住后依次隔 3、7、14、30、60 天；点「仍然困惑」则隔一天。",
+          'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.',
+        ),
+      },
+      dueText(at, now, settings.language),
+    );
+  };
+
   /** Selects or clears every entry of one concept. */
   const conceptPick = (ids: string[]): HTMLElement | null => {
     if (!selecting) return null;
@@ -225,6 +245,7 @@ async function main(): Promise<void> {
         conceptPick(c.entries.map((e) => e.encounterId)),
         h("h2", {}, h("a", { href: conceptHref(c.conceptId) }, n.name)),
         badge(understandingOf(state, c.conceptId)),
+        dueBadge(c.conceptId),
       ),
       n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
       h("ul", { className: "entries" }, ...c.entries.map(entryView)),
@@ -341,6 +362,7 @@ async function main(): Promise<void> {
         conceptPick(d.entries.map((e) => e.encounterId)),
         h("h2", {}, n.name),
         badge(d.understanding),
+        dueBadge(d.conceptId),
         h("span", { className: "domain" }, d.domain),
         h("span", { className: "spacer" }),
         selectToggle(),
@@ -387,6 +409,14 @@ async function main(): Promise<void> {
     draw();
   }
 
+  const nextReviewNote = (at: number): HTMLElement =>
+    h(
+      "span",
+      { className: "next-review", "data-hb": "next-review" },
+      L("下一次复习：", "Next review: "),
+      dueText(at, Date.now(), settings.language),
+    );
+
   function reviewView(): HTMLElement {
     const [item] = dueItems();
     if (!item) {
@@ -396,6 +426,7 @@ async function main(): Promise<void> {
         reviewed > 0
           ? L(`今天的复习完成了，共 ${reviewed} 个。`, `All done for now: ${reviewed} reviewed.`)
           : L("现在没有需要复习的概念。", "Nothing to review right now."),
+        ...(nextDueAt(state) === null ? [] : [h("br"), nextReviewNote(nextDueAt(state)!)]),
       );
     }
     const show = h("button", { type: "button", className: "primary", "data-hb": "review-show" }, L("显示解释", "Show explanation"));
@@ -421,6 +452,7 @@ async function main(): Promise<void> {
         { className: "meta" },
         h("span", { className: "src" }, `《${item.sourceTitle}》`),
         h("span", {}, L(`还剩 ${dueItems().length} 个`, `${dueItems().length} left`)),
+        h("span", { className: "due now", "data-hb": "review-due" }, dueText(item.dueAt, Date.now(), settings.language)),
       ),
       revealed
         ? h(
@@ -438,6 +470,14 @@ async function main(): Promise<void> {
                 revealed = false;
                 draw();
               }),
+              h(
+                "p",
+                { className: "prompt", "data-hb": "review-hint" },
+                L(
+                  `记住了：${daysText(intervalDays(item.streak + 1), "zh")}后再来 · 仍然困惑：${daysText(intervalDays(0), "zh")}后再来 · 跳过：不改变安排`,
+                  `Remembered: back in ${daysText(intervalDays(item.streak + 1), "en")} · Still confused: back in ${daysText(intervalDays(0), "en")} · Skip: no change`,
+                ),
+              ),
             ),
           )
         : h(
@@ -555,7 +595,19 @@ async function main(): Promise<void> {
     }
   });
 
-  const reviewLink = h("a", { className: "button", href: "#review", "data-hb": "review-link" }, "");
+  const reviewLink = h(
+    "a",
+    {
+      className: "button",
+      href: "#review",
+      "data-hb": "review-link",
+      title: L(
+        "到期的术语。新术语查词一天后到期；每次记住后依次隔 3、7、14、30、60 天；点「仍然困惑」则隔一天。",
+        'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.',
+      ),
+    },
+    "",
+  );
   const toolbar = h("div", { className: "toolbar" }, search, reviewLink, selectToggle(), exportMd, exportNotes, backupButton);
 
   root.replaceChildren(

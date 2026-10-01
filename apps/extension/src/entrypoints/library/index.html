@@ -58,6 +58,9 @@
       /* Pseudo-elements do not inherit the page's border-box sizing, so say it: the 10px dot (border included) is centred on the 2px line. */
       .entry::before { content: ""; box-sizing: border-box; position: absolute; left: -22px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: var(--card); border: 2px solid var(--accent); }
       .entry.selected { background: var(--accent-soft); box-shadow: 0 0 0 8px var(--accent-soft); border-radius: 2px; }
+      .due { color: var(--muted); font-size: 12.5px; }
+      .due.now { color: var(--accent); font-weight: 550; }
+      .next-review { display: inline-block; margin-top: 6px; }
       .chat { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border); display: grid; gap: 8px; }
       .chat-title { color: var(--muted); font-size: 12.5px; font-weight: 600; }
       .chat-q { width: fit-content; max-width: 88%; margin-left: auto; padding: 6px 12px; border-radius: 12px 12px 4px 12px; background: var(--accent-soft); font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }

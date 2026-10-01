@@ -1,7 +1,7 @@
 import { DAY_MS } from "@harkback/core";
 import type { Action } from "@harkback/spec";
 import { describe, expect, it } from "vitest";
-import { reviewQueue } from "../src/lib/review";
+import { dueAtOf, intervalDays, nextDueAt, reviewQueue } from "../src/lib/review";
 import { world } from "./helpers";
 
 const T0 = Date.UTC(2026, 8, 1);
@@ -29,7 +29,13 @@ describe("reviewQueue", () => {
     const c = w.concept("LoRA");
     w.encounter(c, "s1", "an explanation");
     const [item] = reviewQueue(w.state(), day(1));
-    expect(item).toMatchObject({ conceptId: c, name: "LoRA", understanding: "new", explanation: "an explanation", sourceTitle: "Paper One" });
+    expect(item).toMatchObject({
+      conceptId: c,
+      name: "LoRA",
+      understanding: "new",
+      explanation: "an explanation",
+      sourceTitle: "Paper One",
+    });
   });
 
   it("makes a confused concept due one day after it was marked", () => {
@@ -122,5 +128,34 @@ describe("reviewQueue", () => {
     const { w } = setup();
     for (let i = 0; i < 5; i++) w.encounter(w.concept(`C${i}`), "s1");
     expect(reviewQueue(w.state(), day(2), { limit: 3 })).toHaveLength(3);
+  });
+});
+
+describe("due dates", () => {
+  it("waits one day, then 3, 7, 14, 30 and 60 days after each remembered review", () => {
+    expect([0, 1, 2, 3, 4, 5, 9].map(intervalDays)).toEqual([1, 3, 7, 14, 30, 60, 60]);
+  });
+
+  it("gives each concept its own due time and the earliest one overall", () => {
+    const { w, act } = setup();
+    const lora = w.concept("LoRA");
+    const loraEnc = w.encounter(lora, "s1");
+    w.setTime(day(1));
+    const attention = w.concept("Attention");
+    w.encounter(attention, "s1");
+    act(loraEnc, "marked_understood", day(2));
+    const state = w.state();
+    expect(dueAtOf(state, lora)).toBe(day(2) + 3 * DAY_MS);
+    expect(dueAtOf(state, attention)).toBe(day(1) + DAY_MS);
+    expect(nextDueAt(state)).toBe(day(2));
+  });
+
+  it("has no due time for muted concepts or an empty history", () => {
+    const { w } = setup();
+    const c = w.concept("LoRA");
+    w.encounter(c, "s1");
+    w.events.push(w.f.make("concept.muted", { concept_id: c }));
+    expect(dueAtOf(w.state(), c)).toBeNull();
+    expect(nextDueAt(w.state())).toBeNull();
   });
 });
