@@ -4,8 +4,22 @@ import { chooseModel, isLocalUrl, modelUrlError } from "../src/lib/model-policy"
 import { DEFAULT_SETTINGS, validateSettings, withDefaults, type ModelConfig, type Settings } from "../src/lib/settings";
 import { effectiveRule, hostPermissionPatterns, normalizePattern, originPattern } from "../src/lib/site-rules";
 
-const remote: ModelConfig = { id: "r", label: "Remote", baseUrl: "https://api.example.com/v1", apiKey: "k", model: "m" };
-const local: ModelConfig = { id: "l", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen" };
+const remote: ModelConfig = {
+  id: "r",
+  label: "Remote",
+  baseUrl: "https://api.example.com/v1",
+  apiKey: "k",
+  model: "m",
+  provider: "custom",
+};
+const local: ModelConfig = {
+  id: "l",
+  label: "Ollama",
+  baseUrl: "http://127.0.0.1:11434/v1",
+  apiKey: "",
+  model: "qwen",
+  provider: "ollama",
+};
 const settings = (o: Partial<Settings> = {}): Settings => ({
   ...DEFAULT_SETTINGS,
   models: [remote, local],
@@ -33,7 +47,7 @@ describe("settings", () => {
       defaultModelId: 5,
     });
     expect(s.onboarded).toBe(false);
-    expect(s.models).toEqual([{ id: "a", label: "", baseUrl: "http://127.0.0.1:1/v1", apiKey: "", model: "", apiType: "openai" }]);
+    expect(s.models).toEqual([{ id: "a", label: "", baseUrl: "http://127.0.0.1:1/v1", apiKey: "", model: "", provider: "custom" }]);
     expect(s.sites).toEqual([{ pattern: "a.com", sensitive: true }]);
     expect(s.rateLimit).toEqual(DEFAULT_SETTINGS.rateLimit);
     expect(s.defaultModelId).toBeNull();

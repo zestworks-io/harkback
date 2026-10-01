@@ -32,7 +32,7 @@ describe("testConnection", () => {
       auth = new Headers(init?.headers).get("authorization");
       return new Response(JSON.stringify({ data: [{ id: "b" }, { id: "a" }] }));
     };
-    expect(await testConnection({ baseUrl: "https://api.example.com/v1/", apiKey: " k " }, fetchImpl)).toEqual({
+    expect(await testConnection({ baseUrl: "https://api.example.com/v1/", apiKey: " k ", provider: "custom" }, fetchImpl)).toEqual({
       kind: "ok",
       models: ["a", "b"],
     });
@@ -45,7 +45,7 @@ describe("testConnection", () => {
       seen = { url: String(url), headers: new Headers(init?.headers) };
       return new Response(JSON.stringify({ data: [{ id: "claude-b" }, { id: "claude-a" }] }));
     };
-    expect(await testConnection({ baseUrl: "https://api.anthropic.com/v1", apiKey: " k ", apiType: "anthropic" }, fetchImpl)).toEqual({
+    expect(await testConnection({ baseUrl: "https://api.anthropic.com/v1", apiKey: " k ", provider: "anthropic" }, fetchImpl)).toEqual({
       kind: "ok",
       models: ["claude-a", "claude-b"],
     });
@@ -68,35 +68,33 @@ describe("testConnection", () => {
       seen = { url: String(url), headers: new Headers(init?.headers) };
       return new Response(JSON.stringify(body));
     };
-    const cfgG = { baseUrl: "https://generativelanguage.googleapis.com/v1beta", apiKey: "g", apiType: "gemini" as const };
+    const cfgG = { baseUrl: "https://generativelanguage.googleapis.com/v1beta", apiKey: "g", provider: "gemini" };
     expect(await testConnection(cfgG, fetchImpl)).toEqual({ kind: "ok", models: ["gemini-2.5-flash", "gemini-2.5-pro"] });
     expect(seen!.url).toBe("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000");
     expect(seen!.headers.get("x-goog-api-key")).toBe("g");
     expect(await testConnection(cfgG, json({}, 400))).toEqual({ kind: "auth" });
   });
 
-  it("works out the API type from the address when none is given", async () => {
-    let url = "";
-    const fetchImpl = async (u: RequestInfo | URL) => {
-      url = String(u);
-      return new Response(JSON.stringify({ data: [] }));
-    };
-    await testConnection({ baseUrl: "https://api.anthropic.com/v1", apiKey: "k" }, fetchImpl);
-    expect(url).toBe("https://api.anthropic.com/v1/models?limit=1000");
-  });
-
   it("tells a blocked Ollama origin apart from a bad key", async () => {
-    expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "" }, json({}, 403))).toEqual({ kind: "origin_blocked" });
-    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 401))).toEqual({ kind: "auth" });
-    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k" }, json({}, 500))).toEqual({
+    expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", provider: "ollama" }, json({}, 403))).toEqual({
+      kind: "origin_blocked",
+    });
+    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k", provider: "custom" }, json({}, 401))).toEqual({
+      kind: "auth",
+    });
+    expect(await testConnection({ baseUrl: "https://api.example.com/v1", apiKey: "k", provider: "custom" }, json({}, 500))).toEqual({
       kind: "http",
       status: 500,
     });
-    expect(await testConnection({ baseUrl: "http://api.example.com/v1", apiKey: "k" }, json({}))).toEqual({ kind: "insecure" });
+    expect(await testConnection({ baseUrl: "http://api.example.com/v1", apiKey: "k", provider: "custom" }, json({}))).toEqual({
+      kind: "insecure",
+    });
     const down = async () => {
       throw new TypeError("Failed to fetch");
     };
-    expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "" }, down)).toEqual({ kind: "unreachable" });
+    expect(await testConnection({ baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", provider: "ollama" }, down)).toEqual({
+      kind: "unreachable",
+    });
   });
 
   it("gives OLLAMA_ORIGINS commands for the extension origin", () => {

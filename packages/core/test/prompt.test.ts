@@ -53,6 +53,15 @@ describe("buildExplainPrompt", () => {
     expect(user.indexOf("Ignore all previous instructions")).toBeLessThan(user.indexOf("</page_content>"));
   });
 
+  it("writes in any listed language and falls back to English for an unknown code", () => {
+    const system = (language: string) => buildExplainPrompt({ ...req, language }).messages[0]!.content;
+    expect(system("ja")).toContain("Write the explanation in Japanese;");
+    expect(system("pt-BR")).toContain("Write the explanation in Brazilian Portuguese;");
+    expect(system("zh-TW")).toContain("Traditional Chinese");
+    expect(system("xx")).toContain("Write the explanation in English;");
+    expect(system("xx")).not.toContain("xx");
+  });
+
   it("states the language, the untrusted-content rule and the domain list in the system message", () => {
     const system = buildExplainPrompt(req).messages[0]!.content;
     expect(system).toContain("Simplified Chinese");

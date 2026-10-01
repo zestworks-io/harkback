@@ -10,7 +10,7 @@ import { mountViewer } from "../../lib/pdf/viewer";
 import { withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
 import { detectPdfSource, type PdfFacts } from "../../lib/source-id";
-import { pick } from "../../lib/ui/strings";
+import { pick } from "../../lib/ui/pick";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -62,7 +62,7 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 async function main(): Promise<void> {
   void initTheme();
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
-  const L = (zh: string, en: string) => pick(settings.language, zh, en);
+  const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(settings.language, zh, en, vars);
   const notice = document.getElementById("notice")!;
   const host = document.getElementById("pages")!;
   const say = (title: string, ...lines: string[]) => {

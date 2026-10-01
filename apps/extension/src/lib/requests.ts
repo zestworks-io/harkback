@@ -6,6 +6,7 @@ import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "./settings";
 import { effectiveRule } from "./site-rules";
 import { isArxivUrl } from "./source-id";
+import { UI_STRINGS } from "./ui/locales/ui";
 
 const USER_ACTIONS = new Set(["marked_understood", "marked_confused", "reunion_recalled"]);
 const MAX_HITS = 500;
@@ -38,6 +39,7 @@ export async function pageInfo(deps: RequestDeps, url: string, incognito: boolea
     scan,
     incognito,
     language: settings.language,
+    strings: UI_STRINGS[settings.language] ?? {},
     theme: settings.theme,
     entries: scan ? matcherEntriesFromState(await deps.getState()) : [],
   };

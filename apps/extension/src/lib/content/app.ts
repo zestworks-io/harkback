@@ -8,7 +8,7 @@ import { detectSource, type DetectedSource } from "../source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
-import { t, type Lang } from "../ui/strings";
+import { t, useStrings, type Lang } from "../ui/strings";
 import type { PortLike, Rpc } from "./rpc";
 
 const MAX_SELECTION = 200;
@@ -80,15 +80,20 @@ export class ContentApp {
     return this.info?.language ?? "zh";
   }
 
+  private take(info: PageInfo): PageInfo {
+    useStrings(info.language, info.strings);
+    return info;
+  }
+
   async start(): Promise<void> {
-    const info = await this.rpc.request({ type: "page-info" });
+    const info = this.take(await this.rpc.request({ type: "page-info" }));
     if (info.enabled && info.autoScan) await this.activate(info);
     else this.info = info;
   }
 
   /** Also the "rescan" action: the toolbar button calls it again. `known` is a page-info answer that is still fresh. */
   async activate(known?: PageInfo): Promise<void> {
-    this.info = known ?? (await this.rpc.request({ type: "page-info" }));
+    this.info = this.take(known ?? (await this.rpc.request({ type: "page-info" })));
     if (!this.info.enabled) return;
     if (!this.listening) {
       this.listening = true;

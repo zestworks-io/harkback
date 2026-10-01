@@ -1,7 +1,7 @@
 import { defaultFetch, normalizeBaseUrl, requestHeaders } from "./model-client";
 import { isLocalUrl, modelUrlError } from "./model-policy";
 import type { ApiType } from "./providers";
-import { apiTypeOf } from "./settings";
+import { apiTypeOf, type ModelConfig } from "./settings";
 
 export type ConnectionResult =
   | { kind: "ok"; models: string[] }
@@ -11,11 +11,11 @@ export type ConnectionResult =
   | { kind: "http"; status: number }
   | { kind: "unreachable" };
 
-/** Lists the models of an address: the request and where to find the names depend on the API type. */
-function listRequest(cfg: { baseUrl: string; apiKey: string; apiType?: ApiType }): { url: string; headers: Record<string, string> } {
+/** Lists the models of an address: the request and where to find the names depend on the provider. */
+function listRequest(cfg: Pick<ModelConfig, "baseUrl" | "apiKey" | "provider">): { url: string; headers: Record<string, string> } {
   const base = normalizeBaseUrl(cfg.baseUrl);
   const key = cfg.apiKey.trim();
-  switch (apiTypeOf({ baseUrl: cfg.baseUrl, apiType: cfg.apiType })) {
+  switch (apiTypeOf(cfg)) {
     case "anthropic":
       return {
         url: `${base}/models?limit=1000`,
@@ -46,11 +46,11 @@ function modelNames(type: ApiType, json: unknown): string[] {
 }
 
 export async function testConnection(
-  cfg: { baseUrl: string; apiKey: string; apiType?: ApiType },
+  cfg: Pick<ModelConfig, "baseUrl" | "apiKey" | "provider">,
   fetchImpl: typeof fetch = defaultFetch,
 ): Promise<ConnectionResult> {
   if (modelUrlError(cfg.baseUrl)) return { kind: "insecure" };
-  const type = apiTypeOf({ baseUrl: cfg.baseUrl, apiType: cfg.apiType });
+  const type = apiTypeOf(cfg);
   const { url, headers } = listRequest(cfg);
   let res: Response;
   try {

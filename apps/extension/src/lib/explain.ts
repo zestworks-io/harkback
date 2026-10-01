@@ -18,7 +18,7 @@ import type { HarkEvent, Locator, Tier } from "@harkback/spec";
 import { understandingOf } from "./concept-detail";
 import { cooccurrenceEdge, type LastLookup } from "./cooccurrence";
 import { chooseModel } from "./model-policy";
-import type { ModelConfig, Settings, SiteRule } from "./settings";
+import { explainLanguageOf, type ModelConfig, type Settings, type SiteRule } from "./settings";
 import { effectiveRule } from "./site-rules";
 import type { DetectedSource } from "./source-id";
 
@@ -127,7 +127,7 @@ export function planExplain(
     abstractFirstSentence: req.abstractFirstSentence,
     candidates: forModel,
     understood: new Set(forModel.filter((c) => understandingOf(state, c.conceptId) === "understood").map((c) => c.conceptId)),
-    language: settings.language,
+    language: explainLanguageOf(settings),
     mode: req.mode,
     ...(earlier ? { earlier } : {}),
   });

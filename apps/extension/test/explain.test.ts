@@ -15,8 +15,22 @@ import { preview, reunionCards } from "../src/lib/reunion-cards";
 import { DEFAULT_SETTINGS, type ModelConfig, type Settings } from "../src/lib/settings";
 import { world } from "./helpers";
 
-const remote: ModelConfig = { id: "r", label: "Remote", baseUrl: "https://api.example.com/v1", apiKey: "k", model: "gpt" };
-const local: ModelConfig = { id: "l", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen" };
+const remote: ModelConfig = {
+  id: "r",
+  label: "Remote",
+  baseUrl: "https://api.example.com/v1",
+  apiKey: "k",
+  model: "gpt",
+  provider: "custom",
+};
+const local: ModelConfig = {
+  id: "l",
+  label: "Ollama",
+  baseUrl: "http://127.0.0.1:11434/v1",
+  apiKey: "",
+  model: "qwen",
+  provider: "ollama",
+};
 const settings = (o: Partial<Settings> = {}): Settings => ({
   ...DEFAULT_SETTINGS,
   models: [remote, local],

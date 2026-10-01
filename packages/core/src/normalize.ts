@@ -38,6 +38,24 @@ const GREEK: Record<string, string> = {
   ω: "omega",
 };
 
+/**
+ * Drops the accents of Latin letters, so "résumé" and "resume" are one term. Marks on other scripts stay: kana and Hangul
+ * need them. Greek is handled by `transliterateGreek`, which expects the letter without its accent, so it is folded too.
+ */
+export function foldAccents(s: string): string {
+  let out = "";
+  let afterLetter = false;
+  for (const ch of s.normalize("NFD")) {
+    if (/\p{Mn}/u.test(ch)) {
+      if (!afterLetter) out += ch;
+      continue;
+    }
+    afterLetter = /[\p{Script=Latin}\p{Script=Greek}]/u.test(ch);
+    out += ch;
+  }
+  return out.normalize("NFC");
+}
+
 export function detectScript(s: string): Script {
   return CJK.test(s) ? "cjk" : "latin";
 }
@@ -83,12 +101,13 @@ export function acronymOf(name: string): string | null {
 export function wordsOf(name: string): string[] {
   const cleaned = stripDeterminers(name);
   if (detectScript(cleaned) === "cjk") return [];
-  return cleaned.toLowerCase().split(LATIN_SEP).filter(Boolean).map(depluralize);
+  return foldAccents(cleaned.toLowerCase()).split(LATIN_SEP).filter(Boolean).map(depluralize);
 }
 
 export function normalizeName(input: string): NormalizedName {
-  const cleaned = stripDeterminers(input);
-  const script = detectScript(cleaned);
+  const stripped = stripDeterminers(input);
+  const script = detectScript(stripped);
+  const cleaned = script === "cjk" ? stripped : foldAccents(stripped);
   if (script === "cjk") {
     return { norm: cleaned.toLowerCase().replace(CJK_SEP, ""), script, caseKey: null };
   }

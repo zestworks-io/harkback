@@ -1,6 +1,7 @@
 import type { ErrorCode } from "../messages";
+import type { Lang } from "./languages";
 
-export type Lang = "zh" | "en";
+export type { Lang };
 
 const zh = {
   explain: "解释",
@@ -96,7 +97,15 @@ const en: Record<StringKey, string> = {
   err_internal: "Something went wrong. Try again.",
 };
 
-const TABLE: Record<Lang, Record<StringKey, string>> = { zh, en };
+const TABLE: Partial<Record<Lang, Readonly<Partial<Record<StringKey, string>>>>> = { zh, en };
+
+/**
+ * Text for the other languages is sent by the background page with the page info, so the content script does not carry
+ * every language. Keys that are missing fall back to English.
+ */
+export function useStrings(lang: Lang, table: Readonly<Partial<Record<StringKey, string>>>): void {
+  if (lang !== "zh" && lang !== "en") TABLE[lang] = table;
+}
 
 type ErrorKey = `err_${ErrorCode}`;
 // Compile-time check that every error code has a message.
@@ -104,11 +113,8 @@ const errorKeysExist: ErrorKey extends StringKey ? true : never = true;
 void errorKeysExist;
 
 export function t(lang: Lang, key: StringKey, vars: Record<string, string | number> = {}): string {
-  return TABLE[lang][key].replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
+  return (TABLE[lang]?.[key] ?? en[key]).replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
 }
-
-/** Inline zh/en choice for pages that carry their own copy. */
-export const pick = (lang: Lang, zh: string, en: string): string => (lang === "zh" ? zh : en);
 
 export function errorText(lang: Lang, code: ErrorCode, retryAfterMs = 0): string {
   return t(lang, `err_${code}`, { s: Math.ceil(retryAfterMs / 1000) });

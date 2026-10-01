@@ -1,7 +1,9 @@
 import { MATCH_RULES } from "./constants";
-import { normalizeName, stripDeterminers, type Script } from "./normalize";
+import { foldAccents, normalizeName, stripDeterminers, type Script } from "./normalize";
 import type { State } from "./state";
 
+/** Kana and Hangul. */
+const SYLLABIC = /[぀-ヿ가-힯]/u;
 const SEPARATOR = /[\s\-‐‑‒–—_]/;
 const SEPARATORS_G = /[\s\-‐‑‒–—_\u00AD]+/g;
 
@@ -26,9 +28,9 @@ const GREEK_LATIN: Record<string, string> = {
   ω: "omega",
 };
 
-/** Compatibility forms ("ﬁ" -> "fi", full-width letters), Greek letter names, and lower case; may yield several characters. */
+/** Compatibility forms ("ﬁ" -> "fi", full-width letters), accents on Latin letters, Greek letter names, and lower case; may yield several characters. */
 function foldChar(ch: string): string {
-  const lower = ch.normalize("NFKC").toLowerCase();
+  const lower = foldAccents(ch.normalize("NFKC").toLowerCase());
   let out = "";
   for (const c of lower) out += GREEK_LATIN[c] ?? c;
   return out.length > 0 ? out : ch;
@@ -41,6 +43,8 @@ export function prepareText(raw: string): PreparedText {
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i]!;
     if (ch === "\u00AD") continue;
+    // An accent written as a separate mark after a Latin letter ("e" + U+0301) is dropped like a precomposed one.
+    if (/\p{Mn}/u.test(ch) && /\p{Script=Latin}/u.test(raw[i - 1] ?? "")) continue;
     if (SEPARATOR.test(ch)) {
       pendingSpace = text.length > 0;
       continue;
@@ -95,7 +99,11 @@ export class Matcher {
   private insert(e: MatcherEntry): void {
     const prepared = prepareText(e.pattern).text.trim();
     if (!prepared) return;
-    if (e.script === "cjk" && Array.from(prepared).length < MATCH_RULES.cjkMinMatchLength) return;
+    if (
+      e.script === "cjk" &&
+      Array.from(prepared).length < (SYLLABIC.test(prepared) ? MATCH_RULES.syllabicMinMatchLength : MATCH_RULES.cjkMinMatchLength)
+    )
+      return;
     const index = this.entries.push({ ...e, prepared }) - 1;
     let s = 0;
     for (let i = 0; i < prepared.length; i++) {

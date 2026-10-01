@@ -12,7 +12,7 @@ describe("onboardingSettings", () => {
     baseUrl: " http://127.0.0.1:11434/v1 ",
     apiKey: " ",
     model: " qwen3 ",
-    apiType: "openai" as const,
+    provider: "ollama",
   };
 
   it("adds the model, makes it the default and, when local, the model for sensitive sources", () => {
@@ -25,7 +25,7 @@ describe("onboardingSettings", () => {
       localModelId: "m1",
     });
     expect(s.models).toEqual([
-      { id: "m1", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen3", apiType: "openai" },
+      { id: "m1", label: "Ollama", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "qwen3", provider: "ollama" },
     ]);
   });
 

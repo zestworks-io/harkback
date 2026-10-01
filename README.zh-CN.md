@@ -105,17 +105,17 @@ pnpm --filter @harkback/extension build
 
 ![设置页：一个模型的名称、模型、地址、API key 和「测试连接」按钮](assets/settings.png)
 
-| 服务          | 接口类型           | Base URL                                           | 说明                         |
-| ------------- | ------------------ | -------------------------------------------------- | ---------------------------- |
-| Ollama        | OpenAI 兼容        | `http://127.0.0.1:11434/v1`                        | 本机，无需 key。见下文。     |
-| OpenAI        | OpenAI 兼容        | `https://api.openai.com/v1`                        | 需要 API key。               |
-| Anthropic     | Anthropic Messages | `https://api.anthropic.com/v1`                     | 需要 API key。               |
-| Google Gemini | Google Gemini      | `https://generativelanguage.googleapis.com/v1beta` | 需要 API key。               |
-| xAI Grok      | OpenAI 兼容        | `https://api.x.ai/v1`                              | 需要 API key。               |
-| OpenRouter    | OpenAI 兼容        | `https://openrouter.ai/api/v1`                     | 需要 API key。               |
-| 自定义        | 自选               | 任意地址                                           | 非本机地址必须使用 `https`。 |
+| 服务          | Base URL                                           | 说明                         |
+| ------------- | -------------------------------------------------- | ---------------------------- |
+| Ollama        | `http://127.0.0.1:11434/v1`                        | 本机，无需 key。见下文。     |
+| OpenAI        | `https://api.openai.com/v1`                        | 需要 API key。               |
+| Anthropic     | `https://api.anthropic.com/v1`                     | 需要 API key。               |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | 需要 API key。               |
+| xAI Grok      | `https://api.x.ai/v1`                              | 需要 API key。               |
+| OpenRouter    | `https://openrouter.ai/api/v1`                     | 需要 API key。               |
+| 自定义        | 任意地址                                           | 非本机地址必须使用 `https`。 |
 
-**接口类型**指这个地址使用的通信格式。选择服务会自动填好地址和类型；手动输入地址时，类型由域名决定：`api.anthropic.com` 是 Anthropic Messages，`generativelanguage.googleapis.com` 是 Google Gemini，其余（包括 OpenRouter 这类网关和公司内部代理）都是 OpenAI 兼容格式。不会根据模型名判断，因为同一个模型可以通过多种格式提供。遇到特殊地址时可以手动改类型。Google 的 OpenAI 兼容端点（`.../v1beta/openai/`）仍按 OpenAI 兼容处理。
+每个服务使用自己的通信格式：Anthropic 和 Google Gemini 使用各自的原生接口，其余（包括 Ollama、Grok、OpenRouter 以及公司内部代理等自定义地址）都使用 OpenAI 兼容格式。选择服务会自动填好地址，地址仍可修改。其他 OpenAI 兼容的服务请选择「自定义」。
 
 第一次测试或保存模型时，Chrome 会请你允许访问该模型地址。如果拒绝，解释卡片会明确告诉你，而不是报一个含糊的网络错误。
 
@@ -168,7 +168,9 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<你的扩展 ID>"
 - 解释质量取决于你选的模型；较小的本机模型可能生成较弱的概念卡片，这会降低回想质量，但不会影响记录。
 - 无法读取浏览器内置 PDF 阅读器中的文字，所以 Harkback 会在自己的阅读页中打开 PDF（arXiv 论文则跳转到 HTML 版本）。扫描件没有文字，不支持，也没有 OCR；表格、含文字的图、三栏及以上等复杂版式的段落识别只是近似。本地 PDF 需要两步授权：先在 `chrome://extensions` 中为 Harkback 开启「允许访问文件网址」，首次打开时再在阅读页点「允许读取本地文件」。
 - 自动缩写匹配要求全称至少有三个词（如 `Large Language Model` 得到 `LLM`）。同一领域里对应不同全称的缩写（例如两个不同的「GNN」）会保持为不同概念。
-- 中日韩名称至少需要三个字符才会加下划线，以避免误报。
+- 中文名称，以及只用汉字书写的日文名称，至少需要三个字符才会加下划线，以避免误报；含假名或谚文的名称两个字符即可。
+- 匹配时会忽略重音符号（“résumé”与“resume”视为同一术语），但除英语外不做词形还原，因此德语复数等变形会被当作不同术语。
+- 界面支持英语、简体中文、繁体中文、日语、韩语、西班牙语、法语、德语和巴西葡萄牙语。解释可以用 16 种语言书写，在设置中单独选择。导出的笔记和 Markdown 只有英文或中文标签。
 
 ## 仓库结构
 

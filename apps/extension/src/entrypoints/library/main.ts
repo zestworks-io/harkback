@@ -10,15 +10,16 @@ import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
 import { dueText, daysText } from "../../lib/due";
 import { dueAtOf, intervalDays, nextDueAt, reviewQueue } from "../../lib/review";
-import { withDefaults } from "../../lib/settings";
+import { explainLanguageOf, withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
-import { pick } from "../../lib/ui/strings";
+import { quoteTitle } from "../../lib/ui/languages";
+import { pick } from "../../lib/ui/pick";
 import { CHANGE_CHANNEL, EventStore } from "../../lib/store";
 
 async function main(): Promise<void> {
   void initTheme();
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
-  const L = (zh: string, en: string) => pick(settings.language, zh, en);
+  const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(settings.language, zh, en, vars);
   const store = await EventStore.open();
   let state: State = replay(await store.all());
 
@@ -56,7 +57,7 @@ async function main(): Promise<void> {
     return b;
   };
 
-  const countLabel = (n: number) => L(`已选 ${n} 条`, `${n} selected`);
+  const countLabel = (n: number) => L("已选 {n} 条", "{n} selected", { n });
   const bar = h("div", { className: "selbar", "data-hb": "selection-bar", hidden: true });
 
   /** Brings checkboxes, highlights and the bar in step with `selected` without redrawing the list. */
@@ -94,7 +95,7 @@ async function main(): Promise<void> {
     del.addEventListener("click", async () => {
       if (del.dataset.confirm !== "1") {
         del.dataset.confirm = "1";
-        del.textContent = L(`确认删除 ${n} 条`, `Confirm delete ${n}`);
+        del.textContent = L("确认删除 {n} 条", "Confirm delete {n}", { n });
         return;
       }
       del.disabled = true;
@@ -112,7 +113,7 @@ async function main(): Promise<void> {
       else failed++;
     }
     state = replay(await store.all());
-    status.textContent = failed > 0 ? L(`${failed} 条删除失败。`, `${failed} could not be deleted.`) : "";
+    status.textContent = failed > 0 ? L("{failed} 条删除失败。", "{failed} could not be deleted.", { failed }) : "";
     if (failed === 0) selecting = false;
     if (currentConceptId() && !conceptDetail(state, currentConceptId()!)) location.hash = "";
     else draw();
@@ -144,7 +145,7 @@ async function main(): Promise<void> {
         : h(
             "div",
             { className: "chat", "data-hb": "chat" },
-            h("div", { className: "chat-title" }, L(`追问 · ${e.followUps.length}`, `Follow-up conversation · ${e.followUps.length}`)),
+            h("div", { className: "chat-title" }, L("追问 · {n}", "Follow-up conversation · {n}", { n: e.followUps.length })),
             ...e.followUps.flatMap((f) => {
               const answer = h("div", { className: "explanation chat-a", "data-hb": "chat-answer" });
               answer.append(renderMarkdown(f.answer));
@@ -170,7 +171,7 @@ async function main(): Promise<void> {
         "div",
         { className: "meta" },
         choose,
-        h("span", { className: "src" }, `《${e.sourceTitle}》`),
+        h("span", { className: "src" }, quoteTitle(e.sourceTitle, settings.language)),
         h("span", {}, e.date),
         h("span", { className: `tier ${e.tier}` }, tier),
         selecting ? null : del,
@@ -182,7 +183,7 @@ async function main(): Promise<void> {
   };
 
   /** Name and other names of a concept, in the language chosen in settings. */
-  const names = (canonical: string, aliases: readonly string[]) => localizeNames(canonical, aliases, settings.language);
+  const names = (canonical: string, aliases: readonly string[]) => localizeNames(canonical, aliases, explainLanguageOf(settings));
 
   const conceptHref = (id: string): string => `#concept=${encodeURIComponent(id)}`;
   const badge = (u: Understanding): HTMLElement =>
@@ -424,7 +425,7 @@ async function main(): Promise<void> {
         "p",
         { className: "empty", "data-hb": "review-done" },
         reviewed > 0
-          ? L(`今天的复习完成了，共 ${reviewed} 个。`, `All done for now: ${reviewed} reviewed.`)
+          ? L("今天的复习完成了，共 {n} 个。", "All done for now: {n} reviewed.", { n: reviewed })
           : L("现在没有需要复习的概念。", "Nothing to review right now."),
         ...(nextDueAt(state) === null ? [] : [h("br"), nextReviewNote(nextDueAt(state)!)]),
       );
@@ -450,8 +451,8 @@ async function main(): Promise<void> {
       h(
         "div",
         { className: "meta" },
-        h("span", { className: "src" }, `《${item.sourceTitle}》`),
-        h("span", {}, L(`还剩 ${dueItems().length} 个`, `${dueItems().length} left`)),
+        h("span", { className: "src" }, quoteTitle(item.sourceTitle, settings.language)),
+        h("span", {}, L("还剩 {n} 个", "{n} left", { n: dueItems().length })),
         h("span", { className: "due now", "data-hb": "review-due" }, dueText(item.dueAt, Date.now(), settings.language)),
       ),
       revealed
@@ -474,8 +475,12 @@ async function main(): Promise<void> {
                 "p",
                 { className: "prompt", "data-hb": "review-hint" },
                 L(
-                  `记住了：${daysText(intervalDays(item.streak + 1), "zh")}后再来 · 仍然困惑：${daysText(intervalDays(0), "zh")}后再来 · 跳过：不改变安排`,
-                  `Remembered: back in ${daysText(intervalDays(item.streak + 1), "en")} · Still confused: back in ${daysText(intervalDays(0), "en")} · Skip: no change`,
+                  "记住了：{a}后再来 · 仍然困惑：{b}后再来 · 跳过：不改变安排",
+                  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change",
+                  {
+                    a: daysText(intervalDays(item.streak + 1), settings.language),
+                    b: daysText(intervalDays(0), settings.language),
+                  },
                 ),
               ),
             ),
@@ -501,7 +506,7 @@ async function main(): Promise<void> {
         : historyModel(state, search.value).flatMap((c) => c.entries.map((e) => e.encounterId));
     queueMicrotask(renderBar);
     toolbar.hidden = !onList();
-    reviewLink.textContent = L(`复习 (${dueItems().length})`, `Review (${dueItems().length})`);
+    reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: dueItems().length });
     if (location.hash === "#review") {
       list.replaceChildren(backLink, reviewView());
       return;
@@ -561,8 +566,9 @@ async function main(): Promise<void> {
       type: "button",
       "data-hb": "export-notes",
       title: L(
-        `每个概念一个 Markdown 文件，带 [[链接]]，写入所选文件夹里的 ${NOTES_FOLDER}/；同名文件会被覆盖。`,
-        `One Markdown file per concept with [[links]], written to ${NOTES_FOLDER}/ in the folder you pick; files with the same name are overwritten.`,
+        "每个概念一个 Markdown 文件，带 [[链接]]，写入所选文件夹里的 {folder}/；同名文件会被覆盖。",
+        "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.",
+        { folder: NOTES_FOLDER },
       ),
     },
     L("导出笔记文件夹", "Export notes folder"),
@@ -585,11 +591,12 @@ async function main(): Promise<void> {
       const { written, failed } = await writeNoteFiles(dir, files);
       status.textContent =
         failed.length === 0
-          ? L(`已导出 ${written} 个笔记。`, `Exported ${written} notes.`)
-          : L(
-              `已导出 ${written} 个笔记，${failed.length} 个失败：${failed.slice(0, 3).join("、")}`,
-              `Exported ${written} notes; ${failed.length} failed: ${failed.slice(0, 3).join(", ")}`,
-            );
+          ? L("已导出 {n} 个笔记。", "Exported {n} notes.", { n: written })
+          : L("已导出 {n} 个笔记，{failed} 个失败：{names}", "Exported {n} notes; {failed} failed: {names}", {
+              n: written,
+              failed: failed.length,
+              names: failed.slice(0, 3).join(settings.language === "zh" ? "、" : ", "),
+            });
     } catch {
       status.textContent = L("导出失败。", "Export failed.");
     }

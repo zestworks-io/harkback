@@ -37,4 +37,13 @@ describe("localizeNames", () => {
   it("does not drop short abbreviations that another name starts with", () => {
     expect(localizeNames("Large Language Model", ["LLM", "LLMs"], "en").aliases).toEqual(["LLM", "LLMs"]);
   });
+
+  it("picks names by the script of the chosen language", () => {
+    const names = ["Gradient Descent", "勾配降下法", "경사 하강법", "Градиентный спуск"];
+    expect(localizeNames("Gradient Descent", names, "ja")).toEqual({ name: "勾配降下法", aliases: [] });
+    expect(localizeNames("Gradient Descent", names, "ko")).toEqual({ name: "경사 하강법", aliases: [] });
+    expect(localizeNames("Gradient Descent", names, "ru")).toEqual({ name: "Градиентный спуск", aliases: [] });
+    expect(localizeNames("Gradient Descent", names, "zh-TW").name).toBe("勾配降下法");
+    expect(localizeNames("Gradient Descent", names, "es")).toEqual({ name: "Gradient Descent", aliases: [] });
+  });
 });

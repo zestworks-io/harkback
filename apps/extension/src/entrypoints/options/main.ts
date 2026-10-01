@@ -1,16 +1,17 @@
-import { ulid } from "@harkback/core";
+import { EXPLAIN_LANGUAGES, ulid } from "@harkback/core";
 import { browser } from "wxt/browser";
 import { testConnection } from "../../lib/connection";
 import { h } from "../../lib/dom";
-import { PRIVACY } from "../../lib/pages/privacy";
+import { privacyNotes } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
-import { apiTypeOf, validateSettings, withDefaults, type Settings } from "../../lib/settings";
+import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
 import { applyTheme } from "../../lib/theme";
-import { API_TYPE_LABELS, API_TYPES, detectApiType, isApiType, PROVIDERS, providerById, providerForAddress } from "../../lib/providers";
+import { PROVIDERS, providerById } from "../../lib/providers";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
-import { pick } from "../../lib/ui/strings";
+import { isLang, UI_LANGUAGES } from "../../lib/ui/languages";
+import { pick } from "../../lib/ui/pick";
 
 function input(value: string, onInput: (v: string) => void, attrs: Record<string, unknown> = {}): HTMLInputElement {
   const el = h("input", { type: "text", value, ...attrs });
@@ -49,7 +50,7 @@ async function main(): Promise<void> {
   applyTheme(draft.theme);
   const root = document.getElementById("app")!;
   const status = h("div", { className: "result", "data-hb": "status" });
-  const L = (zh: string, en: string) => pick(draft.language, zh, en);
+  const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(draft.language, zh, en, vars);
 
   async function save(): Promise<void> {
     const next = trimmed(draft);
@@ -74,14 +75,21 @@ async function main(): Promise<void> {
   function render(): void {
     const language = h(
       "select",
-      {},
-      h("option", { value: "zh", selected: draft.language === "zh" }, "中文"),
-      h("option", { value: "en", selected: draft.language === "en" }, "English"),
+      { "aria-label": L("界面语言", "Interface language") },
+      ...UI_LANGUAGES.map((l) => h("option", { value: l.code, selected: draft.language === l.code }, l.native)),
     );
     language.addEventListener("change", () => {
-      draft.language = language.value === "en" ? "en" : "zh";
+      if (isLang(language.value)) draft.language = language.value;
       render();
     });
+
+    const explainLanguage = h(
+      "select",
+      { "data-hb": "explain-language", "aria-label": L("解释语言", "Explanation language") },
+      h("option", { value: "auto", selected: draft.explainLanguage === "auto" }, L("跟随界面语言", "Same as the interface")),
+      ...EXPLAIN_LANGUAGES.map((l) => h("option", { value: l.code, selected: draft.explainLanguage === l.code }, l.native)),
+    );
+    explainLanguage.addEventListener("change", () => (draft.explainLanguage = explainLanguage.value));
 
     const theme = h(
       "select",
@@ -107,52 +115,32 @@ async function main(): Promise<void> {
         foot.length > 0 ? h("div", { className: "card-foot" }, ...foot) : null,
       );
 
-    // Models whose API type was picked by hand; the others follow their address.
-    const typeChosen = new Set(draft.models.filter((m) => m.apiType && m.apiType !== detectApiType(m.baseUrl)).map((m) => m.id));
-
     const modelRows = draft.models.map((m, i) => {
       const provider = h(
         "select",
         { "data-hb": "model-provider", "aria-label": L("服务", "Provider") },
         ...PROVIDERS.map((p) =>
-          h(
-            "option",
-            { value: p.id, selected: providerForAddress(m.baseUrl).id === p.id },
-            p.id === "custom" ? L("自定义", "Custom") : p.label,
-          ),
+          h("option", { value: p.id, selected: m.provider === p.id }, p.id === "custom" ? L("自定义", "Custom") : p.label),
         ),
-      );
-      const apiType = h(
-        "select",
-        { "data-hb": "model-api-type", "aria-label": L("接口类型", "API type") },
-        ...API_TYPES.map((t) => h("option", { value: t, selected: apiTypeOf(m) === t }, API_TYPE_LABELS[t])),
       );
       provider.addEventListener("change", () => {
         const p = providerById(provider.value);
-        if (!p) return;
-        const previous = providerForAddress(m.baseUrl);
+        const previous = providerById(m.provider);
+        m.provider = p.id;
+        // "Custom" keeps whatever address was typed; the others fill in theirs.
         if (p.baseUrl) {
           m.baseUrl = p.baseUrl;
-          m.apiType = p.apiType;
           if (!m.label.trim() || m.label === "Model" || m.label === previous.label) m.label = p.label;
-        } else {
-          m.apiType = detectApiType(m.baseUrl);
         }
-        typeChosen.delete(m.id);
         render();
       });
-      apiType.addEventListener("change", () => {
-        m.apiType = isApiType(apiType.value) ? apiType.value : "openai";
-        if (m.apiType === detectApiType(m.baseUrl)) typeChosen.delete(m.id);
-        else typeChosen.add(m.id);
-      });
-      const preset = providerForAddress(m.baseUrl);
+      const preset = providerById(m.provider);
       const result = h("div", { className: "result", "data-hb": "model-result" });
       const test = h("button", { type: "button", className: "small", "data-hb": "model-test" }, L("测试连接", "Test connection"));
       test.addEventListener("click", async () => {
         const pattern = originPattern(m.baseUrl.trim());
         if (pattern) await requestOrigins([pattern]);
-        result.textContent = connectionMessage(draft.language, await testConnection({ ...m, apiType: apiTypeOf(m) }), location.origin);
+        result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
       });
       const remove = h("button", { type: "button", className: "small ghost" }, L("删除", "Delete"));
       remove.addEventListener("click", () => {
@@ -172,7 +160,6 @@ async function main(): Promise<void> {
           "div",
           { className: "grid" },
           field(L("服务", "Provider"), provider),
-          field(L("接口类型", "API type"), apiType),
           field(
             L("名称", "Name"),
             input(m.label, (v) => (m.label = v)),
@@ -183,15 +170,7 @@ async function main(): Promise<void> {
           ),
           field(
             L("地址", "Address"),
-            input(
-              m.baseUrl,
-              (v) => {
-                m.baseUrl = v;
-                if (!typeChosen.has(m.id)) apiType.value = m.apiType = detectApiType(v);
-                provider.value = providerForAddress(v).id;
-              },
-              { "data-hb": "model-base-url" },
-            ),
+            input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
             "wide",
           ),
           field(
@@ -220,7 +199,7 @@ async function main(): Promise<void> {
     });
     const addModel = h("button", { type: "button", className: "add", "data-hb": "add-model" }, L("+ 添加模型", "+ Add model"));
     addModel.addEventListener("click", () => {
-      draft.models.push({ id: ulid(), label: "Model", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "", apiType: "openai" });
+      draft.models.push({ id: ulid(), label: "Model", baseUrl: "http://127.0.0.1:11434/v1", apiKey: "", model: "", provider: "ollama" });
       render();
     });
 
@@ -296,6 +275,14 @@ async function main(): Promise<void> {
         ),
       ),
       card(
+        L("解释语言", "Explanation language"),
+        L(
+          "解释和追问的回答用这种语言书写；术语保持原文。模型的回答质量因语言而异。",
+          "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.",
+        ),
+        [explainLanguage],
+      ),
+      card(
         L("模型", "Models"),
         L(
           "非本机地址必须使用 https。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
@@ -367,7 +354,9 @@ async function main(): Promise<void> {
         ],
         [backupButton],
       ),
-      card(L("隐私", "Privacy"), null, [h("ul", { className: "privacy" }, ...PRIVACY[draft.language].map((line) => h("li", {}, line)))]),
+      card(L("隐私", "Privacy"), null, [
+        h("ul", { className: "privacy" }, ...privacyNotes(draft.language).map((line) => h("li", {}, line))),
+      ]),
       h("div", { className: "savebar" }, h("div", { className: "savebar-inner" }, saveButton, status)),
     );
   }

@@ -42,7 +42,9 @@ const TIER_LABEL = {
   en: { defined_in_source: "Defined in source", external_knowledge: "External knowledge" },
 } as const;
 
-export function exportMarkdown(state: State, language: "zh" | "en" = "zh"): string {
+/** `language` is an interface language code; anything but "zh" is exported with English labels. */
+export function exportMarkdown(state: State, language = "zh"): string {
+  const labels = language === "zh" ? "zh" : "en";
   const lines = ["# Harkback export", ""];
   const concepts = [...state.concepts.values()]
     .filter((c) => !c.isPlaceholder)
@@ -55,8 +57,8 @@ export function exportMarkdown(state: State, language: "zh" | "en" = "zh"): stri
       const e = state.encounters.get(eid)!;
       const title = state.sources.get(e.sourceId)?.title || e.sourceId;
       const date = new Date(e.createdAt).toISOString().slice(0, 10);
-      const source = language === "zh" ? `《${title}》` : `“${title}”`;
-      lines.push(`- ${date} · ${source} · ${TIER_LABEL[language][e.explanation.tier]}`);
+      const source = labels === "zh" ? `《${title}》` : `“${title}”`;
+      lines.push(`- ${date} · ${source} · ${TIER_LABEL[labels][e.explanation.tier]}`);
       lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
     }
     lines.push("");

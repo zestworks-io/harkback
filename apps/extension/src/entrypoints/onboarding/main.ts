@@ -2,16 +2,17 @@ import { ulid } from "@harkback/core";
 import { browser } from "wxt/browser";
 import { testConnection, type ConnectionResult } from "../../lib/connection";
 import { h } from "../../lib/dom";
-import { PRIVACY } from "../../lib/pages/privacy";
+import { privacyNotes } from "../../lib/pages/privacy";
 import { request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage, onboardingSettings } from "../../lib/pages/setup";
-import { API_TYPE_LABELS, API_TYPES, detectApiType, isApiType, PROVIDERS, providerById, type ApiType } from "../../lib/providers";
+import { PROVIDERS, providerById } from "../../lib/providers";
 import { modelUrlError } from "../../lib/model-policy";
 import { withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
 import { secretInput } from "../../lib/ui/secret-input";
 import { originPattern } from "../../lib/site-rules";
-import { pick, type Lang } from "../../lib/ui/strings";
+import { isLang, UI_LANGUAGES, type Lang } from "../../lib/ui/languages";
+import { pick } from "../../lib/ui/pick";
 
 type ResultState = "busy" | "ok" | "error" | "help";
 
@@ -25,14 +26,11 @@ async function main(): Promise<void> {
   let settings = withDefaults((await browser.storage.local.get("settings")).settings);
   let lang: Lang = settings.language;
   const root = document.getElementById("app")!;
-  const L = (zh: string, en: string) => pick(lang, zh, en);
+  const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(lang, zh, en, vars);
   // Kept outside render() so switching language does not clear what was typed.
   const form = {
     templateId: PROVIDERS[0]!.id,
     baseUrl: PROVIDERS[0]!.baseUrl,
-    apiType: PROVIDERS[0]!.apiType as ApiType,
-    /** Set once the format is chosen by hand, so typing an address no longer changes it. */
-    typeChosen: false,
     apiKey: "",
     model: "",
     consent: false,
@@ -40,23 +38,18 @@ async function main(): Promise<void> {
   };
 
   const render = (): void => {
-    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
 
-    const langButton = (value: Lang, label: string) => {
-      const b = h("button", { type: "button", "aria-pressed": String(lang === value) }, label);
-      b.addEventListener("click", () => {
-        if (lang === value) return;
-        lang = value;
-        render();
-      });
-      return b;
-    };
     const language = h(
-      "div",
-      { className: "seg", role: "group", "aria-label": L("解释语言", "Explanation language"), "data-hb": "language" },
-      langButton("zh", "中文"),
-      langButton("en", "English"),
+      "select",
+      { className: "lang-select", "aria-label": L("界面语言", "Interface language"), "data-hb": "language" },
+      ...UI_LANGUAGES.map((l) => h("option", { value: l.code, selected: lang === l.code }, l.native)),
     );
+    language.addEventListener("change", () => {
+      if (!isLang(language.value) || language.value === lang) return;
+      lang = language.value;
+      render();
+    });
 
     const result = h("div", { className: "result", role: "status", "aria-live": "polite", "data-hb": "test-result" });
     const show = (text: string, state: ResultState): void => {
@@ -68,19 +61,7 @@ async function main(): Promise<void> {
     consent.addEventListener("change", () => (form.consent = consent.checked));
 
     const baseUrl = h("input", { type: "url", "data-hb": "base-url", value: form.baseUrl, spellcheck: "false" });
-    const apiType = h(
-      "select",
-      { "data-hb": "api-type" },
-      ...API_TYPES.map((t) => h("option", { value: t, selected: form.apiType === t }, API_TYPE_LABELS[t])),
-    );
-    apiType.addEventListener("change", () => {
-      form.apiType = isApiType(apiType.value) ? apiType.value : "openai";
-      form.typeChosen = true;
-    });
-    baseUrl.addEventListener("input", () => {
-      form.baseUrl = baseUrl.value;
-      if (!form.typeChosen) form.apiType = apiType.value = detectApiType(baseUrl.value);
-    });
+    baseUrl.addEventListener("input", () => (form.baseUrl = baseUrl.value));
     const providers = h(
       "div",
       { className: "providers", role: "radiogroup", "aria-label": L("模型服务", "Model service"), "data-hb": "template" },
@@ -88,10 +69,8 @@ async function main(): Promise<void> {
         const radio = h("input", { type: "radio", name: "template", value: tp.id, checked: form.templateId === tp.id });
         radio.addEventListener("change", () => {
           form.templateId = tp.id;
-          form.typeChosen = false;
-          // "Custom" keeps whatever address was typed; the others fill in theirs and the format that goes with it.
+          // "Custom" keeps whatever address was typed; the others fill in theirs.
           if (tp.baseUrl) form.baseUrl = baseUrl.value = tp.baseUrl;
-          form.apiType = apiType.value = tp.baseUrl ? tp.apiType : detectApiType(form.baseUrl);
           model.placeholder = tp.modelHint || L("先测试连接，再从列表中选择", "Test the connection, then pick from the list");
         });
         return h(
@@ -130,7 +109,7 @@ async function main(): Promise<void> {
       }
       await requestOrigins([pattern]);
       show(L("正在连接…", "Connecting…"), "busy");
-      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, apiType: form.apiType });
+      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, provider: form.templateId });
       show(connectionMessage(lang, r, location.origin), stateOf(r));
       if (r.kind === "ok") {
         form.models = r.models;
@@ -156,10 +135,10 @@ async function main(): Promise<void> {
         show(L("需要允许访问模型地址。", "Access to the model address is required."), "error");
         return;
       }
-      const label = providerById(form.templateId)?.label ?? "Model";
+      const label = providerById(form.templateId).label;
       settings = onboardingSettings(
         settings,
-        { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value, apiType: form.apiType },
+        { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value, provider: form.templateId },
         new Date(),
         () => ulid(),
       );
@@ -189,7 +168,7 @@ async function main(): Promise<void> {
           {},
           h("h2", {}, L("你的文字去向", "Where your text goes")),
           h("p", { className: "hint" }, L("请在继续之前读完。", "Read these before you continue.")),
-          h("ul", { className: "notes" }, ...PRIVACY[lang].map((line) => h("li", {}, line))),
+          h("ul", { className: "notes" }, ...privacyNotes(lang).map((line) => h("li", {}, line))),
           h("label", { className: "check" }, consent, L("我已阅读并同意", "I have read and agree")),
         ),
       ),
@@ -211,20 +190,6 @@ async function main(): Promise<void> {
           ),
           providers,
           h("label", { className: "field" }, h("span", {}, L("地址", "Address")), baseUrl),
-          h(
-            "label",
-            { className: "field" },
-            h("span", {}, L("接口类型", "API type")),
-            apiType,
-            h(
-              "small",
-              {},
-              L(
-                "根据地址自动选择；大多数服务（包括 OpenRouter、Grok、Ollama）使用 OpenAI 兼容格式。",
-                "Chosen from the address. Most services, including OpenRouter, Grok and Ollama, use the OpenAI-compatible format.",
-              ),
-            ),
-          ),
           h(
             "label",
             { className: "field" },

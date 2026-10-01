@@ -1,15 +1,5 @@
-/** The wire format a model address speaks. Most services copy OpenAI's; Anthropic and Gemini also have native APIs. */
+/** The wire format of a provider, which follows from the provider alone. Most services copy OpenAI's; Anthropic and Gemini have native APIs. */
 export type ApiType = "openai" | "anthropic" | "gemini";
-
-export const API_TYPES: readonly ApiType[] = ["openai", "anthropic", "gemini"];
-
-export const API_TYPE_LABELS: Record<ApiType, string> = {
-  openai: "OpenAI-compatible",
-  anthropic: "Anthropic Messages",
-  gemini: "Google Gemini",
-};
-
-export const isApiType = (v: unknown): v is ApiType => typeof v === "string" && (API_TYPES as readonly string[]).includes(v);
 
 export interface Provider {
   id: string;
@@ -44,7 +34,12 @@ export const PROVIDERS: readonly Provider[] = [
   { id: "custom", label: "Custom", apiType: "openai", baseUrl: "", modelHint: "" },
 ];
 
-export const providerById = (id: string): Provider | undefined => PROVIDERS.find((p) => p.id === id);
+const CUSTOM = PROVIDERS[PROVIDERS.length - 1]!;
+
+/** The provider with this id; unknown ids are treated as "custom". */
+export const providerById = (id: string | undefined): Provider => PROVIDERS.find((p) => p.id === id) ?? CUSTOM;
+
+export const isProviderId = (v: unknown): v is string => typeof v === "string" && PROVIDERS.some((p) => p.id === v);
 
 function parse(baseUrl: string): URL | null {
   try {
@@ -59,7 +54,7 @@ function parse(baseUrl: string): URL | null {
  * through gateways (OpenRouter, LiteLLM, company proxies) that all use the OpenAI format. Google's OpenAI-compatible endpoint
  * lives under `/openai`, so it stays OpenAI-compatible.
  */
-export function detectApiType(baseUrl: string): ApiType {
+function detectApiType(baseUrl: string): ApiType {
   const u = parse(baseUrl);
   if (!u) return "openai";
   const host = u.hostname.toLowerCase();
@@ -68,9 +63,9 @@ export function detectApiType(baseUrl: string): ApiType {
   return "openai";
 }
 
-/** The preset that matches an address, or "custom". */
+/** The provider that matches an address, or "custom"; used for models saved before a provider was recorded. */
 export function providerForAddress(baseUrl: string): Provider {
   const host = parse(baseUrl)?.host.toLowerCase();
   const found = PROVIDERS.find((p) => p.baseUrl && parse(p.baseUrl)?.host.toLowerCase() === host && detectApiType(baseUrl) === p.apiType);
-  return found ?? PROVIDERS[PROVIDERS.length - 1]!;
+  return found ?? CUSTOM;
 }

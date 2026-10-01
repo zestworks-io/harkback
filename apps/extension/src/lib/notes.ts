@@ -55,7 +55,8 @@ const links = (heading: string, items: RelatedConcept[], titleOf: TitleOf): stri
 
 /** One Markdown note per concept, with `[[wiki links]]` to the concepts it connects to (Obsidian and similar tools). */
 export function conceptNote(d: ConceptDetail, language: Lang, titleOf: TitleOf = (c) => noteTitle(c.name)): string {
-  const t = TEXT[language];
+  // Notes are portable files: languages without a table of their own get English headings.
+  const t = TEXT[language === "zh" ? "zh" : "en"];
   const lines = ["---"];
   if (d.aliases.length > 0) lines.push("aliases:", ...d.aliases.map((a) => `  - ${yaml(a)}`));
   lines.push(`domain: ${d.domain}`, `status: ${d.understanding}`, "---", "", `# ${d.name}`, "");

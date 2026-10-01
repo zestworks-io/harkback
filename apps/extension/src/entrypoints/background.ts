@@ -24,7 +24,7 @@ import { handleRequest, type RequestDeps } from "../lib/requests";
 import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
 import { putHandoff } from "../lib/pdf/handoff";
 import { allowed, readerSource, senderKind } from "../lib/sender-auth";
-import { withDefaults, type Settings } from "../lib/settings";
+import { explainLanguageOf, withDefaults, type Settings } from "../lib/settings";
 import { hostPermissionPatterns, originPattern } from "../lib/site-rules";
 import { arxivHtmlUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
@@ -194,7 +194,7 @@ export default defineBackground(() => {
           paragraph: l.req.paragraph,
           explanation: l.explanation,
           question: q,
-          language: settings.language,
+          language: explainLanguageOf(settings),
         });
         const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), {
           signal: abort.signal,

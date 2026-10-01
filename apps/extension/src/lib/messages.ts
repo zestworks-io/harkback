@@ -5,7 +5,7 @@ import type { ModelErrorCode } from "./model-client";
 import type { ReunionCard } from "./reunion-cards";
 import type { Theme } from "./settings";
 import type { DetectedSource } from "./source-id";
-import type { Lang } from "./ui/strings";
+import type { Lang, StringKey } from "./ui/strings";
 
 export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "no_permission" | "expired" | "internal";
 
@@ -36,6 +36,8 @@ export interface PageInfo {
   scan: boolean;
   incognito: boolean;
   language: Lang;
+  /** The explain card and reunion text for `language`, when it is not Chinese or English. */
+  strings: Partial<Record<StringKey, string>>;
   theme: Theme;
   entries: MatcherEntry[];
 }

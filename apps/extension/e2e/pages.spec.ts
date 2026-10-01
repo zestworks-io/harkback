@@ -52,7 +52,7 @@ test("options save site rules and reject an insecure remote model", async ({ con
   await expect(page.locator("[data-hb=status]")).toContainText("models[1].baseUrl");
 });
 
-test("options pick a provider, follow the address for the API type and keep a type chosen by hand", async ({
+test("options pick a provider, which fills the address and decides the format, and keep a custom address", async ({
   context,
   sw,
   stub,
@@ -64,34 +64,41 @@ test("options pick a provider, follow the address for the API type and keep a ty
   // A new row: the seeded model is the sensitive-source model, which has to stay local.
   await page.locator("[data-hb=add-model]").click();
   const provider = page.locator("[data-hb=model-provider]").last();
-  const type = page.locator("[data-hb=model-api-type]").last();
   const address = page.locator("[data-hb=model-base-url]").last();
   const modelName = page.locator("[data-hb=model-name]").last();
   await expect(provider).toHaveValue("ollama");
-  await expect(type).toHaveValue("openai");
+  await expect(page.locator("[data-hb=model-api-type]")).toHaveCount(0);
 
   await provider.selectOption("anthropic");
   await expect(address).toHaveValue("https://api.anthropic.com/v1");
-  await expect(type).toHaveValue("anthropic");
   await expect(modelName).toHaveAttribute("placeholder", "claude-sonnet-5-5");
 
   await provider.selectOption("grok");
   await expect(address).toHaveValue("https://api.x.ai/v1");
-  await expect(type).toHaveValue("openai");
 
-  await address.fill("https://generativelanguage.googleapis.com/v1beta");
-  await expect(type).toHaveValue("gemini");
-  await expect(provider).toHaveValue("gemini");
-  await address.fill("https://generativelanguage.googleapis.com/v1beta/openai/");
-  await expect(type).toHaveValue("openai");
-
-  await type.selectOption("anthropic");
+  await provider.selectOption("custom");
   await address.fill("https://llm.blog.example.com/v1");
-  await expect(type).toHaveValue("anthropic");
+  await expect(provider).toHaveValue("custom");
 
-  await modelName.fill("claude-sonnet-5-5");
+  await modelName.fill("some-model");
   await page.locator("[data-hb=save]").click();
   await expect(page.locator("[data-hb=status]")).toHaveText("Saved.");
-  const saved = ((await storedSettings(sw)) as unknown as { models: { baseUrl: string; apiType: string; model: string }[] }).models;
-  expect(saved[1]).toMatchObject({ baseUrl: "https://llm.blog.example.com/v1", apiType: "anthropic", model: "claude-sonnet-5-5" });
+  const saved = ((await storedSettings(sw)) as unknown as { models: { baseUrl: string; provider: string; model: string }[] }).models;
+  expect(saved[1]).toMatchObject({ baseUrl: "https://llm.blog.example.com/v1", provider: "custom", model: "some-model" });
+});
+
+test("options switch the interface and the explanation language", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await expect(page.locator("h1")).toHaveText("Harkback settings");
+
+  await page.getByLabel("Interface language").selectOption("ja");
+  await expect(page.locator("h1")).toHaveText("Harkback の設定");
+  await page.getByLabel("解説の言語").selectOption("ko");
+
+  await page.locator("[data-hb=save]").click();
+  await expect(page.locator("[data-hb=status]")).toHaveText("保存しました。");
+  const saved = (await storedSettings(sw)) as unknown as { language: string; explainLanguage: string };
+  expect(saved).toMatchObject({ language: "ja", explainLanguage: "ko" });
 });

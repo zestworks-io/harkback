@@ -1,7 +1,8 @@
-import { REUNION_DEFAULTS } from "@harkback/core";
+import { isExplainLanguage, REUNION_DEFAULTS } from "@harkback/core";
 import { isLocalUrl, modelUrlError } from "./model-policy";
-import { detectApiType, isApiType, type ApiType } from "./providers";
+import { isProviderId, providerById, providerForAddress, type ApiType } from "./providers";
 import { normalizePattern } from "./site-rules";
+import { isLang, type Lang } from "./ui/languages";
 
 export interface ModelConfig {
   id: string;
@@ -9,12 +10,12 @@ export interface ModelConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
-  /** The wire format of the address; when missing (older settings) it is worked out from the address. */
-  apiType?: ApiType;
+  /** The id of a provider in providers.ts; it also decides the wire format. */
+  provider: string;
 }
 
-/** The format to use for a model, whether or not it was saved with one. */
-export const apiTypeOf = (m: Pick<ModelConfig, "baseUrl" | "apiType">): ApiType => m.apiType ?? detectApiType(m.baseUrl);
+/** The wire format a model speaks, which its provider decides. */
+export const apiTypeOf = (m: Pick<ModelConfig, "provider">): ApiType => providerById(m.provider).apiType;
 
 export interface SiteRule {
   /** A domain ("example.com", covers subdomains) or a URL prefix ("https://example.com/docs"). */
@@ -31,7 +32,10 @@ export interface Settings {
   version: 1;
   onboarded: boolean;
   consentAt: string | null;
-  language: "zh" | "en";
+  /** Language of the interface, the library and exports. */
+  language: Lang;
+  /** Language explanations are written in: an `EXPLAIN_LANGUAGES` code, or "auto" to follow `language`. */
+  explainLanguage: string;
   /** "system" follows the operating system. */
   theme: Theme;
   models: ModelConfig[];
@@ -44,11 +48,16 @@ export interface Settings {
   backup: { enabled: boolean };
 }
 
+/** The language to write explanations in. */
+export const explainLanguageOf = (s: Pick<Settings, "language" | "explainLanguage">): string =>
+  s.explainLanguage === "auto" ? s.language : s.explainLanguage;
+
 export const DEFAULT_SETTINGS: Settings = {
   version: 1,
   onboarded: false,
   consentAt: null,
   language: "zh",
+  explainLanguage: "auto",
   theme: "system",
   models: [],
   defaultModelId: null,
@@ -78,7 +87,8 @@ function cleanModel(raw: unknown): ModelConfig[] {
       baseUrl,
       apiKey: str(m.apiKey),
       model: str(m.model),
-      apiType: isApiType(m.apiType) ? m.apiType : detectApiType(baseUrl),
+      // Models saved before providers existed get one worked out from their address.
+      provider: isProviderId(m.provider) ? m.provider : providerForAddress(baseUrl).id,
     },
   ];
 }
@@ -107,7 +117,8 @@ export function withDefaults(raw: unknown): Settings {
     version: 1,
     onboarded: s.onboarded === true,
     consentAt: strOrNull(s.consentAt),
-    language: s.language === "en" ? "en" : "zh",
+    language: isLang(s.language) ? s.language : "zh",
+    explainLanguage: isExplainLanguage(s.explainLanguage) ? s.explainLanguage : "auto",
     theme: s.theme === "light" || s.theme === "dark" ? s.theme : "system",
     models: Array.isArray(s.models) ? s.models.flatMap(cleanModel) : [],
     defaultModelId: strOrNull(s.defaultModelId),

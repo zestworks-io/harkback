@@ -106,17 +106,17 @@ Onboarding walks you through this, and you can change it later on the settings p
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider      | API type           | Base URL                                           | Notes                                 |
-| ------------- | ------------------ | -------------------------------------------------- | ------------------------------------- |
-| Ollama        | OpenAI-compatible  | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.             |
-| OpenAI        | OpenAI-compatible  | `https://api.openai.com/v1`                        | Needs an API key.                     |
-| Anthropic     | Anthropic Messages | `https://api.anthropic.com/v1`                     | Needs an API key.                     |
-| Google Gemini | Google Gemini      | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                     |
-| xAI Grok      | OpenAI-compatible  | `https://api.x.ai/v1`                              | Needs an API key.                     |
-| OpenRouter    | OpenAI-compatible  | `https://openrouter.ai/api/v1`                     | Needs an API key.                     |
-| Custom        | your choice        | any address                                        | Non-local addresses must use `https`. |
+| Provider      | Base URL                                           | Notes                                 |
+| ------------- | -------------------------------------------------- | ------------------------------------- |
+| Ollama        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.             |
+| OpenAI        | `https://api.openai.com/v1`                        | Needs an API key.                     |
+| Anthropic     | `https://api.anthropic.com/v1`                     | Needs an API key.                     |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                     |
+| xAI Grok      | `https://api.x.ai/v1`                              | Needs an API key.                     |
+| OpenRouter    | `https://openrouter.ai/api/v1`                     | Needs an API key.                     |
+| Custom        | any address                                        | Non-local addresses must use `https`. |
 
-The **API type** is the wire format the address speaks. Picking a provider fills in the address and the type, and typing an address picks the type from its host: `api.anthropic.com` is Anthropic Messages, `generativelanguage.googleapis.com` is Google Gemini, and everything else, including gateways such as OpenRouter and company proxies, is OpenAI-compatible. The model name is never used for this, because the same model is served through several formats. You can change the type by hand for an unusual address. Google's OpenAI-compatible endpoint (`.../v1beta/openai/`) stays OpenAI-compatible.
+Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
 
 Chrome asks you to allow access to the model's address the first time you test or save it. If you decline, the explain card says so instead of failing with a network error.
 
@@ -169,7 +169,9 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 - Explanations depend on the model you choose; small local models may produce weaker concept cards, which lowers recall quality but never breaks recording.
 - Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs have no text and are not supported, there is no OCR, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
-- Chinese, Japanese and Korean names must be at least three characters to be underlined, to avoid false positives.
+- Chinese names, and Japanese names written only in kanji, must be at least three characters to be underlined, to avoid false positives. Names with kana or Hangul need two.
+- Accents are ignored when matching ("résumé" and "resume" are one term), but there is no stemming for languages other than English, so inflected forms such as German plurals are separate terms.
+- The interface is available in English, Simplified and Traditional Chinese, Japanese, Korean, Spanish, French, German and Brazilian Portuguese. Explanations can be written in 16 languages, chosen separately in settings. Exported notes and Markdown use English or Chinese labels only.
 
 ## Repository layout
 

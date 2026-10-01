@@ -1,6 +1,7 @@
-import type { Lang } from "../ui/strings";
+import type { Lang } from "../ui/languages";
+import { pick } from "../ui/pick";
 
-export const PRIVACY: Record<Lang, string[]> = {
+export const PRIVACY = {
   zh: [
     "划词解释时，选中的文字、所在段落、章节与页面标题会发送给你选择的模型服务，按该服务商的条款处理。",
     "记录只保存在本机浏览器中；每周自动导出一份 JSONL 备份到「下载/harkback」，只含记录，不含设置与 API key。",
@@ -22,3 +23,8 @@ export const PRIVACY: Record<Lang, string[]> = {
     "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.",
   ],
 };
+
+/** The privacy notes in a language: the written-out Chinese ones, or the English ones translated by their text. */
+export function privacyNotes(lang: Lang): string[] {
+  return PRIVACY.zh.map((zh, i) => pick(lang, zh, PRIVACY.en[i]!));
+}

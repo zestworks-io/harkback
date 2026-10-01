@@ -35,7 +35,16 @@ export function readerSource(readerUrl: string | undefined): string {
   }
 }
 
-const PAGE_ONLY = new Set<Request["type"]>(["delete-encounter", "review-answer", "merge-concepts", "add-alias", "reject-edge", "set-muted", "backup-now", "settings-changed"]);
+const PAGE_ONLY = new Set<Request["type"]>([
+  "delete-encounter",
+  "review-answer",
+  "merge-concepts",
+  "add-alias",
+  "reject-edge",
+  "set-muted",
+  "backup-now",
+  "settings-changed",
+]);
 
 export function allowed(type: Request["type"], kind: SenderKind): boolean {
   return kind === "page" ? PAGE_ONLY.has(type) : !PAGE_ONLY.has(type);

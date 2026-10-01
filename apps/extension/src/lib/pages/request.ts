@@ -1,6 +1,7 @@
 import { browser } from "wxt/browser";
 import type { Request, ResponseMap } from "../messages";
-import { pick, type Lang } from "../ui/strings";
+import type { Lang } from "../ui/languages";
+import { pick } from "../ui/pick";
 
 /** Sends a request to the background page; a failed delivery is reported as `{ ok: false }` instead of throwing. */
 export async function request<T extends Request>(msg: T): Promise<ResponseMap[T["type"]] | { ok: false; error?: string }> {

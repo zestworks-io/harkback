@@ -3,7 +3,7 @@ import { ModelError, normalizeBaseUrl, streamChat } from "../src/lib/model-clien
 import type { ModelConfig } from "../src/lib/settings";
 import { SseParser } from "../src/lib/sse";
 
-const cfg: ModelConfig = { id: "m", label: "M", baseUrl: "https://api.example.com/v1", apiKey: "sk-1", model: "gpt" };
+const cfg: ModelConfig = { id: "m", label: "M", baseUrl: "https://api.example.com/v1", apiKey: "sk-1", model: "gpt", provider: "openai" };
 const messages = [{ role: "user" as const, content: "hi" }];
 
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
@@ -163,13 +163,13 @@ describe("streamChat", () => {
 });
 
 const system = { role: "system" as const, content: "be brief" };
-const claude: ModelConfig = { ...cfg, baseUrl: "https://api.anthropic.com/v1", model: "claude-sonnet-5-5", apiType: "anthropic" };
+const claude: ModelConfig = { ...cfg, baseUrl: "https://api.anthropic.com/v1", model: "claude-sonnet-5-5", provider: "anthropic" };
 const gem: ModelConfig = {
   ...cfg,
   baseUrl: "https://generativelanguage.googleapis.com/v1beta",
   model: "gemini-2.5-flash",
   apiKey: " g-key ",
-  apiType: "gemini",
+  provider: "gemini",
 };
 
 function capture(response: () => Response) {
