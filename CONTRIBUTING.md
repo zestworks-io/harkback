@@ -6,6 +6,8 @@ Thanks for helping improve Harkback.
 
 Node 22 or newer and pnpm. Run `pnpm install`, then see the README for building and loading the extension.
 
+`pnpm install` also installs a pre-commit hook (`.githooks/pre-commit`) that checks staged files with Prettier and ESLint. Fix formatting with `pnpm format`.
+
 ## Before you open a pull request
 
 Run all of these; they must pass:

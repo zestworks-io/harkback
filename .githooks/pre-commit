@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Checks the staged files for formatting and lint errors. Install with `pnpm install` (the prepare script points git here).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+files=()
+while IFS= read -r f; do files+=("$f"); done < <(git diff --cached --name-only --diff-filter=ACMR)
+[[ ${#files[@]} -eq 0 ]] && exit 0
+
+if ! pnpm exec prettier --check --ignore-unknown "${files[@]}" >/dev/null 2>&1; then
+  echo "pre-commit: formatting problems. Run: pnpm exec prettier --write <files>  (or pnpm format)" >&2
+  pnpm exec prettier --check --ignore-unknown "${files[@]}" >&2 || true
+  exit 1
+fi
+
+code=()
+for f in "${files[@]}"; do
+  case "$f" in *.ts|*.tsx|*.js|*.mjs) code+=("$f") ;; esac
+done
+if [[ ${#code[@]} -gt 0 ]]; then
+  tools/lint/node_modules/.bin/eslint -c tools/lint/eslint.config.js "${code[@]}"
+fi

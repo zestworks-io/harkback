@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
     "test": "vitest run",
     "typecheck": "tsc -p packages/spec && tsc -p packages/core && pnpm --filter @harkback/extension typecheck",
     "e2e": "pnpm --filter @harkback/extension e2e",
