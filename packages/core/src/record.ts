@@ -62,6 +62,7 @@ function uniqueNames(candidates: readonly (string | undefined)[], known: Set<str
 export function clampSource(
   src: { source_id: string; ids: SourceIds; title: string; license: string },
   sensitivity: Sensitivity,
+  byUser = false,
 ): PayloadOf<"source.seen"> {
   const { arxiv, doi, url } = src.ids;
   return {
@@ -74,6 +75,7 @@ export function clampSource(
     title: src.title.slice(0, 500),
     license: src.license.slice(0, 64),
     sensitivity,
+    ...(byUser && { by_user: true }),
   };
 }
 

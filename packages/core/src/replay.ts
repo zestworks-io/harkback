@@ -35,7 +35,9 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
           ids: { ...prev?.ids, ...definedOnly(p.ids) },
           title: p.title || prev?.title || "",
           license: p.license,
-          sensitivity: p.sensitivity,
+          // Sensitive is sticky: only the reader's own choice makes a source normal again, so a later, automatic record
+          // (another device that never knew the source was sensitive) cannot expose it.
+          sensitivity: prev?.sensitivity === "sensitive" && p.sensitivity === "normal" && !p.by_user ? "sensitive" : p.sensitivity,
         });
         break;
       }

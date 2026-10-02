@@ -109,6 +109,6 @@ describe("interface languages", () => {
   it("are accepted in saved settings", () => {
     expect(isLang("pt-BR")).toBe(true);
     expect(withDefaults({ language: "ko" }).language).toBe("ko");
-    expect(withDefaults({ language: "xx" }).language).toBe("zh");
+    expect(withDefaults({ language: "xx" }).language).toBe("en");
   });
 });

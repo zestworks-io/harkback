@@ -29,10 +29,18 @@ export function normalizePattern(raw: string): string | null {
 function ruleMatches(pattern: string, url: URL): boolean {
   const p = normalizePattern(pattern);
   if (!p) return false;
-  if (isPrefix(p)) return url.href.startsWith(p);
+  if (isPrefix(p))
+    return url.href.startsWith(p) && (p.endsWith("/") || p.length === url.href.length || "/?#".includes(url.href[p.length]!));
   return url.hostname === p || url.hostname.endsWith(`.${p}`);
 }
 
+/** A URL prefix is more specific than a domain; between two of a kind, the longer one is. */
+function specificity(pattern: string): number {
+  const p = normalizePattern(pattern) ?? "";
+  return (isPrefix(p) ? 1_000_000 : 0) + p.length;
+}
+
+/** For each setting the most specific matching rule that states it wins, so a rule for one path can override its whole site, on or off. */
 export function effectiveRule(rules: readonly SiteRule[], url: string): EffectiveRule {
   let u: URL;
   try {
@@ -40,12 +48,12 @@ export function effectiveRule(rules: readonly SiteRule[], url: string): Effectiv
   } catch {
     return { ...NO_RULE };
   }
-  const matching = rules.filter((r) => ruleMatches(r.pattern, u)).sort((a, b) => b.pattern.length - a.pattern.length);
-  if (matching.length === 0) return { ...NO_RULE };
+  const matching = rules.filter((r) => ruleMatches(r.pattern, u)).sort((a, b) => specificity(b.pattern) - specificity(a.pattern));
+  const flag = (key: "autoScan" | "sensitive" | "disabled"): boolean => matching.find((r) => typeof r[key] === "boolean")?.[key] === true;
   return {
-    autoScan: matching.some((r) => r.autoScan === true),
-    sensitive: matching.some((r) => r.sensitive === true),
-    disabled: matching.some((r) => r.disabled === true),
+    autoScan: flag("autoScan"),
+    sensitive: flag("sensitive"),
+    disabled: flag("disabled"),
     modelId: matching.find((r) => r.modelId)?.modelId ?? null,
   };
 }

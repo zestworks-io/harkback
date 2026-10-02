@@ -12,11 +12,22 @@ export interface ExplainCardHandlers {
   onFollowUp(question: string): void;
   onMarkSensitive(): void;
   onRetry(): void;
+  /** Explain again with another of the configured models. */
+  onRetryWith(modelId: string): void;
+  /** Stop the explanation or follow-up that is being written. */
+  onCancel(): void;
   onClose(): void;
 }
 
+export interface CardModel {
+  id: string;
+  label: string;
+}
+
 /** Failures where trying again can help; a partial explanation stays visible. */
-const RETRYABLE = new Set<ErrorCode>(["timeout", "network", "http", "rate_limited", "internal"]);
+const RETRYABLE = new Set<ErrorCode>(["timeout", "network", "http", "rate_limited", "internal", "aborted"]);
+/** Failures that another model may not have: worth offering the other models. */
+const MODEL_SPECIFIC = new Set<ErrorCode>(["timeout", "network", "http", "rate_limited", "auth", "aborted", "internal", "no_permission"]);
 
 // Buttons live in the extension's closed shadow root, which page scripts cannot reach,
 // so their clicks come from the user; the page-level trigger checks isTrusted itself.
@@ -40,6 +51,7 @@ export class ExplainCard {
   constructor(
     private readonly lang: Lang,
     private readonly handlers: ExplainCardHandlers,
+    private readonly models: readonly CardModel[] = [],
   ) {
     this.body.textContent = t(lang, "loading");
     this.body.classList.add("hb-loading");
@@ -58,6 +70,9 @@ export class ExplainCard {
       this.compose,
     );
     document.addEventListener("keydown", this.onKeyDown, true);
+    this.footer.replaceChildren(
+      h("button", { type: "button", className: "hb-quiet", "data-hb": "stop", onclick: () => this.handlers.onCancel() }, t(lang, "stop")),
+    );
   }
 
   setStreaming(text: string): void {
@@ -69,6 +84,7 @@ export class ExplainCard {
 
   setExplained(text: string, tier: Tier): void {
     this.hasText = true;
+    this.footer.querySelector('[data-hb="stop"]')?.remove();
     this.body.classList.remove("hb-loading");
     this.render(this.body, text);
     const label = t(this.lang, tier === "defined_in_source" ? "tierDefined" : "tierExternal");
@@ -134,12 +150,24 @@ export class ExplainCard {
     const box = h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs));
     if (this.hasText) this.note.replaceChildren(box);
     else this.body.replaceChildren(box);
-    if (RETRYABLE.has(code)) {
+    const others = MODEL_SPECIFIC.has(code) && this.models.length > 1 ? this.models : [];
+    if (RETRYABLE.has(code) || others.length > 0) {
       this.footer.replaceChildren(
-        h(
-          "button",
-          { type: "button", className: "hb-primary", "data-hb": "retry", onclick: () => this.handlers.onRetry() },
-          t(this.lang, "retry"),
+        ...(RETRYABLE.has(code)
+          ? [
+              h(
+                "button",
+                { type: "button", className: "hb-primary", "data-hb": "retry", onclick: () => this.handlers.onRetry() },
+                t(this.lang, "retry"),
+              ),
+            ]
+          : []),
+        ...others.map((m) =>
+          h(
+            "button",
+            { type: "button", "data-hb": "retry-model", "data-model": m.id, onclick: () => this.handlers.onRetryWith(m.id) },
+            t(this.lang, "tryModel", { model: m.label }),
+          ),
         ),
       );
     }
@@ -187,8 +215,9 @@ export class ExplainCard {
       placeholder: t(this.lang, "followUpPlaceholder"),
     });
     const send = () => {
+      if (this.pending) return this.handlers.onCancel();
       const question = input.value.trim();
-      if (!question || this.pending) return;
+      if (!question) return;
       input.value = "";
       this.thread.append(h("div", { className: "hb-question", "data-hb": "followup-question" }, question));
       this.startAnswer().textContent = t(this.lang, "loading");
@@ -197,7 +226,7 @@ export class ExplainCard {
       this.handlers.onFollowUp(question);
     };
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.isComposing) send();
+      if (e.key === "Enter" && !e.isComposing && !this.pending) send();
     });
     const button = h(
       "button",
@@ -217,7 +246,8 @@ export class ExplainCard {
   /** One question at a time: the service handles a single follow-up, so a second one would be dropped and the old answer would stay. */
   private setPending(pending: boolean): void {
     this.pending = pending;
-    if (this.sendButton) this.sendButton.disabled = pending;
+    // While an answer is being written, the Send button stops it.
+    if (this.sendButton) this.sendButton.textContent = t(this.lang, pending ? "stop" : "send");
     if (this.input) {
       this.input.readOnly = pending;
       if (!pending) this.input.focus();

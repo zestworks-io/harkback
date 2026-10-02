@@ -15,6 +15,7 @@ function setup(settings: unknown = {}) {
   const conceptId = w.concept("LoRA");
   const encounterId = w.encounter(conceptId, "arxiv:1");
   const written: HarkEvent[] = [];
+  const imported: HarkEvent[] = [];
   const calls = { compact: 0, backup: 0, sync: 0 };
   const deps: RequestDeps = {
     loadSettings: async () => withDefaults({ reunion: { minGapDays: 0 }, ...(settings as object) }),
@@ -25,11 +26,15 @@ function setup(settings: unknown = {}) {
       return events;
     },
     compact: async () => void calls.compact++,
+    importEvents: async (events: HarkEvent[]) => {
+      imported.push(...events);
+      return events.length;
+    },
     runBackup: async () => void calls.backup++,
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
-  return { deps, written, calls, conceptId, encounterId, w };
+  return { deps, written, imported, calls, conceptId, encounterId, w };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -95,6 +100,24 @@ describe("writes", () => {
     expect(await handleRequest(deps, { type: "mark-sensitive", source: sourceFor("arxiv:1") }, page)).toEqual({ ok: true });
     expect(written.map((e) => e.type)).toEqual(["encounter.action", "concept.muted", "source.seen"]);
     expect(written[2]!.payload).toMatchObject({ source_id: "arxiv:1", sensitivity: "sensitive" });
+  });
+
+  it("lets the reader mark a sensitive source normal again, and says so in the event", async () => {
+    const { deps, written, w } = setup();
+    w.source("secret", "sensitive", "Secret doc");
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: "arxiv:1" }, { id: "x" })).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: "secret" }, { id: "x" })).toEqual({ ok: true });
+    expect(written[0]!.payload).toMatchObject({ source_id: "secret", title: "Secret doc", sensitivity: "normal", by_user: true });
+  });
+
+  it("imports only valid events", async () => {
+    const { deps, imported, w, written } = setup();
+    const good = w.events[0]!;
+    const r = await handleRequest(deps, { type: "import-events", events: [good, { nonsense: true } as never] }, { id: "x" });
+    expect(r).toEqual({ ok: true, added: 1 });
+    expect(imported).toEqual([good]);
+    expect(written).toEqual([]);
+    expect(await handleRequest(deps, { type: "import-events", events: "x" as never }, { id: "x" })).toEqual({ ok: false });
   });
 
   it("refuses every write from a private window", async () => {

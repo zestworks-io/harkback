@@ -43,7 +43,7 @@ const TIER_LABEL = {
 } as const;
 
 /** `language` is an interface language code; anything but "zh" is exported with English labels. */
-export function exportMarkdown(state: State, language = "zh"): string {
+export function exportMarkdown(state: State, language = "en"): string {
   const labels = language === "zh" ? "zh" : "en";
   const lines = ["# Harkback export", ""];
   const concepts = [...state.concepts.values()]

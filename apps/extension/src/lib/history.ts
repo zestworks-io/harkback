@@ -11,7 +11,10 @@ export interface FollowUp {
 export interface HistoryEntry {
   encounterId: string;
   date: string;
+  sourceId: string;
   sourceTitle: string;
+  /** The source is marked sensitive: its content stays on this computer. */
+  sensitive: boolean;
   tier: Tier;
   selection: string;
   explanation: string;
@@ -35,7 +38,9 @@ export function historyEntries(state: State, conceptId: string): HistoryEntry[] 
     return {
       encounterId: e.id,
       date: new Date(e.createdAt).toISOString().slice(0, 10),
+      sourceId: e.sourceId,
       sourceTitle: state.sources.get(e.sourceId)?.title || e.sourceId,
+      sensitive: state.sources.get(e.sourceId)?.sensitivity === "sensitive",
       tier: e.explanation.tier,
       selection: e.selection,
       explanation: e.explanation.text,

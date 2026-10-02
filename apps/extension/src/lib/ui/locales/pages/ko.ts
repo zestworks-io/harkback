@@ -55,8 +55,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Back up JSONL now": "지금 JSONL 백업",
   "Backing up…": "백업 중…",
   "Export Markdown": "Markdown 내보내기",
-  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.":
-    "개념마다 [[링크]]가 포함된 Markdown 파일 하나를 선택한 폴더의 {folder}/에 저장합니다. 같은 이름의 파일은 덮어씁니다.",
   "Export notes folder": "노트 폴더 내보내기",
   "This browser cannot pick a folder.": "이 브라우저에서는 폴더를 선택할 수 없습니다.",
   "Exported {n} notes.": "노트 {n}개를 내보냈습니다.",
@@ -137,8 +135,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "설명과 추가 질문의 답변은 이 언어로 작성됩니다. 전문 용어는 원문 그대로 둡니다. 품질은 언어와 모델에 따라 다릅니다.",
   Models: "모델",
-  'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "로컬이 아닌 주소는 https를 사용해야 합니다. '민감한 출처용'에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 절대 사용하지 않습니다.",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API 키는 확장 프로그램 저장소에 암호화되지 않은 채 저장됩니다. 다른 사이트나 확장 프로그램은 읽을 수 없지만, 이 컴퓨터의 디스크에 접근할 수 있는 사람은 읽을 수 있습니다. 키는 입력한 모델 주소로만 전송되며 백업이나 로그에는 포함되지 않습니다. 사용 한도가 있는 키나 로컬 모델(키 불필요)을 권장합니다.",
   Sites: "사이트",
@@ -206,4 +202,31 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "삭제는 앱 안에서만 적용됩니다. 디스크에 흔적이 남을 수 있으며, 이미 내보낸 백업은 회수할 수 없습니다. 디스크 전체 암호화를 권장합니다.",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API 키는 확장 프로그램 저장소에 암호화되지 않은 채 저장되며, 입력한 모델 주소로만 전송되고 백업이나 로그에는 포함되지 않습니다. 사용 한도가 있는 키를 권장합니다.",
+  "Mark as normal": "일반 출처로 변경",
+  "Confirm: may go to remote models": "확인: 이후 원격 모델로 전송될 수 있습니다",
+  "Content from this source only goes to a local model.": "이 출처의 내용은 로컬 모델로만 전송됩니다.",
+  "Sensitive source": "민감한 출처",
+  "No concepts to show yet.": "표시할 개념이 아직 없습니다.",
+  "Concept graph": "개념 그래프",
+  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "파란 화살표: 선행 개념 · 보라 화살표: 변형 · 점선: 관련",
+  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "녹색: 이해함 · 노랑: 아직 헷갈림 · 파랑: 새 개념 · 점선 원: 아직 설명하지 않음",
+  "One card per concept as tab-separated text; open it in Anki with File → Import.":
+    "개념마다 카드 한 장(탭으로 구분된 텍스트). Anki에서 파일 → 가져오기로 열 수 있습니다.",
+  "Export Anki cards": "Anki 카드 내보내기",
+  "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
+    "JSONL 백업에서 기록을 복원합니다. 이미 있는 기록은 건너뛰므로 중복되지 않습니다.",
+  "Import JSONL": "JSONL 가져오기",
+  "Importing…": "가져오는 중…",
+  "Import failed.": "가져오기에 실패했습니다.",
+  "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
+    "새 이벤트 {added}개를 가져왔고, 이미 있거나 읽을 수 없는 {skipped}개는 건너뛰었습니다.",
+  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
+    "개념마다 Markdown 파일 하나(`[[링크]]` 포함)를 선택한 폴더의 {folder}/ 에 씁니다. 다시 내보내면 노트가 갱신되고, 표시 줄 아래에 쓴 내용은 유지됩니다.",
+  "Draw your concepts and their relations as a map.": "개념과 그 관계를 지도로 그립니다.",
+  Graph: "그래프",
+  "Dash: inherit; ticked: on; empty: off": "—: 상속, 체크: 켬, 비움: 끔",
+  "Leave sensitive sources out of backups and exports": "백업과 내보내기에 민감한 출처 제외",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
+    '일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 써야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. "민감한 출처용"에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 쓰지 않습니다.',
 };

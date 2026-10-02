@@ -322,6 +322,14 @@ describe("streamChat with the Gemini API", () => {
     expect(calls[0]!.body.systemInstruction).toBeUndefined();
   });
 
+  it("skips thought parts in a reply that was not streamed", async () => {
+    const plain = async () =>
+      new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "thinking", thought: true }, { text: "answer" }] } }] }), {
+        headers: { "content-type": "application/json" },
+      });
+    expect(await streamChat(gem, messages, () => {}, { fetchImpl: plain })).toBe("answer");
+  });
+
   it("treats a stream without a finish reason as interrupted", async () => {
     const cut = async () => sse([part("half")]);
     await expect(streamChat(gem, messages, () => {}, { fetchImpl: cut })).rejects.toMatchObject({ code: "network" });

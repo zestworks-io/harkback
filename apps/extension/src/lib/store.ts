@@ -92,6 +92,43 @@ export class EventStore {
     return events;
   }
 
+  /**
+   * Adds events that came from elsewhere (a backup). Events already here, and ones that would reuse a device's sequence number
+   * for a different event, are skipped. Returns how many were added.
+   */
+  async importEvents(events: readonly HarkEvent[]): Promise<number> {
+    const tx = this.db.transaction([EVENTS, META], "readwrite");
+    const done = completion(tx);
+    const meta = tx.objectStore(META);
+    const store = tx.objectStore(EVENTS);
+    const identity = (await req(meta.get(IDENTITY))) as Identity;
+    let added = 0;
+    let ownSeq = identity.seq;
+    await Promise.all(
+      events.map(
+        (e) =>
+          new Promise<void>((resolve) => {
+            const r = store.add(e);
+            r.onsuccess = () => {
+              added++;
+              if (e.device === identity.device) ownSeq = Math.max(ownSeq, e.seq);
+              resolve();
+            };
+            r.onerror = (ev) => {
+              // A duplicate must not abort the whole import.
+              ev.preventDefault();
+              ev.stopPropagation();
+              resolve();
+            };
+          }),
+      ),
+    );
+    // Events from this device's own earlier life: new events must number after them.
+    if (ownSeq !== identity.seq) meta.put({ ...identity, seq: ownSeq });
+    await done;
+    return added;
+  }
+
   async all(): Promise<HarkEvent[]> {
     const tx = this.db.transaction(EVENTS);
     return (await req(tx.objectStore(EVENTS).getAll())) as HarkEvent[];

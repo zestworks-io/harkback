@@ -17,3 +17,4 @@ export * from "./parse-output";
 export * from "./evidence";
 export * from "./record";
 export * from "./export";
+export * from "./redact";

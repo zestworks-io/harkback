@@ -40,8 +40,10 @@ export function prepareText(raw: string): PreparedText {
   let text = "";
   const map: number[] = [];
   let pendingSpace = false;
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i]!;
+  // Whole code points, so that characters outside the BMP (mathematical bold letters, rare CJK) fold like any other.
+  for (let i = 0, width = 1; i < raw.length; i += width) {
+    const ch = String.fromCodePoint(raw.codePointAt(i)!);
+    width = ch.length;
     if (ch === "\u00AD") continue;
     // An accent written as a separate mark after a Latin letter ("e" + U+0301) is dropped like a precomposed one.
     if (/\p{Mn}/u.test(ch) && /\p{Script=Latin}/u.test(raw[i - 1] ?? "")) continue;
@@ -84,6 +86,9 @@ interface TrieNode {
 interface Entry extends MatcherEntry {
   prepared: string;
 }
+
+/** The index just past the character that starts at `index`. */
+const after = (raw: string, index: number): number => index + (raw.codePointAt(index)! > 0xffff ? 2 : 1);
 
 const isLatinWordChar = (c: string | undefined) => c !== undefined && /[\p{Script=Latin}\p{N}]/u.test(c);
 
@@ -148,7 +153,7 @@ export class Matcher {
         const endP = this.accept(e, text, startP, i, raw, map);
         if (endP < 0) continue;
         const start = map[startP]!;
-        const end = map[endP]! + 1;
+        const end = after(raw, map[endP]!);
         hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
       }
     }
@@ -166,7 +171,7 @@ export class Matcher {
       }
     }
     if (e.caseKey) {
-      const original = raw.slice(map[startP]!, map[end]! + 1).replace(SEPARATORS_G, "");
+      const original = raw.slice(map[startP]!, after(raw, map[end]!)).replace(SEPARATORS_G, "");
       if (normalizeName(original).caseKey !== e.caseKey) return -1;
     }
     return end;

@@ -25,3 +25,38 @@ export function applyRetention(ids: readonly number[], newId: number, keep = BAC
   const cut = Math.max(0, all.length - keep);
   return { keep: all.slice(cut), remove: all.slice(0, cut) };
 }
+
+type DownloadState = "in_progress" | "interrupted" | "complete";
+
+/** The part of `chrome.downloads` that `waitForDownload` uses; tests supply a fake. */
+export interface DownloadsApi {
+  search(query: { id: number }): Promise<{ state: DownloadState }[]>;
+  onChanged: {
+    addListener(l: (delta: { id: number; state?: { current?: DownloadState } }) => void): void;
+    removeListener(l: (delta: { id: number; state?: { current?: DownloadState } }) => void): void;
+  };
+}
+
+/** Resolves when the browser has finished or given up on a download; one that never settles counts as interrupted. */
+export function waitForDownload(api: DownloadsApi, id: number, timeoutMs = 120_000): Promise<"complete" | "interrupted"> {
+  return new Promise((resolve) => {
+    const settle = (state: "complete" | "interrupted") => {
+      clearTimeout(timer);
+      api.onChanged.removeListener(listener);
+      resolve(state);
+    };
+    const listener = (delta: { id: number; state?: { current?: DownloadState } }) => {
+      const state = delta.state?.current;
+      if (delta.id === id && (state === "complete" || state === "interrupted")) settle(state);
+    };
+    const timer = setTimeout(() => settle("interrupted"), timeoutMs);
+    api.onChanged.addListener(listener);
+    // It may have finished before the listener was in place.
+    void api
+      .search({ id })
+      .then(([d]) => {
+        if (d && (d.state === "complete" || d.state === "interrupted")) settle(d.state);
+      })
+      .catch(() => undefined);
+  });
+}

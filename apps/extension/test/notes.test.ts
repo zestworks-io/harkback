@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { conceptDetail } from "../src/lib/concept-detail";
-import { conceptNote, noteFilename, noteFiles, writeNoteFiles } from "../src/lib/notes";
+import { conceptNote, mergeNote, NOTE_END, noteFilename, noteFiles, writeNoteFiles } from "../src/lib/notes";
 import { world } from "./helpers";
 
 function build() {
@@ -115,11 +115,38 @@ describe("front matter quoting", () => {
   });
 });
 
+describe("mergeNote", () => {
+  it("keeps what the reader wrote below the marker and ignores files without one", () => {
+    const old = `old generated\n${NOTE_END}\nMy own thoughts\n`;
+    expect(mergeNote(`new generated\n${NOTE_END}\n`, old)).toBe(`new generated\n${NOTE_END}\nMy own thoughts\n`);
+    expect(mergeNote(`new\n${NOTE_END}\n`, `old\n${NOTE_END}\n\n`)).toBe(`new\n${NOTE_END}\n`);
+    expect(mergeNote("new", "an older export without a marker")).toBe("new");
+    expect(mergeNote("new", null)).toBe("new");
+  });
+
+  it("is stable when exporting twice", () => {
+    const { w, lora } = build();
+    const note = conceptNote(conceptDetail(w.state(), lora)!, "en");
+    expect(note.endsWith(`${NOTE_END}\n`)).toBe(true);
+    expect(mergeNote(note, note)).toBe(note);
+  });
+});
+
 describe("writeNoteFiles", () => {
-  function fakeDir(failOn?: string) {
-    const files = new Map<string, string>();
+  it("does not overwrite what the reader wrote under an existing note", async () => {
+    const existing = new Map([["a.md", `stale\n${NOTE_END}\nMy notes\n`]]);
+    const { dir, files } = fakeDir(undefined, existing);
+    await writeNoteFiles(dir, [{ filename: "a.md", content: `fresh\n${NOTE_END}\n` }]);
+    expect(files.get("a.md")).toBe(`fresh\n${NOTE_END}\nMy notes\n`);
+  });
+
+  function fakeDir(failOn?: string, files = new Map<string, string>()) {
     const sub = {
       getFileHandle: async (name: string) => ({
+        getFile: async () => {
+          if (!files.has(name)) throw new Error("not found");
+          return { text: async () => files.get(name)! };
+        },
         createWritable: async () => {
           if (name === failOn) throw new Error("denied");
           let text = "";

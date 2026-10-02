@@ -37,6 +37,8 @@ export interface ExplainRequestMsg {
   earlierEncounterId?: string;
   /** For explanations started from a reunion card: the concept found on the page; recorded without asking. */
   conceptId?: string;
+  /** A model the reader picked for this explanation, instead of the one the settings choose. */
+  modelId?: string;
 }
 
 export interface PageContext {
@@ -75,7 +77,7 @@ function route(req: ExplainRequestMsg, ctx: PageContext, settings: Settings, sta
   const rule = effectiveRule(settings.sites, ctx.url);
   if (rule.disabled) return { kind: "error", code: "site_disabled" };
   const sensitive = rule.sensitive || state.sources.get(req.source.source_id)?.sensitivity === "sensitive";
-  const chosen = chooseModel(settings, rule, sensitive);
+  const chosen = chooseModel(settings, rule, sensitive, req.modelId);
   if (chosen.kind === "error") return chosen;
   return { kind: "ok", rule, sensitive, model: chosen.model, remote: chosen.remote };
 }

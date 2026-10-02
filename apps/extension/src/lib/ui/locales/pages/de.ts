@@ -57,8 +57,6 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Back up JSONL now": "JSONL jetzt sichern",
   "Backing up…": "Sicherung läuft…",
   "Export Markdown": "Markdown exportieren",
-  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.":
-    "Eine Markdown-Datei pro Konzept mit [[Links]], geschrieben nach {folder}/ im gewählten Ordner; Dateien mit demselben Namen werden überschrieben.",
   "Export notes folder": "Notizenordner exportieren",
   "This browser cannot pick a folder.": "Dieser Browser kann keinen Ordner auswählen.",
   "Exported {n} notes.": "{n} Notizen exportiert.",
@@ -139,8 +137,6 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "Erklärungen und Antworten auf Folgefragen werden in dieser Sprache verfasst; Fachbegriffe bleiben in ihrer ursprünglichen Form. Die Qualität hängt von Sprache und Modell ab.",
   Models: "Modelle",
-  'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "Nicht lokale Adressen müssen https verwenden. Ein lokales Modell (127.0.0.1 / localhost), bei dem „Für sensible Quellen“ angehakt ist, wird für sensible Quellen verwendet; sie nutzen nie ein anderes Modell.",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API-Schlüssel werden unverschlüsselt im Speicher der Erweiterung abgelegt: Andere Websites und Erweiterungen können sie nicht lesen, wohl aber jeder mit Zugriff auf den Datenträger dieses Computers. Ein Schlüssel wird nur an die von Ihnen eingegebene Modelladresse gesendet und gelangt nie in Sicherungen oder Protokolle. Bevorzugen Sie einen Schlüssel mit Ausgabenlimit oder ein lokales Modell (ohne Schlüssel).",
   Sites: "Websites",
@@ -210,4 +206,32 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Das Löschen wirkt in der App; auf dem Datenträger können Spuren bleiben, und bereits exportierte Sicherungen lassen sich nicht zurückrufen. Vollständige Datenträgerverschlüsselung wird empfohlen.",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API-Schlüssel werden unverschlüsselt im Speicher der Erweiterung abgelegt; sie werden nur an die von Ihnen eingegebene Modelladresse gesendet und gelangen nie in Sicherungen oder Protokolle. Bevorzugen Sie einen Schlüssel mit Ausgabenlimit.",
+  "Mark as normal": "Als normal markieren",
+  "Confirm: may go to remote models": "Bestätigen: darf an Remote-Modelle gehen",
+  "Content from this source only goes to a local model.": "Der Inhalt dieser Quelle geht nur an ein lokales Modell.",
+  "Sensitive source": "Sensible Quelle",
+  "No concepts to show yet.": "Noch keine Konzepte vorhanden.",
+  "Concept graph": "Konzeptgraph",
+  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
+    "Blauer Pfeil: Voraussetzung · Lila Pfeil: Variante · Gestrichelt: verwandt",
+  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "Grün: verstanden · Gelb: noch unklar · Blau: neu · Gestrichelter Kreis: noch nicht erklärt",
+  "One card per concept as tab-separated text; open it in Anki with File → Import.":
+    "Eine Karte pro Konzept als tabulatorgetrennter Text; in Anki über Datei → Importieren öffnen.",
+  "Export Anki cards": "Anki-Karten exportieren",
+  "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
+    "Stellt Einträge aus einem JSONL-Backup wieder her. Vorhandene Einträge werden übersprungen, nichts wird doppelt angelegt.",
+  "Import JSONL": "JSONL importieren",
+  "Importing…": "Importiere…",
+  "Import failed.": "Import fehlgeschlagen.",
+  "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
+    "{added} neue Ereignisse importiert; {skipped} übersprungen (bereits vorhanden oder nicht lesbar).",
+  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
+    "Eine Markdown-Datei pro Konzept mit [[Links]], geschrieben nach {folder}/ im gewählten Ordner. Ein erneuter Export aktualisiert die Notizen und behält, was Sie unter der Markierungszeile geschrieben haben.",
+  "Draw your concepts and their relations as a map.": "Zeichnet Ihre Konzepte und ihre Beziehungen als Karte.",
+  Graph: "Graph",
+  "Dash: inherit; ticked: on; empty: off": "—: erben; angehakt: an; leer: aus",
+  "Leave sensitive sources out of backups and exports": "Sensible Quellen aus Backups und Exporten auslassen",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
+    "Unverschlüsseltes http ist nur für diesen Computer (127.0.0.1 / localhost) und für Server in Ihrem eigenen Netzwerk (192.168.x.x, 10.x.x.x, name.local, Tailscale) erlaubt; jede andere Adresse muss https verwenden. Ein Server im eigenen Netzwerk gilt trotzdem als remote. Das lokale Modell (127.0.0.1 / localhost) mit Haken bei „Für sensible Quellen“ wird für sensible Quellen verwendet; sie nutzen nie ein anderes Modell.",
 };

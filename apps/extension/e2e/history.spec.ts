@@ -286,3 +286,29 @@ test("exports one note per concept into a Harkback folder", async ({ context, sw
   expect(Object.keys(written)).toEqual(["Harkback"]);
   expect(written.Harkback!["LoRA.md"]).toContain("# LoRA");
 });
+
+test("draws the concept graph and opens a concept from it", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html#graph`);
+  await expect(page.locator("[data-hb=graph]")).toBeVisible();
+  const node = page.locator("[data-hb=graph-node]", { hasText: "LoRA" }).first();
+  await expect(node).toBeVisible();
+  await node.click();
+  await expect(page.locator("[data-hb=concept-detail] h2")).toHaveText("LoRA");
+});
+
+test("importing a backup that is already there adds nothing and says so", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await lookUpLora(context);
+  const before = await readEvents(sw);
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
+  const jsonl = `${before.map((e) => JSON.stringify(e)).join("\n")}\n`;
+  await page
+    .locator("[data-hb=import-file]")
+    .setInputFiles({ name: "backup.jsonl", mimeType: "application/x-ndjson", buffer: Buffer.from(jsonl) });
+  await expect(page.locator("[data-hb=status]")).toContainText("Imported 0 new events");
+  expect(await readEvents(sw)).toHaveLength(before.length);
+});

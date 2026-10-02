@@ -55,8 +55,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Back up JSONL now": "今すぐ JSONL をバックアップ",
   "Backing up…": "バックアップ中…",
   "Export Markdown": "Markdown を書き出す",
-  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.":
-    "概念ごとに 1 つの Markdown ファイル（[[リンク]] 付き）を、選んだフォルダ内の {folder}/ に書き込みます。同名のファイルは上書きされます。",
   "Export notes folder": "ノートをフォルダに書き出す",
   "This browser cannot pick a folder.": "このブラウザではフォルダを選択できません。",
   "Exported {n} notes.": "{n} 件のノートを書き出しました。",
@@ -137,8 +135,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "解説と追加質問への回答はこの言語で書かれます。専門用語は原文のままです。品質は言語とモデルによって異なります。",
   Models: "モデル",
-  'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "ローカル以外のアドレスは https が必須です。「機密ソース用」にチェックしたローカルモデル（127.0.0.1 / localhost）が機密ソースに使われ、機密ソースは他のモデルを一切使いません。",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API キーは拡張機能のストレージに暗号化せず保存されます。他のサイトや拡張機能からは読めませんが、このコンピューターのディスクにアクセスできる人は読めます。キーは入力したモデルのアドレスにのみ送信され、バックアップやログには含まれません。利用上限のあるキーか、ローカルモデル（キー不要）を推奨します。",
   Sites: "サイト",
@@ -207,4 +203,31 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "削除はアプリ内で反映されます。ディスク上に痕跡が残る場合があり、書き出し済みのバックアップは取り消せません。ディスク全体の暗号化を推奨します。",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API キーは拡張機能のストレージに暗号化せず保存されます。入力したモデルのアドレスにのみ送信され、バックアップやログには含まれません。利用上限のあるキーを推奨します。",
+  "Mark as normal": "通常のソースに戻す",
+  "Confirm: may go to remote models": "確認：以後はリモートモデルに送信される可能性があります",
+  "Content from this source only goes to a local model.": "このソースの内容はローカルモデルにのみ送信されます。",
+  "Sensitive source": "機密ソース",
+  "No concepts to show yet.": "表示できる概念はまだありません。",
+  "Concept graph": "概念グラフ",
+  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "青い矢印：前提概念 · 紫の矢印：派生 · 破線：関連",
+  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "緑：理解済み · 黄：まだ不明 · 青：新規 · 破線の円：未解説",
+  "One card per concept as tab-separated text; open it in Anki with File → Import.":
+    "概念ごとに1枚のカード（タブ区切りテキスト）。Anki の「ファイル → インポート」で開けます。",
+  "Export Anki cards": "Anki カードを書き出す",
+  "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
+    "JSONL バックアップから記録を復元します。すでにある記録はスキップされ、重複しません。",
+  "Import JSONL": "JSONL を読み込む",
+  "Importing…": "読み込み中…",
+  "Import failed.": "読み込みに失敗しました。",
+  "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
+    "新しいイベントを {added} 件読み込みました。すでにある、または読み取れない {skipped} 件はスキップしました。",
+  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
+    "概念ごとに1つの Markdown ファイル（[[リンク]] 付き）を、選んだフォルダ内の {folder}/ に書き込みます。再度書き出すとノートが更新され、マーカー行より下に書いた内容は残ります。",
+  "Draw your concepts and their relations as a map.": "概念とその関係を地図として描きます。",
+  Graph: "グラフ",
+  "Dash: inherit; ticked: on; empty: off": "—：継承、チェック：オン、空：オフ",
+  "Leave sensitive sources out of backups and exports": "バックアップと書き出しに機密ソースを含めない",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
+    "プレーンな http は、このコンピューター（127.0.0.1 / localhost）と自分のネットワーク内のサーバー（192.168.x.x、10.x.x.x、name.local、Tailscale）にのみ許可され、それ以外のアドレスは https が必要です。自分のネットワーク内のサーバーもリモート扱いです。「機密ソース用」にチェックしたローカルモデル（127.0.0.1 / localhost）が機密ソースに使われ、機密ソースは他のモデルを使いません。",
 };

@@ -21,10 +21,10 @@ test("onboarding connects to a local model and saves settings", async ({ context
     (await context.waitForEvent("page", { predicate: (p) => p.url().endsWith("/onboarding.html") }));
   await page.locator("[data-hb=base-url]").fill(`${stub.url}/v1`);
   await page.locator("[data-hb=test]").click();
-  await expect(page.locator("[data-hb=test-result]")).toContainText("连接成功");
+  await expect(page.locator("[data-hb=test-result]")).toContainText("Connected");
   await expect(page.locator("[data-hb=model]")).toHaveValue("stub-model");
   await page.locator("[data-hb=finish]").click();
-  await expect(page.locator("[data-hb=test-result]")).toContainText("请先阅读并同意");
+  await expect(page.locator("[data-hb=test-result]")).toContainText("Please read and accept");
   await page.locator("[data-hb=consent]").check();
   await page.locator("[data-hb=finish]").click();
   await expect(page.locator("[data-hb=done]")).toBeVisible();

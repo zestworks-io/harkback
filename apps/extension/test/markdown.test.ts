@@ -57,3 +57,32 @@ describe("renderMarkdown", () => {
     expect(render("## Title\ntext").querySelector("p strong")!.textContent).toBe("Title");
   });
 });
+
+describe("renderMarkdown edge cases", () => {
+  it("keeps snake_case identifiers and prices as text", () => {
+    const div = render("Set max_tokens and min_tokens. It costs $5 per run, or $10 for two. Use __init__ and _emphasis_ too.");
+    expect(div.querySelector(".hb-math")).toBeNull();
+    const p = div.querySelector("p")!;
+    expect(p.textContent).toContain("max_tokens and min_tokens");
+    expect(p.textContent).toContain("$5 per run, or $10");
+    expect(div.querySelector("em")!.textContent).toBe("emphasis");
+  });
+
+  it("still typesets a formula next to a price", () => {
+    expect(render("Take $x^2$ then pay $5.").querySelector(".hb-math")).not.toBeNull();
+  });
+
+  it("nests lists by indentation", () => {
+    const div = render("- one\n  - inner a\n  - inner b\n- two\n\n1. first\n   - sub");
+    expect(div.querySelectorAll("ul > li > ul > li")).toHaveLength(2);
+    expect(div.querySelector("ul")!.children).toHaveLength(2);
+    expect(div.querySelector("ol > li > ul > li")!.textContent).toBe("sub");
+  });
+
+  it("renders tables", () => {
+    const div = render("Before\n\n| Model | Params |\n| --- | ---: |\n| A | 7B |\n| B | 13B |\n\nAfter");
+    expect([...div.querySelectorAll("th")].map((c) => c.textContent)).toEqual(["Model", "Params"]);
+    expect([...div.querySelectorAll("tbody tr")].map((r) => r.textContent)).toEqual(["A7B", "B13B"]);
+    expect(div.querySelectorAll("p")).toHaveLength(2);
+  });
+});

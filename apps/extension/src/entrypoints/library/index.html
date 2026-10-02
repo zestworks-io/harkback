@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -550,6 +550,116 @@
         .concept {
           padding: 16px;
         }
+      }
+      .explanation .hb-table {
+        overflow-x: auto;
+        margin: 0 0 8px;
+      }
+      .explanation table {
+        border-collapse: collapse;
+        font-size: 13.5px;
+      }
+      .explanation th,
+      .explanation td {
+        border: 1px solid var(--border);
+        padding: 3px 9px;
+        text-align: left;
+      }
+      .explanation th {
+        background: var(--subtle);
+      }
+      .explanation li > ul,
+      .explanation li > ol {
+        margin: 2px 0 0;
+      }
+      .sensitive-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: var(--external-soft);
+        color: var(--external);
+      }
+      .graph-wrap {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+        overflow: hidden;
+      }
+      svg.graph {
+        display: block;
+        width: 100%;
+        height: min(70vh, 640px);
+        cursor: grab;
+        touch-action: none;
+      }
+      svg.graph.dragging {
+        cursor: grabbing;
+      }
+      svg.graph .edge {
+        stroke-width: 1.4;
+        fill: none;
+      }
+      svg.graph .edge.prerequisite {
+        stroke: var(--accent);
+      }
+      svg.graph .edge.variant_of {
+        stroke: #a855f7;
+      }
+      svg.graph .edge.related {
+        stroke: var(--muted);
+        stroke-dasharray: 4 3;
+      }
+      svg.graph marker.prerequisite path {
+        fill: var(--accent);
+      }
+      svg.graph marker.variant_of path {
+        fill: #a855f7;
+      }
+      svg.graph .node circle {
+        stroke-width: 2;
+        fill: var(--card);
+        stroke: var(--muted);
+      }
+      svg.graph .node.understood circle {
+        fill: var(--defined);
+        stroke: var(--defined);
+      }
+      svg.graph .node.confused circle {
+        fill: var(--external);
+        stroke: var(--external);
+      }
+      svg.graph .node.new circle {
+        fill: var(--accent-soft);
+        stroke: var(--accent);
+      }
+      svg.graph .node.unstudied circle {
+        fill: var(--card);
+        stroke: var(--muted);
+        stroke-dasharray: 3 2;
+      }
+      svg.graph .node text {
+        fill: var(--fg);
+        font-size: 12px;
+        paint-order: stroke;
+        stroke: var(--card);
+        stroke-width: 3px;
+        text-anchor: middle;
+      }
+      svg.graph a:focus-visible circle,
+      svg.graph a:hover circle {
+        stroke: var(--fg);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        padding: 8px 14px;
+        border-top: 1px solid var(--border);
+        font-size: 12.5px;
+        color: var(--muted);
       }
     </style>
   </head>

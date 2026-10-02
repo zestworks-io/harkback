@@ -1,8 +1,15 @@
-import { buildFollowUpPrompt, canonicalOrder, serializeJsonl, streamingExplanation, type EventFactory } from "@harkback/core";
+import {
+  buildFollowUpPrompt,
+  canonicalOrder,
+  serializeJsonl,
+  streamingExplanation,
+  withoutSensitive,
+  type EventFactory,
+} from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { browser, type Browser } from "wxt/browser";
 import { defineBackground } from "wxt/utils/define-background";
-import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue, type BackupState } from "../lib/backup";
+import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue, waitForDownload, type BackupState } from "../lib/backup";
 import type { LastLookup } from "../lib/cooccurrence";
 import {
   buildExplainRecord,
@@ -28,6 +35,7 @@ import { explainLanguageOf, withDefaults, type Settings } from "../lib/settings"
 import { hostPermissionPatterns, originPattern } from "../lib/site-rules";
 import { arxivHtmlUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
+import { UI_STRINGS } from "../lib/ui/locales/ui";
 import { CHANGE_CHANNEL, EventStore } from "../lib/store";
 
 const CONTENT_SCRIPT = "/content-scripts/content.js";
@@ -63,8 +71,15 @@ export default defineBackground(() => {
     } finally {
       cache.invalidate();
       changes.postMessage("changed");
-      void refreshBadge();
+      scheduleBadge();
     }
+  }
+
+  // Several writes in a row (an explanation and its follow-ups) replay the log once, not once each.
+  let badgeTimer: ReturnType<typeof setTimeout> | undefined;
+  function scheduleBadge(): void {
+    clearTimeout(badgeTimer);
+    badgeTimer = setTimeout(() => void refreshBadge(), 1500);
   }
 
   /** The toolbar badge counts concepts due for review; it never carries any text from the records. */
@@ -95,6 +110,12 @@ export default defineBackground(() => {
     return result;
   }
 
+  /** A request that failed before any answer arrived did not use up the budget. */
+  async function refundRate(): Promise<void> {
+    limiter.release();
+    await browser.storage.session.set({ rateStamps: limiter.stamps() }).catch(() => undefined);
+  }
+
   // ---- explain port -------------------------------------------------------
 
   function handleExplainPort(port: Browser.runtime.Port): void {
@@ -103,9 +124,19 @@ export default defineBackground(() => {
     const senderUrl = port.sender?.url ?? port.sender?.tab?.url ?? "";
     // Site rules and history refer to the PDF the reader shows, not to the reader page.
     const url = senderKind(port.sender ?? {}, browser.runtime.id, extensionOrigin) === "reader" ? readerSource(senderUrl) : senderUrl;
-    const abort = new AbortController();
+    // One controller per model call, so Stop ends the current answer and a later question starts fresh.
+    let active: AbortController | null = null;
+    const begin = (): AbortSignal => (active = new AbortController()).signal;
     let pending: Pending | null = null;
-    let last: { req: ExplainRequestMsg; plan: ExplainPlan; explanation: string; encounterId: string | null } | null = null;
+    type Turn = { question: string; answer: string };
+    let last: {
+      req: ExplainRequestMsg;
+      plan: ExplainPlan;
+      explanation: string;
+      encounterId: string | null;
+      /** Follow-ups answered before the explanation was recorded. */
+      unsaved: Turn[];
+    } | null = null;
     let busy = false;
     let closed = false;
 
@@ -136,31 +167,41 @@ export default defineBackground(() => {
       });
       if (!out.record) return;
       lastLookup.set(tabKey, out.record.lookup);
-      if (last) last.encounterId = out.record.encounterId;
+      if (last) {
+        last.encounterId = out.record.encounterId;
+        const waiting = last.unsaved.splice(0);
+        for (const turn of waiting) await saveFollowUp(out.record.encounterId, turn).catch(() => undefined);
+      }
       post({ type: "done", encounterId: out.record.encounterId, recorded: true });
     }
+
+    const saveFollowUp = (encounterId: string, turn: Turn): Promise<unknown> =>
+      append((f) => [f.make("encounter.action", { encounter_id: encounterId, action: "followed_up", detail: turn })]);
 
     async function start(req: ExplainRequestMsg): Promise<void> {
       busy = true;
       try {
         const settings = await loadSettings();
-        const rate = await acquireRate(settings);
-        if (!rate.ok) return post({ type: "error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         const state = await getState();
         const planned = planExplain(req, { url, incognito }, settings, state);
         if (planned.kind === "error") return post({ type: "error", code: planned.code });
         const { plan } = planned;
         if (!(await canReach(plan.model))) return post({ type: "error", code: "no_permission" });
+        const rate = await acquireRate(settings);
+        if (!rate.ok) return post({ type: "error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         const raw = await streamChat(
           plan.model,
           plan.prompt.messages,
           (full) => post({ type: "delta", text: streamingExplanation(full) }),
           {
-            signal: abort.signal,
+            signal: begin(),
           },
-        );
+        ).catch(async (e: unknown) => {
+          await refundRate();
+          throw e;
+        });
         const outcome = finishExplain(raw, plan, req);
-        last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null };
+        last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
         post({ type: "explained", explanation: outcome.parsed.explanation, tier: outcome.tier });
         if (incognito) return post({ type: "done", encounterId: null, recorded: false });
         // Started from a reunion card: the concept is already known.
@@ -195,12 +236,12 @@ export default defineBackground(() => {
       busy = true;
       try {
         const settings = await loadSettings();
-        const rate = await acquireRate(settings);
-        if (!rate.ok) return post({ type: "followup_error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         // The source may have been marked sensitive since the explanation: route again.
         const routed = routeFollowUp(l.req, { url, incognito }, settings, await getState());
         if (routed.kind === "error") return post({ type: "followup_error", code: routed.code });
         if (!(await canReach(routed.model))) return post({ type: "followup_error", code: "no_permission" });
+        const rate = await acquireRate(settings);
+        if (!rate.ok) return post({ type: "followup_error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         const messages = buildFollowUpPrompt({
           term: l.req.selection,
           paragraph: l.req.paragraph,
@@ -209,17 +250,16 @@ export default defineBackground(() => {
           language: explainLanguageOf(settings),
         });
         const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), {
-          signal: abort.signal,
+          signal: begin(),
+        }).catch(async (e: unknown) => {
+          await refundRate();
+          throw e;
         });
-        const encounterId = l.encounterId;
-        if (encounterId && !incognito) {
-          await append((f) => [
-            f.make("encounter.action", {
-              encounter_id: encounterId,
-              action: "followed_up",
-              detail: { question: q, answer: reply.slice(0, 20000) },
-            }),
-          ]);
+        const turn = { question: q, answer: reply.slice(0, 20000) };
+        if (!incognito) {
+          // Until the explanation itself is recorded there is nothing to attach the conversation to; it is saved right after.
+          if (l.encounterId) await saveFollowUp(l.encounterId, turn);
+          else l.unsaved.push(turn);
         }
         post({ type: "followup_done", answer: reply });
       } catch (e) {
@@ -231,7 +271,7 @@ export default defineBackground(() => {
 
     port.onDisconnect.addListener(() => {
       closed = true;
-      abort.abort();
+      active?.abort();
       // The explanation was fully received: leaving the "same concept?" question unanswered records a new concept.
       if (pending) void record(pending, null).catch(() => undefined);
     });
@@ -240,6 +280,7 @@ export default defineBackground(() => {
       if (msg.type === "start" && !busy && !last) void start(msg.request);
       else if (msg.type === "ping")
         return; // Keepalive: receiving it resets the service worker's idle timer.
+      else if (msg.type === "cancel") active?.abort();
       else if (msg.type === "answer") void answer(msg.sameConcept === true);
       else if (msg.type === "followup" && !busy && last) void followUp(String(msg.question));
     });
@@ -267,6 +308,16 @@ export default defineBackground(() => {
       cache.invalidate();
     },
     runBackup,
+    async importEvents(events) {
+      const { store, cache } = await getServices();
+      try {
+        return await store.importEvents(events);
+      } finally {
+        cache.invalidate();
+        changes.postMessage("changed");
+        scheduleBadge();
+      }
+    },
     async syncContentScripts() {
       sync();
       await syncing;
@@ -344,6 +395,24 @@ export default defineBackground(() => {
 
   browser.action.onClicked.addListener((tab) => activateTab(tab, { type: "activate" }));
 
+  const MENU_ID = "explain-selection";
+  const menuTitle = (lang: Settings["language"]): string =>
+    `Harkback: ${UI_STRINGS[lang]?.explain ?? (lang === "zh" ? "解释" : "Explain")}`;
+
+  /** Creates the right-click entry, or renames it when the interface language changed. */
+  async function ensureMenu(): Promise<void> {
+    const title = menuTitle((await loadSettings()).language);
+    try {
+      await browser.contextMenus.update(MENU_ID, { title });
+    } catch {
+      browser.contextMenus.create({ id: MENU_ID, title, contexts: ["selection"] }, () => void browser.runtime.lastError);
+    }
+  }
+
+  browser.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === MENU_ID && tab) activateTab(tab, { type: "explain-selection" });
+  });
+
   async function syncContentScripts(): Promise<void> {
     const settings = await loadSettings();
     const patterns = [
@@ -396,7 +465,8 @@ export default defineBackground(() => {
 
   async function runBackup(): Promise<void> {
     const { store } = await getServices();
-    const events = await store.all();
+    const all = await store.all();
+    const events = (await loadSettings()).backup.excludeSensitive ? withoutSensitive(all) : all;
     if (events.length === 0) return;
     const { device } = await store.identity();
     const now = Date.now();
@@ -406,7 +476,16 @@ export default defineBackground(() => {
       conflictAction: "uniquify",
       saveAs: false,
     });
-    const { keep, remove } = applyRetention((await loadBackupState()).downloadIds, id);
+    const before = await loadBackupState();
+    // Tracked from the moment it starts, so a worker restart while waiting does not lose track of the file.
+    await browser.storage.local.set({ backupState: { ...before, downloadIds: [...before.downloadIds, id] } satisfies BackupState });
+    // Older backups are only removed once the new one is safely on disk.
+    if ((await waitForDownload(browser.downloads, id)) !== "complete") {
+      await browser.downloads.erase({ id }).catch(() => undefined);
+      await browser.storage.local.set({ backupState: before satisfies BackupState });
+      throw new Error("the backup file could not be written");
+    }
+    const { keep, remove } = applyRetention(before.downloadIds, id);
     for (const old of remove) {
       await browser.downloads.removeFile(old).catch(() => undefined);
       await browser.downloads.erase({ id: old }).catch(() => undefined);
@@ -434,16 +513,19 @@ export default defineBackground(() => {
 
   browser.runtime.onInstalled.addListener((details) => {
     void ensureAlarm();
+    void ensureMenu();
     sync();
     if (details.reason === "install") void browser.tabs.create({ url: browser.runtime.getURL("/onboarding.html") });
   });
   browser.runtime.onStartup.addListener(() => {
     void ensureAlarm();
+    void ensureMenu();
     sync();
   });
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && "settings" in changes) {
       sync();
+      void ensureMenu();
       void refreshBadge();
     }
   });

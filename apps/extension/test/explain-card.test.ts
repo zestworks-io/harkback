@@ -2,16 +2,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { ExplainCard, type ExplainCardHandlers } from "../src/lib/ui/explain-card";
 
-function setup() {
+function setup(models: { id: string; label: string }[] = []) {
   const handlers: ExplainCardHandlers = {
     onAnswer: vi.fn(),
     onAction: vi.fn(),
     onFollowUp: vi.fn(),
     onMarkSensitive: vi.fn(),
     onRetry: vi.fn(),
+    onRetryWith: vi.fn(),
+    onCancel: vi.fn(),
     onClose: vi.fn(),
   };
-  const card = new ExplainCard("zh", handlers);
+  const card = new ExplainCard("zh", handlers, models);
   document.body.append(card.el);
   const q = (hb: string) => card.el.querySelector<HTMLElement>(`[data-hb="${hb}"]`);
   return { card, handlers, q };
@@ -115,13 +117,13 @@ describe("ExplainCard", () => {
     input.value = "第一个问题";
     send.click();
     expect(q("followup-question")!.textContent).toBe("第一个问题");
-    expect(send.disabled).toBe(true);
+    expect(send.textContent).toBe("停止");
     input.value = "太快了";
     send.click();
     expect(handlers.onFollowUp).toHaveBeenCalledTimes(1);
     card.followUpDelta("答案一");
     card.followUpDone("答案一。");
-    expect(send.disabled).toBe(false);
+    expect(send.textContent).toBe("发送");
 
     input.value = "第二个问题";
     send.click();
@@ -153,5 +155,60 @@ describe("ExplainCard", () => {
     card.done(true);
     expect(q("followup-open")).toBeNull();
     expect(q("understood")).not.toBeNull();
+  });
+});
+
+describe("ExplainCard: stop and other models", () => {
+  it("offers Stop while the explanation is written and removes it once it is complete", () => {
+    const { card, handlers, q } = setup();
+    q("stop")!.click();
+    expect(handlers.onCancel).toHaveBeenCalledTimes(1);
+    card.setStreaming("text");
+    card.setExplained("text.", "external_knowledge");
+    expect(q("stop")).toBeNull();
+  });
+
+  it("turns Send into Stop while a follow-up answer is written", () => {
+    const { card, handlers, q } = setup();
+    card.setExplained("text.", "external_knowledge");
+    card.done(true);
+    q("followup-open")!.click();
+    const input = q("followup-input") as HTMLInputElement;
+    input.value = "why?";
+    q("followup-send")!.click();
+    expect(handlers.onFollowUp).toHaveBeenCalledWith("why?");
+    expect(q("followup-send")!.textContent).toBe("停止");
+    q("followup-send")!.click();
+    expect(handlers.onCancel).toHaveBeenCalledTimes(1);
+    expect(handlers.onFollowUp).toHaveBeenCalledTimes(1);
+    card.followUpError("aborted");
+    expect(q("followup-send")!.textContent).toBe("发送");
+  });
+
+  it("offers the configured models after a failure, and Retry after a cancel", () => {
+    const { card, handlers, q } = setup([
+      { id: "a", label: "Local" },
+      { id: "b", label: "Cloud" },
+    ]);
+    card.error("timeout");
+    const buttons = [...card.el.querySelectorAll<HTMLElement>('[data-hb="retry-model"]')];
+    expect(buttons.map((b) => b.textContent)).toEqual(["改用 Local", "改用 Cloud"]);
+    buttons[1]!.click();
+    expect(handlers.onRetryWith).toHaveBeenCalledWith("b");
+    card.error("aborted");
+    expect(q("retry")).not.toBeNull();
+  });
+
+  it("does not offer other models for errors they cannot fix, or when there is only one", () => {
+    const many = setup([
+      { id: "a", label: "Local" },
+      { id: "b", label: "Cloud" },
+    ]);
+    many.card.error("site_disabled");
+    expect(many.card.el.querySelector('[data-hb="retry-model"]')).toBeNull();
+    const one = setup([{ id: "a", label: "Local" }]);
+    one.card.error("timeout");
+    expect(one.card.el.querySelector('[data-hb="retry-model"]')).toBeNull();
+    expect(one.q("retry")).not.toBeNull();
   });
 });

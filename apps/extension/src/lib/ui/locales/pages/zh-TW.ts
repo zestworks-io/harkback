@@ -54,8 +54,6 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Back up JSONL now": "立即備份 JSONL",
   "Backing up…": "備份中…",
   "Export Markdown": "匯出 Markdown",
-  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.":
-    "每個概念一個 Markdown 檔案，帶有 [[連結]]，寫入所選資料夾中的 {folder}/；同名檔案會被覆寫。",
   "Export notes folder": "匯出筆記資料夾",
   "This browser cannot pick a folder.": "這個瀏覽器無法選擇資料夾。",
   "Exported {n} notes.": "已匯出 {n} 個筆記。",
@@ -135,8 +133,6 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "解釋和追問的回答會用這種語言書寫；術語保持原文。品質會因語言和模型而異。",
   Models: "模型",
-  'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "非本機位址必須使用 https。勾選「敏感來源用」的本機模型（127.0.0.1 / localhost）會用於敏感來源；敏感來源不會使用其他模型。",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API key 未加密儲存在瀏覽器擴充功能的儲存空間：其他網站和擴充功能讀不到，但能存取這台電腦磁碟的人可以。它只會傳送到你填寫的模型位址，不會寫入備份或記錄。建議使用有額度限制的 key，或使用本機模型（不需要 key）。",
   Sites: "網站",
@@ -203,4 +199,31 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "刪除只會在應用程式內生效；磁碟上可能仍有殘留，已匯出的備份也無法收回。建議啟用全磁碟加密。",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API key 未加密儲存在擴充功能的儲存空間中；只會傳送到你填寫的模型位址，不會寫入備份或記錄。建議使用有額度限制的 key。",
+  "Mark as normal": "改為一般來源",
+  "Confirm: may go to remote models": "確認：之後可傳送給遠端模型",
+  "Content from this source only goes to a local model.": "這個來源的內容只會傳送給本機模型。",
+  "Sensitive source": "敏感來源",
+  "No concepts to show yet.": "還沒有可顯示的概念。",
+  "Concept graph": "概念關係圖",
+  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "藍色箭頭：前置概念 · 紫色箭頭：變體 · 虛線：相關",
+  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "實心綠：已理解 · 黃：仍困惑 · 藍：新 · 虛線圈：還沒解釋過",
+  "One card per concept as tab-separated text; open it in Anki with File → Import.":
+    "每個概念一張卡片（以 Tab 分隔的文字），可在 Anki 以「檔案 → 匯入」開啟。",
+  "Export Anki cards": "匯出 Anki 卡片",
+  "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
+    "從 JSONL 備份還原記錄。已有的記錄會被略過，不會重複。",
+  "Import JSONL": "匯入 JSONL",
+  "Importing…": "正在匯入…",
+  "Import failed.": "匯入失敗。",
+  "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
+    "已匯入 {added} 筆新記錄，略過 {skipped} 筆已有或無法讀取的記錄。",
+  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
+    "每個概念一個 Markdown 檔案，附有 [[連結]]，寫入所選資料夾中的 {folder}/；再次匯出會更新筆記，你寫在標記行下方的內容會保留。",
+  "Draw your concepts and their relations as a map.": "把概念和它們的關係畫成一張圖。",
+  Graph: "關係圖",
+  "Dash: inherit; ticked: on; empty: off": "—：繼承；勾選：開；空：關",
+  "Leave sensitive sources out of backups and exports": "備份和匯出時不包含敏感來源的內容",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
+    "純 http 只允許用於本機（127.0.0.1 / localhost）和你自己網路裡的伺服器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他位址必須使用 https。自己網路裡的伺服器仍算遠端。勾選「敏感來源用」的本機模型（127.0.0.1 / localhost）會用於敏感來源；敏感來源不會使用其他模型。",
 };

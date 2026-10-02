@@ -28,6 +28,8 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   compare: "用法を比較",
   mute: "今後表示しない",
   retry: "再試行",
+  stop: "停止",
+  tryModel: "{model} で試す",
   err_site_disabled: "このサイトでは無効になっています。",
   err_no_model: "モデルがまだ設定されていません。設定で追加してください。",
   err_needs_local_model: "このソースは機密のため、ローカルモデルのみ使用できます。設定でローカルモデルを追加してください。",

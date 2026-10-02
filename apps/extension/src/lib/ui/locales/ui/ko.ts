@@ -28,6 +28,8 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   compare: "용법 비교",
   mute: "다시 표시 안 함",
   retry: "다시 시도",
+  stop: "중지",
+  tryModel: "{model}(으)로 다시 시도",
   err_site_disabled: "이 사이트에서는 사용 중지되어 있습니다.",
   err_no_model: "아직 모델이 설정되지 않았습니다. 설정에서 추가하세요.",
   err_needs_local_model: "이 출처는 민감하여 로컬 모델만 사용할 수 있습니다. 설정에서 로컬 모델을 설정하세요.",

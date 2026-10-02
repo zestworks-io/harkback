@@ -28,6 +28,8 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   compare: "比較兩處用法",
   mute: "不再提示",
   retry: "重試",
+  stop: "停止",
+  tryModel: "改用 {model}",
   err_site_disabled: "已在此網站停用。",
   err_no_model: "還沒有設定模型，請在設定中新增。",
   err_needs_local_model: "這是敏感來源，只能使用本機模型；請在設定中設定本機模型。",

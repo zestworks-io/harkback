@@ -74,6 +74,9 @@
                 "normal",
                 "sensitive"
               ]
+            },
+            "by_user": {
+              "type": "boolean"
             }
           },
           "required": [

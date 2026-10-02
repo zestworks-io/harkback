@@ -72,6 +72,45 @@ describe("settings", () => {
   });
 });
 
+describe("private network models", () => {
+  it("allows plain http to a server on the home network, but still treats it as remote", () => {
+    for (const url of [
+      "http://192.168.1.20:11434/v1",
+      "http://10.0.0.5/v1",
+      "http://172.20.1.1/v1",
+      "http://100.101.102.103/v1",
+      "http://nas.local:11434/v1",
+      "http://box.tail1234.ts.net/v1",
+      "http://[fd12:3456::1]/v1",
+    ]) {
+      expect(modelUrlError(url), url).toBeNull();
+      expect(isLocalUrl(url), url).toBe(false);
+    }
+    for (const url of [
+      "http://8.8.8.8/v1",
+      "http://172.32.0.1/v1",
+      "http://192.169.1.1/v1",
+      "http://example.com/v1",
+      "http://100.128.0.1/v1",
+    ]) {
+      expect(modelUrlError(url), url).toBe("insecure");
+    }
+  });
+
+  it("never sends a sensitive source to it", () => {
+    const lan = { id: "lan", label: "NAS", baseUrl: "http://192.168.1.20:11434/v1", apiKey: "", model: "m", provider: "ollama" };
+    const settings = { ...withDefaults({}), models: [lan], defaultModelId: "lan", localModelId: null };
+    expect(chooseModel(settings, { autoScan: false, sensitive: false, disabled: false, modelId: null }, false)).toMatchObject({
+      kind: "ok",
+      remote: true,
+    });
+    expect(chooseModel(settings, { autoScan: false, sensitive: true, disabled: false, modelId: "lan" }, true)).toMatchObject({
+      kind: "error",
+      code: "needs_local_model",
+    });
+  });
+});
+
 describe("site rules", () => {
   it("normalizes domains and URL prefixes", () => {
     expect(normalizePattern(" *.Example.COM/ ")).toBe("example.com");
@@ -93,6 +132,26 @@ describe("site rules", () => {
     });
     expect(effectiveRule(rules, "https://other.org/")).toEqual(noRule);
     expect(effectiveRule(rules, "not a url")).toEqual(noRule);
+  });
+
+  it("lets a more specific rule override its site, on or off", () => {
+    const rules = [
+      { pattern: "example.com", autoScan: true, sensitive: true },
+      { pattern: "https://example.com/public", sensitive: false },
+      { pattern: "https://example.com/public/off", autoScan: false, disabled: true },
+    ];
+    expect(effectiveRule(rules, "https://example.com/private")).toMatchObject({ autoScan: true, sensitive: true });
+    expect(effectiveRule(rules, "https://example.com/public/a")).toMatchObject({ autoScan: true, sensitive: false });
+    expect(effectiveRule(rules, "https://example.com/public/off/x")).toMatchObject({ autoScan: false, sensitive: false, disabled: true });
+  });
+
+  it("matches a URL prefix only at a path boundary", () => {
+    const rules = [{ pattern: "https://example.com/docs", sensitive: true }];
+    expect(effectiveRule(rules, "https://example.com/docs").sensitive).toBe(true);
+    expect(effectiveRule(rules, "https://example.com/docs/a?x=1").sensitive).toBe(true);
+    expect(effectiveRule(rules, "https://example.com/docs?x=1").sensitive).toBe(true);
+    expect(effectiveRule(rules, "https://example.com/docs-private").sensitive).toBe(false);
+    expect(effectiveRule(rules, "https://example.com/docsets/a").sensitive).toBe(false);
   });
 
   it("builds host permission patterns", () => {

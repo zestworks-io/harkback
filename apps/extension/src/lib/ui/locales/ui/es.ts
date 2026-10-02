@@ -28,6 +28,8 @@ export const ui_es: Readonly<Record<StringKey, string>> = {
   compare: "Comparar usos",
   mute: "No volver a mostrar",
   retry: "Reintentar",
+  stop: "Detener",
+  tryModel: "Probar con {model}",
   err_site_disabled: "Desactivado en este sitio.",
   err_no_model: "Aún no hay ningún modelo configurado. Añade uno en los ajustes.",
   err_needs_local_model: "Esta fuente es sensible y solo puede usar un modelo local. Configura uno en los ajustes.",

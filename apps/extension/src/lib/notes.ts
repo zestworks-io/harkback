@@ -24,6 +24,9 @@ export function noteFilename(name: string): string {
   return `${noteTitle(name)}.md`;
 }
 
+/** Everything below this line in a note is the reader's own; exporting again never touches it. */
+export const NOTE_END = "<!-- harkback:end — write below this line; it is kept when notes are exported again -->";
+
 const TEXT = {
   zh: {
     prerequisites: "前置概念",
@@ -70,7 +73,17 @@ export function conceptNote(d: ConceptDetail, language: Lang, titleOf: TitleOf =
     lines.push(`- ${e.date} · ${t.source(e.sourceTitle)} · ${t.tier[e.tier]}`);
     lines.push(`  > ${e.explanation.replace(/\s*\n\s*/g, " ").trim()}`);
   }
-  return `${lines.join("\n")}\n`;
+  lines.push("", NOTE_END, "");
+  return lines.join("\n");
+}
+
+/** The note as it is after an export: new generated text, plus whatever the reader wrote below the marker of the old file. */
+export function mergeNote(generated: string, existing: string | null): string {
+  if (existing === null) return generated;
+  const at = existing.indexOf(NOTE_END);
+  if (at < 0) return generated;
+  const mine = existing.slice(at + NOTE_END.length).replace(/^\r?\n/, "");
+  return mine.trim() ? `${generated}${mine}` : generated;
 }
 
 /** Every studied concept as a note; two concepts that would share a file name get " (2)", " (3)" ... */
@@ -100,6 +113,14 @@ export interface NoteWriteResult {
   failed: string[];
 }
 
+async function readText(handle: FileSystemFileHandle): Promise<string | null> {
+  try {
+    return await (await handle.getFile()).text();
+  } catch {
+    return null;
+  }
+}
+
 /** Writes each note into `<dir>/Harkback/`; one failing file does not stop the rest. */
 export async function writeNoteFiles(
   dir: FileSystemDirectoryHandle,
@@ -109,8 +130,10 @@ export async function writeNoteFiles(
   const result: NoteWriteResult = { written: 0, failed: [] };
   for (const f of files) {
     try {
-      const writable = await (await target.getFileHandle(f.filename, { create: true })).createWritable();
-      await writable.write(f.content);
+      const handle = await target.getFileHandle(f.filename, { create: true });
+      const existing = await readText(handle);
+      const writable = await handle.createWritable();
+      await writable.write(mergeNote(f.content, existing || null));
       await writable.close();
       result.written++;
     } catch {

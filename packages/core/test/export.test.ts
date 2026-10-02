@@ -37,7 +37,7 @@ describe("JSONL", () => {
 
 describe("exportMarkdown", () => {
   it("lists real concepts with their encounters and skips placeholders and deleted encounters", () => {
-    const md = exportMarkdown(replay(events));
+    const md = exportMarkdown(replay(events), "zh");
     expect(md).toContain("## LoRA");
     expect(md).toContain("Low-Rank Adaptation");
     expect(md).toContain("2026-09-10 · 《LoRA Paper》 · 外部知识");

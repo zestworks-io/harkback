@@ -55,8 +55,6 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Back up JSONL now": "Sauvegarder le JSONL maintenant",
   "Backing up…": "Sauvegarde en cours…",
   "Export Markdown": "Exporter en Markdown",
-  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.":
-    "Un fichier Markdown par concept avec des [[liens]], écrit dans {folder}/ du dossier choisi ; les fichiers du même nom sont écrasés.",
   "Export notes folder": "Exporter le dossier de notes",
   "This browser cannot pick a folder.": "Ce navigateur ne peut pas choisir de dossier.",
   "Exported {n} notes.": "{n} notes exportées.",
@@ -137,8 +135,6 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "Les explications et les réponses de suivi sont rédigées dans cette langue ; les termes techniques restent dans leur forme d'origine. La qualité varie selon la langue et le modèle.",
   Models: "Modèles",
-  'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "Les adresses non locales doivent utiliser https. Un modèle local (127.0.0.1 / localhost) coché « Pour les sources sensibles » est celui utilisé pour les sources sensibles ; elles n'utilisent jamais d'autre modèle.",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "Les clés API sont stockées non chiffrées dans le stockage de l'extension : les autres sites et extensions ne peuvent pas les lire, mais toute personne ayant accès au disque de cet ordinateur le peut. Une clé n'est envoyée qu'à l'adresse de modèle que vous saisissez et ne figure jamais dans les sauvegardes ni les journaux. Préférez une clé avec un plafond de dépenses, ou un modèle local (sans clé).",
   Sites: "Sites",
@@ -207,4 +203,32 @@ export const pages_fr: Readonly<Record<string, string>> = {
     "La suppression prend effet dans l'application ; des traces peuvent rester sur le disque et les sauvegardes déjà exportées ne peuvent pas être rappelées. Le chiffrement intégral du disque est recommandé.",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "Les clés API sont stockées non chiffrées dans le stockage de l'extension ; elles ne sont envoyées qu'à l'adresse de modèle que vous saisissez et ne figurent jamais dans les sauvegardes ni les journaux. Préférez une clé avec un plafond de dépenses.",
+  "Mark as normal": "Marquer comme normale",
+  "Confirm: may go to remote models": "Confirmer : pourra être envoyé à des modèles distants",
+  "Content from this source only goes to a local model.": "Le contenu de cette source n’est envoyé qu’à un modèle local.",
+  "Sensitive source": "Source sensible",
+  "No concepts to show yet.": "Aucun concept à afficher pour l’instant.",
+  "Concept graph": "Graphe des concepts",
+  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
+    "Flèche bleue : prérequis · Flèche violette : variante · Pointillés : lié",
+  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "Vert : compris · Jaune : encore flou · Bleu : nouveau · Cercle en pointillés : pas encore expliqué",
+  "One card per concept as tab-separated text; open it in Anki with File → Import.":
+    "Une carte par concept sous forme de texte séparé par des tabulations ; ouvrez-le dans Anki avec Fichier → Importer.",
+  "Export Anki cards": "Exporter des cartes Anki",
+  "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
+    "Restaure des enregistrements depuis une sauvegarde JSONL. Ceux que vous avez déjà sont ignorés, rien n’est dupliqué.",
+  "Import JSONL": "Importer un JSONL",
+  "Importing…": "Importation…",
+  "Import failed.": "Échec de l’importation.",
+  "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
+    "{added} nouveaux événements importés ; {skipped} ignorés (déjà présents ou illisibles).",
+  "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
+    "Un fichier Markdown par concept avec des [[liens]], écrit dans {folder}/ du dossier choisi. Une nouvelle exportation met les notes à jour et conserve ce que vous avez écrit sous la ligne repère.",
+  "Draw your concepts and their relations as a map.": "Dessine vos concepts et leurs relations sous forme de carte.",
+  Graph: "Graphe",
+  "Dash: inherit; ticked: on; empty: off": "— : hériter ; coché : activé ; vide : désactivé",
+  "Leave sensitive sources out of backups and exports": "Exclure les sources sensibles des sauvegardes et des exportations",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
+    "Le http simple n’est autorisé que pour cet ordinateur (127.0.0.1 / localhost) et pour les serveurs de votre propre réseau (192.168.x.x, 10.x.x.x, name.local, Tailscale) ; toute autre adresse doit utiliser https. Un serveur de votre propre réseau compte quand même comme distant. Le modèle local (127.0.0.1 / localhost) coché « Pour les sources sensibles » est celui utilisé pour les sources sensibles ; elles n’utilisent jamais un autre modèle.",
 };

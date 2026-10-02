@@ -100,6 +100,34 @@ describe("contextForRange", () => {
     expect(ctx.paragraphId.startsWith("outside:")).toBe(true);
   });
 
+  it("keeps the selected term inside a paragraph longer than the limit", () => {
+    const filler = "lorem ipsum dolor sit amet ".repeat(300);
+    const long = document.createElement("div");
+    long.innerHTML = `<p>${filler}the <b id="deep">kernel trick</b> maps data ${filler}</p>`;
+    document.body.append(long);
+    const p = extractPage(document, "https://example.com/", long);
+    const r = document.createRange();
+    r.selectNodeContents(document.getElementById("deep")!);
+    const ctx = contextForRange(p, r)!;
+    expect(ctx.paragraph.length).toBeLessThanOrEqual(2000);
+    expect(ctx.paragraph).toContain("the kernel trick maps data");
+    expect(ctx.locator.prefix.endsWith("the")).toBe(true);
+    long.remove();
+  });
+
+  it("keeps the term in the fallback context of a long container outside the content", () => {
+    const filler = "word ".repeat(1200);
+    const box = document.createElement("div");
+    box.innerHTML = `${filler}<i id="far">odd term</i> ${filler}`;
+    document.body.append(box);
+    const r = document.createRange();
+    r.selectNodeContents(document.getElementById("far")!);
+    const ctx = contextForRange(extractPage(document, "https://example.com/", document.createElement("div")), r)!;
+    expect(ctx.paragraph).toContain("odd term");
+    expect(ctx.locator.prefix.endsWith("word")).toBe(true);
+    box.remove();
+  });
+
   it("returns null for an empty selection", () => {
     expect(
       contextForRange(

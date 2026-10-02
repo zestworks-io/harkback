@@ -26,6 +26,37 @@ async function setMetaSeq(factory: IDBFactory, seq: number): Promise<void> {
   db.close();
 }
 
+describe("EventStore.importEvents", () => {
+  it("adds new events, skips ones it has, and numbers later events after its own imported ones", async () => {
+    const factory = new IDBFactory();
+    const a = await EventStore.open({ factory, now });
+    await a.append((f) => [muted(f), muted(f), muted(f)]);
+    const backup = await a.all();
+    const device = (await a.identity()).device;
+    a.close();
+
+    // A fresh browser profile restoring the backup, then the same backup again.
+    const fresh = await EventStore.open({ factory: new IDBFactory(), now });
+    expect(await fresh.importEvents(backup)).toBe(3);
+    expect(await fresh.importEvents(backup)).toBe(0);
+    expect(await fresh.all()).toHaveLength(3);
+    const written = await fresh.append((f) => [muted(f)]);
+    expect(new Set(written.map((e) => e.device)).has(device)).toBe(false);
+    expect(await fresh.all()).toHaveLength(4);
+  });
+
+  it("keeps counting after events of its own device that it did not have", async () => {
+    const factory = new IDBFactory();
+    const store = await EventStore.open({ factory, now });
+    const { device } = await store.identity();
+    const foreign = [{ ...(await store.append((f) => [muted(f)]))[0]!, id: ulid(), seq: 40 }];
+    expect(foreign[0]!.device).toBe(device);
+    expect(await store.importEvents(foreign)).toBe(1);
+    const next = await store.append((f) => [muted(f)]);
+    expect(next[0]!.seq).toBe(41);
+  });
+});
+
 describe("EventStore", () => {
   it("assigns increasing seq numbers from one device and writes schema-valid events", async () => {
     const store = await EventStore.open({ factory: new IDBFactory(), now });

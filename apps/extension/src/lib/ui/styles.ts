@@ -52,6 +52,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-body p { margin: 0 0 10px; }
 .hb-body p:last-child { margin-bottom: 0; }
 .hb-body ul, .hb-body ol { margin: 0 0 10px; padding-left: 20px; }
+.hb-body .hb-table { overflow-x: auto; margin: 0 0 10px; }
+.hb-body table { border-collapse: collapse; font-size: 13px; }
+.hb-body th, .hb-body td { border: 1px solid var(--hb-border); padding: 3px 8px; text-align: left; }
+.hb-body th { background: var(--hb-subtle); font-weight: 600; }
+.hb-body li > ul, .hb-body li > ol { margin: 2px 0 0; }
 .hb-body strong { font-weight: 650; }
 .hb-body pre { overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--hb-subtle); }
 .hb-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }

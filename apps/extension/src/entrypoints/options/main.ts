@@ -5,7 +5,7 @@ import { h } from "../../lib/dom";
 import { privacyNotes } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
-import { validateSettings, withDefaults, type Settings } from "../../lib/settings";
+import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/settings";
 import { applyTheme } from "../../lib/theme";
 import { PROVIDERS, providerById } from "../../lib/providers";
 import { hostPermissionPatterns, originPattern } from "../../lib/site-rules";
@@ -28,6 +28,28 @@ function numberInput(value: number, onInput: (v: number) => void, attrs: Record<
 function checkbox(checked: boolean, onChange: (v: boolean) => void, attrs: Record<string, unknown> = {}): HTMLInputElement {
   const el = h("input", { type: "checkbox", checked, ...attrs });
   el.addEventListener("change", () => onChange(el.checked));
+  return el;
+}
+
+/** A checkbox with a third state: left alone (inherits from a broader rule), on, or explicitly off. */
+function triState(
+  value: boolean | undefined,
+  onChange: (v: boolean | undefined) => void,
+  title: string,
+  attrs: Record<string, unknown> = {},
+) {
+  let current = value;
+  const el = h("input", { type: "checkbox", title, ...attrs });
+  const paint = () => {
+    el.indeterminate = current === undefined;
+    el.checked = current === true;
+  };
+  paint();
+  el.addEventListener("click", () => {
+    current = current === undefined ? true : current === true ? false : undefined;
+    onChange(current);
+    paint();
+  });
   return el;
 }
 
@@ -203,6 +225,13 @@ async function main(): Promise<void> {
       render();
     });
 
+    const tip = L("—：继承；勾选：开；空：关", "Dash: inherit; ticked: on; empty: off");
+    const flag =
+      (r: SiteRule, key: "autoScan" | "sensitive" | "disabled") =>
+      (v: boolean | undefined): void => {
+        if (v === undefined) delete r[key];
+        else r[key] = v;
+      };
     const siteRows = draft.sites.map((r, i) => {
       const modelSelect = h(
         "select",
@@ -227,18 +256,9 @@ async function main(): Promise<void> {
           { className: "pattern" },
           input(r.pattern, (v) => (r.pattern = v), { "data-hb": "site-pattern", placeholder: "example.com" }),
         ),
-        choice(
-          checkbox(r.autoScan === true, (v) => (r.autoScan = v), { "data-hb": "site-auto" }),
-          L("自动扫描", "Auto-scan"),
-        ),
-        choice(
-          checkbox(r.sensitive === true, (v) => (r.sensitive = v), { "data-hb": "site-sensitive" }),
-          L("敏感", "Sensitive"),
-        ),
-        choice(
-          checkbox(r.disabled === true, (v) => (r.disabled = v), { "data-hb": "site-disabled" }),
-          L("停用", "Disabled"),
-        ),
+        choice(triState(r.autoScan, flag(r, "autoScan"), tip, { "data-hb": "site-auto" }), L("自动扫描", "Auto-scan")),
+        choice(triState(r.sensitive, flag(r, "sensitive"), tip, { "data-hb": "site-sensitive" }), L("敏感", "Sensitive")),
+        choice(triState(r.disabled, flag(r, "disabled"), tip, { "data-hb": "site-disabled" }), L("停用", "Disabled")),
         modelSelect,
         remove,
       );
@@ -285,8 +305,8 @@ async function main(): Promise<void> {
       card(
         L("模型", "Models"),
         L(
-          "非本机地址必须使用 https。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
-          'Non-local addresses must use https. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
+          "纯 http 只允许用于本机（127.0.0.1 / localhost）和你自己网络里的服务器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他地址必须使用 https。自己网络里的服务器仍算远程。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
+          'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
         ),
         [
           ...modelRows,
@@ -350,6 +370,10 @@ async function main(): Promise<void> {
           choice(
             checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
             L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
+          ),
+          choice(
+            checkbox(draft.backup.excludeSensitive, (v) => (draft.backup.excludeSensitive = v), { "data-hb": "exclude-sensitive" }),
+            L("备份和导出时不包含敏感来源的内容", "Leave sensitive sources out of backups and exports"),
           ),
         ],
         [backupButton],

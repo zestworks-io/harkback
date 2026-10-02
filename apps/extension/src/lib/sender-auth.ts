@@ -37,6 +37,8 @@ export function readerSource(readerUrl: string | undefined): string {
 
 const PAGE_ONLY = new Set<Request["type"]>([
   "delete-encounter",
+  "mark-normal",
+  "import-events",
   "review-answer",
   "merge-concepts",
   "add-alias",

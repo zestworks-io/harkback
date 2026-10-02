@@ -18,7 +18,7 @@ export interface ModelConfig {
 export const apiTypeOf = (m: Pick<ModelConfig, "provider">): ApiType => providerById(m.provider).apiType;
 
 export interface SiteRule {
-  /** A domain ("example.com", covers subdomains) or a URL prefix ("https://example.com/docs"). */
+  /** A domain ("example.com", covers subdomains) or a URL prefix ("https://example.com/docs"). A setting left out is inherited from a broader rule; `false` overrides one. */
   pattern: string;
   autoScan?: boolean;
   sensitive?: boolean;
@@ -45,7 +45,8 @@ export interface Settings {
   sites: SiteRule[];
   rateLimit: { perMinute: number; perHour: number };
   reunion: { minGapDays: number; maxPerPage: number };
-  backup: { enabled: boolean };
+  /** `excludeSensitive`: backups and exports leave out everything that came from sensitive sources. */
+  backup: { enabled: boolean; excludeSensitive: boolean };
 }
 
 /** The language to write explanations in. */
@@ -56,7 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   version: 1,
   onboarded: false,
   consentAt: null,
-  language: "zh",
+  language: "en",
   explainLanguage: "auto",
   theme: "system",
   models: [],
@@ -65,7 +66,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sites: [],
   rateLimit: { perMinute: 10, perHour: 100 },
   reunion: { ...REUNION_DEFAULTS },
-  backup: { enabled: true },
+  backup: { enabled: true, excludeSensitive: false },
 };
 
 function obj(v: unknown): Record<string, unknown> {
@@ -99,9 +100,9 @@ function cleanSite(raw: unknown): SiteRule[] {
   return [
     {
       pattern: r.pattern,
-      ...(r.autoScan === true && { autoScan: true }),
-      ...(r.sensitive === true && { sensitive: true }),
-      ...(r.disabled === true && { disabled: true }),
+      ...(typeof r.autoScan === "boolean" && { autoScan: r.autoScan }),
+      ...(typeof r.sensitive === "boolean" && { sensitive: r.sensitive }),
+      ...(typeof r.disabled === "boolean" && { disabled: r.disabled }),
       ...(typeof r.modelId === "string" && r.modelId && { modelId: r.modelId }),
     },
   ];
@@ -117,7 +118,7 @@ export function withDefaults(raw: unknown): Settings {
     version: 1,
     onboarded: s.onboarded === true,
     consentAt: strOrNull(s.consentAt),
-    language: isLang(s.language) ? s.language : "zh",
+    language: isLang(s.language) ? s.language : "en",
     explainLanguage: isExplainLanguage(s.explainLanguage) ? s.explainLanguage : "auto",
     theme: s.theme === "light" || s.theme === "dark" ? s.theme : "system",
     models: Array.isArray(s.models) ? s.models.flatMap(cleanModel) : [],
@@ -126,7 +127,10 @@ export function withDefaults(raw: unknown): Settings {
     sites: Array.isArray(s.sites) ? s.sites.flatMap(cleanSite) : [],
     rateLimit: { perMinute: num(rate.perMinute, d.rateLimit.perMinute), perHour: num(rate.perHour, d.rateLimit.perHour) },
     reunion: { minGapDays: num(reunion.minGapDays, d.reunion.minGapDays), maxPerPage: num(reunion.maxPerPage, d.reunion.maxPerPage) },
-    backup: { enabled: obj(s.backup).enabled === false ? false : d.backup.enabled },
+    backup: {
+      enabled: obj(s.backup).enabled === false ? false : d.backup.enabled,
+      excludeSensitive: obj(s.backup).excludeSensitive === true,
+    },
   };
 }
 

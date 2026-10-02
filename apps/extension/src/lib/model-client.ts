@@ -186,7 +186,7 @@ const gemini: Adapter = {
   full(json) {
     const candidate = asObject(Array.isArray(asObject(json).candidates) ? (asObject(json).candidates as unknown[])[0] : undefined);
     const parts = asObject(candidate.content).parts;
-    return Array.isArray(parts) ? parts.map((p) => text(asObject(p).text)).join("") : "";
+    return Array.isArray(parts) ? parts.map((p) => (asObject(p).thought === true ? "" : text(asObject(p).text))).join("") : "";
   },
   // Gemini answers a wrong key with 400 rather than 401.
   httpError: (status, body) =>

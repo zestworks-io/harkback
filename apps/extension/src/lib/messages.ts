@@ -1,5 +1,5 @@
 import type { Hit, MatcherEntry } from "@harkback/core";
-import type { Tier } from "@harkback/spec";
+import type { HarkEvent, Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "./explain";
 import type { ModelErrorCode } from "./model-client";
 import type { ReunionCard } from "./reunion-cards";
@@ -14,6 +14,7 @@ export type PortIn =
   | { type: "start"; request: ExplainRequestMsg }
   | { type: "answer"; sameConcept: boolean }
   | { type: "followup"; question: string }
+  | { type: "cancel" }
   | { type: "ping" };
 
 /** Background → content script, on the "explain" port. */
@@ -39,6 +40,8 @@ export interface PageInfo {
   /** The explain card and reunion text for `language`, when it is not Chinese or English. */
   strings: Partial<Record<StringKey, string>>;
   theme: Theme;
+  /** The configured models, so a failed explanation can be tried with another one. Never carries addresses or keys. */
+  models: { id: string; label: string }[];
   entries: MatcherEntry[];
 }
 
@@ -48,6 +51,8 @@ export type Request =
   | { type: "action"; encounterId: string; action: "marked_understood" | "marked_confused" | "reunion_recalled" }
   | { type: "mute"; conceptId: string }
   | { type: "mark-sensitive"; source: DetectedSource }
+  | { type: "mark-normal"; sourceId: string }
+  | { type: "import-events"; events: HarkEvent[] }
   | { type: "delete-encounter"; encounterId: string }
   | { type: "review-answer"; conceptId: string; action: "marked_understood" | "marked_confused" }
   | { type: "merge-concepts"; fromId: string; intoId: string }
@@ -63,6 +68,8 @@ export interface ResponseMap {
   action: { ok: boolean };
   mute: { ok: boolean };
   "mark-sensitive": { ok: boolean };
+  "mark-normal": { ok: boolean };
+  "import-events": { ok: boolean; added?: number };
   "delete-encounter": { ok: boolean };
   "review-answer": { ok: boolean };
   "merge-concepts": { ok: boolean };
@@ -83,6 +90,8 @@ const REQUEST_TYPES = new Set<string>([
   "action",
   "mute",
   "mark-sensitive",
+  "mark-normal",
+  "import-events",
   "delete-encounter",
   "review-answer",
   "merge-concepts",

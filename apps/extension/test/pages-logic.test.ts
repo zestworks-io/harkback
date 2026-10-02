@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue } from "../src/lib/backup";
+import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue, waitForDownload, type DownloadsApi } from "../src/lib/backup";
 import { ollamaOriginsHelp, testConnection } from "../src/lib/connection";
 import { historyModel } from "../src/lib/history";
 import { world } from "./helpers";
@@ -161,5 +161,43 @@ describe("historyModel follow-ups", () => {
     expect(historyModel(state, "corpus-level")[0]!.entries.map((e) => e.encounterId)).toEqual([first]);
     expect(historyModel(state, "how is it calculated")[0]!.entries.map((e) => e.encounterId)).toEqual([first]);
     expect(historyModel(state, "nothing like this")).toEqual([]);
+  });
+});
+
+describe("waitForDownload", () => {
+  function fake(initial?: "in_progress" | "complete" | "interrupted") {
+    let listener: ((d: { id: number; state?: { current?: "in_progress" | "interrupted" | "complete" } }) => void) | undefined;
+    const api: DownloadsApi = {
+      search: async () => (initial ? [{ state: initial }] : []),
+      onChanged: {
+        addListener: (l) => void (listener = l),
+        removeListener: () => void (listener = undefined),
+      },
+    };
+    return {
+      api,
+      fire: (id: number, current: "in_progress" | "interrupted" | "complete") => listener?.({ id, state: { current } }),
+      active: () => listener !== undefined,
+    };
+  }
+
+  it("resolves when the download completes or is interrupted, ignoring other downloads", async () => {
+    const a = fake("in_progress");
+    const done = waitForDownload(a.api, 7);
+    a.fire(8, "complete");
+    a.fire(7, "in_progress");
+    a.fire(7, "complete");
+    expect(await done).toBe("complete");
+    expect(a.active()).toBe(false);
+
+    const b = fake("in_progress");
+    const failed = waitForDownload(b.api, 7);
+    b.fire(7, "interrupted");
+    expect(await failed).toBe("interrupted");
+  });
+
+  it("notices a download that finished before it started listening, and gives up on one that never settles", async () => {
+    expect(await waitForDownload(fake("complete").api, 1)).toBe("complete");
+    expect(await waitForDownload(fake("in_progress").api, 1, 20)).toBe("interrupted");
   });
 });

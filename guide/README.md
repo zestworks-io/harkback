@@ -1,0 +1,17 @@
+# Harkback documentation
+
+| If you want to…                                           | Read                                        |
+| --------------------------------------------------------- | ------------------------------------------- |
+| Install Harkback and explain your first term              | [Getting started](getting-started.md)       |
+| Know every feature and when to use it                     | [User guide](user-guide.md)                 |
+| Connect Ollama, OpenAI, Anthropic, Gemini or a proxy      | [Models and providers](models.md)           |
+| Understand what leaves your computer, and what never does | [Privacy and sensitive sources](privacy.md) |
+| Fix something that does not work                          | [Troubleshooting](troubleshooting.md)       |
+| Understand how the code fits together                     | [Architecture](architecture.md)             |
+| Read, import or build on your records                     | [Data format](data-format.md)               |
+| Contribute code, translations or a provider               | [CONTRIBUTING](../CONTRIBUTING.md)          |
+| See what changed between versions                         | [CHANGELOG](../CHANGELOG.md)                |
+
+The [README](../README.md) is the short version of all of this. [PRIVACY.md](../PRIVACY.md) is the privacy policy, and [SECURITY.md](../SECURITY.md) says how to report a vulnerability.
+
+These pages describe the code in this repository. When the code and a page disagree, the code is right: please open an issue or a pull request.

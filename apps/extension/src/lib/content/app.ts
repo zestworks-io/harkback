@@ -1,4 +1,4 @@
-import { Matcher, type Hit } from "@harkback/core";
+import { Matcher, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain";
 import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../extract";
 import { h } from "../dom";
@@ -18,6 +18,8 @@ export interface ExplainOptions {
   mode: ExplainRequestMsg["mode"];
   earlierEncounterId?: string;
   conceptId?: string;
+  /** The reader chose this model after a failure. */
+  modelId?: string;
 }
 
 interface Session {
@@ -53,6 +55,11 @@ export class ContentApp {
   private session: Session | null = null;
   private layer: ReunionLayer | null = null;
   private rescan: ReturnType<typeof setTimeout> | undefined;
+  /** Rebuilt only when the page-info entries change, not on every rescan. */
+  private matcher: { entries: MatcherEntry[]; value: Matcher } | null = null;
+  private observer: MutationObserver | null = null;
+  private watch: ReturnType<typeof setTimeout> | undefined;
+  private href = location.href;
 
   constructor(
     private readonly rpc: Rpc,
@@ -77,7 +84,7 @@ export class ContentApp {
   }
 
   private get lang(): Lang {
-    return this.info?.language ?? "zh";
+    return this.info?.language ?? "en";
   }
 
   private take(info: PageInfo): PageInfo {
@@ -99,6 +106,9 @@ export class ContentApp {
       this.listening = true;
       document.addEventListener("mouseup", this.onMouseUp, true);
       document.addEventListener("mousedown", this.onMouseDown, true);
+      document.addEventListener("keyup", this.onKeyUp, true);
+      document.addEventListener("touchend", this.onTouchEnd, true);
+      this.observe();
     }
     await this.scan();
   }
@@ -113,7 +123,8 @@ export class ContentApp {
     const page = this.extract();
     this.page = page;
     const firstPerKey = new Map<string, Hit>();
-    for (const hit of new Matcher(info.entries).scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
+    if (this.matcher?.entries !== info.entries) this.matcher = { entries: info.entries, value: new Matcher(info.entries) };
+    for (const hit of this.matcher.value.scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
     this.layer?.clear();
     if (firstPerKey.size === 0) return;
     const { cards } = await this.rpc.request({
@@ -128,6 +139,36 @@ export class ContentApp {
     if (entries.length === 0) return;
     this.layer ??= new ReunionLayer(this.ensureOverlay(), this.lang, (card, action, range) => this.onReunionAction(card, action, range));
     this.layer.show(entries);
+  }
+
+  /** Pages change after they load: more text arrives, or a single-page app moves to another document. */
+  private observe(): void {
+    if (this.observer || typeof MutationObserver === "undefined") return;
+    this.observer = new MutationObserver((records) => {
+      const host = this.overlay?.host;
+      if (
+        host &&
+        records.every((r) => r.target === host || host.contains(r.target) || [...r.addedNodes, ...r.removedNodes].every((n) => n === host))
+      )
+        return;
+      clearTimeout(this.watch);
+      this.watch = setTimeout(() => void this.onPageChanged(), 1500);
+    });
+    this.observer.observe(document.body ?? document.documentElement, { childList: true, subtree: true, characterData: true });
+  }
+
+  private async onPageChanged(): Promise<void> {
+    if (document.hidden) return;
+    if (!this.source && location.href !== this.href) {
+      // Another page of a single-page app: the rules, the source and the card no longer apply.
+      this.href = location.href;
+      this.endSession();
+      this.layer?.clear();
+      this.page = null;
+      await this.activate().catch(() => undefined);
+      return;
+    }
+    this.invalidate();
   }
 
   private onReunionAction(card: ReunionCard, action: ReunionAction, range: Range): void {
@@ -169,6 +210,7 @@ export class ContentApp {
       source,
       ...(opts.earlierEncounterId ? { earlierEncounterId: opts.earlierEncounterId } : {}),
       ...(opts.conceptId ? { conceptId: opts.conceptId } : {}),
+      ...(opts.modelId ? { modelId: opts.modelId } : {}),
     };
 
     const port = this.rpc.connect();
@@ -185,22 +227,32 @@ export class ContentApp {
       encounterId: null,
       finished: false,
       ping: setInterval(() => send({ type: "ping" }), PING_MS),
-      card: new ExplainCard(this.lang, {
-        onAnswer: (sameConcept) => send({ type: "answer", sameConcept }),
-        onAction: (action) => {
-          if (session.encounterId) void this.rpc.request({ type: "action", encounterId: session.encounterId, action });
+      card: new ExplainCard(
+        this.lang,
+        {
+          onAnswer: (sameConcept) => send({ type: "answer", sameConcept }),
+          onAction: (action) => {
+            if (session.encounterId) void this.rpc.request({ type: "action", encounterId: session.encounterId, action });
+          },
+          onFollowUp: (question) => send({ type: "followup", question }),
+          onMarkSensitive: () => void this.rpc.request({ type: "mark-sensitive", source }),
+          onRetry: () => {
+            if (this.session !== session) return;
+            this.endSession();
+            this.explain(range, opts);
+          },
+          onRetryWith: (modelId) => {
+            if (this.session !== session) return;
+            this.endSession();
+            this.explain(range, { ...opts, modelId });
+          },
+          onCancel: () => send({ type: "cancel" }),
+          onClose: () => {
+            if (this.session === session) this.endSession();
+          },
         },
-        onFollowUp: (question) => send({ type: "followup", question }),
-        onMarkSensitive: () => void this.rpc.request({ type: "mark-sensitive", source }),
-        onRetry: () => {
-          if (this.session !== session) return;
-          this.endSession();
-          this.explain(range, opts);
-        },
-        onClose: () => {
-          if (this.session === session) this.endSession();
-        },
-      }),
+        this.info?.models ?? [],
+      ),
     };
     this.session = session;
     placeNear(session.card.el, lastRect(range));
@@ -273,6 +325,26 @@ export class ContentApp {
     if (!e.isTrusted || this.isOwn(e)) return;
     // The selection is final only after this mouseup has been handled.
     setTimeout(() => this.showTrigger(), 0);
+  };
+
+  /** A selection made with the keyboard (Shift + arrows, Select All). */
+  private readonly onKeyUp = (e: KeyboardEvent): void => {
+    if (!e.isTrusted || this.isOwn(e)) return;
+    if (
+      e.key === "Shift" ||
+      e.key.startsWith("Arrow") ||
+      e.key === "Home" ||
+      e.key === "End" ||
+      ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a")
+    ) {
+      setTimeout(() => this.showTrigger(), 0);
+    }
+  };
+
+  /** A selection made by touch settles a moment after the finger lifts. */
+  private readonly onTouchEnd = (e: TouchEvent): void => {
+    if (!e.isTrusted || this.isOwn(e)) return;
+    setTimeout(() => this.showTrigger(), 350);
   };
 
   private showTrigger(): void {

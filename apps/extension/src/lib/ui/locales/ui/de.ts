@@ -28,6 +28,8 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
   compare: "Verwendungen vergleichen",
   mute: "Nicht mehr anzeigen",
   retry: "Erneut versuchen",
+  stop: "Stoppen",
+  tryModel: "Mit {model} versuchen",
   err_site_disabled: "Auf dieser Website deaktiviert.",
   err_no_model: "Noch kein Modell eingerichtet. Fügen Sie in den Einstellungen eines hinzu.",
   err_needs_local_model: "Diese Quelle ist sensibel und darf nur ein lokales Modell verwenden. Richten Sie in den Einstellungen eines ein.",

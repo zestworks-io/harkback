@@ -27,6 +27,8 @@ export const sourceSeenPayload = z.object({
   title: z.string().max(500),
   license: z.string().max(64),
   sensitivity: z.enum(SENSITIVITIES),
+  /** Set when the reader chose the sensitivity. Only such an event can make a sensitive source normal again. */
+  by_user: z.boolean().optional(),
 });
 
 export const conceptCreatedPayload = z.object({

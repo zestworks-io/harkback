@@ -1,6 +1,8 @@
-import { exportMarkdown, replay, type State } from "@harkback/core";
+import { exportMarkdown, parseJsonl, replay, withoutSensitive, type State } from "@harkback/core";
 import { browser } from "wxt/browser";
+import { ankiTsv } from "../../lib/anki";
 import { h } from "../../lib/dom";
+import { buildGraph } from "../../lib/graph";
 import type { Request } from "../../lib/messages";
 import { conceptDetail, understandingOf, type ConceptDetail, type RelatedConcept, type Understanding } from "../../lib/concept-detail";
 import { localizeNames } from "../../lib/names";
@@ -119,6 +121,33 @@ async function main(): Promise<void> {
     else draw();
   }
 
+  /** A sensitive source's content stays on this computer; the reader can lift that for a source they marked by mistake. */
+  const sensitiveBadge = (sourceId: string): HTMLElement => {
+    const undo = h("button", { type: "button", className: "small", "data-hb": "mark-normal" }, L("改为普通来源", "Mark as normal"));
+    undo.addEventListener("click", async () => {
+      if (undo.dataset.confirm !== "1") {
+        undo.dataset.confirm = "1";
+        undo.textContent = L("确认：之后可发送给远程模型", "Confirm: may go to remote models");
+        return;
+      }
+      const r = await request({ type: "mark-normal", sourceId });
+      if (r.ok) {
+        state = replay(await store.all());
+        draw();
+      } else status.textContent = L("操作失败。", "That did not work.");
+    });
+    return h(
+      "span",
+      {
+        className: "sensitive-badge",
+        "data-hb": "sensitive-badge",
+        title: L("这个来源的内容只会发给本机模型。", "Content from this source only goes to a local model."),
+      },
+      L("敏感来源", "Sensitive source"),
+      undo,
+    );
+  };
+
   const entryView = (e: HistoryEntry): HTMLElement => {
     const del = h("button", { type: "button", className: "small", "data-hb": "delete" }, L("删除", "Delete"));
     del.addEventListener("click", async () => {
@@ -174,6 +203,7 @@ async function main(): Promise<void> {
         h("span", { className: "src" }, quoteTitle(e.sourceTitle, settings.language)),
         h("span", {}, e.date),
         h("span", { className: `tier ${e.tier}` }, tier),
+        e.sensitive ? sensitiveBadge(e.sourceId) : null,
         selecting ? null : del,
       ),
       h("blockquote", { className: "quote" }, e.selection),
@@ -391,7 +421,7 @@ async function main(): Promise<void> {
     return m ? decodeURIComponent(m[1]!) : null;
   }
 
-  const onList = (): boolean => currentConceptId() === null && location.hash !== "#review";
+  const onList = (): boolean => currentConceptId() === null && location.hash !== "#review" && location.hash !== "#graph";
   const skipped = new Set<string>();
   let reviewed = 0;
   let revealed = false;
@@ -494,9 +524,129 @@ async function main(): Promise<void> {
     );
   }
 
+  const SVG = "http://www.w3.org/2000/svg";
+  const svgEl = (tag: string, attrs: Record<string, string | number> = {}, ...children: Node[]): SVGElement => {
+    const el = document.createElementNS(SVG, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+    el.append(...children);
+    return el;
+  };
+
+  /** The concepts as a map: relations as lines, colour by how well each is understood. Drag to move, wheel to zoom. */
+  function graphView(): HTMLElement {
+    const g = buildGraph(state, { query: search.value, width: 960, height: 640 });
+    if (g.nodes.length === 0) {
+      return h("p", { className: "empty", "data-hb": "graph-empty" }, L("还没有可显示的概念。", "No concepts to show yet."));
+    }
+    const view = { x: 0, y: 0, w: g.width, h: g.height };
+    const svg = svgEl("svg", { class: "graph", viewBox: `0 0 ${g.width} ${g.height}`, role: "group", "data-hb": "graph" });
+    svg.setAttribute("aria-label", L("概念关系图", "Concept graph"));
+    const marker = (rel: string) =>
+      svgEl(
+        "marker",
+        {
+          id: `arrow-${rel}`,
+          class: rel,
+          viewBox: "0 0 10 10",
+          refX: 17,
+          refY: 5,
+          markerWidth: 7,
+          markerHeight: 7,
+          orient: "auto-start-reverse",
+        },
+        svgEl("path", { d: "M0 0 L10 5 L0 10 z" }),
+      );
+    svg.append(svgEl("defs", {}, marker("prerequisite"), marker("variant_of")));
+    const at = new Map(g.nodes.map((n) => [n.id, n]));
+    for (const e of g.edges) {
+      const a = at.get(e.from)!;
+      const b = at.get(e.to)!;
+      svg.append(
+        svgEl("line", {
+          class: `edge ${e.rel}`,
+          x1: a.x,
+          y1: a.y,
+          x2: b.x,
+          y2: b.y,
+          ...(e.rel === "related" ? {} : { "marker-end": `url(#arrow-${e.rel})` }),
+        }),
+      );
+    }
+    for (const n of g.nodes) {
+      const name = names(n.name, state.concepts.get(n.id)?.names.filter((x) => x !== n.name) ?? []).name;
+      const node = svgEl(
+        "a",
+        {
+          href: n.studied ? conceptHref(n.id) : "#graph",
+          class: `node ${n.studied ? n.understanding : "unstudied"}`,
+          "data-hb": "graph-node",
+          "data-id": n.id,
+        },
+        svgEl("circle", { cx: n.x, cy: n.y, r: 6 + Math.min(n.degree, 6) * 1.5 }),
+        svgEl("text", { x: n.x, y: n.y - 12 - Math.min(n.degree, 6) * 1.5 }, document.createTextNode(name)),
+      );
+      node.append(svgEl("title", {}, document.createTextNode(n.studied ? name : `${name} — ${L("还没解释过", "Not explained yet")}`)));
+      svg.append(node);
+    }
+    const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+    svg.addEventListener(
+      "wheel",
+      (ev) => {
+        ev.preventDefault();
+        const rect = svg.getBoundingClientRect();
+        const factor = ev.deltaY < 0 ? 0.85 : 1 / 0.85;
+        const w = Math.min(g.width * 4, Math.max(g.width / 8, view.w * factor));
+        const k = w / view.w;
+        const px = view.x + ((ev.clientX - rect.left) / rect.width) * view.w;
+        const py = view.y + ((ev.clientY - rect.top) / rect.height) * view.h;
+        view.x = px - (px - view.x) * k;
+        view.y = py - (py - view.y) * k;
+        view.w = w;
+        view.h = view.h * k;
+        apply();
+      },
+      { passive: false },
+    );
+    let drag: { x: number; y: number } | null = null;
+    svg.addEventListener("pointerdown", (ev) => {
+      if ((ev.target as Element).closest("a")) return;
+      drag = { x: ev.clientX, y: ev.clientY };
+      svg.classList.add("dragging");
+      svg.setPointerCapture(ev.pointerId);
+    });
+    svg.addEventListener("pointermove", (ev) => {
+      if (!drag) return;
+      const rect = svg.getBoundingClientRect();
+      view.x -= ((ev.clientX - drag.x) / rect.width) * view.w;
+      view.y -= ((ev.clientY - drag.y) / rect.height) * view.h;
+      drag = { x: ev.clientX, y: ev.clientY };
+      apply();
+    });
+    const end = () => {
+      drag = null;
+      svg.classList.remove("dragging");
+    };
+    svg.addEventListener("pointerup", end);
+    svg.addEventListener("pointercancel", end);
+    return h(
+      "div",
+      { className: "graph-wrap" },
+      svg,
+      h(
+        "div",
+        { className: "legend", "data-hb": "graph-legend" },
+        L("蓝线箭头：前置概念 · 紫线箭头：变体 · 虚线：相关", "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related"),
+        L(
+          "实心绿：已理解 · 黄：仍困惑 · 蓝：新 · 虚线圈：还没解释过",
+          "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet",
+        ),
+      ),
+    );
+  }
+
   function draw(): void {
     const id = currentConceptId();
-    if (location.hash === "#review") selecting = false;
+    if (location.hash === "#review" || location.hash === "#graph") selecting = false;
     // Entries that no longer exist cannot stay selected.
     const alive = new Set(historyModel(state).flatMap((c) => c.entries.map((e) => e.encounterId)));
     for (const s of [...selected]) if (!alive.has(s)) selected.delete(s);
@@ -505,10 +655,15 @@ async function main(): Promise<void> {
         ? (conceptDetail(state, id)?.entries.map((e) => e.encounterId) ?? [])
         : historyModel(state, search.value).flatMap((c) => c.entries.map((e) => e.encounterId));
     queueMicrotask(renderBar);
-    toolbar.hidden = !onList();
+    toolbar.hidden = !onList() && location.hash !== "#graph";
+    for (const el of toolbar.querySelectorAll<HTMLElement>("[data-list-only]")) el.hidden = !onList();
     reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: dueItems().length });
     if (location.hash === "#review") {
       list.replaceChildren(backLink, reviewView());
+      return;
+    }
+    if (location.hash === "#graph") {
+      list.replaceChildren(backLink, graphView());
       return;
     }
     if (id !== null) {
@@ -533,7 +688,7 @@ async function main(): Promise<void> {
     );
   }
   search.addEventListener("input", () => {
-    if (!onList()) location.hash = "";
+    if (!onList() && location.hash !== "#graph") location.hash = "";
     else draw();
   });
   window.addEventListener("hashchange", draw);
@@ -553,8 +708,75 @@ async function main(): Promise<void> {
   });
 
   const exportMd = h("button", { type: "button", "data-hb": "export-md" }, L("导出 Markdown", "Export Markdown"));
-  exportMd.addEventListener("click", () => {
-    const url = URL.createObjectURL(new Blob([exportMarkdown(state, settings.language)], { type: "text/markdown" }));
+  /** The records to export: without sensitive sources when the settings say so. */
+  const exportState = async (): Promise<State> => (settings.backup.excludeSensitive ? replay(withoutSensitive(await store.all())) : state);
+  const download = (text: string, type: string, filename: string): void => {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = h("a", { href: url, download: filename });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  };
+
+  const exportAnki = h(
+    "button",
+    {
+      type: "button",
+      "data-hb": "export-anki",
+      title: L(
+        "每个概念一张卡片（制表符分隔的文本），可在 Anki 里用“导入”打开。",
+        "One card per concept as tab-separated text; open it in Anki with File → Import.",
+      ),
+    },
+    L("导出 Anki 卡片", "Export Anki cards"),
+  );
+  exportAnki.addEventListener("click", async () => {
+    download(ankiTsv(await exportState()), "text/tab-separated-values", `harkback-anki-${new Date().toISOString().slice(0, 10)}.txt`);
+  });
+
+  const fileInput = h("input", { type: "file", accept: ".jsonl,.json,.txt,application/x-ndjson", hidden: true, "data-hb": "import-file" });
+  const importButton = h(
+    "button",
+    {
+      type: "button",
+      "data-hb": "import",
+      title: L(
+        "从 JSONL 备份恢复记录。已有的记录会被跳过，不会重复。",
+        "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.",
+      ),
+    },
+    L("导入 JSONL", "Import JSONL"),
+  );
+  importButton.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    fileInput.value = "";
+    if (!file) return;
+    status.textContent = L("正在导入…", "Importing…");
+    try {
+      const parsed = parseJsonl(await file.text());
+      const total = parsed.events.length;
+      const r = total > 0 ? await request({ type: "import-events", events: parsed.events }) : { ok: true as const, added: 0 };
+      if (!r.ok) {
+        status.textContent = L("导入失败。", "Import failed.");
+        return;
+      }
+      state = replay(await store.all());
+      draw();
+      status.textContent = L(
+        "已导入 {added} 条新记录，跳过 {skipped} 条已有或无法读取的记录。",
+        "Imported {added} new events; skipped {skipped} that were already here or could not be read.",
+        {
+          added: "added" in r ? (r.added ?? 0) : 0,
+          skipped: total - ("added" in r ? (r.added ?? 0) : 0) + parsed.skipped.length + parsed.future.length,
+        },
+      );
+    } catch {
+      status.textContent = L("导入失败。", "Import failed.");
+    }
+  });
+
+  exportMd.addEventListener("click", async () => {
+    const url = URL.createObjectURL(new Blob([exportMarkdown(await exportState(), settings.language)], { type: "text/markdown" }));
     const a = h("a", { href: url, download: `harkback-${new Date().toISOString().slice(0, 10)}.md` });
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
@@ -566,8 +788,8 @@ async function main(): Promise<void> {
       type: "button",
       "data-hb": "export-notes",
       title: L(
-        "每个概念一个 Markdown 文件，带 [[链接]]，写入所选文件夹里的 {folder}/；同名文件会被覆盖。",
-        "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick; files with the same name are overwritten.",
+        "每个概念一个 Markdown 文件，带 [[链接]]，写入所选文件夹里的 {folder}/；再次导出会更新笔记，你写在标记行下面的内容会保留。",
+        "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.",
         { folder: NOTES_FOLDER },
       ),
     },
@@ -587,7 +809,7 @@ async function main(): Promise<void> {
       return; // cancelled
     }
     try {
-      const files = noteFiles(state, settings.language);
+      const files = noteFiles(await exportState(), settings.language);
       const { written, failed } = await writeNoteFiles(dir, files);
       status.textContent =
         failed.length === 0
@@ -615,7 +837,27 @@ async function main(): Promise<void> {
     },
     "",
   );
-  const toolbar = h("div", { className: "toolbar" }, search, reviewLink, selectToggle(), exportMd, exportNotes, backupButton);
+  const graphLink = h(
+    "a",
+    {
+      className: "button",
+      href: "#graph",
+      "data-hb": "graph-link",
+      title: L("把概念和它们的关系画成一张图。", "Draw your concepts and their relations as a map."),
+    },
+    L("关系图", "Graph"),
+  );
+  const toolbar = h(
+    "div",
+    { className: "toolbar" },
+    search,
+    reviewLink,
+    graphLink,
+    ...[selectToggle(), exportMd, exportAnki, exportNotes, backupButton, importButton].map(
+      (b) => (b.setAttribute("data-list-only", ""), b),
+    ),
+    fileInput,
+  );
 
   root.replaceChildren(
     h(

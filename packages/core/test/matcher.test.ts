@@ -80,3 +80,20 @@ describe("Matcher: separators and overlaps", () => {
     expect(m.scan("self-attention and attention").map((h) => h.key)).toEqual(["selfattention", "attention"]);
   });
 });
+
+describe("Matcher with characters outside the BMP", () => {
+  it("folds mathematical bold letters and keeps hit offsets on whole characters", () => {
+    const m = new Matcher([{ pattern: "LoRA", key: "lora", script: "latin", caseKey: "LoRA" }]);
+    const text = "We use 𝐋𝐨𝐑𝐀 here.";
+    const hits = m.scan(text);
+    expect(hits).toHaveLength(1);
+    expect(hits[0]!.text).toBe("𝐋𝐨𝐑𝐀");
+    expect(text.slice(hits[0]!.start, hits[0]!.end)).toBe("𝐋𝐨𝐑𝐀");
+  });
+
+  it("matches a term right before an emoji", () => {
+    const m = new Matcher([{ pattern: "attention", key: "attention", script: "latin", caseKey: null }]);
+    const hits = m.scan("attention😀");
+    expect(hits.map((h) => h.text)).toEqual(["attention"]);
+  });
+});

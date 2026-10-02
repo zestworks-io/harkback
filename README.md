@@ -21,6 +21,7 @@ _Select a term in a PDF, ask a follow-up, and the whole conversation is kept. Cl
 - [Install](#install)
 - [Connect a model](#connect-a-model)
 - [Using Harkback](#using-harkback)
+- [Documentation](#documentation)
 - [Privacy](#privacy)
 - [Your data](#your-data)
 - [Limitations](#limitations)
@@ -56,7 +57,9 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **Review.** History shows a _Review_ button with the number of terms due. Terms you were confused about come back after a day; terms you remembered come back after 3, 7, 14, 30 and 60 days. The toolbar icon shows the same number, and every term shows when it is due and what each answer does to its schedule.
 - **Builds on what you know.** When a term you look up is close to one you already understand, the model is told so and can explain the difference instead of starting over.
 - **Private by design.** Automatic scanning is limited to arxiv.org. Sensitive sites can be forced onto a local model, and private windows never record or scan.
-- **Portable records.** Export everything as Markdown, or as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`.
+- **Portable records.** Export everything as Markdown, as Anki cards, as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian; what you write below the marker line survives the next export), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`, and **Import JSONL** in History restores it (records you already have are skipped). A setting can leave sensitive sources out of backups and exports.
+- **Stop, retry, switch models.** A _Stop_ button ends an answer while it is written. After a failure the card offers _Try again_ and, with several models configured, _Try with…_ for each of the others.
+- **Several ways to start.** Select text and click _Explain_ (mouse, keyboard or touch selections), press `Alt+Shift+E`, or use _Explain_ in the right-click menu. Pages that load more text or move to another page without reloading are rescanned.
 - **Your choice of model.** Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
 
 ## Your knowledge graph
@@ -69,7 +72,7 @@ Each look-up adds to a graph of what you have read, built from your own reading 
 - **The graph does work.** A page that only mentions `QLoRA` reminds you of `LoRA`, the model is told what you already know so it can explain the difference, and review is scheduled per concept.
 - **It is yours.** Export a folder of linked notes (`[[links]]`, one file per concept) and open it in Obsidian to see the graph there, or export the full event log as JSONL.
 
-There is no built-in graph view yet. You browse the graph through concept pages in History, and through Obsidian after exporting.
+Open **Graph** in History to see it as a map: concepts coloured by how well you understood them, with arrows for prerequisites and variants. Drag to move, scroll to zoom, click a concept to open it. You can also browse it through concept pages, and through Obsidian after exporting.
 
 ## How it works
 
@@ -106,15 +109,15 @@ Onboarding walks you through this, and you can change it later on the settings p
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider      | Base URL                                           | Notes                                 |
-| ------------- | -------------------------------------------------- | ------------------------------------- |
-| Ollama        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.             |
-| OpenAI        | `https://api.openai.com/v1`                        | Needs an API key.                     |
-| Anthropic     | `https://api.anthropic.com/v1`                     | Needs an API key.                     |
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                     |
-| xAI Grok      | `https://api.x.ai/v1`                              | Needs an API key.                     |
-| OpenRouter    | `https://openrouter.ai/api/v1`                     | Needs an API key.                     |
-| Custom        | any address                                        | Non-local addresses must use `https`. |
+| Provider      | Base URL                                           | Notes                                                                                                    |
+| ------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Ollama        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                |
+| OpenAI        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                        |
+| Anthropic     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                        |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                        |
+| xAI Grok      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                        |
+| OpenRouter    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                        |
+| Custom        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale). |
 
 Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
 
@@ -137,16 +140,28 @@ then restart Ollama.
 | Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.     |
 | Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader. |
 | See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live.          |
-| Keep your records                 | History page → **Export Markdown** or **Back up JSONL now**.                                   |
+| Keep your records                 | History page → **Export Markdown**, **Export Anki cards** or **Back up JSONL now**.            |
+| Restore from a backup             | History page → **Import JSONL**.                                                               |
+| See how concepts connect          | History page → **Graph**.                                                                      |
 | Stop a term from being underlined | Hover the underline → **Don't show again**.                                                    |
 | Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.         |
+
+## Documentation
+
+The [`guide/`](guide/README.md) folder has the details:
+
+- [Getting started](guide/getting-started.md), the [user guide](guide/user-guide.md), [models and providers](guide/models.md) and [troubleshooting](guide/troubleshooting.md).
+- [Privacy and sensitive sources](guide/privacy.md): what is sent, what never is, and how that is enforced.
+- [Architecture](guide/architecture.md) and the [data format](guide/data-format.md), for contributors and for building on your records.
+- The [changelog](CHANGELOG.md).
 
 ## Privacy
 
 - When you ask for an explanation, the selected text, its paragraph, the section and the page title go to the model service you configured, under that provider's terms.
 - Records stay in this browser. Backups contain records only, never settings or API keys.
 - Pages are scanned automatically only on arxiv.org. Anywhere else you must click the button, press `Alt+Shift+E`, or allow the site.
-- Content from a sensitive source is never sent to a non-local model, including as context for later comparisons.
+- Content from a sensitive source is never sent to a non-local model, including as context for later comparisons. A server on your own network counts as non-local. A source stays sensitive until you mark it normal on its History entry.
+- A setting leaves sensitive sources out of backups and exports.
 - Private windows explain but never record, scan or show reunions.
 - Reunion underlines live in the page, so the page's own scripts may infer which terms you have records for.
 - Deleting an explanation removes it in the app; traces may remain on disk and exported backups cannot be recalled.
@@ -171,7 +186,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
 - Chinese names, and Japanese names written only in kanji, must be at least three characters to be underlined, to avoid false positives. Names with kana or Hangul need two.
 - Accents are ignored when matching ("résumé" and "resume" are one term), but there is no stemming for languages other than English, so inflected forms such as German plurals are separate terms.
-- The interface is available in English, Simplified and Traditional Chinese, Japanese, Korean, Spanish, French, German and Brazilian Portuguese. Explanations can be written in 16 languages, chosen separately in settings. Exported notes and Markdown use English or Chinese labels only.
+- The interface is in English by default and is also available in Simplified and Traditional Chinese, Japanese, Korean, Spanish, French, German and Brazilian Portuguese. Explanations can be written in 16 languages, chosen separately in settings. Exported notes and Markdown use English or Chinese labels only.
 
 ## Repository layout
 
@@ -181,6 +196,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 | `packages/core`  | Pure logic: replay, name normalization, concept matching, reunion selection, prompts, output parsing, JSONL and Markdown export. |
 | `apps/extension` | The Chrome extension, built with [WXT](https://wxt.dev): content script, background worker, history, settings and onboarding.    |
 | `tools/lint`     | ESLint setup.                                                                                                                    |
+| `guide`          | The documentation: user guide, models, privacy, architecture, data format.                                                       |
 
 ## Development
 

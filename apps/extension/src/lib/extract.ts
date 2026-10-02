@@ -90,6 +90,16 @@ export interface SelectionContext {
 
 const normalizeWs = (s: string): string => s.replace(/\s+/g, " ").trim();
 
+const PARAGRAPH_CHARS = 2000;
+
+/** At most `PARAGRAPH_CHARS` of `text`, centred on the selection so the term is never cut off. */
+function windowAround(text: string, start: number, end: number): { text: string; start: number } {
+  if (text.length <= PARAGRAPH_CHARS) return { text, start: 0 };
+  const room = Math.max(0, PARAGRAPH_CHARS - (end - start));
+  const from = Math.min(Math.max(0, start - Math.floor(room / 2)), text.length - PARAGRAPH_CHARS);
+  return { text: text.slice(from, from + PARAGRAPH_CHARS), start: from };
+}
+
 export function firstSentence(text: string): string {
   // CJK sentence ends need no following space.
   const m = /^(.+?(?:[.!?](?=\s|$)|[。！？]))/.exec(text);
@@ -273,8 +283,11 @@ function outsideContext(range: Range, selection: string): SelectionContext {
   let el: Element | null =
     range.startContainer.nodeType === ELEMENT ? (range.startContainer as Element) : range.startContainer.parentElement;
   while (el && !BLOCKS.has(el.localName) && !SKIP.has(el.localName)) el = el.parentElement;
-  const paragraph = normalizeWs(el?.textContent ?? selection).slice(0, 2000);
-  const at = paragraph.indexOf(selection);
+  const full = normalizeWs(el?.textContent ?? selection);
+  const found = full.indexOf(selection);
+  const view = windowAround(full, Math.max(0, found), Math.max(0, found) + selection.length);
+  const paragraph = view.text;
+  const at = found >= 0 ? found - view.start : -1;
   const prefix = at >= 0 ? paragraph.slice(Math.max(0, at - CONTEXT_CHARS), at).trim() : "";
   const suffix = at >= 0 ? paragraph.slice(at + selection.length, at + selection.length + CONTEXT_CHARS).trim() : "";
   return {
@@ -295,7 +308,10 @@ export function contextForRange(page: ExtractedPage, range: Range): SelectionCon
   const first = blockAt(page.blocks, start);
   if (!first) return outsideContext(range, selection);
   const last = blockAt(page.blocks, Math.max(start, end - 1)) ?? first;
-  const paragraph = normalizeWs(page.text.slice(first.start, Math.max(first.end, last.end))).slice(0, 2000);
+  const whole = page.text.slice(first.start, Math.max(first.end, last.end));
+  // Collapsing whitespace only shortens the text, so a window of the raw text is never short of the limit by much.
+  const view = windowAround(whole, start - first.start, end - first.start);
+  const paragraph = normalizeWs(view.text).slice(0, PARAGRAPH_CHARS);
   return {
     selection,
     paragraph,

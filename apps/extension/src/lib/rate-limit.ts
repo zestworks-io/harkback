@@ -19,6 +19,11 @@ export class RateLimiter {
     return [...this.times];
   }
 
+  /** Gives back the most recent request, for one that failed without costing the model service anything. */
+  release(): void {
+    this.times.pop();
+  }
+
   tryAcquire(limits: RateLimits, now: number): RateResult {
     this.times = this.times.filter((t) => t <= now && now - t < HOUR);
     const lastMinute = this.times.filter((t) => now - t < MINUTE);

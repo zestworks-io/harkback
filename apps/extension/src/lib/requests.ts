@@ -1,5 +1,5 @@
 import { acronymOf, clampSource, identityKey, matcherEntriesFromState, type EventFactory, type Hit, type State } from "@harkback/core";
-import { CARD_LIMITS, type HarkEvent } from "@harkback/spec";
+import { CARD_LIMITS, parseEvent, type HarkEvent } from "@harkback/spec";
 import type { PageInfo, Request, ResponseMap } from "./messages";
 import { reunionCards } from "./reunion-cards";
 import type { SenderInfo } from "./sender-auth";
@@ -18,6 +18,8 @@ export interface RequestDeps {
   append(build: (f: EventFactory) => HarkEvent[]): Promise<HarkEvent[]>;
   /** Erases the payloads of deleted encounters and refreshes the cached state. */
   compact(): Promise<void>;
+  /** Adds events from a backup; the ones already present are skipped. Returns how many were new. */
+  importEvents(events: HarkEvent[]): Promise<number>;
   runBackup(): Promise<void>;
   syncContentScripts(): Promise<void>;
   now(): number;
@@ -41,6 +43,7 @@ export async function pageInfo(deps: RequestDeps, url: string, incognito: boolea
     language: settings.language,
     strings: UI_STRINGS[settings.language] ?? {},
     theme: settings.theme,
+    models: settings.models.map((m) => ({ id: m.id, label: m.label })),
     entries: scan ? matcherEntriesFromState(await deps.getState()) : [],
   };
 }
@@ -70,8 +73,24 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
     }
     case "mark-sensitive": {
       if (incognito) return { ok: false };
-      await deps.append((f) => [f.make("source.seen", clampSource(msg.source, "sensitive"))]);
+      await deps.append((f) => [f.make("source.seen", clampSource(msg.source, "sensitive", true))]);
       return { ok: true };
+    }
+    case "mark-normal": {
+      const src = (await deps.getState()).sources.get(String(msg.sourceId));
+      if (!src || src.sensitivity !== "sensitive") return { ok: false };
+      const detected = { source_id: src.id, ids: src.ids, title: src.title, license: src.license };
+      await deps.append((f) => [f.make("source.seen", clampSource(detected, "normal", true))]);
+      return { ok: true };
+    }
+    case "import-events": {
+      if (!Array.isArray(msg.events)) return { ok: false };
+      // The page parsed them, but a message is not a trusted channel: check each event again.
+      const events = msg.events.flatMap((e) => {
+        const r = parseEvent(e);
+        return r.kind === "event" ? [r.event] : [];
+      });
+      return { ok: true, added: await deps.importEvents(events) };
     }
     case "delete-encounter": {
       if (!(await deps.getState()).encounters.has(msg.encounterId)) return { ok: false };
