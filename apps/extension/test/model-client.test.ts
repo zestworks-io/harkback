@@ -133,6 +133,37 @@ describe("streamChat", () => {
     await expect(streamChat(cfg, messages, () => {}, { fetchImpl, idleTimeoutMs: 50 })).rejects.toMatchObject({ code: "timeout" });
   });
 
+  describe("before the first text", () => {
+    const quietThen = (waitMs: number, tail: string) => async (_: RequestInfo | URL, init?: RequestInit) => {
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const timer = setTimeout(() => {
+            controller.enqueue(new TextEncoder().encode(tail));
+            controller.close();
+          }, waitMs);
+          init?.signal?.addEventListener("abort", () => {
+            clearTimeout(timer);
+            controller.error(new DOMException("aborted", "AbortError"));
+          });
+        },
+      });
+      return new Response(body, { headers: { "content-type": "text/event-stream" } });
+    };
+
+    it("waits longer than the idle limit for a slow first token", async () => {
+      const reply = `${delta("<explanation>ok</explanation>")}\n\ndata: [DONE]\n\n`;
+      const fetchImpl = quietThen(150, reply);
+      await expect(streamChat(cfg, messages, () => {}, { fetchImpl, idleTimeoutMs: 50, firstTextTimeoutMs: 1000 })).resolves.toBeDefined();
+    });
+
+    it("times out when no text arrives within the first-text limit", async () => {
+      const fetchImpl = quietThen(5000, "");
+      await expect(streamChat(cfg, messages, () => {}, { fetchImpl, idleTimeoutMs: 20, firstTextTimeoutMs: 100 })).rejects.toMatchObject({
+        code: "timeout",
+      });
+    });
+  });
+
   it("reports network failures and cancellation", async () => {
     const fail = async () => {
       throw new TypeError("Failed to fetch");
