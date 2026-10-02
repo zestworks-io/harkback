@@ -46,7 +46,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 
 ## Features
 
-- **Explain in context.** Select a term, click _Explain_ or press `Alt+E`. The answer streams in from the model you configured and is marked _defined in source_ (the page defines the term, and the quote is verified against the page text) or _external knowledge_.
+- **Explain in context.** Select a term, click _Explain_ or press `Alt+Shift+E`. The answer streams in from the model you configured and is marked _defined in source_ (the page defines the term, and the quote is verified against the page text) or _external knowledge_.
 - **Remember.** Each explanation, follow-up question and "got it / still confused" mark is stored as an event in IndexedDB. Nothing leaves your browser except the model request you trigger.
 - **Follow-up conversations.** Ask more on the card; each question stays above its answer, and the conversation is saved with the explanation. History shows it in full, and search finds it. Formulas are typeset.
 - **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, then mark it remembered, explain it again, compare the two usages, or mute it.
@@ -132,7 +132,7 @@ then restart Ollama.
 
 | You want to                       | Do this                                                                                        |
 | --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Explain a term                    | Select it and click **Explain**, or press `Alt+E`.                                             |
+| Explain a term                    | Select it and click **Explain**, or press `Alt+Shift+E`.                                       |
 | Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.          |
 | Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.     |
 | Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader. |
@@ -145,7 +145,7 @@ then restart Ollama.
 
 - When you ask for an explanation, the selected text, its paragraph, the section and the page title go to the model service you configured, under that provider's terms.
 - Records stay in this browser. Backups contain records only, never settings or API keys.
-- Pages are scanned automatically only on arxiv.org. Anywhere else you must click the button, press `Alt+E`, or allow the site.
+- Pages are scanned automatically only on arxiv.org. Anywhere else you must click the button, press `Alt+Shift+E`, or allow the site.
 - Content from a sensitive source is never sent to a non-local model, including as context for later comparisons.
 - Private windows explain but never record, scan or show reunions.
 - Reunion underlines live in the page, so the page's own scripts may infer which terms you have records for.

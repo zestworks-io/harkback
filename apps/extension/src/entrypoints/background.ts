@@ -46,6 +46,13 @@ export default defineBackground(() => {
   const lastLookup = new Map<string, LastLookup>();
   const limiter = new RateLimiter();
   let limiterLoaded = false;
+  // Records are written one after another, each from the state the previous one left, so two tabs never both create the same concept.
+  let recording: Promise<unknown> = Promise.resolve();
+  const inRecordingOrder = <T>(task: () => Promise<T>): Promise<T> => {
+    const run = recording.then(task);
+    recording = run.catch(() => undefined);
+    return run;
+  };
 
   const loadSettings = async (): Promise<Settings> => withDefaults((await browser.storage.local.get("settings")).settings);
 
@@ -105,10 +112,16 @@ export default defineBackground(() => {
     const post = (m: PortOut): void => {
       if (!closed) port.postMessage(m);
     };
+    // The explanation is already on screen; a failed write must not replace it with an error.
+    const unrecorded = (): void => post({ type: "done", encounterId: null, recorded: false });
     const fail = (e: unknown): void => post({ type: "error", code: e instanceof ModelError ? e.code : "internal" });
 
-    async function record(p: Pending, conceptId: string | null): Promise<void> {
+    const record = (p: Pending, conceptId: string | null): Promise<void> => {
       pending = null;
+      return inRecordingOrder(() => write(p, conceptId));
+    };
+
+    async function write(p: Pending, conceptId: string | null): Promise<void> {
       const state = await getState();
       const out: { record?: ExplainRecord } = {};
       await append((f) => {
@@ -157,7 +170,10 @@ export default defineBackground(() => {
           const c = outcome.resolution.candidate;
           return post({ type: "ask", name: c.canonicalName, daysAgo: daysSinceLastEncounter(state, c.conceptId, Date.now()) });
         }
-        await record({ outcome, req, plan }, hinted ?? (outcome.resolution.kind === "existing" ? outcome.resolution.conceptId : null));
+        await record(
+          { outcome, req, plan },
+          hinted ?? (outcome.resolution.kind === "existing" ? outcome.resolution.conceptId : null),
+        ).catch(unrecorded);
       } catch (e) {
         fail(e);
       } finally {
@@ -169,11 +185,7 @@ export default defineBackground(() => {
       const p = pending;
       if (!p) return post({ type: "error", code: "expired" });
       const conceptId = sameConcept && p.outcome.resolution.kind === "ask_user" ? p.outcome.resolution.candidate.conceptId : null;
-      try {
-        await record(p, conceptId);
-      } catch (e) {
-        fail(e);
-      }
+      await record(p, conceptId).catch(unrecorded);
     }
 
     async function followUp(question: string): Promise<void> {
@@ -340,12 +352,20 @@ export default defineBackground(() => {
     const granted: string[] = [];
     for (const p of patterns) if (await browser.permissions.contains({ origins: [p] })) granted.push(p);
     const existing = await browser.scripting.getRegisteredContentScripts({ ids: [ALLOWLIST_SCRIPT_ID] });
-    if (existing.length > 0) await browser.scripting.unregisterContentScripts({ ids: [ALLOWLIST_SCRIPT_ID] });
-    if (granted.length > 0) {
-      await browser.scripting.registerContentScripts([
-        { id: ALLOWLIST_SCRIPT_ID, matches: granted, js: [CONTENT_SCRIPT.slice(1)], runAt: "document_idle", persistAcrossSessions: true },
-      ]);
+    if (granted.length === 0) {
+      if (existing.length > 0) await browser.scripting.unregisterContentScripts({ ids: [ALLOWLIST_SCRIPT_ID] });
+      return;
     }
+    // Updating in place keeps the old registration if the new patterns are rejected.
+    const script = {
+      id: ALLOWLIST_SCRIPT_ID,
+      matches: granted,
+      js: [CONTENT_SCRIPT.slice(1)],
+      runAt: "document_idle" as const,
+      persistAcrossSessions: true,
+    };
+    if (existing.length > 0) await browser.scripting.updateContentScripts([script]);
+    else await browser.scripting.registerContentScripts([script]);
   }
 
   // Settings and permission events often arrive together; run the syncs one after another.

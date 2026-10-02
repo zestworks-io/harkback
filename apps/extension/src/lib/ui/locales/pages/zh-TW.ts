@@ -191,8 +191,8 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "請求解釋時，選取的文字、所在段落、章節和頁面標題會傳送給你選擇的模型服務，並依該服務商的條款處理。",
   "Records stay in this browser. A JSONL backup is saved to Downloads/harkback every week; it contains records only, never settings or API keys.":
     "記錄只保存在這個瀏覽器中；每週會自動匯出一份 JSONL 備份到 Downloads/harkback，只含記錄，不含設定與 API key。",
-  "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+E, or allow the site in settings.":
-    "預設只在 arxiv.org 自動掃描；其他網站需要你點選工具列按鈕、按 Alt+E，或在設定中允許該網站。",
+  "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+Shift+E, or allow the site in settings.":
+    "預設只在 arxiv.org 自動掃描；其他網站需要你點選工具列按鈕、按 Alt+Shift+E，或在設定中允許該網站。",
   "Reunion hints are shown on the page, so the page's own scripts may infer which terms you have records for.":
     "重逢提示顯示在網頁上，網頁自己的指令碼可能據此推斷你在哪些術語上有記錄。",
   "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.":

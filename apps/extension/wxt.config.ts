@@ -31,7 +31,7 @@ export default defineConfig({
     action: { default_title: "Harkback: scan this page" },
     commands: {
       "explain-selection": {
-        suggested_key: { default: "Alt+E" },
+        suggested_key: { default: "Alt+Shift+E" },
         description: "Explain the selected text",
       },
     },

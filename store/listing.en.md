@@ -16,7 +16,7 @@ Harkback is for people who read papers and technical documents. Select a term an
 It does not try to be a better chatbot. It adds what a chat window lacks: memory.
 
 HOW IT WORKS
-• Select a term, then click Explain or press Alt+E. The explanation uses the paragraph and section around the term, and quotes the page when the page defines it.
+• Select a term, then click Explain or press Alt+Shift+E. The explanation uses the paragraph and section around the term, and quotes the page when the page defines it.
 • Mark an explanation "Got it" or "Still confused". Harkback remembers, and schedules the terms you are unsure about for review.
 • On later pages, terms you have looked up are underlined. Hover to see the earlier explanation, where you met it, and how well you understood it. Abbreviations match their full names ("LLM" and "Large Language Model").
 • Ask follow-up questions on any card. The conversation is saved with the explanation.

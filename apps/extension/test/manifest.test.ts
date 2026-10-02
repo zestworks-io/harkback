@@ -18,7 +18,7 @@ describe.skipIf(!enabled)("production manifest", () => {
     // Entrypoint names like "history" or "newtab" silently become browser page overrides.
     expect(manifest.chrome_url_overrides).toBeUndefined();
     expect(manifest.content_scripts).toEqual([expect.objectContaining({ matches: ["https://arxiv.org/*"] })]);
-    expect(manifest.commands["explain-selection"].suggested_key.default).toBe("Alt+E");
+    expect(manifest.commands["explain-selection"].suggested_key.default).toBe("Alt+Shift+E");
   });
 
   it("keeps the schema library out of the script injected into web pages", () => {

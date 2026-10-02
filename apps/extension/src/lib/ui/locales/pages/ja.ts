@@ -195,8 +195,8 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "解説を依頼すると、選択したテキスト、その段落、節、ページタイトルが、あなたが選んだモデルサービスに、そのサービスの規約に従って送信されます。",
   "Records stay in this browser. A JSONL backup is saved to Downloads/harkback every week; it contains records only, never settings or API keys.":
     "記録はこのブラウザ内に保存されます。JSONL バックアップが毎週 Downloads/harkback に保存されます。含まれるのは記録のみで、設定や API キーは含まれません。",
-  "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+E, or allow the site in settings.":
-    "ページを自動でスキャンするのは arxiv.org のみです。それ以外ではツールバーのボタンをクリックするか、Alt+E を押すか、設定でサイトを許可してください。",
+  "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+Shift+E, or allow the site in settings.":
+    "ページを自動でスキャンするのは arxiv.org のみです。それ以外ではツールバーのボタンをクリックするか、Alt+Shift+E を押すか、設定でサイトを許可してください。",
   "Reunion hints are shown on the page, so the page's own scripts may infer which terms you have records for.":
     "再会のヒントはページ上に表示されるため、そのページのスクリプトが、どの用語の記録をお持ちか推測できる場合があります。",
   "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.":

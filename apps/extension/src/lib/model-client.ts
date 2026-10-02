@@ -37,7 +37,10 @@ export function requestHeaders(apiKey: string, headers: Record<string, string>):
 export interface StreamOptions {
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  /** How long the stream may go quiet once the answer has started. */
   idleTimeoutMs?: number;
+  /** How long to wait for the first text; reasoning models can think for a while before answering. */
+  firstTextTimeoutMs?: number;
   temperature?: number;
 }
 
@@ -202,21 +205,25 @@ export async function streamChat(
   const adapter = ADAPTERS[apiTypeOf(cfg)];
   const fetchImpl = opts.fetchImpl ?? defaultFetch;
   const idleMs = opts.idleTimeoutMs ?? 30_000;
+  const firstMs = Math.max(idleMs, opts.firstTextTimeoutMs ?? 120_000);
   const controller = new AbortController();
+  let full = "";
   let timedOut = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const arm = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, idleMs);
+    timer = setTimeout(
+      () => {
+        timedOut = true;
+        controller.abort();
+      },
+      full ? idleMs : firstMs,
+    );
   };
   const onAbort = () => controller.abort();
   if (opts.signal?.aborted) controller.abort();
   opts.signal?.addEventListener("abort", onAbort);
 
-  let full = "";
   try {
     arm();
     const res = await fetchImpl(adapter.url(cfg), {
@@ -273,11 +280,11 @@ export async function streamChat(
         handle(parser.end());
         break;
       }
-      arm();
       if (handle(parser.push(value))) {
         await reader.cancel().catch(() => undefined);
         break;
       }
+      arm();
     }
     if (!finished) throw new ModelError("network", "the stream ended early");
     if (!full.trim()) throw new ModelError("http", "empty response", res.status);
