@@ -111,3 +111,73 @@ test("says why a PDF could not be opened", async ({ context, sw, stub, extension
   await none.goto(readerUrl(extensionId, "javascript:alert(1)"));
   await expect(none.locator("#notice")).toContainText("No PDF was given");
 });
+
+test("reads a scanned PDF and explains a term in it", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  const src = `${stub.url}/pdf/scanned.pdf`;
+  const page = await context.newPage();
+  await page.goto(readerUrl(extensionId, src));
+
+  // The scan has no text of its own; the words appear once the page has been read.
+  await expect(page.locator("#scanbar-status")).toContainText("Reading scanned page");
+  await expect(page.locator(".hb-page[data-page='1'] .textLayer")).toContainText("Low-rank adaptation", { timeout: 45_000 });
+  // The title and the heading are found by their size, and the lines of a paragraph are joined.
+  await expect(page.locator(".hb-page[data-page='1'] .textLayer h2")).toHaveCount(2);
+  await expect(page.locator("#scanbar-status")).toContainText("Read 2 scanned pages", { timeout: 45_000 });
+
+  const button = page.locator("[data-hb=explain-button]");
+  await expect(async () => {
+    const { x, y } = await centerOf(page, "LoRA");
+    await page.mouse.dblclick(x, y);
+    await expect(button).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await button.click();
+  await expect(page.locator("[data-hb=explanation]")).toHaveText("LoRA 是一个测试解释。");
+  const sent = stub.requests[0]!.body.messages.map((m) => m.content).join("\n");
+  expect(sent).toContain("freezes the pretrained weights and injects small trainable matrices into every layer");
+
+  // What was read is kept: a second visit shows the text without reading the pages again.
+  const pagesKept = () =>
+    page.evaluate(
+      () =>
+        new Promise<number>((resolve, reject) => {
+          const open = indexedDB.open("harkback-ocr");
+          open.onerror = () => reject(open.error);
+          open.onsuccess = () => {
+            const count = open.result.transaction("pages").objectStore("pages").count();
+            count.onsuccess = () => resolve(count.result);
+          };
+        }),
+    );
+  expect(await pagesKept()).toBe(2);
+});
+
+test("discards a language pack that does not match its checksum", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await context.route("https://cdn.jsdelivr.net/**", (route) =>
+    route.fulfill({ status: 200, headers: { "access-control-allow-origin": "*" }, body: "not a language pack" }),
+  );
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#pdf`);
+  await expect(page.locator("[data-hb=ocr-install-chi_sim]")).toBeVisible();
+  await page.locator("[data-hb=ocr-install-chi_sim]").click();
+  await expect(page.locator("[data-hb=ocr-message]")).toContainText("did not match its checksum");
+  await expect(page.locator("[data-hb=ocr-install-chi_sim]")).toBeVisible();
+});
+
+test("reads a scanned PDF again in place when the languages are applied", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  const page = await context.newPage();
+  await page.goto(readerUrl(extensionId, `${stub.url}/pdf/scanned.pdf`));
+  await expect(page.locator("#scanbar-status")).toContainText("Read 2 scanned pages", { timeout: 45_000 });
+
+  // The page must not reload: the PDF was handed over once and cannot be fetched again by the reader.
+  await page.evaluate(() => ((window as unknown as { marker: number }).marker = 1));
+  await page.locator("#scanbar-toggle").click();
+  await page.locator("[data-hb=ocr-apply]").click();
+  // The pages are read faster than the status can be polled, so only the end state is checked.
+  await expect(page.locator("#scanbar-status")).toContainText("Read 2 scanned pages", { timeout: 45_000 });
+  await expect(page.locator(".hb-page[data-page='1'] .textLayer")).toContainText("Low-rank adaptation");
+  expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
+  expect(await page.locator(".hb-page").count()).toBe(2);
+});

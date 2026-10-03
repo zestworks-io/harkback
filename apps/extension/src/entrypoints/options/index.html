@@ -113,6 +113,37 @@
         min-width: 104px;
       }
 
+      .tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+        overflow-x: auto;
+      }
+      .tab {
+        height: auto;
+        padding: 10px 14px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        background: none;
+        color: var(--muted);
+        font-weight: 500;
+        white-space: nowrap;
+        margin-bottom: -1px;
+      }
+      .tab:hover {
+        background: none;
+        color: var(--fg);
+      }
+      .tab[aria-selected="true"] {
+        color: var(--fg);
+        border-bottom-color: var(--primary);
+      }
+      .tab-panel[hidden] {
+        display: none;
+      }
+
       .card {
         background: var(--card);
         border: 1px solid var(--border);
@@ -247,6 +278,47 @@
         width: 100%;
         border-style: dashed;
         color: var(--muted);
+      }
+      .hb-ocr-langs {
+        display: grid;
+        gap: 12px;
+      }
+      .hb-ocr-note,
+      .hb-ocr-message {
+        margin: 0;
+        color: var(--muted);
+      }
+      .hb-ocr-message:empty {
+        display: none;
+      }
+      .hb-ocr-langs {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+      .hb-ocr-note,
+      .hb-ocr-message {
+        grid-column: 1 / -1;
+      }
+      .hb-ocr-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "name action" "size action";
+        column-gap: 12px;
+        align-items: center;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .hb-ocr-name {
+        grid-area: name;
+        font-weight: 500;
+      }
+      .hb-ocr-size {
+        grid-area: size;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .hb-ocr-row button {
+        grid-area: action;
       }
 
       .item {

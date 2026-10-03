@@ -253,7 +253,17 @@ async function main(): Promise<void> {
           { className: "next" },
           h("li", {}, L("打开任意一篇 arXiv 论文。", "Open any arXiv paper.")),
           h("li", {}, L("选中一个术语。", "Select a term.")),
-          h("li", {}, L("点「解释」，或按 ", "Click “Explain”, or press "), h("kbd", {}, "Alt"), " + ", h("kbd", {}, "E"), L("。", ".")),
+          h(
+            "li",
+            {},
+            L("点「解释」，或按 ", "Click “Explain”, or press "),
+            h("kbd", {}, "Alt"),
+            " + ",
+            h("kbd", {}, "Shift"),
+            " + ",
+            h("kbd", {}, "E"),
+            L("。", "."),
+          ),
         ),
         h(
           "p",

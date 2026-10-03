@@ -1,18 +1,67 @@
-# Harkback
+<p align="center">
+  <img src="assets/logo.png" alt="Harkback" width="96">
+</p>
 
-**English** · [简体中文](README.zh-CN.md)
+<h1 align="center">Harkback</h1>
 
-**Explain terms while you read. Remember what you understood. Get it back when you meet the term again.**
+<h3 align="center">
+Explain terms while you read. Remember what you understood.<br>Get it back when you meet the term again.
+</h3>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+  <a href="CHANGELOG.md"><img alt="Version" src="https://img.shields.io/github/package-json/v/zestworks-io/harkback?filename=apps%2Fextension%2Fpackage.json&label=version&color=informational"></a>
+  <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white">
+  <img alt="Node 22+" src="https://img.shields.io/badge/node-%E2%89%A522-339933?logo=nodedotjs&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white">
+  <img alt="Local first" src="https://img.shields.io/badge/data-local--first-success">
+  <a href="https://github.com/zestworks-io/harkback/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zestworks-io/harkback?style=flat"></a>
+  <a href="https://github.com/zestworks-io/harkback/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/zestworks-io/harkback"></a>
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"></a>
+</p>
+
+<p align="center">
+| <a href="#quick-start"><b>Quick start</b></a> | <a href="#features"><b>Features</b></a> | <a href="guide/README.md"><b>Docs</b></a> | <a href="#privacy"><b>Privacy</b></a> | <a href="CHANGELOG.md"><b>Changelog</b></a> | <a href="CONTRIBUTING.md"><b>Contributing</b></a> |
+</p>
+
+<p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a></p>
 
 Harkback is a Chrome extension for people who read papers and technical documents. Select a term and it explains the term in context. Every explanation is kept in a local, append-only log. When the same term shows up on a later page, even under another spelling, Harkback underlines it and shows what you understood last time.
 
 > "harken back": to return to an earlier point.
 
-[![Harkback explaining BLEU in a PDF, answering a follow-up question and typesetting the formula](assets/demo.gif)](assets/demo.mp4)
+<p align="center">
+  <a href="assets/demo.mp4"><img src="assets/demo.gif" alt="Demo" width="720"></a>
+  <br><sub>Select a term in a PDF, ask a follow-up, and the whole conversation is kept. Click the animation for the full-quality video.</sub>
+</p>
 
-_Select a term in a PDF, ask a follow-up, and the whole conversation is kept. Click the animation for the full-quality video._
+## Quick start
 
-## Contents
+```sh
+git clone https://github.com/zestworks-io/harkback.git && cd harkback
+pnpm install && pnpm --filter @harkback/extension build
+```
+
+Open `chrome://extensions`, turn on **Developer mode**, choose **Load unpacked** and select `apps/extension/.output/chrome-mv3`. Then pick a model:
+
+<details open>
+<summary><b>Local model (free)</b></summary>
+
+Install [Ollama](https://ollama.com), pull a model, and in the onboarding page choose **Ollama**. Use _Test connection_ to get the one command that allows the extension. Nothing leaves your computer.
+
+</details>
+
+<details>
+<summary><b>Hosted model (your own API key)</b></summary>
+
+Choose OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter or a custom OpenAI-compatible address and paste your key. The provider bills you directly; Harkback has no server in between.
+
+</details>
+
+Then select a term on any page and press `Alt+Shift+E`. See [Install](#install) and [Connect a model](#connect-a-model) for details.
+
+<details>
+<summary><b>Contents</b></summary>
 
 - [Why not just ask ChatGPT?](#why-not-just-ask-chatgpt)
 - [Features](#features)
@@ -29,6 +78,8 @@ _Select a term in a PDF, ask a follow-up, and the whole conversation is kept. Cl
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
+
+</details>
 
 ## Why not just ask ChatGPT?
 
@@ -182,7 +233,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 
 - Chrome (Manifest V3) only.
 - Explanations depend on the model you choose; small local models may produce weaker concept cards, which lowers recall quality but never breaks recording.
-- Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs have no text and are not supported, there is no OCR, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
+- Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs are read with OCR on your computer (English is built in; other languages are one download each from `cdn.jsdelivr.net`), which is slower and less exact than real text and does not recover handwriting, formulas or tables, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
 - Chinese names, and Japanese names written only in kanji, must be at least three characters to be underlined, to avoid false positives. Names with kana or Hangul need two.
 - Accents are ignored when matching ("résumé" and "resume" are one term), but there is no stemming for languages other than English, so inflected forms such as German plurals are separate terms.

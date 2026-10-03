@@ -2,14 +2,24 @@ import type { HarkEvent } from "@harkback/spec";
 import { parseEdgeId } from "./ids";
 import { isSensitiveOnly } from "./prompt";
 import { replay } from "./replay";
+import type { SourceState } from "./state";
 
 /**
  * The events without anything that came from a sensitive source: the source itself, its encounters and what was done to
  * them, and the concepts and relations known only from such sources. A concept that was also met in a normal source stays.
+ * `alsoSensitive` marks further sources as sensitive, for rules that are not part of the records.
  */
-export function withoutSensitive(events: readonly HarkEvent[]): HarkEvent[] {
-  const state = replay(events);
-  const sensitiveSources = new Set([...state.sources.values()].filter((s) => s.sensitivity === "sensitive").map((s) => s.id));
+export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (source: SourceState) => boolean = () => false): HarkEvent[] {
+  const replayed = replay(events);
+  // A source the reader's site rules call sensitive counts as sensitive even if it was recorded before the rule existed.
+  const sources = new Map(
+    [...replayed.sources].map(([id, s]): [string, SourceState] => [
+      id,
+      s.sensitivity !== "sensitive" && alsoSensitive(s) ? { ...s, sensitivity: "sensitive" } : s,
+    ]),
+  );
+  const state = { ...replayed, sources };
+  const sensitiveSources = new Set([...sources.values()].filter((s) => s.sensitivity === "sensitive").map((s) => s.id));
   if (sensitiveSources.size === 0) return [...events];
 
   const sensitiveEncounters = new Set<string>();

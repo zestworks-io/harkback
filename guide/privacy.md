@@ -42,12 +42,13 @@ Incognito windows must be allowed for the extension in Chrome. In them Harkback 
 
 ## Where your data is
 
-| What                  | Where                                                                                              | Leaves the browser?                            |
-| --------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Records (event log)   | IndexedDB, in this browser profile                                                                 | Only in backups and exports you make or enable |
-| Settings and API keys | `chrome.storage.local`, unencrypted                                                                | Never in backups or exports                    |
-| Weekly backup         | `Downloads/harkback/` as JSONL                                                                     | It is a plain file; protect it like any other  |
-| PDF being opened      | A temporary IndexedDB entry, deleted when the reader takes it, or after 10 minutes at the next PDF | No                                             |
+| What                                | Where                                                                                                | Leaves the browser?                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Records (event log)                 | IndexedDB, in this browser profile                                                                   | Only in backups and exports you make or enable                                |
+| Settings and API keys               | `chrome.storage.local`, unencrypted                                                                  | Never in backups or exports                                                   |
+| Weekly backup                       | `Downloads/harkback/` as JSONL                                                                       | It is a plain file; protect it like any other                                 |
+| Scanned PDF text and language packs | IndexedDB `harkback-ocr`, in this browser profile; the text is cached per page so a PDF is read once | Never; not in backups or exports; language packs are downloaded, not uploaded |
+| PDF being opened                    | A temporary IndexedDB entry, deleted when the reader takes it, or after 10 minutes at the next PDF   | No                                                                            |
 
 **Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files.
 

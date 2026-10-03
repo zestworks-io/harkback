@@ -114,6 +114,57 @@
         padding: 1px 5px;
         border-radius: 4px;
       }
+      #scanbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        padding: 8px 16px;
+        background: var(--card);
+        color: var(--fg);
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+      #scanbar[hidden],
+      #scanbar-panel[hidden] {
+        display: none;
+      }
+      #scanbar-top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #scanbar button {
+        font: inherit;
+        height: 28px;
+        padding: 0 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--fg);
+      }
+      #scanbar button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .hb-ocr-note,
+      .hb-ocr-message {
+        margin: 8px 0;
+        color: var(--muted);
+      }
+      .hb-ocr-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 3px 0;
+      }
+      .hb-ocr-name {
+        flex: 1;
+      }
+      .hb-ocr-size {
+        color: var(--muted);
+      }
       .hb-pages {
         padding: 12px 0 48px;
       }
@@ -132,6 +183,13 @@
   </head>
   <body>
     <div id="notice" hidden></div>
+    <div id="scanbar" hidden>
+      <div id="scanbar-top">
+        <span id="scanbar-status" role="status"></span>
+        <button type="button" id="scanbar-toggle"></button>
+      </div>
+      <div id="scanbar-panel" hidden></div>
+    </div>
     <main id="pages" class="hb-pages"></main>
     <script type="module" src="./main.ts"></script>
   </body>

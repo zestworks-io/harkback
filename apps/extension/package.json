@@ -1,6 +1,6 @@
 {
   "name": "@harkback/extension",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
@@ -18,7 +18,9 @@
     "@harkback/core": "workspace:*",
     "@harkback/spec": "workspace:*",
     "@mozilla/readability": "^0.6.0",
-    "pdfjs-dist": "^6.3.289"
+    "@tesseract.js-data/eng": "1.0.0",
+    "pdfjs-dist": "^6.3.289",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

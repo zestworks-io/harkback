@@ -10,6 +10,7 @@ export const PRIVACY = {
     "处理保密材料时，请在设置中把该网站标为敏感并使用本机模型（如 Ollama）；敏感来源的内容不会发给非本机模型。",
     "无痕窗口默认不启用；启用后只解释、不记录、不显示重逢。",
     "删除在应用层生效；磁盘上可能仍有残留，已导出的备份无法追回。建议开启全盘加密。",
+    "扫描版 PDF 在本机识别文字，页面图像不会离开你的电脑。只有当你安装某种识别语言时，才会从 cdn.jsdelivr.net 下载一次语言包，不会发送任何文档内容。",
     "API key 保存在浏览器扩展存储中，未加密；只发送到你填写的模型地址，不进入备份或日志。建议使用有额度限制的 key。",
   ],
   en: [
@@ -20,6 +21,7 @@ export const PRIVACY = {
     "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.",
     "Private windows are off by default; when enabled, the extension explains but records nothing and shows no reunions.",
     "Deletion takes effect in the app; traces may remain on disk and exported backups cannot be recalled. Full-disk encryption is recommended.",
+    "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.",
     "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.",
   ],
 };

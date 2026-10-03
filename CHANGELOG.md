@@ -2,10 +2,11 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## Unreleased
+## 0.2.0 - 2026-10-02
 
 ### Added
 
+- **Scanned PDFs.** Pages that are only pictures are read with OCR on your computer, as they come near the screen, and then behave like text: select, explain, record. English is built in; other languages (Chinese first) are installed from a list, each downloaded once from `cdn.jsdelivr.net` and checked against a checksum. The languages are chosen per document, and what was read is kept.
 - **Concept graph.** History → Graph draws concepts and their relations as a map, coloured by how well each is understood. Drag, zoom, filter by name, click to open a concept.
 - **Import JSONL.** Restore records from a backup; records already present are skipped, so importing is safe to repeat.
 - **Anki export.** One card per concept as tab-separated text.
@@ -30,6 +31,17 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- Backups and exports that leave out sensitive sources now also leave out sources that a sensitive site rule covers, as explanation requests already did.
+- Exporting notes no longer overwrites a file in the notes folder that has text but not Harkback's marker line; it is skipped and reported.
+- The setup page gave the shortcut as Alt+E; it is Alt+Shift+E.
+- A failed database read in the background was remembered until the worker restarted; the next request now tries again.
+- A malformed `#concept=` address no longer breaks the History page.
+- Import stopped treating every database error as a duplicate: only duplicates are skipped, and a full disk now fails the import.
+- A follow-up answer in text of four-byte characters could exceed the size limit of an event and be rejected when restoring a backup.
+- A page that changed while its tab was in the background was not scanned again when the tab came back.
+- Hand-edited rate and reunion limits of zero or a fraction are replaced by the defaults, instead of blocking every request.
+- Absurdly nested formulas no longer break the explanation card.
+- A PDF page that scrolled away while it was being drawn kept its picture in memory.
 - Snake_case identifiers such as `max_tokens` were rendered as italic text, and dollar amounts such as `$5 … $10` as a formula.
 - A long paragraph was cut from its start, so the selected term could be missing from what the model saw. The paragraph is now centred on the selection.
 - Non-streamed Gemini replies included the model's internal "thought" text.

@@ -23,7 +23,7 @@ HOW IT WORKS
 • Your records form a knowledge graph of concepts, aliases, prerequisites, variants and related terms. Search it, review it, export it as Markdown notes (with [[links]] for Obsidian) or as a JSONL backup.
 
 PDFs AND PAPERS
-arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset. Other websites are scanned only when you click the toolbar button or allow the site.
+arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset; scanned PDFs are read with OCR on your computer. Other websites are scanned only when you click the toolbar button or allow the site.
 
 YOU CHOOSE THE MODEL
 Harkback has no server and no account. You connect your own model: either one that runs on your computer, so your text never leaves it, or a hosted service that you use with your own API key.

@@ -131,7 +131,10 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Save changes": "변경 사항 저장",
   "Back up now": "지금 백업",
   "Harkback settings": "Harkback 설정",
-  "Models, sites and privacy.": "모델, 사이트, 개인정보 보호.",
+  "Models, sites, scanning and privacy.": "모델, 사이트, 스캔, 개인정보 보호.",
+  General: "일반",
+  "Scanned PDFs": "스캔 PDF",
+  "Data and privacy": "데이터 및 개인정보 보호",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "설명과 추가 질문의 답변은 이 언어로 작성됩니다. 전문 용어는 원문 그대로 둡니다. 품질은 언어와 모델에 따라 다릅니다.",
   Models: "모델",
@@ -229,4 +232,25 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Leave sensitive sources out of backups and exports": "백업과 내보내기에 민감한 출처 제외",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
     '일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 써야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. "민감한 출처용"에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 쓰지 않습니다.',
+  "Languages for scanned PDFs": "스캔 PDF 언어",
+  "Text in scanned PDFs is read on this computer; page images never leave it.":
+    "스캔한 PDF의 글자는 이 컴퓨터에서 읽으며, 페이지 이미지는 밖으로 나가지 않습니다.",
+  Languages: "언어",
+  "Reading scanned page {done} of {found}…": "스캔 페이지 읽는 중 {done}/{found}…",
+  "Scanned pages could not be read.": "스캔한 페이지를 읽을 수 없었습니다.",
+  "The reading is uncertain; the document may be in another language. Choose it under Languages.":
+    "인식 결과가 불확실합니다. 문서가 다른 언어일 수 있으니 '언어'에서 선택하세요.",
+  "Read {done} scanned pages.": "스캔 페이지 {done}개를 읽었습니다.",
+  Remove: "제거",
+  Install: "설치",
+  "Installing…": "설치 중…",
+  "The download of {name} did not match its checksum and was discarded.": "{name} 다운로드가 체크섬과 일치하지 않아 폐기했습니다.",
+  "Could not download {name}. Check your connection and try again.":
+    "{name}을(를) 다운로드할 수 없습니다. 연결을 확인하고 다시 시도하세요.",
+  "Built in": "내장",
+  "Read again with these": "이 언어로 다시 읽기",
+  "English is built in. Other languages download once from {host}; no document content is sent.":
+    "영어는 내장되어 있습니다. 다른 언어는 {host}에서 한 번만 내려받으며 문서 내용은 전송되지 않습니다.",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
+    "스캔한 PDF는 이 컴퓨터에서 읽으며 페이지 이미지는 밖으로 나가지 않습니다. 언어 팩은 설치할 때에만 cdn.jsdelivr.net에서 한 번 내려받으며 문서 내용은 전송되지 않습니다.",
 };

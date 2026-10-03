@@ -129,7 +129,10 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Save changes": "儲存變更",
   "Back up now": "立即備份",
   "Harkback settings": "Harkback 設定",
-  "Models, sites and privacy.": "模型、網站與隱私。",
+  "Models, sites, scanning and privacy.": "模型、網站、掃描與隱私。",
+  General: "一般",
+  "Scanned PDFs": "掃描版 PDF",
+  "Data and privacy": "資料與隱私",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "解釋和追問的回答會用這種語言書寫；術語保持原文。品質會因語言和模型而異。",
   Models: "模型",
@@ -226,4 +229,23 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Leave sensitive sources out of backups and exports": "備份和匯出時不包含敏感來源的內容",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
     "純 http 只允許用於本機（127.0.0.1 / localhost）和你自己網路裡的伺服器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他位址必須使用 https。自己網路裡的伺服器仍算遠端。勾選「敏感來源用」的本機模型（127.0.0.1 / localhost）會用於敏感來源；敏感來源不會使用其他模型。",
+  "Languages for scanned PDFs": "掃描版 PDF 的辨識語言",
+  "Text in scanned PDFs is read on this computer; page images never leave it.": "掃描版 PDF 的文字在本機辨識，頁面影像不會離開你的電腦。",
+  Languages: "語言",
+  "Reading scanned page {done} of {found}…": "正在辨識掃描頁 {done}/{found}…",
+  "Scanned pages could not be read.": "無法辨識掃描頁。",
+  "The reading is uncertain; the document may be in another language. Choose it under Languages.":
+    "辨識結果不太確定，文件可能使用了其他語言，請在「語言」中選擇。",
+  "Read {done} scanned pages.": "已辨識 {done} 頁掃描頁。",
+  Remove: "移除",
+  Install: "安裝",
+  "Installing…": "安裝中…",
+  "The download of {name} did not match its checksum and was discarded.": "{name} 的下載與其檢查碼不符，已丟棄。",
+  "Could not download {name}. Check your connection and try again.": "無法下載 {name}，請檢查網路後重試。",
+  "Built in": "內建",
+  "Read again with these": "用所選語言重新辨識",
+  "English is built in. Other languages download once from {host}; no document content is sent.":
+    "英文已內建。其他語言只需從 {host} 下載一次，不會傳送任何文件內容。",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
+    "掃描版 PDF 在本機辨識文字，頁面影像不會離開你的電腦。只有當你安裝某種辨識語言時，才會從 cdn.jsdelivr.net 下載一次語言包，不會傳送任何文件內容。",
 };

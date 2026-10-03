@@ -5,8 +5,13 @@ import { browser } from "wxt/browser";
 import { ContentApp } from "../../lib/content/app";
 import { browserRpc } from "../../lib/content/rpc";
 import { listenForTabMessages } from "../../lib/content/tab-messages";
+import { startEngine } from "../../lib/ocr/engine";
+import { DEFAULT_LANGUAGES, normalizeLanguages } from "../../lib/ocr/languages";
+import { languagePanel } from "../../lib/ocr/panel";
+import { getChoice, getPack, installedPacks, putChoice } from "../../lib/ocr/store";
 import { takeHandoff } from "../../lib/pdf/handoff";
-import { mountViewer } from "../../lib/pdf/viewer";
+import { createScanner, type Scanner } from "../../lib/pdf/scan";
+import { mountViewer, type ScanProgress, type Viewer } from "../../lib/pdf/viewer";
 import { withDefaults } from "../../lib/settings";
 import { initTheme } from "../../lib/theme";
 import { detectPdfSource, type PdfFacts } from "../../lib/source-id";
@@ -15,6 +20,8 @@ import { pick } from "../../lib/ui/pick";
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 const FIRST_PAGE_CHARS = 6000;
+/** Below this mean confidence a scan was probably read in the wrong language. */
+const LOW_CONFIDENCE = 60;
 
 class ReaderError extends Error {
   constructor(readonly kind: "file-access" | "download" | "password" | "invalid") {
@@ -158,19 +165,95 @@ async function main(): Promise<void> {
     root: () => host,
   });
   listenForTabMessages(app);
-  const viewer = await mountViewer(doc, host, { onTextChanged: () => app.invalidate() });
+  const ocrAssets = new URL("ocr/", browser.runtime.getURL("/reader.html")).href;
+  const bar = document.getElementById("scanbar")!;
+  const barStatus = document.getElementById("scanbar-status")!;
+  const barPanel = document.getElementById("scanbar-panel")!;
+  const barToggle = document.getElementById("scanbar-toggle")!;
+  barToggle.textContent = L("语言", "Languages");
+
+  /** What is showing the document now: reading again with other languages replaces it without reloading the page. */
+  let current: { viewer: Viewer; scanner: Scanner; languages: string[]; panelBuilt: boolean } | null = null;
+
+  async function show(): Promise<void> {
+    const installed = new Set(await installedPacks().catch(() => [] as string[]));
+    const languages = normalizeLanguages(
+      ((await getChoice(source.source_id).catch(() => null)) ?? [...DEFAULT_LANGUAGES]).filter((c) => c === "eng" || installed.has(c)),
+    );
+    const scanner = createScanner({
+      // The file itself identifies what was read, so a changed file at the same address is read again.
+      doc: doc.fingerprints[0] ?? source.source_id,
+      languages,
+      start: () =>
+        startEngine(
+          languages,
+          {
+            worker: `${ocrAssets}worker.min.js`,
+            core: `${ocrAssets}tesseract-core-simd-lstm.wasm.js`,
+            bundledPack: `${ocrAssets}eng.traineddata.gz`,
+          },
+          (code) => getPack(code),
+        ),
+    });
+    let scanFound = 0;
+    const onProgress = (p: ScanProgress): void => {
+      scanFound = p.found;
+      if (p.found === 0) return;
+      bar.hidden = false;
+      const left = p.found - p.done - p.failed;
+      barStatus.textContent =
+        left > 0
+          ? L("正在识别扫描页 {done}/{found}…", "Reading scanned page {done} of {found}…", { done: p.done + 1, found: p.found })
+          : p.done === 0
+            ? L("无法识别扫描页。", "Scanned pages could not be read.")
+            : p.confidence !== null && p.confidence < LOW_CONFIDENCE
+              ? L(
+                  "识别结果不太确定，文档可能使用了其他语言，请在「语言」中选择。",
+                  "The reading is uncertain; the document may be in another language. Choose it under Languages.",
+                )
+              : L("已识别 {done} 页扫描页。", "Read {done} scanned pages.", { done: p.done });
+    };
+    barPanel.replaceChildren();
+    barPanel.hidden = true;
+    const viewer = await mountViewer(doc, host, { onTextChanged: () => app.invalidate(), scan: { scanner, onProgress } });
+    current = { viewer, scanner, languages, panelBuilt: false };
+    void viewer.textReady.then((chars) => {
+      if (current?.viewer === viewer && chars === 0 && scanFound === 0) {
+        say(
+          L(
+            "这个 PDF 没有可选中的文字，可能是扫描件；Harkback 无法解释其中的内容。",
+            "This PDF has no selectable text, so it may be a scan; Harkback cannot explain what is in it.",
+          ),
+        );
+      }
+    });
+  }
+
+  async function readAgain(langs: string[]): Promise<void> {
+    await putChoice(source.source_id, normalizeLanguages(langs)).catch(() => undefined);
+    const old = current;
+    current = null;
+    old?.viewer.destroy();
+    await old?.scanner.stop().catch(() => undefined);
+    host.replaceChildren();
+    bar.hidden = true;
+    await show();
+  }
+
+  addEventListener("pagehide", () => void current?.scanner.stop());
+  barToggle.addEventListener("click", async () => {
+    const now = current;
+    if (!now) return;
+    if (!now.panelBuilt) {
+      now.panelBuilt = true;
+      barPanel.append(await languagePanel({ L, choose: { chosen: now.languages, apply: (langs) => void readAgain(langs) } }));
+    }
+    barPanel.hidden = !barPanel.hidden;
+  });
+
+  await show();
   // Opening the reader is the same request as pressing the button on a web page.
   void app.activate().catch(() => undefined);
-  void viewer.textReady.then((chars) => {
-    if (chars === 0) {
-      say(
-        L(
-          "这个 PDF 没有可选中的文字，可能是扫描件；Harkback 无法解释其中的内容。",
-          "This PDF has no selectable text, so it may be a scan; Harkback cannot explain what is in it.",
-        ),
-      );
-    }
-  });
 }
 
 void main();

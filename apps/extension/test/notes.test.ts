@@ -140,6 +140,23 @@ describe("writeNoteFiles", () => {
     expect(files.get("a.md")).toBe(`fresh\n${NOTE_END}\nMy notes\n`);
   });
 
+  it("leaves a file alone that has text but no marker, and says so", async () => {
+    const mine = "My own note about LoRA, written before Harkback.\n";
+    const { dir, files } = fakeDir(undefined, new Map([["a.md", mine]]));
+    const result = await writeNoteFiles(dir, [
+      { filename: "a.md", content: `fresh\n${NOTE_END}\n` },
+      { filename: "b.md", content: "B" },
+    ]);
+    expect(files.get("a.md")).toBe(mine);
+    expect(result).toEqual({ written: 1, failed: ["a.md"] });
+  });
+
+  it("writes into a file that exists but is empty", async () => {
+    const { dir, files } = fakeDir(undefined, new Map([["a.md", ""]]));
+    expect(await writeNoteFiles(dir, [{ filename: "a.md", content: "A" }])).toEqual({ written: 1, failed: [] });
+    expect(files.get("a.md")).toBe("A");
+  });
+
   function fakeDir(failOn?: string, files = new Map<string, string>()) {
     const sub = {
       getFileHandle: async (name: string) => ({

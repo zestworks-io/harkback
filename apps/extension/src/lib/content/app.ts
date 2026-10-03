@@ -155,10 +155,20 @@ export class ContentApp {
       this.watch = setTimeout(() => void this.onPageChanged(), 1500);
     });
     this.observer.observe(document.body ?? document.documentElement, { childList: true, subtree: true, characterData: true });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && this.changedWhileHidden) void this.onPageChanged();
+    });
   }
 
+  /** The page changed while its tab was in the background; it is looked at again when the tab comes back. */
+  private changedWhileHidden = false;
+
   private async onPageChanged(): Promise<void> {
-    if (document.hidden) return;
+    if (document.hidden) {
+      this.changedWhileHidden = true;
+      return;
+    }
+    this.changedWhileHidden = false;
     if (!this.source && location.href !== this.href) {
       // Another page of a single-page app: the rules, the source and the card no longer apply.
       this.href = location.href;

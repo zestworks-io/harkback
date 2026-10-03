@@ -115,9 +115,11 @@ export class EventStore {
               resolve();
             };
             r.onerror = (ev) => {
-              // A duplicate must not abort the whole import.
-              ev.preventDefault();
-              ev.stopPropagation();
+              // A duplicate must not abort the whole import; any other failure (such as a full disk) must.
+              if (r.error?.name === "ConstraintError") {
+                ev.preventDefault();
+                ev.stopPropagation();
+              }
               resolve();
             };
           }),

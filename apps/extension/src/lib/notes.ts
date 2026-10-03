@@ -132,6 +132,11 @@ export async function writeNoteFiles(
     try {
       const handle = await target.getFileHandle(f.filename, { create: true });
       const existing = await readText(handle);
+      // A file that has text but not our marker is the reader's own (or had the marker deleted): it is left as it is.
+      if (existing && !existing.includes(NOTE_END)) {
+        result.failed.push(f.filename);
+        continue;
+      }
       const writable = await handle.createWritable();
       await writable.write(mergeNote(f.content, existing || null));
       await writable.close();

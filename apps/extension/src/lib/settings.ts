@@ -75,7 +75,9 @@ function obj(v: unknown): Record<string, unknown> {
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 const strOrNull = (v: unknown): string | null => (typeof v === "string" ? v : null);
-const num = (v: unknown, fallback: number): number => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
+/** A whole number of at least `min`; anything else (a hand-edited zero, a fraction) would lock requests out or never fire. */
+const count = (v: unknown, fallback: number, min: number): number =>
+  Number.isInteger(v) && (v as number) >= min ? (v as number) : fallback;
 
 function cleanModel(raw: unknown): ModelConfig[] {
   const m = obj(raw);
@@ -125,8 +127,11 @@ export function withDefaults(raw: unknown): Settings {
     defaultModelId: strOrNull(s.defaultModelId),
     localModelId: strOrNull(s.localModelId),
     sites: Array.isArray(s.sites) ? s.sites.flatMap(cleanSite) : [],
-    rateLimit: { perMinute: num(rate.perMinute, d.rateLimit.perMinute), perHour: num(rate.perHour, d.rateLimit.perHour) },
-    reunion: { minGapDays: num(reunion.minGapDays, d.reunion.minGapDays), maxPerPage: num(reunion.maxPerPage, d.reunion.maxPerPage) },
+    rateLimit: { perMinute: count(rate.perMinute, d.rateLimit.perMinute, 1), perHour: count(rate.perHour, d.rateLimit.perHour, 1) },
+    reunion: {
+      minGapDays: count(reunion.minGapDays, d.reunion.minGapDays, 0),
+      maxPerPage: count(reunion.maxPerPage, d.reunion.maxPerPage, 1),
+    },
     backup: {
       enabled: obj(s.backup).enabled === false ? false : d.backup.enabled,
       excludeSensitive: obj(s.backup).excludeSensitive === true,

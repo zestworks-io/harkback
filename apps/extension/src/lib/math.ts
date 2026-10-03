@@ -216,6 +216,11 @@ function plain(frag: DocumentFragment): string {
 export function renderMath(tex: string, block: boolean): HTMLElement {
   const el = block ? h("div", { className: "hb-math hb-math-block" }) : h("span", { className: "hb-math" });
   el.setAttribute("data-tex", tex);
-  new Parser(tokenize(tex)).run(el);
+  try {
+    new Parser(tokenize(tex)).run(el);
+  } catch {
+    // Absurdly nested input runs out of stack; show the source instead of breaking the card.
+    el.replaceChildren(document.createTextNode(tex));
+  }
   return el;
 }

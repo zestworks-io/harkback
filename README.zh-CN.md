@@ -1,18 +1,67 @@
-# Harkback
+<p align="center">
+  <img src="assets/logo.png" alt="Harkback" width="96">
+</p>
 
-[English](README.md) · **简体中文**
+<h1 align="center">Harkback</h1>
 
-**边读边解释术语，记住你弄懂了什么，下次再遇到时把它找回来。**
+<h3 align="center">
+边读边解释术语，记住你弄懂了什么。<br>下次再遇到时，把它找回来。
+</h3>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+  <a href="CHANGELOG.md"><img alt="Version" src="https://img.shields.io/github/package-json/v/zestworks-io/harkback?filename=apps%2Fextension%2Fpackage.json&label=version&color=informational"></a>
+  <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white">
+  <img alt="Node 22+" src="https://img.shields.io/badge/node-%E2%89%A522-339933?logo=nodedotjs&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white">
+  <img alt="Local first" src="https://img.shields.io/badge/data-local--first-success">
+  <a href="https://github.com/zestworks-io/harkback/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/zestworks-io/harkback?style=flat"></a>
+  <a href="https://github.com/zestworks-io/harkback/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/zestworks-io/harkback"></a>
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"></a>
+</p>
+
+<p align="center">
+| <a href="#快速开始"><b>快速开始</b></a> | <a href="#功能"><b>功能</b></a> | <a href="guide/README.md"><b>文档</b></a> | <a href="#隐私"><b>隐私</b></a> | <a href="CHANGELOG.md"><b>更新日志</b></a> | <a href="CONTRIBUTING.md"><b>参与贡献</b></a> |
+</p>
+
+<p align="center"><a href="README.md">English</a> · <b>简体中文</b></p>
 
 Harkback 是一个面向论文与技术文档读者的 Chrome 扩展。选中一个术语，它会结合上下文给出解释；每次解释都会保存到本机的只追加日志里。之后在别的页面再遇到同一个术语（哪怕写法不同），Harkback 会给它加下划线，并告诉你上次是怎么理解的。
 
 > "harken back"：回到先前的某一点。
 
-[![Harkback 在 PDF 中解释 BLEU、回答追问并排版公式](assets/demo.gif)](assets/demo.mp4)
+<p align="center">
+  <a href="assets/demo.mp4"><img src="assets/demo.gif" alt="Demo" width="720"></a>
+  <br><sub>在 PDF 里选中术语、继续追问，整段对话都会被保存。点击动图查看完整视频。</sub>
+</p>
 
-_在 PDF 里选中术语、继续追问，整段对话都会被保存。点击动图查看完整视频。_
+## 快速开始
 
-## 目录
+```sh
+git clone https://github.com/zestworks-io/harkback.git && cd harkback
+pnpm install && pnpm --filter @harkback/extension build
+```
+
+打开 `chrome://extensions`，开启**开发者模式**，选择**加载已解压的扩展程序**，指向 `apps/extension/.output/chrome-mv3`。然后选择模型：
+
+<details open>
+<summary><b>本地模型（免费）</b></summary>
+
+安装 [Ollama](https://ollama.com) 并拉取一个模型，在引导页选择 **Ollama**。点「测试连接」会给出允许扩展访问的那一条命令。数据不会离开你的电脑。
+
+</details>
+
+<details>
+<summary><b>云端模型（使用你自己的 API Key）</b></summary>
+
+选择 OpenAI、Anthropic、Google Gemini、xAI Grok、OpenRouter，或自定义的 OpenAI 兼容地址，填入你的 Key。费用由服务商直接向你收取，Harkback 中间没有服务器。
+
+</details>
+
+然后在任意页面选中术语，按 `Alt+Shift+E`。详见[安装](#安装)与[连接模型](#连接模型)。
+
+<details>
+<summary><b>目录</b></summary>
 
 - [为什么不直接问 ChatGPT？](#为什么不直接问-chatgpt)
 - [功能](#功能)
@@ -29,6 +78,8 @@ _在 PDF 里选中术语、继续追问，整段对话都会被保存。点击�
 - [开发](#开发)
 - [参与贡献](#参与贡献)
 - [许可证](#许可证)
+
+</details>
 
 ## 为什么不直接问 ChatGPT？
 
@@ -176,7 +227,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<你的扩展 ID>"
 
 - 仅支持 Chrome（Manifest V3）。
 - 解释质量取决于你选的模型；较小的本机模型可能生成较弱的概念卡片，这会降低回想质量，但不会影响记录。
-- 无法读取浏览器内置 PDF 阅读器中的文字，所以 Harkback 会在自己的阅读页中打开 PDF（arXiv 论文则跳转到 HTML 版本）。扫描件没有文字，不支持，也没有 OCR；表格、含文字的图、三栏及以上等复杂版式的段落识别只是近似。本地 PDF 需要两步授权：先在 `chrome://extensions` 中为 Harkback 开启「允许访问文件网址」，首次打开时再在阅读页点「允许读取本地文件」。
+- 无法读取浏览器内置 PDF 阅读器中的文字，所以 Harkback 会在自己的阅读页中打开 PDF（arXiv 论文则跳转到 HTML 版本）。扫描件会在本机用 OCR 识别（英文已内置，其他语言各需从 `cdn.jsdelivr.net` 下载一次），比有文字的 PDF 更慢也更不精确，手写、公式和表格无法还原；表格、含文字的图、三栏及以上等复杂版式的段落识别只是近似。本地 PDF 需要两步授权：先在 `chrome://extensions` 中为 Harkback 开启「允许访问文件网址」，首次打开时再在阅读页点「允许读取本地文件」。
 - 自动缩写匹配要求全称至少有三个词（如 `Large Language Model` 得到 `LLM`）。同一领域里对应不同全称的缩写（例如两个不同的「GNN」）会保持为不同概念。
 - 中文名称，以及只用汉字书写的日文名称，至少需要三个字符才会加下划线，以避免误报；含假名或谚文的名称两个字符即可。
 - 匹配时会忽略重音符号（“résumé”与“resume”视为同一术语），但除英语外不做词形还原，因此德语复数等变形会被当作不同术语。

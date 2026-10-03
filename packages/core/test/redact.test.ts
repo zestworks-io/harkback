@@ -91,3 +91,26 @@ describe("sensitive sources stay sensitive", () => {
     expect(replay(l.events).sources.get("s")!.sensitivity).toBe("sensitive");
   });
 });
+
+describe("withoutSensitive with rules of its own", () => {
+  it("also drops a source the rules call sensitive, and what is known only from it", () => {
+    const l = log();
+    l.source("kept", "normal");
+    l.source("ruled", "normal");
+    const open = l.concept("Open");
+    const ruledOnly = l.concept("Ruled only");
+    l.encounter(open, "kept");
+    l.encounter(ruledOnly, "ruled");
+    const out = replay(withoutSensitive(l.events, (s) => s.id === "ruled"));
+    expect([...out.sources.keys()]).toEqual(["kept"]);
+    expect([...out.concepts.values()].map((c) => c.canonicalName)).toEqual(["Open"]);
+    expect(out.encounters.size).toBe(1);
+  });
+
+  it("changes nothing when no rule applies", () => {
+    const l = log();
+    l.source("kept", "normal");
+    l.encounter(l.concept("Open"), "kept");
+    expect(withoutSensitive(l.events, () => false)).toEqual(l.events);
+  });
+});

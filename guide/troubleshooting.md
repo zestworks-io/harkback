@@ -38,7 +38,15 @@ Two approvals are needed, once:
 1. `chrome://extensions` → Harkback → **Details** → turn on **Allow access to file URLs**.
 2. On the reader page, click **Allow local files**.
 
-Scanned PDFs have no text and are not supported (there is no OCR). Complicated layouts (tables, three or more columns) may split paragraphs imperfectly.
+## A scanned PDF shows no text, or the wrong text
+
+A PDF that is only pictures of pages is read with OCR on your computer, page by page as you scroll; the bar at the top shows progress. Reading takes a few seconds per page, and the text becomes selectable as each page finishes. What was read is kept, so the next visit is instant.
+
+- English is built in. For another language, open **Languages** in the bar at the top of the reader (or _Languages for scanned PDFs_ in settings), install it, tick it together with English if the document mixes them, and choose **Read again with these**. The pack is downloaded once from `cdn.jsdelivr.net`; no document content is sent.
+- If the bar says the reading is uncertain, the document is probably in another language than the one chosen.
+- OCR works best on clean, upright pages. Handwriting, formulas and tables are not recovered, and pages that are rotated in the file may not line up with their text.
+
+Complicated layouts (tables, three or more columns) may split paragraphs imperfectly.
 
 ## The shortcut does nothing
 

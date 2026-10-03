@@ -133,7 +133,10 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Save changes": "Änderungen speichern",
   "Back up now": "Jetzt sichern",
   "Harkback settings": "Harkback-Einstellungen",
-  "Models, sites and privacy.": "Modelle, Websites und Datenschutz.",
+  "Models, sites, scanning and privacy.": "Modelle, Websites, Scans und Datenschutz.",
+  General: "Allgemein",
+  "Scanned PDFs": "Gescannte PDFs",
+  "Data and privacy": "Daten und Datenschutz",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "Erklärungen und Antworten auf Folgefragen werden in dieser Sprache verfasst; Fachbegriffe bleiben in ihrer ursprünglichen Form. Die Qualität hängt von Sprache und Modell ab.",
   Models: "Modelle",
@@ -234,4 +237,26 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Leave sensitive sources out of backups and exports": "Sensible Quellen aus Backups und Exporten auslassen",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
     "Unverschlüsseltes http ist nur für diesen Computer (127.0.0.1 / localhost) und für Server in Ihrem eigenen Netzwerk (192.168.x.x, 10.x.x.x, name.local, Tailscale) erlaubt; jede andere Adresse muss https verwenden. Ein Server im eigenen Netzwerk gilt trotzdem als remote. Das lokale Modell (127.0.0.1 / localhost) mit Haken bei „Für sensible Quellen“ wird für sensible Quellen verwendet; sie nutzen nie ein anderes Modell.",
+  "Languages for scanned PDFs": "Sprachen für gescannte PDFs",
+  "Text in scanned PDFs is read on this computer; page images never leave it.":
+    "Text in gescannten PDFs wird auf diesem Computer gelesen; Seitenbilder verlassen ihn nie.",
+  Languages: "Sprachen",
+  "Reading scanned page {done} of {found}…": "Gescannte Seite {done} von {found} wird gelesen…",
+  "Scanned pages could not be read.": "Gescannte Seiten konnten nicht gelesen werden.",
+  "The reading is uncertain; the document may be in another language. Choose it under Languages.":
+    "Das Ergebnis ist unsicher; das Dokument ist möglicherweise in einer anderen Sprache. Wähle sie unter „Sprachen“.",
+  "Read {done} scanned pages.": "{done} gescannte Seiten gelesen.",
+  Remove: "Entfernen",
+  Install: "Installieren",
+  "Installing…": "Wird installiert…",
+  "The download of {name} did not match its checksum and was discarded.":
+    "Der Download von {name} stimmte nicht mit seiner Prüfsumme überein und wurde verworfen.",
+  "Could not download {name}. Check your connection and try again.":
+    "{name} konnte nicht heruntergeladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "Built in": "Eingebaut",
+  "Read again with these": "Mit diesen erneut lesen",
+  "English is built in. Other languages download once from {host}; no document content is sent.":
+    "Englisch ist eingebaut. Andere Sprachen werden einmal von {host} geladen; es werden keine Dokumentinhalte gesendet.",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
+    "Gescannte PDFs werden auf diesem Computer gelesen, Seitenbilder verlassen ihn nie. Ein Sprachpaket wird nur dann einmal von cdn.jsdelivr.net geladen, wenn du eines installierst; es werden keine Dokumentinhalte gesendet.",
 };

@@ -58,6 +58,11 @@ export function effectiveRule(rules: readonly SiteRule[], url: string): Effectiv
   };
 }
 
+/** Whether the reader's site rules call a recorded source sensitive, whatever it was recorded as. */
+export function sensitiveBySiteRule(rules: readonly SiteRule[], source: { ids: { url?: string } }): boolean {
+  return source.ids.url !== undefined && effectiveRule(rules, source.ids.url).sensitive;
+}
+
 /** Match patterns for chrome.permissions / registerContentScripts. Match patterns cannot carry ports. */
 export function hostPermissionPatterns(pattern: string): string[] {
   const p = normalizePattern(pattern);

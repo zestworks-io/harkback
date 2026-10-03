@@ -13,6 +13,7 @@ import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
 import { dueText, daysText } from "../../lib/due";
 import { dueAtOf, intervalDays, nextDueAt, reviewQueue } from "../../lib/review";
 import { explainLanguageOf, withDefaults } from "../../lib/settings";
+import { sensitiveBySiteRule } from "../../lib/site-rules";
 import { initTheme } from "../../lib/theme";
 import { quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
@@ -418,7 +419,12 @@ async function main(): Promise<void> {
 
   function currentConceptId(): string | null {
     const m = /^#concept=(.+)$/.exec(location.hash);
-    return m ? decodeURIComponent(m[1]!) : null;
+    if (!m) return null;
+    try {
+      return decodeURIComponent(m[1]!);
+    } catch {
+      return null; // a hash that is not valid text names no concept
+    }
   }
 
   const onList = (): boolean => currentConceptId() === null && location.hash !== "#review" && location.hash !== "#graph";
@@ -709,7 +715,8 @@ async function main(): Promise<void> {
 
   const exportMd = h("button", { type: "button", "data-hb": "export-md" }, L("导出 Markdown", "Export Markdown"));
   /** The records to export: without sensitive sources when the settings say so. */
-  const exportState = async (): Promise<State> => (settings.backup.excludeSensitive ? replay(withoutSensitive(await store.all())) : state);
+  const exportState = async (): Promise<State> =>
+    settings.backup.excludeSensitive ? replay(withoutSensitive(await store.all(), (s) => sensitiveBySiteRule(settings.sites, s))) : state;
   const download = (text: string, type: string, filename: string): void => {
     const url = URL.createObjectURL(new Blob([text], { type }));
     const a = h("a", { href: url, download: filename });

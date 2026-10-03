@@ -73,6 +73,7 @@ Because replay is a pure function of the log, it is easy to test, including with
 - **IndexedDB `harkback`**: object store `events` (key `id`, unique index on `[device, seq]`) and `meta` (device identity and sequence counter). If the counter is behind the log, a new device id is generated, so an `[device, seq]` clash is impossible.
 - **`chrome.storage.local`**: settings and backup bookkeeping. **`chrome.storage.session`**: the rate limiter's timestamps.
 - **IndexedDB `harkback-pdf`**: a short-lived hand-off of a downloaded PDF to the reader page.
+- **IndexedDB `harkback-ocr`**: downloaded OCR language packs, the text read from scanned pages (keyed by source, page and languages) and the languages chosen per document. All of it can be fetched or computed again, so it is not backed up. The OCR engine's own cache (`keyval-store`) only holds copies of the packs for the worker to load.
 
 Deleting an encounter appends `encounter.deleted`, then `compact()` rewrites the deleted encounter's payloads to `null` in place. Ids, order and tombstones stay, so the log remains valid.
 

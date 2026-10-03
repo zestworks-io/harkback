@@ -7,7 +7,14 @@ export class StateCache {
   constructor(private readonly store: Pick<EventStore, "all">) {}
 
   get(): Promise<State> {
-    this.state ??= this.store.all().then((events) => replay(events));
+    this.state ??= this.store
+      .all()
+      .then((events) => replay(events))
+      .catch((e: unknown) => {
+        // A failed read is not remembered.
+        this.state = null;
+        throw e;
+      });
     return this.state;
   }
 

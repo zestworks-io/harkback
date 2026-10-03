@@ -24,7 +24,7 @@ Explain terms the user selects while reading, keep a private record of what they
 
 ## Remote code
 
-**No.** All code is bundled in the package, including pdf.js. The extension sends requests to the model service the user configured, and does not download or run code from any server.
+**No.** All code is bundled in the package, including pdf.js and the OCR engine (WebAssembly, allowed by `'wasm-unsafe-eval'` in the extension page policy). The only thing the extension downloads is optional OCR language data, which is not code; it is fetched once from a pinned address and checked against a checksum before use. The extension sends requests to the model service the user configured, and does not download or run code from any server.
 
 ## Data usage disclosures
 

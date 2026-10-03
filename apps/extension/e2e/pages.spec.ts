@@ -37,7 +37,7 @@ test("onboarding connects to a local model and saves settings", async ({ context
 test("options save site rules and reject an insecure remote model", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url));
   const page = await context.newPage();
-  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.goto(`chrome-extension://${extensionId}/options.html#sites`);
   await page.locator("[data-hb=add-site]").click();
   await page.locator("[data-hb=site-pattern]").fill("blog.example.com");
   await page.locator("[data-hb=site-sensitive]").check();
@@ -45,6 +45,7 @@ test("options save site rules and reject an insecure remote model", async ({ con
   await expect(page.locator("[data-hb=status]")).toHaveText("已保存。");
   expect((await storedSettings(sw)).sites).toEqual([{ pattern: "blog.example.com", sensitive: true }]);
 
+  await page.locator("[data-hb=tab-models]").click();
   await page.locator("[data-hb=add-model]").click();
   await page.locator("[data-hb=model-base-url]").last().fill("http://api.example.com/v1");
   await page.locator("[data-hb=model-name]").last().fill("gpt");
@@ -90,7 +91,7 @@ test("options pick a provider, which fills the address and decides the format, a
 test("options switch the interface and the explanation language", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
   const page = await context.newPage();
-  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.goto(`chrome-extension://${extensionId}/options.html#general`);
   await expect(page.locator("h1")).toHaveText("Harkback settings");
 
   await page.getByLabel("Interface language").selectOption("ja");

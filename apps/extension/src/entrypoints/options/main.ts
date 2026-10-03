@@ -2,6 +2,7 @@ import { EXPLAIN_LANGUAGES, ulid } from "@harkback/core";
 import { browser } from "wxt/browser";
 import { testConnection } from "../../lib/connection";
 import { h } from "../../lib/dom";
+import { languagePanel } from "../../lib/ocr/panel";
 import { privacyNotes } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage } from "../../lib/pages/setup";
@@ -67,7 +68,11 @@ function trimmed(s: Settings): Settings {
   };
 }
 
+type TabId = "general" | "models" | "sites" | "pdf" | "data";
+const TAB_IDS: readonly TabId[] = ["general", "models", "sites", "pdf", "data"];
+
 async function main(): Promise<void> {
+  let activeTab: TabId = TAB_IDS.find((t) => t === location.hash.slice(1)) ?? "models";
   const draft: Settings = withDefaults((await browser.storage.local.get("settings")).settings);
   applyTheme(draft.theme);
   const root = document.getElementById("app")!;
@@ -94,7 +99,10 @@ async function main(): Promise<void> {
     status.textContent = L("已保存。", "Saved.");
   }
 
+  const ocrHost = h("div", { "data-hb": "ocr-host" });
+
   function render(): void {
+    void languagePanel({ L }).then((panel) => ocrHost.replaceChildren(panel));
     const language = h(
       "select",
       { "aria-label": L("界面语言", "Interface language") },
@@ -276,6 +284,57 @@ async function main(): Promise<void> {
       status.textContent = await backupNow(draft.language);
     });
 
+    const tabs: { id: TabId; label: string }[] = [
+      { id: "general", label: L("常规", "General") },
+      { id: "models", label: L("模型", "Models") },
+      { id: "sites", label: L("网站", "Sites") },
+      { id: "pdf", label: L("扫描版 PDF", "Scanned PDFs") },
+      { id: "data", label: L("数据与隐私", "Data and privacy") },
+    ];
+    const select = (id: TabId): void => {
+      activeTab = id;
+      history.replaceState(null, "", `#${id}`);
+      render();
+      root.querySelector<HTMLElement>(`[data-hb="tab-${id}"]`)?.focus();
+    };
+    const tabBar = h(
+      "div",
+      { className: "tabs", role: "tablist" },
+      ...tabs.map((t, i) => {
+        const b = h(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            id: `tab-${t.id}`,
+            className: "tab",
+            "data-hb": `tab-${t.id}`,
+            "aria-selected": String(activeTab === t.id),
+            "aria-controls": `panel-${t.id}`,
+            tabIndex: activeTab === t.id ? 0 : -1,
+          },
+          t.label,
+        );
+        b.addEventListener("click", () => select(t.id));
+        b.addEventListener("keydown", (e) => {
+          const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (step) {
+            e.preventDefault();
+            select(tabs[(i + step + tabs.length) % tabs.length]!.id);
+          }
+        });
+        return b;
+      }),
+    );
+    const tabPanels = (list: { id: TabId }[], ...groups: Node[][]): Node[] =>
+      list.map((t, i) =>
+        h(
+          "div",
+          { className: "tab-panel", role: "tabpanel", id: `panel-${t.id}`, "aria-labelledby": `tab-${t.id}`, hidden: activeTab !== t.id },
+          ...groups[i]!,
+        ),
+      );
+
     root.replaceChildren(
       h(
         "div",
@@ -284,7 +343,7 @@ async function main(): Promise<void> {
           "div",
           {},
           h("h1", {}, L("Harkback 设置", "Harkback settings")),
-          h("p", { className: "sub" }, L("模型、网站与隐私。", "Models, sites and privacy.")),
+          h("p", { className: "sub" }, L("模型、网站、扫描与隐私。", "Models, sites, scanning and privacy.")),
         ),
         h(
           "div",
@@ -294,93 +353,115 @@ async function main(): Promise<void> {
           language,
         ),
       ),
-      card(
-        L("解释语言", "Explanation language"),
-        L(
-          "解释和追问的回答用这种语言书写；术语保持原文。模型的回答质量因语言而异。",
-          "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.",
-        ),
-        [explainLanguage],
-      ),
-      card(
-        L("模型", "Models"),
-        L(
-          "纯 http 只允许用于本机（127.0.0.1 / localhost）和你自己网络里的服务器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他地址必须使用 https。自己网络里的服务器仍算远程。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
-          'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
-        ),
+      tabBar,
+      ...tabPanels(
+        tabs,
         [
-          ...modelRows,
-          addModel,
-          h(
-            "p",
-            { className: "note" },
+          card(
+            L("解释语言", "Explanation language"),
             L(
-              "API key 未加密保存在浏览器扩展存储中：其他网站和扩展读不到，但能读取本机磁盘的人可以。它只会发送到你填写的模型地址，不会写入备份或日志。建议使用有额度限制的 key，或使用本机模型（无需 key）。",
-              "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).",
+              "解释和追问的回答用这种语言书写；术语保持原文。模型的回答质量因语言而异。",
+              "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.",
             ),
+            [explainLanguage],
           ),
+          card(L("限制与提示", "Limits and hints"), null, [
+            h(
+              "div",
+              { className: "grid four" },
+              field(
+                L("每分钟解释上限（次）", "Explanations per minute"),
+                numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }),
+              ),
+              field(
+                L("每小时解释上限（次）", "Explanations per hour"),
+                numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
+              ),
+              field(
+                L("重逢间隔（天）", "Reunion gap (days)"),
+                numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
+              ),
+              field(
+                L("每页重逢上限（条）", "Reunions per page"),
+                numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
+              ),
+            ),
+          ]),
         ],
-      ),
-      card(
-        L("网站", "Sites"),
-        L(
-          "默认只在 arxiv.org 自动扫描。其他网站可以在这里允许，或标为敏感。",
-          "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.",
-        ),
         [
-          h(
-            "p",
-            { className: "note" },
+          card(
+            L("模型", "Models"),
             L(
-              "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源用」。",
-              '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.',
+              "纯 http 只允许用于本机（127.0.0.1 / localhost）和你自己网络里的服务器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他地址必须使用 https。自己网络里的服务器仍算远程。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
+              'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
             ),
+            [
+              ...modelRows,
+              addModel,
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "API key 未加密保存在浏览器扩展存储中：其他网站和扩展读不到，但能读取本机磁盘的人可以。它只会发送到你填写的模型地址，不会写入备份或日志。建议使用有额度限制的 key，或使用本机模型（无需 key）。",
+                  "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).",
+                ),
+              ),
+            ],
           ),
-          ...siteRows,
-          draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
-          addSite,
         ],
-      ),
-      card(L("限制与提示", "Limits and hints"), null, [
-        h(
-          "div",
-          { className: "grid four" },
-          field(
-            L("每分钟解释上限（次）", "Explanations per minute"),
-            numberInput(draft.rateLimit.perMinute, (v) => (draft.rateLimit.perMinute = v), { min: "1" }),
-          ),
-          field(
-            L("每小时解释上限（次）", "Explanations per hour"),
-            numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
-          ),
-          field(
-            L("重逢间隔（天）", "Reunion gap (days)"),
-            numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
-          ),
-          field(
-            L("每页重逢上限（条）", "Reunions per page"),
-            numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
-          ),
-        ),
-      ]),
-      card(
-        L("备份", "Backup"),
-        null,
         [
-          choice(
-            checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
-            L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
-          ),
-          choice(
-            checkbox(draft.backup.excludeSensitive, (v) => (draft.backup.excludeSensitive = v), { "data-hb": "exclude-sensitive" }),
-            L("备份和导出时不包含敏感来源的内容", "Leave sensitive sources out of backups and exports"),
+          card(
+            L("网站", "Sites"),
+            L(
+              "默认只在 arxiv.org 自动扫描。其他网站可以在这里允许，或标为敏感。",
+              "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.",
+            ),
+            [
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源用」。",
+                  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.',
+                ),
+              ),
+              ...siteRows,
+              draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
+              addSite,
+            ],
           ),
         ],
-        [backupButton],
+        [
+          card(
+            L("扫描版 PDF 的识别语言", "Languages for scanned PDFs"),
+            L(
+              "扫描版 PDF 在本机识别文字，页面图像不会离开你的电脑。",
+              "Text in scanned PDFs is read on this computer; page images never leave it.",
+            ),
+            [ocrHost],
+          ),
+        ],
+        [
+          card(
+            L("备份", "Backup"),
+            null,
+            [
+              choice(
+                checkbox(draft.backup.enabled, (v) => (draft.backup.enabled = v)),
+                L("每周导出 JSONL 到「下载/harkback」", "Export JSONL to Downloads/harkback every week"),
+              ),
+              choice(
+                checkbox(draft.backup.excludeSensitive, (v) => (draft.backup.excludeSensitive = v), { "data-hb": "exclude-sensitive" }),
+                L("备份和导出时不包含敏感来源的内容", "Leave sensitive sources out of backups and exports"),
+              ),
+            ],
+            [backupButton],
+          ),
+          card(L("隐私", "Privacy"), null, [
+            h("ul", { className: "privacy" }, ...privacyNotes(draft.language).map((line) => h("li", {}, line))),
+          ]),
+        ],
       ),
-      card(L("隐私", "Privacy"), null, [
-        h("ul", { className: "privacy" }, ...privacyNotes(draft.language).map((line) => h("li", {}, line))),
-      ]),
       h("div", { className: "savebar" }, h("div", { className: "savebar-inner" }, saveButton, status)),
     );
   }

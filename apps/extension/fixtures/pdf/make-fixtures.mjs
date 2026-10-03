@@ -1,6 +1,8 @@
 // Writes the PDF fixtures used by the tests: node fixtures/pdf/make-fixtures.mjs
 import { writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
+import { deflateSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -89,5 +91,55 @@ const columns = pdf(
   "Two Column Notes",
 );
 
+/** A PDF whose pages are only pictures: each page of `source` drawn as a grey image, with no text in the file. */
+async function scanOf(source, title) {
+  const requireFrom = createRequire(import.meta.url);
+  const pdfjsPackage = requireFrom.resolve("pdfjs-dist/package.json");
+  const { createCanvas } = createRequire(pdfjsPackage)("@napi-rs/canvas");
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const fonts = path.join(path.dirname(pdfjsPackage), "standard_fonts") + "/";
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(source), standardFontDataUrl: fonts, verbosity: 0 }).promise;
+  const SCALE = 3;
+  const objects = [];
+  const add = (body) => objects.push(body) && objects.length;
+  add("<< /Type /Catalog /Pages 2 0 R >>");
+  add("");
+  const kids = [];
+  for (let n = 1; n <= doc.numPages; n++) {
+    const page = await doc.getPage(n);
+    const viewport = page.getViewport({ scale: SCALE });
+    const canvas = createCanvas(Math.floor(viewport.width), Math.floor(viewport.height));
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: context, viewport }).promise;
+    const rgba = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    const grey = Buffer.alloc(canvas.width * canvas.height);
+    for (let i = 0; i < grey.length; i++) grey[i] = rgba[i * 4];
+    const data = deflateSync(grey);
+    const image = add(
+      `<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length ${data.length} >>\nstream\n${data.toString("latin1")}\nendstream`,
+    );
+    const content = "q 612 0 0 792 0 0 cm /Im0 Do Q";
+    const contents = add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 ${image} 0 R >> >> /Contents ${contents} 0 R >>`));
+  }
+  objects[1] = `<< /Type /Pages /Kids [${kids.map((k) => `${k} 0 R`).join(" ")}] /Count ${kids.length} >>`;
+  const info = add(`<< /Title (${esc(title)}) >>`);
+  let out = Buffer.from("%PDF-1.4\n", "latin1");
+  const offsets = [];
+  objects.forEach((body, i) => {
+    offsets.push(out.length);
+    out = Buffer.concat([out, Buffer.from(`${i + 1} 0 obj\n${body}\nendobj\n`, "latin1")]);
+  });
+  const xref = out.length;
+  const table = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}`;
+  return Buffer.concat([
+    out,
+    Buffer.from(`${table}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF\n`, "latin1"),
+  ]);
+}
+
 writeFileSync(path.join(here, "paper.pdf"), paper);
 writeFileSync(path.join(here, "columns.pdf"), columns);
+writeFileSync(path.join(here, "scanned.pdf"), await scanOf(paper, "Adapters for Small Language Models (scan)"));

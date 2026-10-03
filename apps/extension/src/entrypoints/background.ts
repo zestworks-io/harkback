@@ -32,7 +32,7 @@ import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
 import { putHandoff } from "../lib/pdf/handoff";
 import { allowed, readerSource, senderKind } from "../lib/sender-auth";
 import { explainLanguageOf, withDefaults, type Settings } from "../lib/settings";
-import { hostPermissionPatterns, originPattern } from "../lib/site-rules";
+import { hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/site-rules";
 import { arxivHtmlUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
 import { UI_STRINGS } from "../lib/ui/locales/ui";
@@ -42,18 +42,27 @@ const CONTENT_SCRIPT = "/content-scripts/content.js";
 const ALLOWLIST_SCRIPT_ID = "allowlist";
 const BACKUP_ALARM = "backup";
 const BADGE_ALARM = "badge";
+/** Short enough that the event stays under the size limit even if every character takes four bytes. */
+const FOLLOW_UP_ANSWER_CHARS = 12_000;
 
 type Pending = { outcome: ExplainOutcome; req: ExplainRequestMsg; plan: ExplainPlan };
 
 export default defineBackground(() => {
   const extensionOrigin = self.location.origin;
   let services: Promise<{ store: EventStore; cache: StateCache }> | null = null;
-  const getServices = () => (services ??= EventStore.open().then((store) => ({ store, cache: new StateCache(store) })));
+  // A failed open is not remembered: the next request tries again.
+  const getServices = () =>
+    (services ??= EventStore.open()
+      .then((store) => ({ store, cache: new StateCache(store) }))
+      .catch((e: unknown) => {
+        services = null;
+        throw e;
+      }));
   const getState = async () => (await getServices()).cache.get();
   const changes = new BroadcastChannel(CHANGE_CHANNEL);
   const lastLookup = new Map<string, LastLookup>();
   const limiter = new RateLimiter();
-  let limiterLoaded = false;
+  let limiterLoaded: Promise<void> | undefined;
   // Records are written one after another, each from the state the previous one left, so two tabs never both create the same concept.
   let recording: Promise<unknown> = Promise.resolve();
   const inRecordingOrder = <T>(task: () => Promise<T>): Promise<T> => {
@@ -100,11 +109,16 @@ export default defineBackground(() => {
   }
 
   async function acquireRate(settings: Settings): Promise<RateResult> {
-    if (!limiterLoaded) {
-      const saved: unknown = (await browser.storage.session.get("rateStamps")).rateStamps;
-      if (Array.isArray(saved)) limiter.load(saved.filter((t): t is number => typeof t === "number"));
-      limiterLoaded = true;
-    }
+    limiterLoaded ??= browser.storage.session.get("rateStamps").then(
+      ({ rateStamps }) => {
+        if (Array.isArray(rateStamps)) limiter.load(rateStamps.filter((t): t is number => typeof t === "number"));
+      },
+      (e: unknown) => {
+        limiterLoaded = undefined; // a failed read is not remembered
+        throw e;
+      },
+    );
+    await limiterLoaded;
     const result = limiter.tryAcquire(settings.rateLimit, Date.now());
     await browser.storage.session.set({ rateStamps: limiter.stamps() });
     return result;
@@ -255,7 +269,7 @@ export default defineBackground(() => {
           await refundRate();
           throw e;
         });
-        const turn = { question: q, answer: reply.slice(0, 20000) };
+        const turn = { question: q, answer: reply.slice(0, FOLLOW_UP_ANSWER_CHARS) };
         if (!incognito) {
           // Until the explanation itself is recorded there is nothing to attach the conversation to; it is saved right after.
           if (l.encounterId) await saveFollowUp(l.encounterId, turn);
@@ -466,7 +480,8 @@ export default defineBackground(() => {
   async function runBackup(): Promise<void> {
     const { store } = await getServices();
     const all = await store.all();
-    const events = (await loadSettings()).backup.excludeSensitive ? withoutSensitive(all) : all;
+    const settings = await loadSettings();
+    const events = settings.backup.excludeSensitive ? withoutSensitive(all, (s) => sensitiveBySiteRule(settings.sites, s)) : all;
     if (events.length === 0) return;
     const { device } = await store.identity();
     const now = Date.now();

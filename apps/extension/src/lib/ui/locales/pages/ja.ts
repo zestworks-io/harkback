@@ -131,7 +131,10 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Save changes": "変更を保存",
   "Back up now": "今すぐバックアップ",
   "Harkback settings": "Harkback の設定",
-  "Models, sites and privacy.": "モデル、サイト、プライバシー。",
+  "Models, sites, scanning and privacy.": "モデル、サイト、スキャン、プライバシー。",
+  General: "一般",
+  "Scanned PDFs": "スキャンPDF",
+  "Data and privacy": "データとプライバシー",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "解説と追加質問への回答はこの言語で書かれます。専門用語は原文のままです。品質は言語とモデルによって異なります。",
   Models: "モデル",
@@ -230,4 +233,26 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Leave sensitive sources out of backups and exports": "バックアップと書き出しに機密ソースを含めない",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
     "プレーンな http は、このコンピューター（127.0.0.1 / localhost）と自分のネットワーク内のサーバー（192.168.x.x、10.x.x.x、name.local、Tailscale）にのみ許可され、それ以外のアドレスは https が必要です。自分のネットワーク内のサーバーもリモート扱いです。「機密ソース用」にチェックしたローカルモデル（127.0.0.1 / localhost）が機密ソースに使われ、機密ソースは他のモデルを使いません。",
+  "Languages for scanned PDFs": "スキャンPDFの言語",
+  "Text in scanned PDFs is read on this computer; page images never leave it.":
+    "スキャンしたPDFの文字はこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。",
+  Languages: "言語",
+  "Reading scanned page {done} of {found}…": "スキャンページを読み取り中 {done}/{found}…",
+  "Scanned pages could not be read.": "スキャンしたページを読み取れませんでした。",
+  "The reading is uncertain; the document may be in another language. Choose it under Languages.":
+    "読み取り結果に自信がありません。文書が別の言語かもしれません。「言語」で選んでください。",
+  "Read {done} scanned pages.": "スキャンページ {done} 件を読み取りました。",
+  Remove: "削除",
+  Install: "インストール",
+  "Installing…": "インストール中…",
+  "The download of {name} did not match its checksum and was discarded.":
+    "{name} のダウンロードがチェックサムと一致しなかったため破棄しました。",
+  "Could not download {name}. Check your connection and try again.":
+    "{name} をダウンロードできませんでした。接続を確認してもう一度お試しください。",
+  "Built in": "内蔵",
+  "Read again with these": "これらで読み直す",
+  "English is built in. Other languages download once from {host}; no document content is sent.":
+    "英語は内蔵されています。ほかの言語は {host} から一度だけダウンロードされ、文書の内容は送信されません。",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
+    "スキャンしたPDFはこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。言語パックは、インストールしたときだけ cdn.jsdelivr.net から一度ダウンロードされ、文書の内容は送信されません。",
 };
