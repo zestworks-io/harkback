@@ -23,6 +23,14 @@ describe("ankiTsv", () => {
     expect(tags).toBe("harkback ml confused");
   });
 
+  it("never starts a field with a double quote, which the importer would read as a quoted field", () => {
+    const w = world();
+    w.source("s1", "normal", "Paper");
+    w.encounter(w.concept("LoRA"), "s1", '"Frozen" weights');
+    const [, back] = ankiTsv(w.state()).trimEnd().split("\n")[3]!.split("\t");
+    expect(back).toMatch(/^&quot;Frozen&quot; weights/);
+  });
+
   it("is only the header for an empty library", () => {
     expect(ankiTsv(world().state()).trimEnd().split("\n")).toHaveLength(3);
   });

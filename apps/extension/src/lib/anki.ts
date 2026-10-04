@@ -1,7 +1,8 @@
 import type { State } from "@harkback/core";
 import { understandingOf } from "./concept-detail";
 
-const escapeHtml = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Quotes too: a field that starts with one would be read as a quoted field by the importer.
+const escapeHtml = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const field = (s: string): string => escapeHtml(s).replace(/\t/g, " ").replace(/\r?\n/g, "<br>");
 const tag = (s: string): string => s.replace(/[\s,]+/g, "_");
 

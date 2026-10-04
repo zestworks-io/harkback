@@ -38,6 +38,8 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 - A malformed `#concept=` address no longer breaks the History page.
 - Import stopped treating every database error as a duplicate: only duplicates are skipped, and a full disk now fails the import.
 - A follow-up answer in text of four-byte characters could exceed the size limit of an event and be rejected when restoring a backup.
+- A model at an IPv6 address (such as `http://[::1]:8080`) failed with an internal error, because the permission check cannot name such an address; the request is now sent and decides for itself.
+- Anki export: a card whose text begins with a double quote was read by Anki as a quoted field and lost its text; quotes are now escaped.
 - A page that changed while its tab was in the background was not scanned again when the tab came back.
 - Hand-edited rate and reunion limits of zero or a fraction are replaced by the defaults, instead of blocking every request.
 - Absurdly nested formulas no longer break the explanation card.

@@ -105,7 +105,9 @@ export default defineBackground(() => {
   /** Optional host permissions are granted at runtime; without one the request would fail with a vague network error. */
   async function canReach(model: { baseUrl: string }): Promise<boolean> {
     const origin = originPattern(model.baseUrl.trim());
-    return origin === null || (await browser.permissions.contains({ origins: [origin] }));
+    if (origin === null) return true;
+    // Match patterns cannot name an IPv6 address, so asking about one throws; the request itself then decides.
+    return browser.permissions.contains({ origins: [origin] }).catch(() => true);
   }
 
   async function acquireRate(settings: Settings): Promise<RateResult> {
