@@ -43,6 +43,13 @@ describe("renderMarkdown", () => {
     expect(div.textContent).toContain("pic");
   });
 
+  it("keeps balanced parentheses inside a link address", () => {
+    const div = render("[Python](https://en.wikipedia.org/wiki/Python_(programming_language)) is common");
+    const link = div.querySelector(".hb-link")!;
+    expect(link.getAttribute("data-url")).toBe("https://en.wikipedia.org/wiki/Python_(programming_language)");
+    expect(div.textContent).toBe("Python is common");
+  });
+
   it("turns only http(s) links into inert link spans", () => {
     const div = render("[LoRA](https://arxiv.org/abs/2106.09685) and [bad](javascript:alert(1))");
     const links = div.querySelectorAll(".hb-link");

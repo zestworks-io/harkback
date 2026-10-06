@@ -19,9 +19,10 @@ export class RateLimiter {
     return [...this.times];
   }
 
-  /** Gives back the most recent request, for one that failed without costing the model service anything. */
-  release(): void {
-    this.times.pop();
+  /** Gives back the request made at `at`, for one that failed without costing the model service anything. */
+  release(at: number): void {
+    const i = this.times.indexOf(at);
+    if (i >= 0) this.times.splice(i, 1);
   }
 
   tryAcquire(limits: RateLimits, now: number): RateResult {

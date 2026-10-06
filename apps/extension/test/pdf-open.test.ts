@@ -92,6 +92,12 @@ describe("fetchAsDataUrl", () => {
     expect(await fetchAsDataUrl()).toBe("data:application/pdf;base64,QUJD");
   });
 
+  it("leaves a very large file for the reader to download itself", async () => {
+    const big = new Response("x", { headers: { "content-length": String(65 * 1024 * 1024) } });
+    vi.stubGlobal("fetch", async () => big);
+    expect(await fetchAsDataUrl()).toBeNull();
+  });
+
   it("answers null when the download fails", async () => {
     vi.stubGlobal("fetch", async () => new Response("no", { status: 403 }));
     expect(await fetchAsDataUrl()).toBeNull();

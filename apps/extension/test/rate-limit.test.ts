@@ -15,8 +15,18 @@ describe("RateLimiter", () => {
     const r = new RateLimiter();
     r.tryAcquire(limits, 1000);
     r.tryAcquire(limits, 2000);
-    r.release();
+    r.release(2000);
     expect(r.tryAcquire(limits, 3000)).toEqual({ ok: true });
     expect(r.stamps()).toEqual([1000, 3000]);
+  });
+
+  it("gives back the request that failed, not a later one", () => {
+    const r = new RateLimiter();
+    r.tryAcquire(limits, 1000);
+    r.tryAcquire(limits, 2000);
+    r.release(1000);
+    expect(r.stamps()).toEqual([2000]);
+    r.release(5000);
+    expect(r.stamps()).toEqual([2000]);
   });
 });

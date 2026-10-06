@@ -1,14 +1,19 @@
 import type { ModelConfig, Settings } from "./settings";
 import type { EffectiveRule } from "./site-rules";
 
-const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]", "::1"]);
+const LOCAL_HOSTS = new Set(["localhost", "[::1]", "::1"]);
 
+/** This machine: `localhost` and its subdomains, the whole 127.0.0.0/8 loopback range, and `::1`. */
 export function isLocalUrl(url: string): boolean {
+  let host: string;
   try {
-    return LOCAL_HOSTS.has(new URL(url).hostname);
+    host = new URL(url).hostname.toLowerCase();
   } catch {
     return false;
   }
+  if (LOCAL_HOSTS.has(host) || host.endsWith(".localhost")) return true;
+  const v4 = /^127\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  return v4 !== null && [v4[1], v4[2], v4[3]].every((n) => Number(n) <= 255);
 }
 
 /**

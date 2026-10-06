@@ -165,6 +165,10 @@ describe("routing", () => {
   it("recognizes local model addresses and rejects remote http", () => {
     expect(isLocalUrl("http://localhost:11434/v1")).toBe(true);
     expect(isLocalUrl("http://[::1]:8080")).toBe(true);
+    expect(isLocalUrl("http://127.0.0.2:8080")).toBe(true);
+    expect(isLocalUrl("http://llm.localhost:8080")).toBe(true);
+    expect(isLocalUrl("http://127.0.0.300")).toBe(false);
+    expect(isLocalUrl("http://notlocalhost.example.com")).toBe(false);
     expect(isLocalUrl("https://api.example.com")).toBe(false);
     expect(modelUrlError("http://api.example.com/v1")).toBe("insecure");
     expect(modelUrlError("ftp://x")).toBe("invalid");

@@ -82,7 +82,8 @@ const systemOf = (messages: readonly ChatMessage[]): string =>
     .filter((m) => m.role === "system")
     .map((m) => m.content)
     .join("\n\n");
-const userTurns = (messages: readonly ChatMessage[]): string[] => messages.filter((m) => m.role !== "system").map((m) => m.content);
+const turnsOf = (messages: readonly ChatMessage[]): { role: "user" | "assistant"; content: string }[] =>
+  messages.flatMap((m) => (m.role === "system" ? [] : [{ role: m.role, content: m.content }]));
 
 const openai: Adapter = {
   url: (cfg) => `${normalizeBaseUrl(cfg.baseUrl)}/chat/completions`,
@@ -127,7 +128,7 @@ const anthropic: Adapter = {
       max_tokens: 4096,
       stream: true,
       ...(system && { system }),
-      messages: userTurns(messages).map((content) => ({ role: "user", content })),
+      messages: turnsOf(messages),
       ...(opts.temperature !== undefined && { temperature: opts.temperature }),
     };
   },
@@ -162,7 +163,10 @@ const gemini: Adapter = {
     const system = systemOf(messages);
     return {
       ...(system && { systemInstruction: { parts: [{ text: system }] } }),
-      contents: userTurns(messages).map((content) => ({ role: "user", parts: [{ text: content }] })),
+      contents: turnsOf(messages).map(({ role, content }) => ({
+        role: role === "assistant" ? "model" : "user",
+        parts: [{ text: content }],
+      })),
       ...(opts.temperature !== undefined && { generationConfig: { temperature: opts.temperature } }),
     };
   },

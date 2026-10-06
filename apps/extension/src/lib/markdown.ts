@@ -10,11 +10,11 @@ const INLINE = new RegExp(
     String.raw`(\$(?:[^\s$]|[^\s$][^$\n]*?[^\s$])\$(?!\d)|\\\([^\n]+?\\\))`,
     String.raw`(\*\*[^*\n]+\*\*|(?<!${WORD})__[^_\n]+__(?!${WORD}))`,
     String.raw`(\*[^*\s][^*\n]*\*|(?<!${WORD})_[^_\s](?:[^_\n]*[^_\s])?_(?!${WORD}))`,
-    String.raw`(!?\[[^\]\n]*\]\([^)\s]*\))`,
+    String.raw`(!?\[[^\]\n]*\]\((?:[^()\s]|\([^()\s]*\))*\))`,
   ].join("|"),
   "gu",
 );
-const LINK = /^(!?)\[([^\]\n]*)\]\(([^)\s]*)\)$/;
+const LINK = /^(!?)\[([^\]\n]*)\]\(((?:[^()\s]|\([^()\s]*\))*)\)$/;
 
 function safeUrl(raw: string): string | null {
   try {

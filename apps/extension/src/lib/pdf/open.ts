@@ -24,7 +24,11 @@ export async function fetchAsDataUrl(): Promise<string | null> {
   try {
     const res = await fetch(location.href, { credentials: "include" });
     if (!res.ok) return null;
+    // A data: URL costs about a third more memory than the file, in the page, the message and the database; a very large
+    // file is left for the reader to download itself.
+    if (Number(res.headers.get("content-length")) > 64 * 1024 * 1024) return null;
     const blob = await res.blob();
+    if (blob.size > 64 * 1024 * 1024) return null;
     return await new Promise<string | null>((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);

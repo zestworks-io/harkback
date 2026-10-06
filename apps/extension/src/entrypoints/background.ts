@@ -110,7 +110,7 @@ export default defineBackground(() => {
     return browser.permissions.contains({ origins: [origin] }).catch(() => true);
   }
 
-  async function acquireRate(settings: Settings): Promise<RateResult> {
+  async function acquireRate(settings: Settings, now: number): Promise<RateResult> {
     limiterLoaded ??= browser.storage.session.get("rateStamps").then(
       ({ rateStamps }) => {
         if (Array.isArray(rateStamps)) limiter.load(rateStamps.filter((t): t is number => typeof t === "number"));
@@ -121,14 +121,14 @@ export default defineBackground(() => {
       },
     );
     await limiterLoaded;
-    const result = limiter.tryAcquire(settings.rateLimit, Date.now());
+    const result = limiter.tryAcquire(settings.rateLimit, now);
     await browser.storage.session.set({ rateStamps: limiter.stamps() });
     return result;
   }
 
   /** A request that failed before any answer arrived did not use up the budget. */
-  async function refundRate(): Promise<void> {
-    limiter.release();
+  async function refundRate(at: number): Promise<void> {
+    limiter.release(at);
     await browser.storage.session.set({ rateStamps: limiter.stamps() }).catch(() => undefined);
   }
 
@@ -203,7 +203,8 @@ export default defineBackground(() => {
         if (planned.kind === "error") return post({ type: "error", code: planned.code });
         const { plan } = planned;
         if (!(await canReach(plan.model))) return post({ type: "error", code: "no_permission" });
-        const rate = await acquireRate(settings);
+        const asked = Date.now();
+        const rate = await acquireRate(settings, asked);
         if (!rate.ok) return post({ type: "error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         const raw = await streamChat(
           plan.model,
@@ -213,7 +214,7 @@ export default defineBackground(() => {
             signal: begin(),
           },
         ).catch(async (e: unknown) => {
-          await refundRate();
+          await refundRate(asked);
           throw e;
         });
         const outcome = finishExplain(raw, plan, req);
@@ -256,7 +257,8 @@ export default defineBackground(() => {
         const routed = routeFollowUp(l.req, { url, incognito }, settings, await getState());
         if (routed.kind === "error") return post({ type: "followup_error", code: routed.code });
         if (!(await canReach(routed.model))) return post({ type: "followup_error", code: "no_permission" });
-        const rate = await acquireRate(settings);
+        const asked = Date.now();
+        const rate = await acquireRate(settings, asked);
         if (!rate.ok) return post({ type: "followup_error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
         const messages = buildFollowUpPrompt({
           term: l.req.selection,
@@ -268,7 +270,7 @@ export default defineBackground(() => {
         const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), {
           signal: begin(),
         }).catch(async (e: unknown) => {
-          await refundRate();
+          await refundRate(asked);
           throw e;
         });
         const turn = { question: q, answer: reply.slice(0, FOLLOW_UP_ANSWER_CHARS) };
@@ -479,7 +481,15 @@ export default defineBackground(() => {
     return reply.url;
   }
 
-  async function runBackup(): Promise<void> {
+  // The alarm and the "back up now" button can fire together; two runs at once would overwrite each other's download list.
+  let backingUp: Promise<unknown> = Promise.resolve();
+  function runBackup(): Promise<void> {
+    const run = backingUp.then(writeBackup);
+    backingUp = run.catch(() => undefined);
+    return run;
+  }
+
+  async function writeBackup(): Promise<void> {
     const { store } = await getServices();
     const all = await store.all();
     const settings = await loadSettings();

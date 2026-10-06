@@ -246,6 +246,22 @@ describe("streamChat with the Anthropic API", () => {
     expect(call.body.max_tokens).toBeGreaterThan(0);
   });
 
+  it("keeps who said what when earlier answers are sent back", async () => {
+    const { calls, fetchImpl } = capture(okStream);
+    const thread = [
+      system,
+      { role: "user" as const, content: "q" },
+      { role: "assistant" as const, content: "a" },
+      { role: "user" as const, content: "q2" },
+    ];
+    await streamChat(claude, thread, () => {}, { fetchImpl });
+    expect(calls[0]!.body.messages).toEqual([
+      { role: "user", content: "q" },
+      { role: "assistant", content: "a" },
+      { role: "user", content: "q2" },
+    ]);
+  });
+
   it("only sends a temperature when asked and tolerates a pasted /messages address", async () => {
     const { calls, fetchImpl } = capture(okStream);
     await streamChat({ ...claude, baseUrl: "https://api.anthropic.com/v1/messages" }, messages, () => {}, { fetchImpl });
