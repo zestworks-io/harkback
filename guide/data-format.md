@@ -61,12 +61,14 @@ Limits: names ≤ 80 characters, ≤ 8 aliases, selection ≤ 200, explanation �
 
 ## Source ids
 
-A source is identified, in this order, by `arxiv:<id>`, `doi:<doi>`, or `url:<canonical or cleaned URL>` (tracking parameters and the fragment removed). A YouTube video is `youtube:<video id>` whichever address it was reached by, with `ids.url` set to `https://www.youtube.com/watch?v=<id>`; its encounters carry the playback position in `locator.t` (whole seconds). `t` is optional and absent from every other source. A local PDF is identified by `pdf:sha256:<hash>`, and its path is never recorded.
+A source is identified, in this order, by `arxiv:<id>`, `doi:<doi>`, or `url:<canonical or cleaned URL>` (tracking parameters and the fragment removed). A page of a site with a profile (`lib/source/site-profiles.ts`) is `github:<owner>/<repo>` or `github:<owner>/<repo>#<number>` (lower case), `notion:<32 hex digits>`, `gdoc:<document id>` or `gdoc:e/<publishing id>`, however its address is written. A YouTube video is `youtube:<video id>` whichever address it was reached by, with `ids.url` set to `https://www.youtube.com/watch?v=<id>`; its encounters carry the playback position in `locator.t` (whole seconds). `t` is optional and absent from every other source. A local PDF is identified by `pdf:sha256:<hash>`, and its path is never recorded.
 
 ## Replay rules worth knowing
 
 - **Concepts that are the same are merged by replay**, not by an event: equal names within a domain, a name that is another concept's alias, an abbreviation and its single full name (three or more words). Explicit `concept.merged` events are applied too.
 - **Sensitive is sticky.** A later `source.seen` with `sensitivity: "normal"` is ignored unless it has `by_user: true`.
+- **The reader's choice is remembered.** A `source.seen` with `by_user: true` marks the source as one the reader decided about, whichever sensitivity it carries. A page that looks private is not asked about again once its source, its paper under another id, or its repository has such a record.
+- **A repository passes sensitivity to its issues.** A source `github:owner/repo#12` is sensitive when `github:owner/repo` is, unless the reader recorded `normal` (with `by_user: true`) for the issue itself, and did so after the repository was last marked by the reader.
 - **Deleting is a tombstone.** `encounter.deleted` hides the encounter; compaction clears the payloads of the encounter and its actions to `null`.
 - **Edges** are keyed by `(from, rel, to)` of the representatives; repeated proposals merge, taking the highest confidence. An edge below confidence 0.7 is not shown unless confirmed.
 - **Unknown references** (an action for an encounter you do not have, an alias for an unknown concept) are ignored. Some are listed in `state.warnings`.

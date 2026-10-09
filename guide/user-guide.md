@@ -13,6 +13,8 @@
 - [History](#history)
 - [Export, backup and restore](#export-backup-and-restore)
 - [Site rules](#site-rules)
+- [GitHub, Notion and Google Docs](#github-notion-and-google-docs)
+- [Pages that look private](#pages-that-look-private)
 - [Keyboard and shortcuts](#keyboard-and-shortcuts)
 
 ## Explaining
@@ -151,7 +153,7 @@ Under _Sites_ in settings, each rule has a pattern and three switches, plus an o
 - **Auto-scan**, **Sensitive**, **Disabled** – each can be inherited, on or off. Click a box to cycle: dash (inherit), ticked (on), empty (off).
 - **Model** – use this model on matching pages instead of the default.
 
-When several rules match a page, each setting comes from the **most specific** rule that sets it: a URL prefix beats a domain, and a longer pattern beats a shorter one. So you can mark a whole site sensitive and switch that off for one public path, or the other way round.
+When several rules match a page, each setting comes from the **most specific** rule that sets it: a URL prefix beats a domain, and a longer pattern beats a shorter one. So you can mark a whole site sensitive and switch that off for one public path, or the other way round. A rule that says a site is _not_ sensitive settles it for the pages of that site, except a page that says it is private (see [Pages that look private](#pages-that-look-private)): that one still asks you once.
 
 **Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
 
@@ -164,6 +166,33 @@ Add YouTube under _Sites_ with the _+ YouTube captions_ button, press _Save chan
 - **Records.** The lookup is a normal record with the playback position. In History, Review and the exports the position shows as `12:34`, and the source link opens the video at that moment. A video is one source however you reached it (`watch`, `youtu.be`, a playlist or a start-time link).
 - **Privacy.** Only the caption line on screen is read; no caption file is downloaded. The underlines are drawn by Harkback, not in YouTube's page. A _Sensitive_ rule for `youtube.com` makes explanations use a local model, as on any site. The _Preview_ button is not offered on video pages.
 - **Limits.** Auto-generated captions misspell technical terms and a misspelt term will not match. Only `youtube.com/watch` is supported; in full-screen mode the player hides Harkback's hints (use theater mode).
+
+## GitHub, Notion and Google Docs
+
+Add the site under _Sites_ and press _Save changes_, as for any site; allow site access when the browser asks. Nothing runs there before that. These pages are then read by their own layout, so only the document's text is scanned, not the menus around it, and a document is one source however you reached it.
+
+| Site        | What is read                                                                                     | Source id                                      |
+| ----------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| GitHub      | A repository's home page (its README), an issue's or pull request's conversation (any tab of it) | `github:owner/repo`, `github:owner/repo#12`    |
+| Notion      | A page, including a database row opened in a peek (the row is the source, not the database)      | `notion:<page id>`                             |
+| Google Docs | A document in its published (`/pub`) or mobile (`/mobilebasic`) view                             | `gdoc:<document id>`, `gdoc:e/<publishing id>` |
+
+- **Not covered.** Code files and other GitHub pages, Notion database views, and the Google Docs editor. The editor draws its text instead of writing it, so there is nothing to read: the toolbar button says so, and the published or mobile view of the same document works. The Docs _preview_ view has not been checked.
+- **Long Notion pages.** Notion only draws the blocks near the screen, so a very long page may be read in part.
+- **When a site changes.** Harkback finds the text by the site's current layout. If it no longer recognises the layout, the page is read as any other page would be until Harkback is updated.
+
+## Pages that look private
+
+Many pages on these sites are private. Harkback cannot see who may open a page, so it goes by what the page suggests, and asks when it is not sure. Before anything is sent to a model:
+
+- **A private GitHub repository** (the page says so) and **a Notion or Google Docs page that is not published** are held back. On Notion and Google Docs, a published page (`*.notion.site`, a Google document opened through its published link) is treated as public and is not held back.
+- **You are asked once**, in the card when you first explain something there, or in the small lock at the corner of the page. _Local only_ marks the source sensitive, so explanations use your local model and fail if you have none. _Send anyway_ goes to your usual model. Tick _Remember for this site_ to make the answer a rule for the whole site.
+- **The answer is yours and is kept.** It is recorded with the source, so you are not asked again about it (nor about the issues of a repository you chose for). In a private window nothing is recorded, and the answer holds until you close or reload the page.
+- **The lock.** A page that is sensitive, or would be asked about, shows a small lock. On a sensitive page, press it to mark the page normal again; on a page that would be asked about, press it to answer before you select anything. If a site rule is what makes the page sensitive, the lock says so and cannot change it: edit the rule under _Sites_. A page that is fine shows nothing.
+- **The page preview** (the toolbar button) shows the same question instead of offering to scan, and scans only after you have answered. Underlining terms you know needs no model and never asks.
+- **A repository's issues** are as sensitive as the repository. If you mark an issue itself as fine, that overrides it for that issue, unless you mark the repository sensitive again afterwards.
+
+What a page suggests about itself is only a hint. If a page must never leave your computer, mark its site or path sensitive under _Sites_; that is always followed.
 
 ## Keyboard and shortcuts
 

@@ -35,7 +35,7 @@ Inside `apps/extension/src/lib`, the same idea, by what the code is about. The t
 | `review/`                                   | The review schedule: FSRS, due dates, order, prerequisite gaps, the toolbar badge, "check my answer".        |
 | `records/`                                  | Views of what was recorded: concept pages, names, graph, history, digest, reunion cards.                     |
 | `explain/`                                  | Turning a selection or a page into a request for a model: the plan, the page preview.                        |
-| `source/`                                   | Where the text comes from: page extraction, source ids, site rules.                                          |
+| `source/`                                   | Where the text comes from: page extraction, source ids, site rules, per-site profiles and the privacy gate.  |
 | `storage/`                                  | The event store, its cache, backups and settings.                                                            |
 | `messaging/`                                | The messages between content script, background and pages, and who may send which.                           |
 | `export/`                                   | Anki and note-folder export.                                                                                 |
@@ -73,7 +73,7 @@ Keep `packages/core` and `packages/spec` free of browser APIs. They run in plain
 ## An explanation, step by step
 
 1. The content script builds an `ExplainRequestMsg`: selection, paragraph (windowed around the selection), section, title, source id, locator.
-2. The background routes it (`lib/explain/explain.ts`, `lib/models/model-policy.ts`): the site rule (disabled? sensitive? which model?), the model the user picked after a failure, and the sensitivity of the source. Sensitive sources may only use a local model.
+2. The background routes it (`lib/explain/explain.ts`, `lib/models/model-policy.ts`): the site rule (disabled? sensitive? which model?), the model the user picked after a failure, and the sensitivity of the source. Sensitive sources may only use a local model. Before a model is chosen, the privacy gate (`lib/source/privacy-gate.ts`) decides whether the page is sensitive, fine, or must be asked about; in the last case nothing is planned, and the reader's answer comes back as a new request.
 3. It checks that Chrome granted the model's address, takes a slot from the local rate limiter, and streams the reply (`lib/models/model-client.ts`). Three adapters (OpenAI-compatible, Anthropic, Gemini) turn each service's stream into text. A stream only counts as complete if the service says it finished.
 4. `parseModelOutput` (`packages/core/src/llm/parse-output.ts`) reads the three blocks `<explanation>`, `<evidence>`, `<card>` and tolerates truncation, trailing commas and decorated labels. `verifyEvidence` checks the quote against the page text and decides the tier: _defined in source_ or _external knowledge_.
 5. `resolveConcept` decides whether the term is a known concept: the model may name a candidate (`c1`), or the best candidate may be close enough that the user is asked.
@@ -115,13 +115,15 @@ Report vulnerabilities as described in [SECURITY.md](../SECURITY.md).
 
 ## Where to change things
 
-| You want to…                      | Look at                                                                                                                                            |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Add a model provider              | `lib/models/providers.ts` (and an adapter in `lib/models/model-client.ts` if its format is new)                                                    |
-| Change how names are matched      | `packages/core/src/concepts/normalize.ts`, `matcher.ts`, and `events/replay-concepts.ts`                                                           |
-| Change reunion rules              | `packages/core/src/concepts/reunion.ts`, `packages/core/src/constants.ts`                                                                          |
-| Change the prompt or reply format | `packages/core/src/llm/prompt.ts`, `parse-output.ts`                                                                                               |
-| Change the review schedule        | `lib/review/review.ts` (replay), `lib/review/fsrs.ts` (the memory model), `lib/review/prerequisites.ts` (order), `lib/review/foundation.ts` (gaps) |
-| Add an event type or field        | `packages/spec/src/schema.ts`, then `packages/core/src/events/replay.ts`; regenerate the schema                                                    |
-| Add a page setting                | `lib/storage/settings.ts` (type, default, `withDefaults`, `validateSettings`), then `entrypoints/options`                                          |
-| Add a language                    | see [CONTRIBUTING](../CONTRIBUTING.md#adding-a-language)                                                                                           |
+| You want to…                        | Look at                                                                                                                                            |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a model provider                | `lib/models/providers.ts` (and an adapter in `lib/models/model-client.ts` if its format is new)                                                    |
+| Change how names are matched        | `packages/core/src/concepts/normalize.ts`, `matcher.ts`, and `events/replay-concepts.ts`                                                           |
+| Change reunion rules                | `packages/core/src/concepts/reunion.ts`, `packages/core/src/constants.ts`                                                                          |
+| Change the prompt or reply format   | `packages/core/src/llm/prompt.ts`, `parse-output.ts`                                                                                               |
+| Change the review schedule          | `lib/review/review.ts` (replay), `lib/review/fsrs.ts` (the memory model), `lib/review/prerequisites.ts` (order), `lib/review/foundation.ts` (gaps) |
+| Add an event type or field          | `packages/spec/src/schema.ts`, then `packages/core/src/events/replay.ts`; regenerate the schema                                                    |
+| Support another site's pages        | `lib/source/site-profiles.ts`: a profile gives a page's source id, where its text is, and a privacy hint; the generic path is the fallback         |
+| Change what is asked before sending | `lib/source/privacy-gate.ts` (the order of the checks), `lib/source/site-rules.ts` (private-by-default sites)                                      |
+| Add a page setting                  | `lib/storage/settings.ts` (type, default, `withDefaults`, `validateSettings`), then `entrypoints/options`                                          |
+| Add a language                      | see [CONTRIBUTING](../CONTRIBUTING.md#adding-a-language)                                                                                           |

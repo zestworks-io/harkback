@@ -2,20 +2,26 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## Unreleased
+## 1.0.2 - 2026-10-09
 
 ### Added
 
+- **GitHub, Notion and Google Docs.** Add the site under Settings → Sites and its pages are read by their own layout: a repository's README, the conversation of an issue or pull request, a Notion page (including a database row opened in a peek), a Google document in its published or mobile view. Each is one source however its address is written (`github:owner/repo#12`, `notion:<page id>`, `gdoc:<document id>`), and only the document's text is read, not the navigation around it. Where a layout is not recognised, the page is read as before. The Google Docs editor draws its text and cannot be read; the toolbar button says so and points to the published or mobile view.
+- **A page that looks private is asked about before anything is sent.** A private GitHub repository, or a page on Notion or Google Docs that is not published, is not sent to any model until you choose _Local only_ or _Send anyway_, in the card or in a small lock at the corner of the page. The choice is recorded as your own, can be remembered for the site, and in a private window holds for that page only. A sensitive page shows the lock too, and pressing it marks the page normal again (unless a site rule makes it sensitive, which the lock only reports).
 - **YouTube captions.** Add YouTube under Settings → Sites (_+ YouTube captions_) and, with captions (CC) on, terms you have looked up before are underlined in the caption line of a watch page. Hover an underline to see what you understood last time; pause the video and select a term to explain it, and the explanation uses the captions you have already watched as its context. A lookup on a video is recorded like any other, with the playback position: concept pages, review cards, reunion hints and exports show it as `12:34`, and History and Review open the video at that moment. Nothing is downloaded: Harkback reads only the captions the player is showing, and it does nothing on YouTube until you add the site. A video is one source (`youtube:<id>`) however you reached it. The event format gains an optional `locator.t` (whole seconds); logs without it replay as before.
 - **Suggested research sites.** Settings → Sites has a _Suggested research sites_ button that adds auto-scan rules for bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology in one step. It skips sites that already have a rule and never changes one you edited. Saving asks the browser for site access once for all of them.
 
 ### Changed
 
+- **An issue or pull request is as sensitive as its repository.** Marking a repository sensitive covers its issues and pull requests, recorded or not. Saying that one issue is fine overrides this for that issue, unless you mark the repository again afterwards.
+- **A site-wide "not sensitive" rule no longer hides a page that says it is private.** On a private-looking page you are asked once, and the answer is kept for that source.
+- **The card does not offer to mark a source sensitive when it already is.**
 - **More abbreviations are treated as ambiguous.** Common medical and machine-learning abbreviations (MS, CAD, PE, RA, CT, AD, PD, ER, CI, GAN, RNN, SVM) and any short key shared by two concepts, even in the same field, now underline only when another term from that field is also on the page.
 - **A paper seen under its arXiv id and its DOI counts as one source.** A reunion no longer calls a term new to a paper when you met it in the same paper under its other id. Existing records are unchanged.
 
 ### Fixed
 
+- "Check my answer", comparing with an earlier look-up, and backups and exports that leave out sensitive sources now treat a paper as sensitive under either of its ids, and an issue as sensitive when its repository is. They used to look only at the id a source was recorded under.
 - A term selected in another language no longer creates a second concept. When the model's card gives the English name of a concept you already have (as its name or one of its aliases, in the same field), the lookup joins that concept and adds the selected text as an alias, so the next page matches either language. Names shared by several concepts, or by concepts in another field, still stay separate.
 
 ## 1.0.1 - 2026-10-09

@@ -37,6 +37,20 @@ Sensitivity is **sticky**. Once a source is sensitive, only your own choice (**M
 
 A site rule that matches a source applies even to records made before the rule existed. Rules can be switched off for a more specific path; see [Site rules](user-guide.md#site-rules).
 
+## Pages that look private
+
+Most pages on GitHub, Notion and Google Docs are private, and a page looks the same to Harkback whether or not you may share it. So it goes by hints and asks when it is unsure, **before anything is sent**:
+
+- a GitHub page that says its repository is private, and a Notion or Google Docs page that is not published, are held back until you choose _Local only_ (the source becomes sensitive) or _Send anyway_ (the usual model);
+- a published page (`*.notion.site`, a Google document's published link) is not held back;
+- your choice is recorded as your own and can be remembered for the whole site as a rule; a rule for a site never silently hides a page that says it is private;
+- in a private window the choice is not recorded and holds until you close or reload the page;
+- the check happens in the background worker, in the same place that picks the model, so the page cannot skip it. The toolbar's page preview shows the same question before it offers to scan; underlining terms you know uses no model and never asks.
+
+A hint can be wrong or missing, for example after a site changes its layout. Mark a site or path **Sensitive** when the content must never leave your computer; that is always followed and needs no hint.
+
+An issue or pull request is as sensitive as its repository. Saying that one issue is fine overrides that for it alone, unless the repository is marked sensitive again afterwards.
+
 ## Private windows
 
 Incognito windows must be allowed for the extension in Chrome. In them Harkback explains but never records, scans or shows reunions, and every write request is refused.
