@@ -18,4 +18,23 @@ export const MATCH_RULES = {
 } as const;
 
 /** Keys are compared in lower case. Maintained from evaluation results. */
-export const DEFAULT_AMBIGUOUS_ACRONYMS: ReadonlySet<string> = new Set(["sam", "rl", "moe", "gp"]);
+export const DEFAULT_AMBIGUOUS_ACRONYMS: ReadonlySet<string> = new Set([
+  // machine learning
+  "sam",
+  "rl",
+  "moe",
+  "gp",
+  "gan",
+  "rnn",
+  "svm",
+  // medicine
+  "ms",
+  "cad",
+  "pe",
+  "ra",
+  "ct",
+  "ad",
+  "pd",
+  "er",
+  "ci",
+]);

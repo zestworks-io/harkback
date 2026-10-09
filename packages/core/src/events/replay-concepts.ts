@@ -1,5 +1,5 @@
 import type { Domain, HarkEvent } from "@harkback/spec";
-import { DEFAULT_AMBIGUOUS_ACRONYMS } from "../constants";
+import { DEFAULT_AMBIGUOUS_ACRONYMS, MATCH_RULES } from "../constants";
 import { acronymOf, identityKey, normalizeName } from "../concepts/normalize";
 import type { AliasInfo, ConceptState } from "./state";
 import { MinUnionFind } from "./union-find";
@@ -183,8 +183,13 @@ export function resolveConcepts(
   for (const info of aliases.values()) {
     info.conceptIds.sort();
     const domains = new Set(info.conceptIds.map((cid) => concepts.get(cid)!.domain));
+    // A short key shared by several concepts is probably an abbreviation of each, even within one field.
+    const sharedShort = info.key.length <= MATCH_RULES.shortAcronymMaxLength && info.conceptIds.length > 1;
     info.ambiguous =
-      domains.size > 1 || ambiguousAcronyms.has(info.key.toLowerCase()) || (derivedKeys.has(info.key) && info.conceptIds.length > 1);
+      domains.size > 1 ||
+      ambiguousAcronyms.has(info.key.toLowerCase()) ||
+      (derivedKeys.has(info.key) && info.conceptIds.length > 1) ||
+      sharedShort;
   }
 
   return { concepts, representative, aliases, warnings };

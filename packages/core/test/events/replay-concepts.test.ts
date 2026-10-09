@@ -43,6 +43,23 @@ describe("resolveConcepts", () => {
     expect(r.aliases.get("SAM")?.ambiguous).toBe(true);
   });
 
+  it("marks common medical and ML abbreviations as ambiguous, and keeps the list overridable", () => {
+    for (const name of ["MS", "CAD", "PE", "RA", "CT", "AD", "PD", "ER", "CI", "GAN", "RNN", "SVM"]) {
+      expect(resolve([concept(1, name)]).aliases.get(name)?.ambiguous, name).toBe(true);
+    }
+    const none = resolveConcepts(canonicalOrder([concept(1, "MS")]), new Set());
+    expect(none.aliases.get("MS")?.ambiguous).toBe(false);
+  });
+
+  it("marks a short key shared by two concepts of one field as ambiguous, but not a long one", () => {
+    const short = resolve([concept(1, "Foo Bar Baz", "ml", ["FBZ"]), concept(2, "Fast Bit Zip", "ml", ["FBZ"])]);
+    expect(short.aliases.get("FBZ")?.conceptIds).toHaveLength(2);
+    expect(short.aliases.get("FBZ")?.ambiguous).toBe(true);
+    const long = resolve([concept(1, "Alpha One", "ml", ["Alphaxlong"]), concept(2, "Alpha Two", "ml", ["Alphaxlong"])]);
+    expect(long.aliases.get("alphaxlong")?.conceptIds).toHaveLength(2);
+    expect(long.aliases.get("alphaxlong")?.ambiguous).toBe(false);
+  });
+
   it("applies aliases added later and warns about unknown concepts", () => {
     const r = resolve([
       concept(1, "LoRA"),
