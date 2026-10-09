@@ -156,6 +156,8 @@ pnpm --filter @harkback/extension build
 
 Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `apps/extension/.output/chrome-mv3`. The onboarding page opens on install.
 
+**Microsoft Edge.** Run `pnpm build -b edge` in `apps/extension` (or `pnpm zip:edge`), open `edge://extensions`, turn on **Developer mode**, choose **Load unpacked** and select `apps/extension/.output/edge-mv3`. Edge may not offer Chrome's built-in model; choose another model in setup.
+
 ## Connect a model
 
 Onboarding is three steps: **Welcome** (an example reunion hint and a built-in example explanation you can try without calling any model), **Privacy** (where your text goes; you must tick the consent box before _Next_ is enabled) and **Model** (pick a provider, then _Finish_). Running onboarding again updates the model you already have instead of adding a copy. You can add more models and change options later on the settings page, which also sets rate limits, reunion hints and how long a model may stay quiet before a request is given up.
@@ -235,7 +237,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 
 ## Limitations
 
-- Chrome (Manifest V3) only.
+- Chrome and Microsoft Edge (Manifest V3). Firefox and Safari are not supported. Chrome's built-in model is not available in every browser; Edge needs another model.
 - Explanations depend on the model you choose; small local models may produce weaker concept cards, which lowers recall quality but never breaks recording.
 - Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs are read with OCR on your computer (English is built in; other languages are one download each from `cdn.jsdelivr.net`), which is slower and less exact than real text and does not recover handwriting, formulas or tables, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
@@ -271,7 +273,7 @@ pnpm e2e           # end-to-end tests in Chromium (run `pnpm exec playwright ins
 pnpm format:check  # formatting
 ```
 
-To package a release for the Chrome Web Store, bump `version` in `apps/extension/package.json`, then run `pnpm release`. It runs the checks, builds the production extension, verifies the package and writes `apps/extension/.output/harkback-<version>-chrome.zip`. Use `tools/package.sh --skip-checks` to only build the zip.
+To package a release for Microsoft Edge Add-ons, run `pnpm zip:edge` (see `store/edge/README.md`). To package a release for the Chrome Web Store, bump `version` in `apps/extension/package.json`, then run `pnpm release`. It runs the checks, builds the production extension, verifies the package and writes `apps/extension/.output/harkback-<version>-chrome.zip`. Use `tools/package.sh --skip-checks` to only build the zip.
 
 The end-to-end tests load the built extension into Chromium, serve arXiv pages from `apps/extension/fixtures`, and talk to a local stub model server. They cover the whole loop: reading a paper, explaining, recording, the history page, and reunions on other papers. See `apps/extension/e2e`.
 

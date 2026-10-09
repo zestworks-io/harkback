@@ -1,5 +1,7 @@
 # Chrome Web Store submission
 
+For Microsoft Edge Add-ons, see `edge/README.md`.
+
 Everything the dashboard asks for, in one place. Files here are inputs for you to paste or upload; none of them ship in the extension.
 
 | Dashboard field                               | Source                                                                    |

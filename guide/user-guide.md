@@ -19,11 +19,11 @@
 
 Select up to 200 characters, then use any of these:
 
-| Way                                 | Notes                                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------------------------- |
-| The **Explain** button              | Appears next to a selection made with the mouse, the keyboard or touch.               |
-| `Alt+Shift+E`                       | Works on the current selection. You can rebind it at `chrome://extensions/shortcuts`. |
-| Right-click → **Harkback: Explain** | The same as the shortcut.                                                             |
+| Way                                 | Notes                                                                                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| The **Explain** button              | Appears next to a selection made with the mouse, the keyboard or touch.                                                       |
+| `Alt+Shift+E`                       | Works on the current selection. You can rebind it at `chrome://extensions/shortcuts` (`edge://extensions/shortcuts` in Edge). |
+| Right-click → **Harkback: Explain** | The same as the shortcut.                                                                                                     |
 
 The card shows the answer as it is written. While it is being written, **Stop** ends it. If the request fails, the card offers **Try again** and, when you have several models configured, **Try with…** for each of the others.
 
