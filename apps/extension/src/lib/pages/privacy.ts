@@ -4,6 +4,7 @@ import { pick } from "../ui/pick";
 export const PRIVACY = {
   zh: [
     "划词解释时，选中的文字、所在段落、章节与页面标题会发送给你选择的模型服务，按该服务商的条款处理。",
+    "复习时，可选的「检查我的回答」只在你点击时，才会把术语、你输入的回答和当时的解释发给你的模型；可以在设置中关闭。",
     "记录只保存在本机浏览器中；每周自动导出一份 JSONL 备份到「下载/harkback」，只含记录，不含设置与 API key。",
     "默认只在 arxiv.org 自动扫描；其他网站需要你点击扩展图标、按 Alt+Shift+E，或在设置中加入白名单。",
     "重逢提示显示在网页上，网页自己的脚本可能据此推断你在哪些词上有记录。",
@@ -15,6 +16,7 @@ export const PRIVACY = {
   ],
   en: [
     "When you ask for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service you choose, under that provider's terms.",
+    "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.",
     "Records stay in this browser. A JSONL backup is saved to Downloads/harkback every week; it contains records only, never settings or API keys.",
     "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+Shift+E, or allow the site in settings.",
     "Reunion hints are shown on the page, so the page's own scripts may infer which terms you have records for.",

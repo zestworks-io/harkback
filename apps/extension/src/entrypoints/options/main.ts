@@ -365,6 +365,40 @@ async function main(): Promise<void> {
             ),
             [explainLanguage],
           ),
+          card(L("复习", "Review"), null, [
+            h(
+              "div",
+              { className: "grid four" },
+              field(
+                L("目标记忆率（%）", "Target recall (%)"),
+                numberInput(Math.round(draft.review.desiredRetention * 100), (v) => (draft.review.desiredRetention = Math.round(v) / 100), {
+                  min: "70",
+                  max: "97",
+                  "data-hb": "desired-retention",
+                }),
+              ),
+            ),
+            h(
+              "p",
+              { className: "note" },
+              L(
+                "术语到期时你希望还记得的概率。越高，复习越频繁；默认 90。",
+                "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.",
+              ),
+            ),
+            choice(
+              checkbox(draft.review.modelCheck, (v) => (draft.review.modelCheck = v), { "data-hb": "model-check" }),
+              L("在复习中提供「检查我的回答」", "Offer “Check my answer” in review"),
+            ),
+            h(
+              "p",
+              { className: "note" },
+              L(
+                "点击这个按钮时，Harkback 会把术语、你输入的回答和当时的解释发给你的模型。它使用你平时的模型选择：敏感来源只会发给本机模型，并且计入每分钟和每小时的上限。关闭后按钮不会出现，也不会发送任何内容。",
+                "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.",
+              ),
+            ),
+          ]),
           card(L("限制与提示", "Limits and hints"), null, [
             h(
               "div",
@@ -384,6 +418,34 @@ async function main(): Promise<void> {
               field(
                 L("每页重逢上限（条）", "Reunions per page"),
                 numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
+              ),
+            ),
+            h(
+              "div",
+              { className: "grid four" },
+              field(
+                L("模型停顿超时（秒）", "Model idle timeout (seconds)"),
+                numberInput(draft.timeouts.idleSeconds, (v) => (draft.timeouts.idleSeconds = v), {
+                  min: "5",
+                  max: "600",
+                  "data-hb": "idle-timeout",
+                }),
+              ),
+              field(
+                L("等待首个字的超时（秒）", "Wait for first text (seconds)"),
+                numberInput(draft.timeouts.firstTextSeconds, (v) => (draft.timeouts.firstTextSeconds = v), {
+                  min: "10",
+                  max: "1800",
+                  "data-hb": "first-text-timeout",
+                }),
+              ),
+            ),
+            h(
+              "p",
+              { className: "note" },
+              L(
+                "回答开始后，模型停顿超过「停顿超时」就会放弃；推理型模型在写出第一个字前可能想很久，所以首个字的等待时间单独设置。",
+                "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.",
               ),
             ),
           ]),

@@ -17,9 +17,9 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Select this entry": "이 기록 선택",
   Understood: "이해함",
   Confused: "아직 헷갈림",
+  Shaky: "불안정",
+  "Comes first: {names} build on it": "먼저 복습: {names}이(가) 이것을 바탕으로 합니다",
   New: "새 항목",
-  'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.':
-    "새 용어는 찾아본 다음 날 복습 시점이 되고, 기억해낼 때마다 3, 7, 14, 30, 60일 뒤에 복습 시점이 됩니다. '아직 헷갈림'을 선택하면 다음 날 다시 나타납니다.",
   "Select all entries of this concept": "이 개념의 모든 기록 선택",
   "That name belongs to another concept; use Merge instead.": "그 이름은 다른 개념의 것입니다. 대신 '병합'을 사용하세요.",
   "That did not work.": "작업이 실패했습니다.",
@@ -46,8 +46,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Remembered: "기억남",
   "Still confused": "아직 헷갈림",
   Skip: "건너뛰기",
-  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change":
-    "기억남: {a} 후에 다시 표시 · 아직 헷갈림: {b} 후에 다시 표시 · 건너뛰기: 변경 없음",
   "Do you still remember this?": "이 용어를 아직 기억하시나요?",
   "Review ({n})": "복습 ({n})",
   "Concept not found.": "개념을 찾을 수 없습니다.",
@@ -60,8 +58,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Exported {n} notes.": "노트 {n}개를 내보냈습니다.",
   "Exported {n} notes; {failed} failed: {names}": "노트 {n}개를 내보냈고 {failed}개는 실패했습니다: {names}",
   "Export failed.": "내보내지 못했습니다.",
-  'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.':
-    "복습 시점이 된 용어입니다. 새 용어는 찾아본 다음 날 복습 시점이 되고, 기억해낼 때마다 3, 7, 14, 30, 60일 뒤에 복습 시점이 됩니다. '아직 헷갈림'을 선택하면 다음 날 다시 나타납니다.",
   History: "기록",
   "Every term you have looked up, grouped by concept.": "지금까지 찾아본 모든 용어를 개념별로 묶어 보여줍니다.",
   Settings: "설정",
@@ -212,8 +208,8 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "No concepts to show yet.": "표시할 개념이 아직 없습니다.",
   "Concept graph": "개념 그래프",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "파란 화살표: 선행 개념 · 보라 화살표: 변형 · 점선: 관련",
-  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "녹색: 이해함 · 노랑: 아직 헷갈림 · 파랑: 새 개념 · 점선 원: 아직 설명하지 않음",
+  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "녹색: 이해함 · 연노랑: 불안정 · 노랑: 아직 헷갈림 · 파랑: 새 개념 · 점선 원: 아직 설명하지 않음",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "개념마다 카드 한 장(탭으로 구분된 텍스트). Anki에서 파일 → 가져오기로 열 수 있습니다.",
   "Export Anki cards": "Anki 카드 내보내기",
@@ -253,4 +249,80 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "영어는 내장되어 있습니다. 다른 언어는 {host}에서 한 번만 내려받으며 문서 내용은 전송되지 않습니다.",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
     "스캔한 PDF는 이 컴퓨터에서 읽으며 페이지 이미지는 밖으로 나가지 않습니다. 언어 팩은 설치할 때에만 cdn.jsdelivr.net에서 한 번 내려받으며 문서 내용은 전송되지 않습니다.",
+  Field: "분야",
+  "All fields": "모든 분야",
+  Understanding: "이해도",
+  "All levels": "모든 수준",
+  "Looked up": "찾아본 시기",
+  "Any time": "언제든지",
+  "Last 7 days": "최근 7일",
+  "Last 30 days": "최근 30일",
+  "Last 90 days": "최근 90일",
+  "No concepts match these filters.": "이 필터에 맞는 개념이 없습니다.",
+  "Example only: no model was called": "예시일 뿐입니다. 모델을 호출하지 않았습니다",
+  "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.":
+    "저순위 어댑터(LoRA)는 사전 학습된 가중치를 고정하고 그 옆에 작은 행렬 두 개만 학습하므로, 바뀌는 매개변수는 아주 일부입니다.",
+  "Connect a model below to get explanations like this for anything you read.":
+    "아래에서 모델을 연결하면 읽는 모든 내용에 이런 설명을 받을 수 있습니다.",
+  "Try it first": "먼저 해 보기",
+  "Click the underlined term to see what an explanation looks like.": "밑줄 친 용어를 클릭하면 설명이 어떻게 보이는지 확인할 수 있습니다.",
+  "Model idle timeout (seconds)": "모델 유휴 제한 시간(초)",
+  "Wait for first text (seconds)": "첫 글자까지 대기 시간(초)",
+  "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.":
+    "답변이 시작된 뒤 모델이 유휴 제한 시간보다 오래 멈춰 있으면 포기합니다. 추론 모델은 첫 단어 전에 오래 생각할 수 있으므로 그 대기 시간은 따로 설정합니다.",
+  "What you met this week, built on this computer from your records; no model is called.":
+    "이번 주에 만난 내용을 기록을 바탕으로 이 컴퓨터에서 만듭니다. 모델을 호출하지 않습니다.",
+  Digest: "요약",
+  "Same as the week before": "지난주와 같음",
+  "{n} more than the week before": "지난주보다 {n}개 많음",
+  "{n} fewer than the week before": "지난주보다 {n}개 적음",
+  "{a} builds on {b}": "{a}은(는) {b}을(를) 바탕으로 합니다",
+  "{a} is a variant of {b}": "{a}은(는) {b}의 변형입니다",
+  "{a} is related to {b}": "{a}은(는) {b}와(과) 관련이 있습니다",
+  "← Previous week": "← 지난주",
+  "This week": "이번 주",
+  "Next week →": "다음 주 →",
+  "This digest is built on this computer from your records; no model is called.":
+    "이 요약은 기록을 바탕으로 이 컴퓨터에서 만들어지며 모델을 호출하지 않습니다.",
+  "Nothing was recorded this week.": "이번 주에는 기록된 내용이 없습니다.",
+  "Terms met": "만난 용어",
+  "New terms": "새 용어",
+  Revisited: "다시 만난 용어",
+  "Active days": "활동한 날",
+  "Terms you met": "이번 주에 만난 용어",
+  "Where you read": "읽은 곳",
+  "{n} look-ups": "{n}회 찾아봄",
+  "New connections": "새 연결",
+  "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
+    "새 용어는 찾아본 다음 날 복습 대상이 되며, 그 뒤에는 각 답변 결과에 따라 잊어버릴 즈음에 다음 복습이 잡힙니다.",
+  Again: "다시",
+  Hard: "어려움",
+  Good: "좋음",
+  Easy: "쉬움",
+  "remote service": "원격 서비스",
+  "on this computer": "이 컴퓨터",
+  "Check my answer with {model} ({where})": "{model}(으)로 내 답변 확인 ({where})",
+  "Checking…": "확인 중…",
+  "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.":
+    "용어, 내 답변, 저장된 설명을 {model}({where})(으)로 보냅니다. 확인 내용은 저장되지 않고, 이후 선택한 평가만 저장됩니다.",
+  "Turn off in settings": "설정에서 끄기",
+  "Looks right": "맞는 것 같음",
+  "Partly right": "부분적으로 맞음",
+  "Not quite": "아쉽게 틀림",
+  "Suggested: {grade} (you decide)": "추천: {grade} (결정은 직접)",
+  "Type what you remember (optional)": "기억나는 내용을 적어 보세요(선택)",
+  "Your answer": "내 답변",
+  "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.":
+    "각 버튼에는 그것을 고르면 용어가 다시 나오는 시점이 표시됩니다. 건너뛰기는 아무것도 바꾸지 않습니다. 키: 스페이스는 설명 표시, 1–4는 평가, S는 건너뛰기.",
+  "Terms that are due. A new term is due a day after you look it up; after that each answer sets when it comes back, just before you would forget it.":
+    "복습할 용어입니다. 새 용어는 찾아본 다음 날 대상이 되고, 그 뒤에는 각 답변에 따라 잊기 직전에 다시 나옵니다.",
+  Review: "복습",
+  "Target recall (%)": "목표 기억률(%)",
+  "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.":
+    "용어가 복습 시점에 왔을 때 기억하고 싶은 확률입니다. 높을수록 복습이 늘어나며 기본값은 90입니다.",
+  "Offer “Check my answer” in review": "복습에서 '내 답변 확인' 제공",
+  "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.":
+    "누르면 Harkback이 용어, 입력한 답변, 저장된 설명을 모델로 보냅니다. 평소 모델 선택을 따르므로 민감한 출처는 로컬 모델로만 가고, 확인마다 분당·시간당 한도에 포함됩니다. 끄면 버튼이 나타나지 않고 아무것도 전송되지 않습니다.",
+  "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
+    "복습에서 선택 사항인 '내 답변 확인' 버튼은 누를 때만 용어, 입력한 답변, 저장된 설명을 모델로 보내며, 설정에서 끌 수 있습니다.",
 };

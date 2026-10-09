@@ -37,6 +37,13 @@ describe("understandingOf", () => {
     expect(understandingOf(w.state(), c)).toBe("confused");
   });
 
+  it("calls a term answered Hard shaky, neither understood nor confused", () => {
+    const { w, act } = setup();
+    const c = w.concept("LoRA");
+    act(w.encounter(c, "s1"), "review_hard");
+    expect(understandingOf(w.state(), c)).toBe("shaky");
+  });
+
   it("counts a recalled reunion as understood", () => {
     const { w, act } = setup();
     const c = w.concept("LoRA");

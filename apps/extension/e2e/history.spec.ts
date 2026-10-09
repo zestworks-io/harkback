@@ -136,13 +136,74 @@ test("reviews a concept that is due and records the answer", async ({ context, s
   await expect(page.locator("[data-hb=review-due]")).toHaveText(/已逾期 1 天/);
   await page.locator("[data-hb=review-show]").click();
   await expect(page.locator("[data-hb=review-card]")).toContainText("LoRA 是一个测试解释。");
-  await expect(page.locator("[data-hb=review-hint]")).toContainText("记住了：3 天后再来 · 仍然困惑：1 天后再来");
-  await page.locator("[data-hb=review-remembered]").click();
+  await expect(page.locator("[data-hb=review-again]")).toHaveText("没记住 · 1 天");
+  await expect(page.locator("[data-hb=review-good]")).toHaveText("记住了 · 3 天");
+  await expect(page.locator("[data-hb=review-easy]")).toHaveText("很轻松 · 16 天");
+  await page.locator("[data-hb=review-good]").click();
   await expect(page.locator("[data-hb=review-done]")).toBeVisible();
   await expect(page.locator("[data-hb=next-review]")).toContainText("下一次复习：");
   const actions = await eventsOf(sw, "encounter.action");
-  expect(actions.map((e) => e.payload?.action)).toContain("marked_understood");
+  expect(actions.map((e) => e.payload?.action)).toContain("review_good");
   await expect(page.locator("[data-hb=review-link]")).toContainText("(0)");
+});
+
+test("checks a typed answer with the model, says where it goes, and still leaves the grade to the reader", async ({
+  context,
+  sw,
+  stub,
+  extensionId,
+}) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.clock.setFixedTime(Date.now() + 2 * 86_400_000);
+  await page.goto(`chrome-extension://${extensionId}/library.html#review`);
+  await expect(page.locator("[data-hb=check-disclosure]")).toContainText(
+    "sends the term, your answer and its stored explanation to Stub (on this computer)",
+  );
+  await expect(page.locator("[data-hb=review-check]")).toBeDisabled();
+  const before = stub.requests.length;
+  await page.locator("[data-hb=review-answer]").fill("It trains two small matrices.");
+  stub.queue.push({ body: "<verdict>partial</verdict><feedback>You have the matrices; the frozen weights are missing.</feedback>" });
+  await page.locator("[data-hb=review-check]").click();
+  await expect(page.locator("[data-hb=check-result]")).toContainText("Partly right");
+  await expect(page.locator("[data-hb=check-result]")).toContainText("frozen weights are missing");
+  await expect(page.locator("[data-hb=check-result]")).toContainText("Suggested: Hard");
+  expect(stub.requests.length).toBe(before + 1);
+  expect(JSON.stringify(stub.requests.at(-1)!.body.messages)).toContain("It trains two small matrices.");
+  // The grade is the reader's: nothing is recorded until a button is pressed, and the typed answer is never saved.
+  expect((await eventsOf(sw, "encounter.action")).length).toBe(0);
+  await page.locator("[data-hb=review-hard]").click();
+  const actions = await eventsOf(sw, "encounter.action");
+  expect(actions.map((e) => e.payload?.action)).toEqual(["review_hard"]);
+  expect(JSON.stringify(await eventsOf(sw, "encounter.action"))).not.toContain("two small matrices");
+});
+
+test("offers no model check, and sends nothing, when it is turned off", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en", review: { modelCheck: false } }));
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.clock.setFixedTime(Date.now() + 2 * 86_400_000);
+  const before = stub.requests.length;
+  await page.goto(`chrome-extension://${extensionId}/library.html#review`);
+  await expect(page.locator("[data-hb=review-card]")).toBeVisible();
+  await expect(page.locator("[data-hb=review-check]")).toHaveCount(0);
+  await expect(page.locator("[data-hb=check-disclosure]")).toHaveCount(0);
+  expect(stub.requests.length).toBe(before);
+});
+
+test("reviews with the keyboard alone", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.clock.setFixedTime(Date.now() + 2 * 86_400_000);
+  await page.goto(`chrome-extension://${extensionId}/library.html#review`);
+  await expect(page.locator("[data-hb=review-card]")).toBeVisible();
+  await page.keyboard.press("Space");
+  await expect(page.locator("[data-hb=review-card]")).toContainText("LoRA 是一个测试解释。");
+  await page.keyboard.press("4");
+  await expect(page.locator("[data-hb=review-done]")).toBeVisible();
+  expect((await eventsOf(sw, "encounter.action")).map((e) => e.payload?.action)).toEqual(["review_easy"]);
 });
 
 test("keeps the toolbar badge empty when nothing is due", async ({ context, sw, stub }) => {

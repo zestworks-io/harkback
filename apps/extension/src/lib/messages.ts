@@ -1,4 +1,4 @@
-import type { Hit, MatcherEntry } from "@harkback/core";
+import type { Grade, Hit, MatcherEntry, ReviewAction, Verdict } from "@harkback/core";
 import type { HarkEvent, Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "./explain";
 import type { ModelErrorCode } from "./model-client";
@@ -54,7 +54,8 @@ export type Request =
   | { type: "mark-normal"; sourceId: string }
   | { type: "import-events"; events: HarkEvent[] }
   | { type: "delete-encounter"; encounterId: string }
-  | { type: "review-answer"; conceptId: string; action: "marked_understood" | "marked_confused" }
+  | { type: "review-answer"; conceptId: string; action: ReviewAction }
+  | { type: "check-answer"; conceptId: string; answer: string }
   | { type: "merge-concepts"; fromId: string; intoId: string }
   | { type: "add-alias"; conceptId: string; alias: string }
   | { type: "reject-edge"; edgeId: string }
@@ -72,6 +73,10 @@ export interface ResponseMap {
   "import-events": { ok: boolean; added?: number };
   "delete-encounter": { ok: boolean };
   "review-answer": { ok: boolean };
+  /** A model's opinion of an answer given from memory. `suggested` is only a hint: the reader grades. */
+  "check-answer":
+    | { ok: true; verdict: Verdict; feedback: string; suggested: Grade; model: string }
+    | { ok: false; code: ErrorCode; retryAfterMs?: number };
   "merge-concepts": { ok: boolean };
   /** `collides`: the alias belongs to another concept, so adding it would merge the two. */
   "add-alias": { ok: boolean; collides?: boolean };
@@ -94,6 +99,7 @@ const REQUEST_TYPES = new Set<string>([
   "import-events",
   "delete-encounter",
   "review-answer",
+  "check-answer",
   "merge-concepts",
   "add-alias",
   "reject-edge",

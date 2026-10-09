@@ -53,6 +53,21 @@ describe("settings", () => {
     expect(s.defaultModelId).toBeNull();
   });
 
+  it("reads timeouts and review settings, falling back when they are out of range", () => {
+    const s = withDefaults({
+      timeouts: { idleSeconds: 45, firstTextSeconds: 5 },
+      review: { desiredRetention: 0.85, modelCheck: false },
+    });
+    expect(s.timeouts).toEqual({ idleSeconds: 45, firstTextSeconds: 120 });
+    expect(s.review).toEqual({ desiredRetention: 0.85, modelCheck: false });
+    expect(withDefaults({ review: { desiredRetention: 2, modelCheck: "no" } }).review).toEqual({ desiredRetention: 0.9, modelCheck: true });
+    expect(
+      validateSettings(
+        settings({ timeouts: { idleSeconds: 1, firstTextSeconds: 120 }, review: { desiredRetention: 0.5, modelCheck: true } }),
+      ),
+    ).toEqual(["timeouts.idleSeconds", "review.desiredRetention"]);
+  });
+
   it("reports invalid fields by path", () => {
     const bad = settings({
       models: [{ ...remote, baseUrl: "http://api.example.com/v1" }, local],

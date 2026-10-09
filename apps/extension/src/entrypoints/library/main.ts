@@ -1,9 +1,12 @@
-import { exportMarkdown, parseJsonl, replay, withoutSensitive, type State } from "@harkback/core";
+import { DAY_MS, exportMarkdown, parseJsonl, replay, withoutSensitive, type Grade, type ReviewAction, type State } from "@harkback/core";
+import { DOMAINS, type Domain } from "@harkback/spec";
 import { browser } from "wxt/browser";
 import { ankiTsv } from "../../lib/anki";
 import { h } from "../../lib/dom";
+import { buildDigest, weekOf } from "../../lib/digest";
 import { buildGraph } from "../../lib/graph";
-import type { Request } from "../../lib/messages";
+import { digestView } from "../../lib/pages/digest-view";
+import type { Request, ResponseMap } from "../../lib/messages";
 import { conceptDetail, understandingOf, type ConceptDetail, type RelatedConcept, type Understanding } from "../../lib/concept-detail";
 import { localizeNames } from "../../lib/names";
 import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
@@ -11,18 +14,23 @@ import { renderMarkdown } from "../../lib/markdown";
 import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
 import { dueText, daysText } from "../../lib/due";
-import { dueAtOf, intervalDays, nextDueAt, reviewQueue } from "../../lib/review";
+import { dueAtOf, nextDueAt, reviewQueue } from "../../lib/review";
+import { routeCheck } from "../../lib/review-check";
 import { explainLanguageOf, withDefaults } from "../../lib/settings";
 import { sensitiveBySiteRule } from "../../lib/site-rules";
 import { initTheme } from "../../lib/theme";
 import { quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
+import { errorText, useStrings } from "../../lib/ui/strings";
+import { UI_STRINGS } from "../../lib/ui/locales/ui";
 import { CHANGE_CHANNEL, EventStore } from "../../lib/store";
 
 async function main(): Promise<void> {
   void initTheme();
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(settings.language, zh, en, vars);
+  // Error messages (such as a model that could not be reached) come from the shared card text.
+  useStrings(settings.language, UI_STRINGS[settings.language] ?? {});
   const store = await EventStore.open();
   let state: State = replay(await store.all());
 
@@ -221,12 +229,18 @@ async function main(): Promise<void> {
     h(
       "span",
       { className: `status ${u}`, "data-hb": "understanding" },
-      u === "understood" ? L("已理解", "Understood") : u === "confused" ? L("仍困惑", "Confused") : L("新", "New"),
+      u === "understood"
+        ? L("已理解", "Understood")
+        : u === "shaky"
+          ? L("不太牢", "Shaky")
+          : u === "confused"
+            ? L("仍困惑", "Confused")
+            : L("新", "New"),
     );
 
   /** When the concept is next up for review; nothing for muted concepts. */
   const dueBadge = (conceptId: string): HTMLElement | null => {
-    const at = dueAtOf(state, conceptId);
+    const at = dueAtOf(state, conceptId, settings.review.desiredRetention);
     if (at === null) return null;
     const now = Date.now();
     return h(
@@ -235,8 +249,8 @@ async function main(): Promise<void> {
         className: `due${at <= now ? " now" : ""}`,
         "data-hb": "due",
         title: L(
-          "新术语查词一天后进入复习；每次记住后依次隔 3、7、14、30、60 天；点「仍然困惑」则隔一天。",
-          'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.',
+          "新术语查词一天后进入复习；之后根据你每次的评分，在你快要忘记时安排下一次。",
+          "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.",
         ),
       },
       dueText(at, now, settings.language),
@@ -427,22 +441,62 @@ async function main(): Promise<void> {
     }
   }
 
-  const onList = (): boolean => currentConceptId() === null && location.hash !== "#review" && location.hash !== "#graph";
+  const onList = (): boolean =>
+    currentConceptId() === null && location.hash !== "#review" && location.hash !== "#graph" && location.hash !== "#digest";
   const skipped = new Set<string>();
   let reviewed = 0;
   let revealed = false;
 
-  const dueItems = () => reviewQueue(state, Date.now()).filter((i) => !skipped.has(i.conceptId));
+  const retention = settings.review.desiredRetention;
+  const dueItems = () => reviewQueue(state, Date.now(), { retention }).filter((i) => !skipped.has(i.conceptId));
 
-  async function answer(conceptId: string, action: "marked_understood" | "marked_confused"): Promise<void> {
-    const r = await request({ type: "review-answer", conceptId, action });
-    if (!r.ok) {
-      status.textContent = L("保存失败。", "Could not save.");
-      return;
-    }
-    reviewed++;
+  const GRADE_ACTIONS: Record<Grade, ReviewAction> = { 1: "review_again", 2: "review_hard", 3: "review_good", 4: "review_easy" };
+  const gradeName = (g: Grade): string =>
+    g === 1 ? L("没记住", "Again") : g === 2 ? L("勉强记得", "Hard") : g === 3 ? L("记住了", "Good") : L("很轻松", "Easy");
+  /** What the reader typed for the current term, and what the model made of it. */
+  let typed = "";
+  type CheckOk = Extract<ResponseMap["check-answer"], { ok: true }>;
+  let check: { busy: true } | { busy: false; result: CheckOk } | { busy: false; error: string } | null = null;
+  /** Counts the cards shown, so a model reply that arrives after the reader moved on is dropped. */
+  let cardSeq = 0;
+  /** True while a grade is being saved; a second key press or click must not record it twice. */
+  let saving = false;
+  const resetCard = (): void => {
+    cardSeq++;
     revealed = false;
-    state = replay(await store.all());
+    typed = "";
+    check = null;
+  };
+
+  async function answer(conceptId: string, grade: Grade): Promise<void> {
+    if (saving) return;
+    saving = true;
+    try {
+      const r = await request({ type: "review-answer", conceptId, action: GRADE_ACTIONS[grade] });
+      if (!r.ok) {
+        status.textContent = L("保存失败。", "Could not save.");
+        return;
+      }
+      reviewed++;
+      resetCard();
+      state = replay(await store.all());
+      draw();
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function checkAnswer(conceptId: string): Promise<void> {
+    if (!typed.trim()) return;
+    if (check?.busy) return;
+    const seq = cardSeq;
+    check = { busy: true };
+    draw();
+    const r = await request({ type: "check-answer", conceptId, answer: typed });
+    if (seq !== cardSeq) return; // the reader skipped or graded this card meanwhile
+    check = r.ok
+      ? { busy: false, result: r as CheckOk }
+      : { busy: false, error: errorText(settings.language, "code" in r ? r.code : "internal", "retryAfterMs" in r ? r.retryAfterMs : 0) };
     draw();
   }
 
@@ -454,6 +508,64 @@ async function main(): Promise<void> {
       dueText(at, Date.now(), settings.language),
     );
 
+  /** The optional model check: a button that says where the answer goes, and what the model said. */
+  function checkPanel(item: { conceptId: string }): HTMLElement | null {
+    const route = routeCheck(settings, state, item.conceptId);
+    if (route.kind === "error") {
+      // Off in settings: nothing is offered. Any other failure (no model yet, sensitive source without a local one) is explained.
+      if (!settings.review.modelCheck) return null;
+      return h("p", { className: "check-note", "data-hb": "check-unavailable" }, errorText(settings.language, route.code));
+    }
+    const where = route.remote ? L("远程服务", "remote service") : L("本机", "on this computer");
+    const label = L("用 {model} 检查我的回答（{where}）", "Check my answer with {model} ({where})", { model: route.model.label, where });
+    const button = h(
+      "button",
+      { type: "button", "data-hb": "review-check", disabled: typed.trim() === "" || (check !== null && check.busy) },
+      check?.busy ? L("正在检查…", "Checking…") : label,
+    );
+    button.addEventListener("click", () => void checkAnswer(item.conceptId));
+    const result = check && !check.busy ? check : null;
+    return h(
+      "div",
+      { className: "check", "data-hb": "check-panel" },
+      button,
+      h(
+        "p",
+        { className: "check-note", "data-hb": "check-disclosure" },
+        L(
+          "会把术语、你的回答和当时的解释发给 {model}（{where}）。检查本身不会保存，只保存你之后选的评分。",
+          "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.",
+          { model: route.model.label, where },
+        ),
+        " ",
+        h("a", { href: browser.runtime.getURL("/options.html"), "data-hb": "check-off" }, L("在设置中关闭", "Turn off in settings")),
+      ),
+      result && "result" in result
+        ? h(
+            "div",
+            { className: `check-result ${result.result.verdict}`, "data-hb": "check-result" },
+            h(
+              "strong",
+              {},
+              result.result.verdict === "correct"
+                ? L("基本正确", "Looks right")
+                : result.result.verdict === "partial"
+                  ? L("部分正确", "Partly right")
+                  : L("不太对", "Not quite"),
+            ),
+            result.result.feedback ? ` ${result.result.feedback}` : "",
+            h(
+              "div",
+              { className: "check-suggest" },
+              L("建议评分：{grade}（由你决定）", "Suggested: {grade} (you decide)", { grade: gradeName(result.result.suggested) }),
+            ),
+          )
+        : result
+          ? h("p", { className: "check-error", role: "alert", "data-hb": "check-error" }, result.error)
+          : null,
+    );
+  }
+
   function reviewView(): HTMLElement {
     const [item] = dueItems();
     if (!item) {
@@ -463,7 +575,7 @@ async function main(): Promise<void> {
         reviewed > 0
           ? L("今天的复习完成了，共 {n} 个。", "All done for now: {n} reviewed.", { n: reviewed })
           : L("现在没有需要复习的概念。", "Nothing to review right now."),
-        ...(nextDueAt(state) === null ? [] : [h("br"), nextReviewNote(nextDueAt(state)!)]),
+        ...(nextDueAt(state, retention) === null ? [] : [h("br"), nextReviewNote(nextDueAt(state, retention)!)]),
       );
     }
     const show = h("button", { type: "button", className: "primary", "data-hb": "review-show" }, L("显示解释", "Show explanation"));
@@ -479,6 +591,21 @@ async function main(): Promise<void> {
     const explanation = h("div", { className: "explanation" });
     explanation.append(renderMarkdown(item.explanation));
     const n = names(item.name, item.aliases);
+    const answerBox = h("textarea", {
+      className: "review-answer",
+      rows: "3",
+      "data-hb": "review-answer",
+      placeholder: L("凭记忆写下你记得的（可选）", "Type what you remember (optional)"),
+      "aria-label": L("你的回答", "Your answer"),
+    });
+    answerBox.value = typed;
+    answerBox.addEventListener("input", () => {
+      typed = answerBox.value;
+      const checkButton = list.querySelector<HTMLButtonElement>('[data-hb="review-check"]');
+      if (checkButton) checkButton.disabled = typed.trim() === "";
+    });
+    const gradable = revealed || (check !== null && !check.busy && "result" in check);
+    const grades: Grade[] = [1, 2, 3, 4];
     return h(
       "section",
       { className: "concept review", "data-hb": "review-card" },
@@ -489,46 +616,81 @@ async function main(): Promise<void> {
         { className: "meta" },
         h("span", { className: "src" }, quoteTitle(item.sourceTitle, settings.language)),
         h("span", {}, L("还剩 {n} 个", "{n} left", { n: dueItems().length })),
+        item.unlocks.length > 0
+          ? h(
+              "span",
+              { className: "unlocks", "data-hb": "review-unlocks" },
+              L("先修概念：{names} 建立在它之上", "Comes first: {names} build on it", {
+                names: item.unlocks.slice(0, 3).join(", ") + (item.unlocks.length > 3 ? ` +${item.unlocks.length - 3}` : ""),
+              }),
+            )
+          : null,
         h("span", { className: "due now", "data-hb": "review-due" }, dueText(item.dueAt, Date.now(), settings.language)),
       ),
-      revealed
+      h(
+        "div",
+        { className: "actions" },
+        h("p", { className: "prompt" }, L("你还记得这个概念吗？", "Do you still remember this?")),
+        revealed ? null : answerBox,
+        revealed ? null : show,
+        revealed ? null : checkPanel(item),
+      ),
+      revealed ? h("div", {}, h("blockquote", { className: "quote" }, item.selection), explanation) : null,
+      gradable
         ? h(
             "div",
-            {},
-            h("blockquote", { className: "quote" }, item.selection),
-            explanation,
+            { className: "actions" },
+            ...grades.map((g) =>
+              button(
+                `${gradeName(g)} · ${daysText(item.previews[g], settings.language)}`,
+                `review-${GRADE_ACTIONS[g].slice(7)}`,
+                () => void answer(item.conceptId, g),
+                g === (check && !check.busy && "result" in check ? check.result.suggested : 3) ? "primary" : "",
+              ),
+            ),
+            button(L("跳过", "Skip"), "review-skip", () => skip(item.conceptId)),
             h(
-              "div",
-              { className: "actions" },
-              button(L("记住了", "Remembered"), "review-remembered", () => void answer(item.conceptId, "marked_understood"), "primary"),
-              button(L("仍然困惑", "Still confused"), "review-confused", () => void answer(item.conceptId, "marked_confused")),
-              button(L("跳过", "Skip"), "review-skip", () => {
-                skipped.add(item.conceptId);
-                revealed = false;
-                draw();
-              }),
-              h(
-                "p",
-                { className: "prompt", "data-hb": "review-hint" },
-                L(
-                  "记住了：{a}后再来 · 仍然困惑：{b}后再来 · 跳过：不改变安排",
-                  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change",
-                  {
-                    a: daysText(intervalDays(item.streak + 1), settings.language),
-                    b: daysText(intervalDays(0), settings.language),
-                  },
-                ),
+              "p",
+              { className: "prompt", "data-hb": "review-hint" },
+              L(
+                "按钮上是选这个评分后再次复习的间隔；跳过不改变安排。快捷键：空格显示解释，1–4 评分，S 跳过。",
+                "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.",
               ),
             ),
           )
-        : h(
+        : null,
+      !gradable && revealed === false
+        ? h(
             "div",
             { className: "actions" },
-            h("p", { className: "prompt" }, L("你还记得这个概念吗？", "Do you still remember this?")),
-            show,
-          ),
+            button(L("跳过", "Skip"), "review-skip", () => skip(item.conceptId)),
+          )
+        : null,
     );
   }
+
+  function skip(conceptId: string): void {
+    skipped.add(conceptId);
+    resetCard();
+    draw();
+  }
+
+  /** Keyboard-only review: Space shows the explanation, 1–4 grade, S skips. Ignored while typing or on a focused control. */
+  document.addEventListener("keydown", (e) => {
+    if (location.hash !== "#review" || e.metaKey || e.ctrlKey || e.altKey) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest("input, textarea, select, [contenteditable]")) return;
+    const item = dueItems()[0];
+    if (!item || saving || check?.busy) return;
+    const gradable = revealed || (check !== null && !check.busy && "result" in check);
+    if (e.key === " " && !revealed && !target?.closest("button, a")) {
+      e.preventDefault();
+      revealed = true;
+      draw();
+    } else if (gradable && e.key >= "1" && e.key <= "4") {
+      void answer(item.conceptId, Number(e.key) as Grade);
+    } else if (e.key.toLowerCase() === "s") skip(item.conceptId);
+  });
 
   const SVG = "http://www.w3.org/2000/svg";
   const svgEl = (tag: string, attrs: Record<string, string | number> = {}, ...children: Node[]): SVGElement => {
@@ -538,11 +700,101 @@ async function main(): Promise<void> {
     return el;
   };
 
+  /** Which week the digest shows: 0 is this week, -1 the one before. Never in the future. */
+  let digestOffset = 0;
+  const digestPage = (): HTMLElement =>
+    digestView({
+      digest: buildDigest(state, weekOf(Date.now(), digestOffset)),
+      lang: settings.language,
+      conceptHref,
+      isCurrentWeek: digestOffset >= 0,
+      goto: (move) => {
+        digestOffset = move === 0 ? 0 : Math.min(0, digestOffset + move);
+        draw();
+      },
+    });
+
+  const graphFilter: { domain: "" | Domain; understanding: "" | Understanding; days: number } = { domain: "", understanding: "", days: 0 };
+
+  /** A drop-down that redraws the map when it changes and keeps the keyboard where it was. */
+  function graphSelect(name: string, label: string, options: [string, string][], value: string, set: (v: string) => void): HTMLElement {
+    const select = h(
+      "select",
+      { "data-hb": `graph-filter-${name}`, "aria-label": label },
+      ...options.map(([v, text]) => h("option", { value: v }, text)),
+    );
+    select.value = value;
+    select.addEventListener("change", () => {
+      set(select.value);
+      draw();
+      list.querySelector<HTMLElement>(`[data-hb="graph-filter-${name}"]`)?.focus();
+    });
+    return h("label", {}, label, " ", select);
+  }
+
+  function graphFilterBar(): HTMLElement {
+    return h(
+      "div",
+      { className: "graph-filters", "data-hb": "graph-filters" },
+      graphSelect(
+        "domain",
+        L("领域", "Field"),
+        [["", L("全部领域", "All fields")], ...DOMAINS.map((d): [string, string] => [d, d])],
+        graphFilter.domain,
+        (v) => (graphFilter.domain = v as "" | Domain),
+      ),
+      graphSelect(
+        "understanding",
+        L("理解程度", "Understanding"),
+        [
+          ["", L("全部", "All levels")],
+          ["understood", L("已理解", "Understood")],
+          ["shaky", L("不太牢", "Shaky")],
+          ["confused", L("仍困惑", "Confused")],
+          ["new", L("新", "New")],
+        ],
+        graphFilter.understanding,
+        (v) => (graphFilter.understanding = v as "" | Understanding),
+      ),
+      graphSelect(
+        "days",
+        L("最近查过", "Looked up"),
+        [
+          ["0", L("任何时间", "Any time")],
+          ["7", L("最近 7 天", "Last 7 days")],
+          ["30", L("最近 30 天", "Last 30 days")],
+          ["90", L("最近 90 天", "Last 90 days")],
+        ],
+        String(graphFilter.days),
+        (v) => (graphFilter.days = Number(v)),
+      ),
+    );
+  }
+
   /** The concepts as a map: relations as lines, colour by how well each is understood. Drag to move, wheel to zoom. */
   function graphView(): HTMLElement {
-    const g = buildGraph(state, { query: search.value, width: 960, height: 640 });
+    const filtered = graphFilter.domain !== "" || graphFilter.understanding !== "" || graphFilter.days > 0;
+    const g = buildGraph(state, {
+      query: search.value,
+      ...(graphFilter.domain && { domain: graphFilter.domain }),
+      ...(graphFilter.understanding && { understanding: graphFilter.understanding }),
+      ...(graphFilter.days > 0 && { since: Date.now() - graphFilter.days * DAY_MS }),
+      width: 960,
+      height: 640,
+    });
     if (g.nodes.length === 0) {
-      return h("p", { className: "empty", "data-hb": "graph-empty" }, L("还没有可显示的概念。", "No concepts to show yet."));
+      return h(
+        "div",
+        {},
+        graphFilterBar(),
+        h(
+          "p",
+          { className: "empty", "data-hb": "graph-empty" },
+          filtered
+            ? L("没有符合这些筛选条件的概念。", "No concepts match these filters.")
+            : L("还没有可显示的概念。", "No concepts to show yet."),
+        ),
+      );
     }
     const view = { x: 0, y: 0, w: g.width, h: g.height };
     const svg = svgEl("svg", { class: "graph", viewBox: `0 0 ${g.width} ${g.height}`, role: "group", "data-hb": "graph" });
@@ -636,15 +888,20 @@ async function main(): Promise<void> {
     svg.addEventListener("pointercancel", end);
     return h(
       "div",
-      { className: "graph-wrap" },
-      svg,
+      {},
+      graphFilterBar(),
       h(
         "div",
-        { className: "legend", "data-hb": "graph-legend" },
-        L("蓝线箭头：前置概念 · 紫线箭头：变体 · 虚线：相关", "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related"),
-        L(
-          "实心绿：已理解 · 黄：仍困惑 · 蓝：新 · 虚线圈：还没解释过",
-          "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet",
+        { className: "graph-wrap" },
+        svg,
+        h(
+          "div",
+          { className: "legend", "data-hb": "graph-legend" },
+          L("蓝线箭头：前置概念 · 紫线箭头：变体 · 虚线：相关", "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related"),
+          L(
+            "实心绿：已理解 · 浅黄：不太牢 · 黄：仍困惑 · 蓝：新 · 虚线圈：还没解释过",
+            "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet",
+          ),
         ),
       ),
     );
@@ -652,7 +909,7 @@ async function main(): Promise<void> {
 
   function draw(): void {
     const id = currentConceptId();
-    if (location.hash === "#review" || location.hash === "#graph") selecting = false;
+    if (location.hash === "#review" || location.hash === "#graph" || location.hash === "#digest") selecting = false;
     // Entries that no longer exist cannot stay selected.
     const alive = new Set(historyModel(state).flatMap((c) => c.entries.map((e) => e.encounterId)));
     for (const s of [...selected]) if (!alive.has(s)) selected.delete(s);
@@ -661,7 +918,7 @@ async function main(): Promise<void> {
         ? (conceptDetail(state, id)?.entries.map((e) => e.encounterId) ?? [])
         : historyModel(state, search.value).flatMap((c) => c.entries.map((e) => e.encounterId));
     queueMicrotask(renderBar);
-    toolbar.hidden = !onList() && location.hash !== "#graph";
+    toolbar.hidden = !onList() && location.hash !== "#graph" && location.hash !== "#digest";
     for (const el of toolbar.querySelectorAll<HTMLElement>("[data-list-only]")) el.hidden = !onList();
     reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: dueItems().length });
     if (location.hash === "#review") {
@@ -670,6 +927,10 @@ async function main(): Promise<void> {
     }
     if (location.hash === "#graph") {
       list.replaceChildren(backLink, graphView());
+      return;
+    }
+    if (location.hash === "#digest") {
+      list.replaceChildren(backLink, digestPage());
       return;
     }
     if (id !== null) {
@@ -838,8 +1099,8 @@ async function main(): Promise<void> {
       href: "#review",
       "data-hb": "review-link",
       title: L(
-        "到期的术语。新术语查词一天后到期；每次记住后依次隔 3、7、14、30、60 天；点「仍然困惑」则隔一天。",
-        'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.',
+        "到期的术语。新术语查词一天后到期；之后根据你每次的评分，在你快要忘记时再来。",
+        "Terms that are due. A new term is due a day after you look it up; after that each answer sets when it comes back, just before you would forget it.",
       ),
     },
     "",
@@ -854,12 +1115,26 @@ async function main(): Promise<void> {
     },
     L("关系图", "Graph"),
   );
+  const digestLink = h(
+    "a",
+    {
+      className: "button",
+      href: "#digest",
+      "data-hb": "digest-link",
+      title: L(
+        "这一周遇到了什么：由你的记录在本机生成，不调用模型。",
+        "What you met this week, built on this computer from your records; no model is called.",
+      ),
+    },
+    L("周报", "Digest"),
+  );
   const toolbar = h(
     "div",
     { className: "toolbar" },
     search,
     reviewLink,
     graphLink,
+    digestLink,
     ...[selectToggle(), exportMd, exportAnki, exportNotes, backupButton, importButton].map(
       (b) => (b.setAttribute("data-list-only", ""), b),
     ),

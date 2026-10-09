@@ -1,12 +1,15 @@
-import { DAY_MS, type State } from "@harkback/core";
+import { DAY_MS, gradeOf, type Grade, type State } from "@harkback/core";
 import type { Action } from "@harkback/spec";
 import { understandingOf, type Understanding } from "./concept-detail";
+import { orderByPrerequisites, prerequisiteMap } from "./prerequisites";
+import { firstMemory, nextMemory, previewDays, scheduledDays, type Memory } from "./fsrs";
 
-/** Days to wait after 1, 2, 3 ... consecutive successful reviews; the last step repeats. */
-const LADDER_DAYS = [3, 7, 14, 30, 60] as const;
-const RETRY_DAYS = 1;
-
-const DECISIVE: ReadonlySet<Action> = new Set(["marked_understood", "marked_confused", "reunion_recalled"]);
+/** The chance of remembering a term when it comes due, unless the settings say otherwise. */
+export const DEFAULT_RETENTION = 0.9;
+/** A term that was looked up but never answered comes up again after this many days. */
+const UNANSWERED_DAYS = 1;
+/** The marks on the explain card, which older versions also used as review answers (a day or more after the look-up). */
+const CARD_MARKS: ReadonlySet<Action> = new Set(["marked_understood", "marked_confused"]);
 
 export interface ReviewItem {
   conceptId: string;
@@ -14,8 +17,12 @@ export interface ReviewItem {
   aliases: string[];
   understanding: Understanding;
   dueAt: number;
-  /** Consecutive successful reviews; the next answer of "remembered" moves it up one step. */
-  streak: number;
+  /** How many times it has been answered; 0 for a term that was only looked up. */
+  answers: number;
+  /** The wait in days each answer would give, for the buttons. */
+  previews: Record<Grade, number>;
+  /** Due terms that build on this one, which therefore come after it; empty when none do. */
+  unlocks: string[];
   /** The encounter a review answer is recorded on: the concept's latest one. */
   encounterId: string;
   selection: string;
@@ -23,58 +30,71 @@ export interface ReviewItem {
   sourceTitle: string;
 }
 
-/** Days to wait before the next review after `streak` consecutive successful reviews (0 after a "still confused"). */
-export function intervalDays(streak: number): number {
-  return streak === 0 ? RETRY_DAYS : LADDER_DAYS[Math.min(streak, LADDER_DAYS.length) - 1]!;
-}
-
 interface Schedule {
   dueAt: number;
-  streak: number;
+  memory: Memory | null;
+  answers: number;
+  /** When the last answer was given; the look-up time for a term never answered. */
+  lastAt: number;
 }
 
-/** When a concept is next due, from its answers: the last answer (or the latest look-up) plus the wait for its streak. */
+/** When a concept is next due, replayed from its answers: each one updates what the model knows about how well it is remembered. */
 function scheduleOf(
   state: State,
   concept: { id: string; isPlaceholder: boolean; muted: boolean },
+  retention: number,
 ): (Schedule & { latestId: string }) | null {
   if (concept.isPlaceholder || concept.muted) return null;
   const encounters = (state.encountersByConcept.get(concept.id) ?? []).map((id) => state.encounters.get(id)!);
   const latest = encounters.at(-1);
   if (!latest) return null;
-  const decisive = encounters
-    .flatMap((e) => e.actions)
-    .filter((a) => DECISIVE.has(a.action))
+  const answers = encounters
+    .flatMap((e) => e.actions.map((a) => ({ ...a, lookedUpAt: e.createdAt })))
+    .flatMap((a) => {
+      const grade = gradeOf(a.action);
+      if (grade === null) return [];
+      // A mark made on the explain card right after a look-up says how the explanation read, not how well it is remembered.
+      if (CARD_MARKS.has(a.action) && a.at - a.lookedUpAt < DAY_MS) return [];
+      return [{ grade, at: a.at }];
+    })
     .sort((a, b) => a.at - b.at);
-  const last = decisive.at(-1);
-  let streak = 0;
-  for (let i = decisive.length - 1; i >= 0 && decisive[i]!.action !== "marked_confused"; i--) streak++;
-  const base = last ? last.at : latest.createdAt;
-  return { dueAt: base + intervalDays(streak) * DAY_MS, streak, latestId: latest.id };
+  let memory: Memory | null = null;
+  let lastAt = 0;
+  for (const { grade, at } of answers) {
+    memory = memory ? nextMemory(memory, grade, Math.max(0, at - lastAt) / DAY_MS) : firstMemory(grade);
+    lastAt = at;
+  }
+  if (!memory)
+    return { dueAt: latest.createdAt + UNANSWERED_DAYS * DAY_MS, memory, answers: 0, lastAt: latest.createdAt, latestId: latest.id };
+  return { dueAt: lastAt + scheduledDays(memory, retention) * DAY_MS, memory, answers: answers.length, lastAt, latestId: latest.id };
 }
 
 /** When one concept is due for review; null for muted concepts and ones that were never looked up. */
-export function dueAtOf(state: State, conceptId: string): number | null {
+export function dueAtOf(state: State, conceptId: string, retention = DEFAULT_RETENTION): number | null {
   const concept = state.concepts.get(state.representative.get(conceptId) ?? conceptId);
-  return (concept && scheduleOf(state, concept)?.dueAt) ?? null;
+  return (concept && scheduleOf(state, concept, retention)?.dueAt) ?? null;
 }
 
 /** The earliest due time over all concepts, or null when there is nothing to review. */
-export function nextDueAt(state: State): number | null {
+export function nextDueAt(state: State, retention = DEFAULT_RETENTION): number | null {
   let next: number | null = null;
   for (const concept of state.concepts.values()) {
-    const due = scheduleOf(state, concept)?.dueAt;
+    const due = scheduleOf(state, concept, retention)?.dueAt;
     if (due !== undefined && (next === null || due < next)) next = due;
   }
   return next;
 }
 
-export function reviewQueue(state: State, now: number, opts: { limit?: number } = {}): ReviewItem[] {
+/** Terms you struggle with come first. */
+const WEAKNESS: Record<Understanding, number> = { confused: 2, shaky: 1, understood: 0, new: 0 };
+
+export function reviewQueue(state: State, now: number, opts: { limit?: number; retention?: number } = {}): ReviewItem[] {
+  const retention = opts.retention ?? DEFAULT_RETENTION;
   const due: { item: ReviewItem; overdue: number }[] = [];
   for (const concept of state.concepts.values()) {
-    const schedule = scheduleOf(state, concept);
+    const schedule = scheduleOf(state, concept, retention);
     if (!schedule || now < schedule.dueAt) continue;
-    const { dueAt, streak } = schedule;
+    const { dueAt, answers, memory, lastAt } = schedule;
     const latest = state.encounters.get(schedule.latestId)!;
 
     due.push({
@@ -85,7 +105,9 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number } 
         aliases: concept.names.filter((n) => n !== concept.canonicalName),
         understanding: understandingOf(state, concept.id),
         dueAt,
-        streak,
+        answers,
+        unlocks: [],
+        previews: previewDays(memory, Math.max(0, now - lastAt) / DAY_MS, retention),
         encounterId: latest.id,
         selection: latest.selection,
         explanation: latest.explanation.text,
@@ -95,9 +117,11 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number } 
   }
   due.sort(
     (a, b) =>
-      Number(b.item.understanding === "confused") - Number(a.item.understanding === "confused") ||
-      b.overdue - a.overdue ||
-      a.item.name.localeCompare(b.item.name),
+      WEAKNESS[b.item.understanding] - WEAKNESS[a.item.understanding] || b.overdue - a.overdue || a.item.name.localeCompare(b.item.name),
   );
-  return due.map((d) => d.item).slice(0, opts.limit ?? Infinity);
+  // A term comes after the terms it builds on, when those are due too.
+  const { ordered, dependents } = orderByPrerequisites(due, (d) => d.item.conceptId, prerequisiteMap(state));
+  const nameOf = new Map(ordered.map((d) => [d.item.conceptId, d.item.name]));
+  for (const { item } of ordered) item.unlocks = (dependents.get(item.conceptId) ?? []).map((id) => nameOf.get(id)!);
+  return ordered.map((d) => d.item).slice(0, opts.limit ?? Infinity);
 }

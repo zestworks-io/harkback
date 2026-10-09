@@ -36,6 +36,8 @@ async function main(): Promise<void> {
     consent: false,
     models: [] as string[],
   };
+  // Also outside render(), so the example stays open when the language changes.
+  let sampleOpen = false;
 
   const render = (): void => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
@@ -150,6 +152,7 @@ async function main(): Promise<void> {
     root.replaceChildren(
       h("header", { className: "top" }, h("span", { className: "brand" }, "Harkback"), language),
       specimen(),
+      sample(),
       h("h1", {}, L("开始使用 Harkback", "Set up Harkback")),
       h(
         "p",
@@ -239,6 +242,56 @@ async function main(): Promise<void> {
         ),
       ),
     );
+
+  /** A canned explanation, so the first look at the card does not wait for a model; nothing is sent anywhere. */
+  const sample = (): HTMLElement => {
+    const toggle = h(
+      "button",
+      { type: "button", className: "term sample-term", "data-hb": "sample-term", "aria-expanded": String(sampleOpen) },
+      "low-rank adapter",
+    );
+    const card = h(
+      "div",
+      { className: "sample-card", "data-hb": "sample-card", role: "status", hidden: !sampleOpen },
+      h("div", { className: "sample-meta" }, L("示例，没有调用任何模型", "Example only: no model was called")),
+      h(
+        "p",
+        {},
+        L(
+          "低秩适配器（LoRA）冻结预训练权重，只在旁边训练两个小矩阵，所以只有极小一部分参数会改变。",
+          "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.",
+        ),
+      ),
+      h(
+        "p",
+        { className: "sample-next" },
+        L("连接模型后，你读到的任何术语都能得到这样的解释。", "Connect a model below to get explanations like this for anything you read."),
+      ),
+    );
+    toggle.addEventListener("click", () => {
+      sampleOpen = !sampleOpen;
+      card.hidden = !sampleOpen;
+      toggle.setAttribute("aria-expanded", String(sampleOpen));
+    });
+    return h(
+      "section",
+      { className: "sample", "data-hb": "sample", "aria-label": L("先试一试", "Try it first") },
+      h("h2", {}, L("先试一试", "Try it first")),
+      h(
+        "p",
+        { className: "sample-text", lang: "en" },
+        "To fine-tune a large model cheaply, you can add a ",
+        toggle,
+        " to each layer instead of updating every weight.",
+      ),
+      h(
+        "p",
+        { className: "hint" },
+        L("点击带下划线的词，看看解释是什么样子。", "Click the underlined term to see what an explanation looks like."),
+      ),
+      card,
+    );
+  };
 
   const renderDone = (): void => {
     root.replaceChildren(

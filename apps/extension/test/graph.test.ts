@@ -43,6 +43,27 @@ describe("graphModel", () => {
     expect(q.nodes.map((n) => n.name).sort()).toEqual(["LoRA", "QLoRA"]);
   });
 
+  it("filters by field, understanding and when a concept was last looked up, keeping the neighbours", () => {
+    const { w, ids } = build();
+    const state = w.state();
+    const names = (o: Parameters<typeof graphModel>[1]) =>
+      graphModel(w.state(), o)
+        .nodes.map((n) => n.name)
+        .sort();
+    expect(state.concepts.get(ids.lora)!.domain).toBe("ml");
+    expect(names({ domain: "ml" })).toEqual(["LoRA", "Lonely", "Matrix rank", "PEFT", "QLoRA"]);
+    expect(names({ domain: "bio" })).toEqual([]);
+    expect(names({ understanding: "confused" })).toEqual([]);
+    w.events.push(w.f.make("encounter.action", { encounter_id: [...state.encounters.keys()][0]!, action: "marked_confused" }));
+    expect(names({ understanding: "confused" }).length).toBeGreaterThan(0);
+    const later = Date.UTC(2026, 9, 1);
+    w.setTime(later);
+    const fresh = w.concept("Fresh");
+    w.encounter(fresh, "s1");
+    expect(names({ since: later })).toEqual(["Fresh"]);
+    expect(names({ since: later + 1 })).toEqual([]);
+  });
+
   it("keeps the best connected concepts when there are too many", () => {
     const { w } = build();
     const m = graphModel(w.state(), { limit: 2 });

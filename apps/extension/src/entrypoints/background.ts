@@ -1,6 +1,8 @@
 import {
+  buildCheckPrompt,
   buildFollowUpPrompt,
   canonicalOrder,
+  parseCheckReply,
   serializeJsonl,
   streamingExplanation,
   withoutSensitive,
@@ -22,7 +24,8 @@ import {
   type ExplainRecord,
   type ExplainRequestMsg,
 } from "../lib/explain";
-import { isRequest, type PortIn, type PortOut, type TabMessage } from "../lib/messages";
+import { isRequest, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messages";
+import { routeCheck } from "../lib/review-check";
 import { ModelError, streamChat } from "../lib/model-client";
 import { reviewQueue } from "../lib/review";
 import { badgeFor } from "../lib/review-badge";
@@ -71,6 +74,11 @@ export default defineBackground(() => {
     return run;
   };
 
+  const timeoutsOf = (s: Settings) => ({
+    idleTimeoutMs: s.timeouts.idleSeconds * 1000,
+    firstTextTimeoutMs: s.timeouts.firstTextSeconds * 1000,
+  });
+
   const loadSettings = async (): Promise<Settings> => withDefaults((await browser.storage.local.get("settings")).settings);
 
   async function append(build: (f: EventFactory) => HarkEvent[]): Promise<HarkEvent[]> {
@@ -94,7 +102,9 @@ export default defineBackground(() => {
   /** The toolbar badge counts concepts due for review; it never carries any text from the records. */
   async function refreshBadge(): Promise<void> {
     try {
-      const { text, title } = badgeFor(reviewQueue(await getState(), Date.now()).length, (await loadSettings()).language);
+      const settings = await loadSettings();
+      const due = reviewQueue(await getState(), Date.now(), { retention: settings.review.desiredRetention });
+      const { text, title } = badgeFor(due.length, settings.language);
       await browser.action.setBadgeText({ text });
       await browser.action.setTitle({ title });
     } catch {
@@ -210,9 +220,7 @@ export default defineBackground(() => {
           plan.model,
           plan.prompt.messages,
           (full) => post({ type: "delta", text: streamingExplanation(full) }),
-          {
-            signal: begin(),
-          },
+          { signal: begin(), ...timeoutsOf(settings) },
         ).catch(async (e: unknown) => {
           await refundRate(asked);
           throw e;
@@ -269,6 +277,7 @@ export default defineBackground(() => {
         });
         const reply = await streamChat(routed.model, messages, (full) => post({ type: "followup_delta", text: full }), {
           signal: begin(),
+          ...timeoutsOf(settings),
         }).catch(async (e: unknown) => {
           await refundRate(asked);
           throw e;
@@ -316,6 +325,36 @@ export default defineBackground(() => {
 
   // ---- one-shot requests --------------------------------------------------
 
+  /** "Check my answer" in review: one model call, never recorded; only the grade the reader then picks is. */
+  async function checkAnswer(conceptId: string, answer: string): Promise<ResponseMap["check-answer"]> {
+    const settings = await loadSettings();
+    const routed = routeCheck(settings, await getState(), conceptId);
+    if (routed.kind === "error") return { ok: false, code: routed.code };
+    if (!(await canReach(routed.model))) return { ok: false, code: "no_permission" };
+    const asked = Date.now();
+    const rate = await acquireRate(settings, asked);
+    if (!rate.ok) return { ok: false, code: "local_rate", retryAfterMs: rate.retryAfterMs };
+    try {
+      const messages = buildCheckPrompt({
+        term: routed.term,
+        explanation: routed.explanation,
+        answer,
+        language: explainLanguageOf(settings),
+      });
+      const raw = await streamChat(routed.model, messages, () => undefined, timeoutsOf(settings));
+      const result = parseCheckReply(raw);
+      if (!result) {
+        // The model answered, but not in the format asked for; that is no use of the reader's budget.
+        await refundRate(asked);
+        return { ok: false, code: "http" };
+      }
+      return { ok: true, ...result, model: routed.model.label };
+    } catch (e) {
+      await refundRate(asked);
+      return { ok: false, code: e instanceof ModelError ? e.code : "internal" };
+    }
+  }
+
   const requestDeps: RequestDeps = {
     loadSettings,
     getState,
@@ -326,6 +365,7 @@ export default defineBackground(() => {
       cache.invalidate();
     },
     runBackup,
+    checkAnswer,
     async importEvents(events) {
       const { store, cache } = await getServices();
       try {

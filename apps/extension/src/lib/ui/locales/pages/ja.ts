@@ -17,9 +17,9 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Select this entry": "この記録を選択",
   Understood: "理解した",
   Confused: "まだ分からない",
+  Shaky: "あやふや",
+  "Comes first: {names} build on it": "先に復習：{names} がこれを前提にしています",
   New: "新規",
-  'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.':
-    "新しい用語は調べた翌日に復習の期限になり、思い出せるたびに 3、7、14、30、60 日後に期限が来ます。「まだ分からない」を選ぶと翌日に戻ってきます。",
   "Select all entries of this concept": "この概念の記録をすべて選択",
   "That name belongs to another concept; use Merge instead.": "その名前は別の概念のものです。代わりに「統合」を使ってください。",
   "That did not work.": "うまくいきませんでした。",
@@ -46,8 +46,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Remembered: "覚えていた",
   "Still confused": "まだ分からない",
   Skip: "スキップ",
-  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change":
-    "覚えていた：{a}後に再表示 · まだ分からない：{b}後に再表示 · スキップ：変更なし",
   "Do you still remember this?": "この用語をまだ覚えていますか？",
   "Review ({n})": "復習 ({n})",
   "Concept not found.": "概念が見つかりません。",
@@ -60,8 +58,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Exported {n} notes.": "{n} 件のノートを書き出しました。",
   "Exported {n} notes; {failed} failed: {names}": "{n} 件のノートを書き出しました（{failed} 件は失敗：{names}）",
   "Export failed.": "書き出しに失敗しました。",
-  'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.':
-    "期限が来ている用語です。新しい用語は調べた翌日に期限になり、思い出せるたびに 3、7、14、30、60 日後に期限が来ます。「まだ分からない」を選ぶと翌日に戻ってきます。",
   History: "履歴",
   "Every term you have looked up, grouped by concept.": "これまでに調べた用語を概念ごとに表示します。",
   Settings: "設定",
@@ -213,8 +209,8 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "No concepts to show yet.": "表示できる概念はまだありません。",
   "Concept graph": "概念グラフ",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "青い矢印：前提概念 · 紫の矢印：派生 · 破線：関連",
-  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "緑：理解済み · 黄：まだ不明 · 青：新規 · 破線の円：未解説",
+  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "緑：理解済み · 薄い黄：あやふや · 黄：まだ不明 · 青：新規 · 破線の円：未解説",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "概念ごとに1枚のカード（タブ区切りテキスト）。Anki の「ファイル → インポート」で開けます。",
   "Export Anki cards": "Anki カードを書き出す",
@@ -255,4 +251,80 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "英語は内蔵されています。ほかの言語は {host} から一度だけダウンロードされ、文書の内容は送信されません。",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
     "スキャンしたPDFはこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。言語パックは、インストールしたときだけ cdn.jsdelivr.net から一度ダウンロードされ、文書の内容は送信されません。",
+  Field: "分野",
+  "All fields": "すべての分野",
+  Understanding: "理解度",
+  "All levels": "すべて",
+  "Looked up": "調べた時期",
+  "Any time": "いつでも",
+  "Last 7 days": "過去 7 日",
+  "Last 30 days": "過去 30 日",
+  "Last 90 days": "過去 90 日",
+  "No concepts match these filters.": "この条件に合う概念はありません。",
+  "Example only: no model was called": "例です。モデルは呼び出されていません",
+  "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.":
+    "低ランクアダプター（LoRA）は、事前学習済みの重みを固定し、その横で 2 つの小さな行列だけを学習します。そのため変わるパラメーターはごく一部です。",
+  "Connect a model below to get explanations like this for anything you read.":
+    "下でモデルを接続すると、読んだものすべてにこのような解説が付きます。",
+  "Try it first": "まず試す",
+  "Click the underlined term to see what an explanation looks like.": "下線の付いた語をクリックすると、解説の見た目を確認できます。",
+  "Model idle timeout (seconds)": "モデルの無応答タイムアウト（秒）",
+  "Wait for first text (seconds)": "最初の文字までの待ち時間（秒）",
+  "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.":
+    "回答が始まったあと、モデルが無応答タイムアウトより長く黙った場合は打ち切ります。推論モデルは最初の一語の前に長く考えることがあるため、その待ち時間は別に設定します。",
+  "What you met this week, built on this computer from your records; no model is called.":
+    "今週出会った内容を、記録からこのコンピューター上で作成します。モデルは呼び出しません。",
+  Digest: "ダイジェスト",
+  "Same as the week before": "前週と同じ",
+  "{n} more than the week before": "前週より {n} 件多い",
+  "{n} fewer than the week before": "前週より {n} 件少ない",
+  "{a} builds on {b}": "{a} は {b} を土台にしています",
+  "{a} is a variant of {b}": "{a} は {b} の派生です",
+  "{a} is related to {b}": "{a} は {b} に関連しています",
+  "← Previous week": "← 前の週",
+  "This week": "今週",
+  "Next week →": "次の週 →",
+  "This digest is built on this computer from your records; no model is called.":
+    "このダイジェストは、記録からこのコンピューター上で作成されます。モデルは呼び出しません。",
+  "Nothing was recorded this week.": "この週の記録はありません。",
+  "Terms met": "出会った用語",
+  "New terms": "新しい用語",
+  Revisited: "再訪した用語",
+  "Active days": "アクティブな日数",
+  "Terms you met": "今週出会った用語",
+  "Where you read": "読んだ場所",
+  "{n} look-ups": "{n} 回",
+  "New connections": "新しいつながり",
+  "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
+    "新しい用語は調べた翌日に復習の対象になります。その後は、各回の答えに応じて、忘れかけるころに次の復習が設定されます。",
+  Again: "もう一度",
+  Hard: "難しい",
+  Good: "できた",
+  Easy: "簡単",
+  "remote service": "リモートサービス",
+  "on this computer": "このコンピューター上",
+  "Check my answer with {model} ({where})": "{model} で答えを確認（{where}）",
+  "Checking…": "確認中…",
+  "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.":
+    "用語、あなたの答え、保存済みの解説を {model}（{where}）に送信します。確認の内容は保存されず、そのあと選んだ評価だけが保存されます。",
+  "Turn off in settings": "設定でオフにする",
+  "Looks right": "ほぼ正解",
+  "Partly right": "部分的に正解",
+  "Not quite": "惜しい",
+  "Suggested: {grade} (you decide)": "おすすめ：{grade}（決めるのはあなたです）",
+  "Type what you remember (optional)": "覚えていることを書いてください（任意）",
+  "Your answer": "あなたの答え",
+  "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.":
+    "各ボタンには、それを選んだ場合に用語が戻ってくる時期が表示されます。スキップでは何も変わりません。キー：スペースで解説を表示、1–4 で評価、S でスキップ。",
+  "Terms that are due. A new term is due a day after you look it up; after that each answer sets when it comes back, just before you would forget it.":
+    "復習の期限が来た用語です。新しい用語は調べた翌日に対象になり、その後は各回の答えに応じて、忘れる直前に戻ってきます。",
+  Review: "復習",
+  "Target recall (%)": "目標の記憶率（%）",
+  "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.":
+    "用語の復習時期が来たときに覚えていたい確率です。高いほど復習が増えます。既定値は 90 です。",
+  "Offer “Check my answer” in review": "復習で「答えを確認」を表示する",
+  "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.":
+    "押すと、Harkback は用語、入力した答え、保存済みの解説をモデルに送信します。通常のモデル選択に従うため、機密ソースはローカルモデルにのみ送られ、確認ごとに毎分・毎時の上限に数えられます。オフにするとボタンは表示されず、何も送信されません。",
+  "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
+    "復習中の任意の「答えを確認」ボタンは、押したときだけ、用語・入力した答え・保存済みの解説をモデルに送信します。設定でオフにできます。",
 };

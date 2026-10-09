@@ -17,9 +17,9 @@ export const pages_es: Readonly<Record<string, string>> = {
   "Select this entry": "Seleccionar esta entrada",
   Understood: "Entendido",
   Confused: "Confuso",
+  Shaky: "Poco firme",
+  "Comes first: {names} build on it": "Va primero: {names} se apoyan en él",
   New: "Nuevo",
-  'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.':
-    "Un término nuevo toca repasarse un día después de consultarlo, y luego a los 3, 7, 14, 30 y 60 días de cada vez que lo recuerdas. «Sigo confundido» lo trae de vuelta al día siguiente.",
   "Select all entries of this concept": "Seleccionar todas las entradas de este concepto",
   "That name belongs to another concept; use Merge instead.": "Ese nombre pertenece a otro concepto; usa Fusionar en su lugar.",
   "That did not work.": "No funcionó.",
@@ -46,8 +46,6 @@ export const pages_es: Readonly<Record<string, string>> = {
   Remembered: "Lo recordé",
   "Still confused": "Sigo confundido",
   Skip: "Omitir",
-  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change":
-    "Lo recordé: vuelve en {a} · Sigo confundido: vuelve en {b} · Omitir: sin cambios",
   "Do you still remember this?": "¿Aún recuerdas este término?",
   "Review ({n})": "Repasar ({n})",
   "Concept not found.": "Concepto no encontrado.",
@@ -60,8 +58,6 @@ export const pages_es: Readonly<Record<string, string>> = {
   "Exported {n} notes.": "Se exportaron {n} notas.",
   "Exported {n} notes; {failed} failed: {names}": "Se exportaron {n} notas; {failed} fallaron: {names}",
   "Export failed.": "Error al exportar.",
-  'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.':
-    "Términos que toca repasar. Un término nuevo toca repasarse un día después de consultarlo, y luego a los 3, 7, 14, 30 y 60 días de cada vez que lo recuerdas; «Sigo confundido» lo trae de vuelta al día siguiente.",
   History: "Historial",
   "Every term you have looked up, grouped by concept.": "Cada término que has consultado, agrupado por concepto.",
   Settings: "Ajustes",
@@ -215,8 +211,8 @@ export const pages_es: Readonly<Record<string, string>> = {
   "Concept graph": "Grafo de conceptos",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
     "Flecha azul: requisito previo · Flecha morada: variante · Discontinua: relacionado",
-  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Verde: entendido · Amarillo: aún confuso · Azul: nuevo · Círculo discontinuo: sin explicar",
+  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "Verde: entendido · Amarillo claro: poco firme · Amarillo: aún confuso · Azul: nuevo · Círculo discontinuo: sin explicar",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Una tarjeta por concepto como texto separado por tabuladores; ábrelo en Anki con Archivo → Importar.",
   "Export Anki cards": "Exportar tarjetas de Anki",
@@ -257,4 +253,80 @@ export const pages_es: Readonly<Record<string, string>> = {
     "El inglés viene incluido. Los demás idiomas se descargan una vez desde {host}; no se envía ningún contenido del documento.",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
     "Los PDF escaneados se leen en este equipo y las imágenes de las páginas nunca salen de él. Un paquete de idioma se descarga una vez desde cdn.jsdelivr.net solo cuando instalas uno; no se envía ningún contenido del documento.",
+  Field: "Área",
+  "All fields": "Todas las áreas",
+  Understanding: "Comprensión",
+  "All levels": "Todos los niveles",
+  "Looked up": "Consultado",
+  "Any time": "Cualquier momento",
+  "Last 7 days": "Últimos 7 días",
+  "Last 30 days": "Últimos 30 días",
+  "Last 90 days": "Últimos 90 días",
+  "No concepts match these filters.": "Ningún concepto coincide con estos filtros.",
+  "Example only: no model was called": "Solo un ejemplo: no se llamó a ningún modelo",
+  "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.":
+    "Un adaptador de bajo rango (LoRA) congela los pesos preentrenados y entrena dos matrices pequeñas a su lado, de modo que solo cambia una fracción mínima de los parámetros.",
+  "Connect a model below to get explanations like this for anything you read.":
+    "Conecta un modelo más abajo para obtener explicaciones como esta de todo lo que leas.",
+  "Try it first": "Pruébalo primero",
+  "Click the underlined term to see what an explanation looks like.": "Haz clic en el término subrayado para ver cómo es una explicación.",
+  "Model idle timeout (seconds)": "Tiempo de espera sin actividad del modelo (segundos)",
+  "Wait for first text (seconds)": "Espera del primer texto (segundos)",
+  "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.":
+    "Una vez iniciada una respuesta, se abandona un modelo que permanece en silencio más tiempo que el límite de inactividad. Los modelos de razonamiento pueden pensar mucho antes de la primera palabra, por eso esa espera se configura aparte.",
+  "What you met this week, built on this computer from your records; no model is called.":
+    "Lo que viste esta semana, generado en este equipo a partir de tus registros; no se llama a ningún modelo.",
+  Digest: "Resumen",
+  "Same as the week before": "Igual que la semana anterior",
+  "{n} more than the week before": "{n} más que la semana anterior",
+  "{n} fewer than the week before": "{n} menos que la semana anterior",
+  "{a} builds on {b}": "{a} se basa en {b}",
+  "{a} is a variant of {b}": "{a} es una variante de {b}",
+  "{a} is related to {b}": "{a} está relacionado con {b}",
+  "← Previous week": "← Semana anterior",
+  "This week": "Esta semana",
+  "Next week →": "Semana siguiente →",
+  "This digest is built on this computer from your records; no model is called.":
+    "Este resumen se genera en este equipo a partir de tus registros; no se llama a ningún modelo.",
+  "Nothing was recorded this week.": "Esta semana no se registró nada.",
+  "Terms met": "Términos encontrados",
+  "New terms": "Términos nuevos",
+  Revisited: "Revisados",
+  "Active days": "Días activos",
+  "Terms you met": "Términos de esta semana",
+  "Where you read": "Dónde leíste",
+  "{n} look-ups": "{n} consultas",
+  "New connections": "Conexiones nuevas",
+  "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
+    "Un término nuevo toca repasarse un día después de consultarlo; después, el siguiente repaso se fija para cuando estés a punto de olvidarlo, según cómo fue cada respuesta.",
+  Again: "Otra vez",
+  Hard: "Difícil",
+  Good: "Bien",
+  Easy: "Fácil",
+  "remote service": "servicio remoto",
+  "on this computer": "en este equipo",
+  "Check my answer with {model} ({where})": "Comprobar mi respuesta con {model} ({where})",
+  "Checking…": "Comprobando…",
+  "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.":
+    "Esto envía el término, tu respuesta y su explicación guardada a {model} ({where}). De la comprobación no se guarda nada; solo la nota que elijas después.",
+  "Turn off in settings": "Desactivar en ajustes",
+  "Looks right": "Parece correcto",
+  "Partly right": "Parcialmente correcto",
+  "Not quite": "No del todo",
+  "Suggested: {grade} (you decide)": "Sugerencia: {grade} (tú decides)",
+  "Type what you remember (optional)": "Escribe lo que recuerdes (opcional)",
+  "Your answer": "Tu respuesta",
+  "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.":
+    "Cada botón muestra cuándo vuelve el término si lo eliges; Omitir no cambia nada. Teclas: Espacio muestra la explicación, 1–4 califican, S omite.",
+  "Terms that are due. A new term is due a day after you look it up; after that each answer sets when it comes back, just before you would forget it.":
+    "Términos pendientes. Un término nuevo toca un día después de consultarlo; después, cada respuesta fija cuándo vuelve, justo antes de que lo olvides.",
+  Review: "Repaso",
+  "Target recall (%)": "Recuerdo objetivo (%)",
+  "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.":
+    "Con qué probabilidad quieres recordar un término cuando toca repasarlo. Más alto significa más repasos; el valor predeterminado es 90.",
+  "Offer “Check my answer” in review": "Ofrecer «Comprobar mi respuesta» en el repaso",
+  "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.":
+    "Al pulsarlo, Harkback envía el término, tu respuesta escrita y su explicación guardada a tu modelo. Usa tu elección de modelo habitual: las fuentes sensibles solo van a un modelo local, y cada comprobación cuenta para tus límites por minuto y por hora. Si lo desactivas, el botón no aparece y no se envía nada.",
+  "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
+    "En el repaso, el botón opcional «Comprobar mi respuesta» envía el término, tu respuesta escrita y su explicación guardada a tu modelo solo cuando lo pulsas; se puede desactivar en ajustes.",
 };

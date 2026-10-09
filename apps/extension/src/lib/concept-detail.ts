@@ -1,8 +1,10 @@
-import { THRESHOLDS, type State } from "@harkback/core";
-import type { Action, Domain } from "@harkback/spec";
+import { gradeOf, type State } from "@harkback/core";
+import type { Domain } from "@harkback/spec";
+import { isActiveEdge } from "./prerequisites";
 import { historyEntries, type HistoryEntry } from "./history";
 
-export type Understanding = "understood" | "confused" | "new";
+/** `shaky`: the last answer was "Hard", remembered only with effort. */
+export type Understanding = "understood" | "shaky" | "confused" | "new";
 
 export interface RelatedConcept {
   conceptId: string;
@@ -29,18 +31,17 @@ export interface ConceptDetail {
   entries: HistoryEntry[];
 }
 
-const DECISIVE: ReadonlySet<Action> = new Set(["marked_understood", "marked_confused", "reunion_recalled"]);
-
 /** The most recent decisive action across all encounters of the concept decides. */
 export function understandingOf(state: State, conceptId: string): Understanding {
   const id = state.representative.get(conceptId) ?? conceptId;
   const actions = (state.encountersByConcept.get(id) ?? [])
     .flatMap((eid) => state.encounters.get(eid)?.actions ?? [])
-    .filter((a) => DECISIVE.has(a.action))
+    .filter((a) => gradeOf(a.action) !== null)
     .sort((a, b) => a.at - b.at);
   const last = actions.at(-1);
   if (!last) return "new";
-  return last.action === "marked_confused" ? "confused" : "understood";
+  const grade = gradeOf(last.action);
+  return grade === 1 ? "confused" : grade === 2 ? "shaky" : "understood";
 }
 
 export function conceptDetail(state: State, conceptId: string): ConceptDetail | null {
@@ -66,8 +67,7 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
   };
   for (const edge of state.edges.values()) {
     if (edge.from !== id && edge.to !== id) continue;
-    if (edge.status === "rejected") continue;
-    if (edge.status !== "confirmed" && edge.confidence < THRESHOLDS.relatedEdgeConfidence) continue;
+    if (!isActiveEdge(edge)) continue;
     const other = edge.from === id ? edge.to : edge.from;
     if (edge.rel === "prerequisite") {
       if (edge.from === id) add(groups.prerequisites, other, edge.id);

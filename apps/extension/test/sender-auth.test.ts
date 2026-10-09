@@ -46,6 +46,10 @@ describe("allowed", () => {
     expect(allowed("review-answer", "page")).toBe(true);
     expect(allowed("review-answer", "content")).toBe(false);
     expect(allowed("review-answer", "reader")).toBe(false);
+    // The model check spends the user's model quota, so a web page's content script must never be able to ask for it.
+    expect(allowed("check-answer", "page")).toBe(true);
+    expect(allowed("check-answer", "content")).toBe(false);
+    expect(allowed("check-answer", "reader")).toBe(false);
     for (const type of ["merge-concepts", "add-alias", "reject-edge", "set-muted", "mark-normal", "import-events"] as const) {
       expect(allowed(type, "page")).toBe(true);
       expect(allowed(type, "content")).toBe(false);

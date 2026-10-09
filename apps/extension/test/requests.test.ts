@@ -17,6 +17,7 @@ function setup(settings: unknown = {}) {
   const written: HarkEvent[] = [];
   const imported: HarkEvent[] = [];
   const calls = { compact: 0, backup: 0, sync: 0 };
+  const checked: { conceptId: string; answer: string }[] = [];
   const deps: RequestDeps = {
     loadSettings: async () => withDefaults({ reunion: { minGapDays: 0 }, ...(settings as object) }),
     getState: async () => w.state(),
@@ -31,10 +32,14 @@ function setup(settings: unknown = {}) {
       return events.length;
     },
     runBackup: async () => void calls.backup++,
+    checkAnswer: async (conceptId: string, answer: string) => {
+      checked.push({ conceptId, answer });
+      return { ok: true as const, verdict: "partial" as const, feedback: "close", suggested: 2 as const, model: "m" };
+    },
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
-  return { deps, written, imported, calls, conceptId, encounterId, w };
+  return { deps, written, imported, calls, checked, conceptId, encounterId, w };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -150,19 +155,58 @@ describe("page-only requests", () => {
 
   it("records a review answer on the concept's latest encounter", async () => {
     const { deps, written, conceptId } = setup();
-    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "marked_understood" }, extensionPage)).toEqual({
-      ok: true,
-    });
-    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "marked_confused" }, extensionPage)).toEqual({ ok: true });
-    expect(written.map((e) => [e.type, (e.payload as { action?: string }).action])).toEqual([
-      ["encounter.action", "marked_understood"],
-      ["encounter.action", "marked_confused"],
+    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "review_good" }, extensionPage)).toEqual({ ok: true });
+    expect(written.map((e) => [e.type, (e.payload as { action?: string }).action])).toEqual([["encounter.action", "review_good"]]);
+  });
+
+  it("does not take the older marks as review answers", async () => {
+    const { deps, written, conceptId } = setup();
+    for (const action of ["marked_understood", "marked_confused", "reunion_recalled"] as const) {
+      expect(await handleRequest(deps, { type: "review-answer", conceptId, action: action as never }, extensionPage)).toEqual({
+        ok: false,
+      });
+    }
+    expect(written).toEqual([]);
+  });
+
+  it("records the four review grades", async () => {
+    const { deps, written, conceptId } = setup();
+    for (const action of ["review_again", "review_hard", "review_good", "review_easy"] as const) {
+      expect(await handleRequest(deps, { type: "review-answer", conceptId, action }, extensionPage)).toEqual({ ok: true });
+    }
+    expect(written.map((e) => (e.payload as { action?: string }).action)).toEqual([
+      "review_again",
+      "review_hard",
+      "review_good",
+      "review_easy",
     ]);
+  });
+
+  it("passes a typed answer to the model check, trimmed and cut to a safe length", async () => {
+    const { deps, checked, conceptId } = setup();
+    const r = await handleRequest(deps, { type: "check-answer", conceptId, answer: `  ${"a".repeat(3000)}  ` }, extensionPage);
+    expect(r).toMatchObject({ ok: true, verdict: "partial", suggested: 2 });
+    expect(checked).toHaveLength(1);
+    expect(checked[0]!.answer).toHaveLength(2000);
+    expect(checked[0]!.conceptId).toBe(conceptId);
+  });
+
+  it("does not call the model for an empty answer", async () => {
+    const { deps, checked, conceptId } = setup();
+    expect(await handleRequest(deps, { type: "check-answer", conceptId, answer: "   " }, extensionPage)).toEqual({
+      ok: false,
+      code: "internal",
+    });
+    expect(await handleRequest(deps, { type: "check-answer", conceptId, answer: 5 as never }, extensionPage)).toEqual({
+      ok: false,
+      code: "internal",
+    });
+    expect(checked).toEqual([]);
   });
 
   it("refuses a review answer for an unknown concept or an action it cannot take", async () => {
     const { deps, written, conceptId } = setup();
-    expect(await handleRequest(deps, { type: "review-answer", conceptId: "missing", action: "marked_understood" }, extensionPage)).toEqual({
+    expect(await handleRequest(deps, { type: "review-answer", conceptId: "missing", action: "review_good" }, extensionPage)).toEqual({
       ok: false,
     });
     expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "followed_up" as never }, extensionPage)).toEqual({

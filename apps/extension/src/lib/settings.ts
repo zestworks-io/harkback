@@ -45,6 +45,13 @@ export interface Settings {
   sites: SiteRule[];
   rateLimit: { perMinute: number; perHour: number };
   reunion: { minGapDays: number; maxPerPage: number };
+  /** How long a model may stay quiet before a request is given up: once the answer has started, and before its first text. */
+  timeouts: { idleSeconds: number; firstTextSeconds: number };
+  /**
+   * `desiredRetention`: the share of reviewed terms you want to still remember when they come due; higher means more reviews.
+   * `modelCheck`: review offers "Check my answer", which sends your answer and the stored explanation to your model.
+   */
+  review: { desiredRetention: number; modelCheck: boolean };
   /** `excludeSensitive`: backups and exports leave out everything that came from sensitive sources. */
   backup: { enabled: boolean; excludeSensitive: boolean };
 }
@@ -66,6 +73,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sites: [],
   rateLimit: { perMinute: 10, perHour: 100 },
   reunion: { ...REUNION_DEFAULTS },
+  timeouts: { idleSeconds: 30, firstTextSeconds: 120 },
+  review: { desiredRetention: 0.9, modelCheck: true },
   backup: { enabled: true, excludeSensitive: false },
 };
 
@@ -78,6 +87,13 @@ const strOrNull = (v: unknown): string | null => (typeof v === "string" ? v : nu
 /** A whole number of at least `min`; anything else (a hand-edited zero, a fraction) would lock requests out or never fire. */
 const count = (v: unknown, fallback: number, min: number): number =>
   Number.isInteger(v) && (v as number) >= min ? (v as number) : fallback;
+
+export const MIN_RETENTION = 0.7;
+export const MAX_RETENTION = 0.97;
+
+/** A number between `min` and `max`; anything else falls back. */
+const within = (v: unknown, fallback: number, min: number, max: number): number =>
+  typeof v === "number" && Number.isFinite(v) && v >= min && v <= max ? v : fallback;
 
 function cleanModel(raw: unknown): ModelConfig[] {
   const m = obj(raw);
@@ -116,6 +132,8 @@ export function withDefaults(raw: unknown): Settings {
   const d = DEFAULT_SETTINGS;
   const rate = obj(s.rateLimit);
   const reunion = obj(s.reunion);
+  const timeouts = obj(s.timeouts);
+  const review = obj(s.review);
   return {
     version: 1,
     onboarded: s.onboarded === true,
@@ -131,6 +149,14 @@ export function withDefaults(raw: unknown): Settings {
     reunion: {
       minGapDays: count(reunion.minGapDays, d.reunion.minGapDays, 0),
       maxPerPage: count(reunion.maxPerPage, d.reunion.maxPerPage, 1),
+    },
+    timeouts: {
+      idleSeconds: within(timeouts.idleSeconds, d.timeouts.idleSeconds, 5, 600),
+      firstTextSeconds: within(timeouts.firstTextSeconds, d.timeouts.firstTextSeconds, 10, 1800),
+    },
+    review: {
+      desiredRetention: within(review.desiredRetention, d.review.desiredRetention, MIN_RETENTION, MAX_RETENTION),
+      modelCheck: review.modelCheck !== false,
     },
     backup: {
       enabled: obj(s.backup).enabled === false ? false : d.backup.enabled,
@@ -161,6 +187,9 @@ export function validateSettings(s: Settings): string[] {
   if (!isInt(s.rateLimit.perHour, 1, 10000)) errors.push("rateLimit.perHour");
   if (!isInt(s.reunion.minGapDays, 0, 365)) errors.push("reunion.minGapDays");
   if (!isInt(s.reunion.maxPerPage, 1, 10)) errors.push("reunion.maxPerPage");
+  if (!isInt(s.timeouts.idleSeconds, 5, 600)) errors.push("timeouts.idleSeconds");
+  if (!isInt(s.timeouts.firstTextSeconds, 10, 1800)) errors.push("timeouts.firstTextSeconds");
+  if (!(s.review.desiredRetention >= MIN_RETENTION && s.review.desiredRetention <= MAX_RETENTION)) errors.push("review.desiredRetention");
   s.sites.forEach((r, i) => {
     if (!normalizePattern(r.pattern)) errors.push(`sites[${i}].pattern`);
     if (r.modelId !== undefined && !ids.has(r.modelId)) errors.push(`sites[${i}].modelId`);

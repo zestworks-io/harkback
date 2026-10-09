@@ -17,9 +17,9 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Select this entry": "Sélectionner cette entrée",
   Understood: "Compris",
   Confused: "Pas clair",
+  Shaky: "Fragile",
+  "Comes first: {names} build on it": "À voir d’abord : {names} s’appuient dessus",
   New: "Nouveau",
-  'A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it. "Still confused" brings it back the next day.':
-    "Un nouveau terme est à revoir un jour après sa recherche, puis 3, 7, 14, 30 et 60 jours après chaque fois que vous vous en souvenez. « Toujours confus » le ramène le lendemain.",
   "Select all entries of this concept": "Sélectionner toutes les entrées de ce concept",
   "That name belongs to another concept; use Merge instead.": "Ce nom appartient à un autre concept ; utilisez plutôt Fusionner.",
   "That did not work.": "Cela n'a pas fonctionné.",
@@ -46,8 +46,6 @@ export const pages_fr: Readonly<Record<string, string>> = {
   Remembered: "Je m'en souviens",
   "Still confused": "Toujours confus",
   Skip: "Passer",
-  "Remembered: back in {a} · Still confused: back in {b} · Skip: no change":
-    "Je m'en souviens : revient dans {a} · Toujours confus : revient dans {b} · Passer : aucun changement",
   "Do you still remember this?": "Vous souvenez-vous encore de ce terme ?",
   "Review ({n})": "Réviser ({n})",
   "Concept not found.": "Concept introuvable.",
@@ -60,8 +58,6 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Exported {n} notes.": "{n} notes exportées.",
   "Exported {n} notes; {failed} failed: {names}": "{n} notes exportées ; {failed} en échec : {names}",
   "Export failed.": "Échec de l'exportation.",
-  'Terms that are due. A new term is due a day after you look it up, then 3, 7, 14, 30 and 60 days after each time you remember it; "Still confused" brings it back the next day.':
-    "Termes à réviser. Un nouveau terme est à revoir un jour après sa recherche, puis 3, 7, 14, 30 et 60 jours après chaque fois que vous vous en souvenez ; « Toujours confus » le ramène le lendemain.",
   History: "Historique",
   "Every term you have looked up, grouped by concept.": "Chaque terme que vous avez recherché, regroupé par concept.",
   Settings: "Paramètres",
@@ -214,8 +210,8 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Concept graph": "Graphe des concepts",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
     "Flèche bleue : prérequis · Flèche violette : variante · Pointillés : lié",
-  "Green: understood · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Vert : compris · Jaune : encore flou · Bleu : nouveau · Cercle en pointillés : pas encore expliqué",
+  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
+    "Vert : compris · Jaune pâle : fragile · Jaune : encore flou · Bleu : nouveau · Cercle en pointillés : pas encore expliqué",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Une carte par concept sous forme de texte séparé par des tabulations ; ouvrez-le dans Anki avec Fichier → Importer.",
   "Export Anki cards": "Exporter des cartes Anki",
@@ -256,4 +252,81 @@ export const pages_fr: Readonly<Record<string, string>> = {
     "L’anglais est intégré. Les autres langues se téléchargent une fois depuis {host} ; aucun contenu du document n’est envoyé.",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
     "Les PDF numérisés sont lus sur cet ordinateur et les images des pages ne le quittent jamais. Un pack de langue n’est téléchargé qu’une fois depuis cdn.jsdelivr.net, seulement si vous en installez un ; aucun contenu du document n’est envoyé.",
+  Field: "Domaine",
+  "All fields": "Tous les domaines",
+  Understanding: "Compréhension",
+  "All levels": "Tous les niveaux",
+  "Looked up": "Consulté",
+  "Any time": "À tout moment",
+  "Last 7 days": "7 derniers jours",
+  "Last 30 days": "30 derniers jours",
+  "Last 90 days": "90 derniers jours",
+  "No concepts match these filters.": "Aucun concept ne correspond à ces filtres.",
+  "Example only: no model was called": "Simple exemple : aucun modèle n'a été appelé",
+  "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.":
+    "Un adaptateur de faible rang (LoRA) fige les poids préentraînés et entraîne à côté deux petites matrices, si bien que seule une infime fraction des paramètres change.",
+  "Connect a model below to get explanations like this for anything you read.":
+    "Connectez un modèle ci-dessous pour obtenir ce type d'explication pour tout ce que vous lisez.",
+  "Try it first": "Essayez d'abord",
+  "Click the underlined term to see what an explanation looks like.":
+    "Cliquez sur le terme souligné pour voir à quoi ressemble une explication.",
+  "Model idle timeout (seconds)": "Délai d'inactivité du modèle (secondes)",
+  "Wait for first text (seconds)": "Attente du premier texte (secondes)",
+  "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.":
+    "Une fois la réponse commencée, un modèle qui reste silencieux plus longtemps que le délai d'inactivité est abandonné. Les modèles de raisonnement peuvent réfléchir longtemps avant le premier mot ; cette attente est donc réglée séparément.",
+  "What you met this week, built on this computer from your records; no model is called.":
+    "Ce que vous avez rencontré cette semaine, calculé sur cet ordinateur à partir de vos enregistrements ; aucun modèle n'est appelé.",
+  Digest: "Bilan",
+  "Same as the week before": "Identique à la semaine précédente",
+  "{n} more than the week before": "{n} de plus que la semaine précédente",
+  "{n} fewer than the week before": "{n} de moins que la semaine précédente",
+  "{a} builds on {b}": "{a} s'appuie sur {b}",
+  "{a} is a variant of {b}": "{a} est une variante de {b}",
+  "{a} is related to {b}": "{a} est lié à {b}",
+  "← Previous week": "← Semaine précédente",
+  "This week": "Cette semaine",
+  "Next week →": "Semaine suivante →",
+  "This digest is built on this computer from your records; no model is called.":
+    "Ce bilan est calculé sur cet ordinateur à partir de vos enregistrements ; aucun modèle n'est appelé.",
+  "Nothing was recorded this week.": "Rien n'a été enregistré cette semaine.",
+  "Terms met": "Termes rencontrés",
+  "New terms": "Nouveaux termes",
+  Revisited: "Revus",
+  "Active days": "Jours actifs",
+  "Terms you met": "Termes de la semaine",
+  "Where you read": "Où vous avez lu",
+  "{n} look-ups": "{n} recherches",
+  "New connections": "Nouveaux liens",
+  "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
+    "Un nouveau terme est à revoir un jour après sa recherche ; ensuite, la prochaine révision est fixée au moment où vous alliez l'oublier, selon le déroulement de chaque réponse.",
+  Again: "À revoir",
+  Hard: "Difficile",
+  Good: "Bien",
+  Easy: "Facile",
+  "remote service": "service distant",
+  "on this computer": "sur cet ordinateur",
+  "Check my answer with {model} ({where})": "Vérifier ma réponse avec {model} ({where})",
+  "Checking…": "Vérification…",
+  "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.":
+    "Cela envoie le terme, votre réponse et son explication enregistrée à {model} ({where}). Rien de la vérification n'est conservé ; seule la note que vous choisissez ensuite l'est.",
+  "Turn off in settings": "Désactiver dans les réglages",
+  "Looks right": "Semble juste",
+  "Partly right": "En partie juste",
+  "Not quite": "Pas tout à fait",
+  "Suggested: {grade} (you decide)": "Suggestion : {grade} (c'est vous qui décidez)",
+  "Type what you remember (optional)": "Écrivez ce dont vous vous souvenez (facultatif)",
+  "Your answer": "Votre réponse",
+  "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.":
+    "Chaque bouton indique quand le terme reviendra si vous le choisissez ; Passer ne change rien. Touches : Espace affiche l'explication, 1–4 notent, S passe.",
+  "Terms that are due. A new term is due a day after you look it up; after that each answer sets when it comes back, just before you would forget it.":
+    "Termes à revoir. Un nouveau terme est à revoir un jour après sa recherche ; ensuite, chaque réponse fixe son retour, juste avant que vous ne l'oubliiez.",
+  Review: "Révision",
+  "Target recall (%)": "Taux de rappel visé (%)",
+  "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.":
+    "La probabilité de vous souvenir d'un terme au moment où il est à revoir. Plus elle est élevée, plus il y a de révisions ; la valeur par défaut est 90.",
+  "Offer “Check my answer” in review": "Proposer « Vérifier ma réponse » pendant la révision",
+  "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.":
+    "Lorsque vous l'appuyez, Harkback envoie le terme, votre réponse saisie et son explication enregistrée à votre modèle. Il utilise votre choix de modèle habituel : les sources sensibles ne vont qu'à un modèle local, et chaque vérification compte dans vos limites par minute et par heure. Si vous désactivez cette option, le bouton n'apparaît jamais et rien n'est envoyé.",
+  "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
+    "Pendant la révision, le bouton facultatif « Vérifier ma réponse » envoie le terme, votre réponse saisie et son explication enregistrée à votre modèle, uniquement lorsque vous l'appuyez ; il peut être désactivé dans les réglages.",
 };

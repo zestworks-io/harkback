@@ -1,5 +1,5 @@
 import { THRESHOLDS, type State } from "@harkback/core";
-import type { Rel } from "@harkback/spec";
+import type { Domain, Rel } from "@harkback/spec";
 import { understandingOf, type Understanding } from "./concept-detail";
 
 export interface GraphNode {
@@ -31,6 +31,12 @@ export interface Graph {
 export interface GraphOptions {
   /** Show only concepts whose name contains this, and the ones they connect to. */
   query?: string;
+  /** Show only studied concepts in this field, and the ones they connect to. */
+  domain?: Domain;
+  /** Show only studied concepts you understand this well, and the ones they connect to. */
+  understanding?: Understanding;
+  /** Show only studied concepts you last looked up at or after this time (ms), and the ones they connect to. */
+  since?: number;
   /** The most concepts to draw; the best connected ones are kept. */
   limit?: number;
   width?: number;
@@ -51,9 +57,25 @@ export function graphModel(state: State, o: GraphOptions = {}): Omit<Graph, "wid
     degree.set(e.to, (degree.get(e.to) ?? 0) + 1);
   }
   const matches = (id: string): boolean => !q || state.concepts.get(id)!.names.some((n) => n.toLowerCase().includes(q));
+  const lastLookup = (id: string): number => {
+    const last = state.encountersByConcept.get(id)?.at(-1);
+    return (last && state.encounters.get(last)?.createdAt) || 0;
+  };
+  const filtering = o.domain !== undefined || o.understanding !== undefined || o.since !== undefined;
+  // Only a concept that was studied has a field, an understanding and a last look-up to filter on.
+  const passes = (id: string): boolean => {
+    if (!filtering) return true;
+    const c = state.concepts.get(id)!;
+    return (
+      !c.isPlaceholder &&
+      (o.domain === undefined || c.domain === o.domain) &&
+      (o.understanding === undefined || understandingOf(state, id) === o.understanding) &&
+      (o.since === undefined || lastLookup(id) >= o.since)
+    );
+  };
   let ids = [...state.concepts.values()].filter((c) => !c.isPlaceholder || degree.has(c.id)).map((c) => c.id);
-  if (q) {
-    const direct = new Set(ids.filter(matches));
+  if (q || filtering) {
+    const direct = new Set(ids.filter((id) => matches(id) && passes(id)));
     const hit = new Set(direct);
     for (const e of edges) {
       if (direct.has(e.from)) hit.add(e.to);

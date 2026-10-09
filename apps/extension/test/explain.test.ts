@@ -243,6 +243,7 @@ describe("reunion cards", () => {
         conceptId: lora,
         conceptName: "LoRA",
         viaName: null,
+        matched: "LoRA",
         start: 10,
         end: 14,
         encounterId: enc,

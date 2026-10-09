@@ -154,6 +154,53 @@
         margin: 0;
         color: var(--muted);
       }
+      .review-answer {
+        flex: 1 1 100%;
+        font: inherit;
+        color: var(--fg);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        resize: vertical;
+      }
+      .check {
+        flex: 1 1 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .check-note {
+        margin: 0;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      .check-result {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--muted);
+        border-radius: 8px;
+        background: var(--card);
+      }
+      .check-result.correct {
+        border-left-color: var(--understood, #2a9d5c);
+      }
+      .check-result.partial {
+        border-left-color: var(--confused, #d9a400);
+      }
+      .check-result.incorrect {
+        border-left-color: var(--danger, #c0392b);
+      }
+      .check-suggest {
+        margin-top: 4px;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      .check-error {
+        margin: 0;
+        color: var(--danger, #c0392b);
+      }
       .review .quote {
         margin-top: 12px;
       }
@@ -432,6 +479,10 @@
         color: var(--external);
         background: var(--external-soft);
       }
+      .status.shaky {
+        color: var(--external);
+        background: var(--subtle);
+      }
       .domain {
         color: var(--muted);
         font-size: 12.5px;
@@ -582,6 +633,88 @@
         background: var(--external-soft);
         color: var(--external);
       }
+      .digest-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px 16px;
+        margin-bottom: 14px;
+      }
+      .digest-head h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .digest-nav {
+        display: flex;
+        gap: 8px;
+      }
+      .digest-tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .digest-tile {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+        padding: 12px 14px;
+      }
+      .digest-num {
+        font-size: 28px;
+        font-weight: 650;
+        line-height: 1.1;
+      }
+      .digest-label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .digest-note {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .digest-section h2 {
+        font-size: 15px;
+        margin: 18px 0 6px;
+      }
+      .digest-list {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .digest-list li {
+        margin: 3px 0;
+      }
+      .digest-badge {
+        margin-left: 8px;
+        padding: 0 7px;
+        border-radius: 999px;
+        font-size: 11.5px;
+        background: var(--external-soft);
+        color: var(--external);
+      }
+      .digest-count {
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+      .graph-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .graph-filters select {
+        height: 30px;
+        font: inherit;
+        color: var(--fg);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 8px;
+      }
       .graph-wrap {
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -629,6 +762,10 @@
       }
       svg.graph .node.confused circle {
         fill: var(--external);
+        stroke: var(--external);
+      }
+      svg.graph .node.shaky circle {
+        fill: var(--external-soft);
         stroke: var(--external);
       }
       svg.graph .node.new circle {

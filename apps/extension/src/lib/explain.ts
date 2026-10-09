@@ -58,7 +58,7 @@ export interface ExplainPlan {
 }
 
 /** Sources whose URL matches a sensitive site rule count as sensitive, even if they were recorded before the rule existed. */
-function applySiteRules(state: State, rules: readonly SiteRule[]): State {
+export function applySiteRules(state: State, rules: readonly SiteRule[]): State {
   if (!rules.some((r) => r.sensitive)) return state;
   const sources = new Map(state.sources);
   for (const [id, src] of sources) {

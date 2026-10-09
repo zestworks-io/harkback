@@ -40,6 +40,7 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "mark-normal",
   "import-events",
   "review-answer",
+  "check-answer",
   "merge-concepts",
   "add-alias",
   "reject-edge",
