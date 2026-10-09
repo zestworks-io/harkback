@@ -133,4 +133,15 @@ describe("selectReunions: one paper under two ids", () => {
     const state = replay([...base, seen("arxiv:2", { arxiv: "2", doi: "10.1/x" })]);
     expect(state.encounters.get(id(10))!.sourceId).toBe("doi:10.1/x");
   });
+
+  it("resolves the current page's id without a record of its own, and versioned ids", () => {
+    const events = [
+      concept(1, "LoRA"),
+      encounter(10, 1, "doi:10.48550/arxiv.2106.09685", "2026-09-01T00:00:00Z"),
+      encounter(11, 1, "arxiv:2106.09686v2", "2026-09-01T00:00:00Z"),
+    ];
+    expect(run(events, "LoRA", "arxiv:2106.09685v1")).toHaveLength(1); // only the other paper is left
+    expect(run(events.slice(0, 2), "LoRA", "arxiv:2106.09685")).toEqual([]);
+    expect(run([events[0]!, events[2]!], "LoRA", "arxiv:2106.09686")).toEqual([]);
+  });
 });

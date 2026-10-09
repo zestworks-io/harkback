@@ -3,6 +3,17 @@ import { MinUnionFind } from "./union-find";
 
 const ARXIV_DOI = /^10\.48550\/arxiv\.(.+)$/i;
 
+/** One spelling per id: no version suffix on arXiv ids, lower-case DOIs, and arXiv's own DOI form as the arXiv id. */
+export function normalizeSourceId(id: string): string {
+  if (id.startsWith("arxiv:")) return id.replace(/v\d+$/, "");
+  if (id.startsWith("doi:")) {
+    const doi = id.toLowerCase();
+    const m = ARXIV_DOI.exec(doi.slice(4));
+    return m ? `arxiv:${m[1]!.replace(/v\d+$/, "")}` : doi;
+  }
+  return id;
+}
+
 /** The ids a source is known by, in the form source ids use: `arxiv:<id>` and `doi:<id>`. */
 function idKeys(ids: SourceIds): string[] {
   const keys: string[] = [];
@@ -25,14 +36,14 @@ export function resolveSourceIdentity(sorted: readonly HarkEvent[]): Map<string,
   const uf = new MinUnionFind();
   for (const e of sorted) {
     if (e.type !== "source.seen") continue;
-    const keys = [e.payload.source_id, ...idKeys(e.payload.ids)];
+    const keys = [normalizeSourceId(e.payload.source_id), ...idKeys(e.payload.ids)];
     for (const k of keys) uf.add(k);
     for (const k of keys.slice(1)) uf.union(keys[0]!, k);
   }
   const map = new Map<string, string>();
   for (const e of sorted) {
     if (e.type !== "source.seen") continue;
-    for (const k of [e.payload.source_id, ...idKeys(e.payload.ids)]) map.set(k, uf.find(k));
+    for (const k of [normalizeSourceId(e.payload.source_id), ...idKeys(e.payload.ids)]) map.set(k, uf.find(k));
   }
   return map;
 }

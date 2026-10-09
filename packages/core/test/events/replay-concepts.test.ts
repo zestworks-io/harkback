@@ -60,6 +60,12 @@ describe("resolveConcepts", () => {
     expect(long.aliases.get("alphaxlong")?.ambiguous).toBe(false);
   });
 
+  it("does not treat a short ordinary word shared by two concepts as an abbreviation", () => {
+    const r = resolve([concept(1, "Go Language", "ml", ["Go"]), concept(2, "Go Game", "ml", ["Go"])]);
+    expect(r.aliases.get("Go")?.conceptIds).toHaveLength(2);
+    expect(r.aliases.get("Go")?.ambiguous).toBe(false);
+  });
+
   it("applies aliases added later and warns about unknown concepts", () => {
     const r = resolve([
       concept(1, "LoRA"),

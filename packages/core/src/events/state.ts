@@ -1,4 +1,5 @@
 import type { Action, Domain, EdgeSource, EncounterFlag, Explanation, Locator, Rel, Sensitivity, SourceIds } from "@harkback/spec";
+import { normalizeSourceId } from "./source-identity";
 import type { Script } from "../concepts/normalize";
 
 export interface ConceptState {
@@ -86,5 +87,8 @@ export interface State {
 
 /** True when both source ids name the same source, directly or through a paper's other id. */
 export function sameSource(state: Pick<State, "sourceIdentity">, a: string, b: string): boolean {
-  return a === b || (state.sourceIdentity.get(a) ?? a) === (state.sourceIdentity.get(b) ?? b);
+  if (a === b) return true;
+  const ka = normalizeSourceId(a);
+  const kb = normalizeSourceId(b);
+  return (state.sourceIdentity.get(ka) ?? ka) === (state.sourceIdentity.get(kb) ?? kb);
 }
