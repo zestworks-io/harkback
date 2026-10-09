@@ -14,7 +14,7 @@ Harkback is a browser extension that explains terms while you read and remembers
 
 ## What leaves your browser
 
-Only the request you trigger. When you ask for an explanation, Harkback sends the selected text, its paragraph, the section and the page title to the **model service you configured** (for example a hosted API or a local server such as Ollama). That service handles the data under its own terms and privacy policy. Content from sources you mark as sensitive is never sent to a non-local model. The same is true of the optional "Check my answer" button in review: only when you press it, Harkback sends the term, the answer you typed and the stored explanation to your model. You can turn it off in settings.
+Only the request you trigger. When you ask for an explanation, Harkback sends the selected text, its paragraph, the section and the page title to the **model service you configured** (for example a hosted API or a local server such as Ollama). That service handles the data under its own terms and privacy policy. Content from sources you mark as sensitive is never sent to a non-local model. The same is true of the optional "Check my answer" button in review: only when you press it, Harkback sends the term, the answer you typed and the stored explanation to your model. You can turn it off in settings. The same goes for the page preview: only when you press Scan, Harkback sends the page text (the first 16,000 characters) to your model, and a page you marked sensitive only uses a local model. Chrome's built-in model runs on your computer, so nothing is sent anywhere; Chrome itself downloads that model when you press Download model.
 
 Scanned PDFs are read on your computer: the page images never leave it. The one network request OCR can make is downloading a language pack (English is built in) from `cdn.jsdelivr.net`, once, and only when you install a language under Languages. That request carries no document content, and the pack is checked against a checksum shipped with Harkback before it is used.
 
@@ -24,7 +24,7 @@ Harkback does not include analytics, advertising or tracking, and does not sell 
 
 - **Site access (optional).** Harkback asks for access to a website only when you choose to scan it or add it to the allowed list, and it asks for your model's address so it can send your requests. On arxiv.org it runs automatically.
 - **Local files (optional).** To read a PDF on your computer, you can allow access to local files. The file is read in your browser and is never uploaded.
-- **Other permissions.** `storage` keeps your records and settings; `alarms` schedules the weekly backup and refreshes the review count on the toolbar icon; `downloads` writes that backup; `offscreen` creates the backup file; `scripting` and `activeTab` let the toolbar button read the page you are on; `contextMenus` adds "Explain with Harkback" to the right-click menu of selected text.
+- **Other permissions.** `storage` keeps your records and settings; `alarms` schedules the weekly backup and refreshes the review count on the toolbar icon; `downloads` writes that backup; `offscreen` creates the backup file; `scripting` and `activeTab` let the toolbar button and the keyboard shortcuts read the page you are on; `contextMenus` adds "Explain with Harkback" to the right-click menu of selected text and "Harkback: Preview this page" to the right-click menu of a page.
 
 ## Private windows
 

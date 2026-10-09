@@ -100,6 +100,10 @@ test("store screenshots", async ({ context, sw, stub, extensionId }) => {
   await onboarding.locator("[data-hb=next]").click();
   await onboarding.waitForTimeout(300);
   await shot(onboarding, "5-privacy.png");
+  await onboarding.locator("[data-hb=consent]").check();
+  await onboarding.locator("[data-hb=next]").click();
+  await onboarding.waitForTimeout(300);
+  await shot(onboarding, "6-model.png");
 });
 
 const TILE = (w: number, h: number, scale: number) => `<!doctype html><meta charset="utf-8"><style>

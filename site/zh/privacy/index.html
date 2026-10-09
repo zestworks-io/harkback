@@ -18,7 +18,7 @@
 <main><div class="wrap">
 
 <h1>隐私政策</h1>
-<p class="meta">最后更新：2026 年 10 月 1 日</p>
+<p class="meta">最后更新：2026 年 10 月 9 日</p>
 <p>Harkback 是一个浏览器扩展：阅读时解释术语，并记住你理解了什么。它没有自己的服务器，开发者不会接收、存储或看到你的任何数据。</p>
 
 <h2>Harkback 保存什么</h2>
@@ -29,7 +29,7 @@
 </ul>
 
 <h2>哪些内容会离开你的浏览器</h2>
-<p>只有你触发的请求。当你请求解释时，Harkback 会把选中的文字、所在段落、章节和页面标题发送给<strong>你配置的模型服务</strong>（例如云端 API 或 Ollama 这样的本机服务）。该服务按其自己的条款和隐私政策处理这些数据。你标为敏感的来源，其内容绝不会发给非本机模型。复习中可选的「检查我的回答」也是如此：只有你点击时，Harkback 才会把术语、你输入的回答和当时的解释发给你的模型。你可以在设置中关闭它。</p>
+<p>只有你触发的请求。当你请求解释时，Harkback 会把选中的文字、所在段落、章节和页面标题发送给<strong>你配置的模型服务</strong>（例如云端 API 或 Ollama 这样的本机服务）。该服务按其自己的条款和隐私政策处理这些数据。你标为敏感的来源，其内容绝不会发给非本机模型。复习中可选的「检查我的回答」也是如此：只有你点击时，Harkback 才会把术语、你输入的回答和当时的解释发给你的模型。你可以在设置中关闭它。页面预览也是如此：只有你点击「扫描」时，Harkback 才会把页面文字（前 16,000 个字符）发给你的模型，你标为敏感的页面只会使用本机模型。Chrome 内置模型在你的电脑上运行，不会发送到任何地方；该模型由 Chrome 自己在你点击「下载模型」时下载。</p>
 <p>扫描版 PDF 在你的电脑上识别文字，页面图像不会离开电脑。识别唯一可能发出的网络请求，是从 <code>cdn.jsdelivr.net</code> 下载语言包（英文已内置），且只在你于「语言」中安装某种语言时下载一次。该请求不含任何文档内容，语言包在使用前会用随 Harkback 发布的校验值检查。</p>
 <p>Harkback 不含统计分析、广告或跟踪，也不会出售或分享你的数据。</p>
 
@@ -37,7 +37,7 @@
 <ul>
 <li><strong>网站访问（可选）。</strong>只有当你选择扫描某个网站或把它加入允许列表时，Harkback 才会请求访问该网站；它还会请求访问你模型的地址，以便发送你的请求。在 arxiv.org 上会自动运行。</li>
 <li><strong>本地文件（可选）。</strong>要读取电脑上的 PDF，你可以允许访问本地文件。文件只在浏览器中读取，不会上传。</li>
-<li><strong>其他权限。</strong><code>storage</code> 用于保存记录和设置；<code>alarms</code> 用于安排每周备份并刷新工具栏图标上的待复习数量；<code>downloads</code> 用于写入备份；<code>offscreen</code> 用于生成备份文件；<code>scripting</code> 和 <code>activeTab</code> 让工具栏按钮可以读取你当前所在的页面；<code>contextMenus</code> 在选中文字的右键菜单中加入“用 Harkback 解释”。</li>
+<li><strong>其他权限。</strong><code>storage</code> 用于保存记录和设置；<code>alarms</code> 用于安排每周备份并刷新工具栏图标上的待复习数量；<code>downloads</code> 用于写入备份；<code>offscreen</code> 用于生成备份文件；<code>scripting</code> 和 <code>activeTab</code> 让工具栏按钮和快捷键可以读取你当前所在的页面；<code>contextMenus</code> 在选中文字的右键菜单中加入“用 Harkback 解释”，并在页面右键菜单中加入“Harkback: 预览本页概念”。</li>
 </ul>
 
 <h2>无痕窗口</h2>
