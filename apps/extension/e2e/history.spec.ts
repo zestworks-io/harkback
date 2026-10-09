@@ -137,8 +137,8 @@ test("reviews a concept that is due and records the answer", async ({ context, s
   await page.locator("[data-hb=review-show]").click();
   await expect(page.locator("[data-hb=review-card]")).toContainText("LoRA 是一个测试解释。");
   await expect(page.locator("[data-hb=review-again]")).toHaveText("没记住 · 1 天");
-  await expect(page.locator("[data-hb=review-good]")).toHaveText("记住了 · 3 天");
-  await expect(page.locator("[data-hb=review-easy]")).toHaveText("很轻松 · 16 天");
+  await expect(page.locator("[data-hb=review-good]")).toHaveText("记住了 · 5 天");
+  await expect(page.locator("[data-hb=review-easy]")).toHaveText("很轻松 · 54 天");
   await page.locator("[data-hb=review-good]").click();
   await expect(page.locator("[data-hb=review-done]")).toBeVisible();
   await expect(page.locator("[data-hb=next-review]")).toContainText("下一次复习：");

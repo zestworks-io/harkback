@@ -55,7 +55,7 @@ describe("reviewQueue", () => {
       act(w.encounter(c, "s1"), action, day(0));
       return dueAtOf(w.state(), c)! - day(0);
     };
-    expect([due("review_again"), due("review_hard"), due("review_good"), due("review_easy")]).toEqual([1, 1, 3, 16].map((n) => n * DAY_MS));
+    expect([due("review_again"), due("review_hard"), due("review_good"), due("review_easy")]).toEqual([1, 1, 5, 54].map((n) => n * DAY_MS));
   });
 
   it("counts the older marks as answers: understood is Good and confused is Again", () => {
@@ -71,8 +71,8 @@ describe("reviewQueue", () => {
     act(eb, "reunion_recalled", day(1));
     act(ec, "marked_confused", day(1));
     const s = w.state();
-    expect(dueAtOf(s, a)).toBe(day(4));
-    expect(dueAtOf(s, b)).toBe(day(4));
+    expect(dueAtOf(s, a)).toBe(day(6));
+    expect(dueAtOf(s, b)).toBe(day(6));
     expect(dueAtOf(s, c)).toBe(day(2));
   });
 
@@ -109,14 +109,14 @@ describe("reviewQueue", () => {
     const c = w.concept("LoRA");
     const e = w.encounter(c, "s1");
     act(e, "review_good", day(0));
-    expect(reviewQueue(w.state(), day(2))).toEqual([]);
-    expect(reviewQueue(w.state(), day(3))).toHaveLength(1);
-    act(e, "review_good", day(3));
-    const second = scheduledDays(nextMemory(firstMemory(3), 3, 3), 0.9);
-    expect(second).toBeGreaterThan(3);
-    expect(dueAtOf(w.state(), c)).toBe(day(3) + second * DAY_MS);
-    expect(reviewQueue(w.state(), day(3 + second) - 1)).toEqual([]);
-    expect(reviewQueue(w.state(), day(3 + second))).toHaveLength(1);
+    expect(reviewQueue(w.state(), day(4))).toEqual([]);
+    expect(reviewQueue(w.state(), day(5))).toHaveLength(1);
+    act(e, "review_good", day(5));
+    const second = scheduledDays(nextMemory(firstMemory(3), 3, 5), 0.9);
+    expect(second).toBeGreaterThan(5);
+    expect(dueAtOf(w.state(), c)).toBe(day(5) + second * DAY_MS);
+    expect(reviewQueue(w.state(), day(5 + second) - 1)).toEqual([]);
+    expect(reviewQueue(w.state(), day(5 + second))).toHaveLength(1);
   });
 
   it("brings terms back sooner at a higher target recall", () => {
@@ -148,14 +148,14 @@ describe("reviewQueue", () => {
     act(e, "review_good", day(0));
     act(e, "followed_up", day(2));
     act(e, "reunion_compare", day(2));
-    expect(dueAtOf(w.state(), c)).toBe(day(3));
+    expect(dueAtOf(w.state(), c)).toBe(day(5));
   });
 
   it("gives each item what every answer would schedule, for the buttons", () => {
     const { w } = setup();
     w.encounter(w.concept("LoRA"), "s1");
     const [item] = reviewQueue(w.state(), day(1));
-    expect(item!.previews).toEqual({ 1: 1, 2: 1, 3: 3, 4: 16 });
+    expect(item!.previews).toEqual({ 1: 1, 2: 1, 3: 5, 4: 54 });
   });
 
   it("skips muted concepts and placeholders", () => {
@@ -207,7 +207,7 @@ describe("due dates", () => {
     w.encounter(attention, "s1");
     act(loraEnc, "review_good", day(2));
     const state = w.state();
-    expect(dueAtOf(state, lora)).toBe(day(2) + 3 * DAY_MS);
+    expect(dueAtOf(state, lora)).toBe(day(2) + 5 * DAY_MS);
     expect(dueAtOf(state, attention)).toBe(day(1) + DAY_MS);
     expect(nextDueAt(state)).toBe(day(2));
   });
