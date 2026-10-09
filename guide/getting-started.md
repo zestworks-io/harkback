@@ -19,12 +19,15 @@ After you pull new code, run the build again and press the reload icon on the ex
 
 ## 2. Connect a model
 
-Harkback has no server. It needs a model to write explanations, and you choose which one. The onboarding page walks you through it:
+Harkback has no server. It needs a model to write explanations, and you choose which one. The onboarding page is a three-step stepper; a finished step shows a ✓ and can be clicked to go back.
 
-1. Pick a provider. The address fills in.
-2. Paste an API key if the provider needs one (Ollama does not).
-3. Press **Test connection**. Chrome asks whether Harkback may reach that address; allow it.
-4. Tick the consent box and press **Finish**.
+1. **Welcome.** See an example reunion hint, and click the underlined term to see what an explanation looks like. No model is called.
+2. **Privacy.** Read where your text goes and tick the consent box. **Next** stays disabled until you do.
+3. **Model.** Pick a provider; the address fills in. Paste an API key if the provider needs one (Ollama and Chrome's built-in model do not). Press **Test connection**, and Chrome asks whether Harkback may reach that address; allow it. Then press **Finish**.
+
+**Chrome built-in (Gemini Nano)** needs no address or key. Selecting it shows the model's status and a **Download model** button; **Finish** waits until the download is done. It is a small model that runs on your computer, so expect it to be slower than a cloud model, especially on the first request, with simpler answers. It suits short explanations.
+
+You can add more models and change options later on the settings page. Running onboarding again updates the model you already have; it does not add a second copy.
 
 The easiest free option is a local [Ollama](https://ollama.com) model. It needs one extra step, because Ollama refuses requests from browser extensions until you allow the extension's origin. The Test button shows the exact command for your system. See [Models and providers](models.md) for every provider and for running a model on another computer in your home network.
 

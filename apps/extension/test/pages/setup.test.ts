@@ -29,6 +29,14 @@ describe("onboardingSettings", () => {
     ]);
   });
 
+  it("running setup again updates the same model instead of adding a copy", () => {
+    const first = onboardingSettings(DEFAULT_SETTINGS, input, new Date(), () => "m1");
+    const again = onboardingSettings(first, { ...input, label: "Local Ollama" }, new Date(), () => "m9");
+    expect(again.models).toEqual([expect.objectContaining({ id: "m1", label: "Local Ollama" })]);
+    expect(again.defaultModelId).toBe("m1");
+    expect(again.localModelId).toBe("m1");
+  });
+
   it("does not use a remote model for sensitive sources", () => {
     const s = onboardingSettings(DEFAULT_SETTINGS, { ...input, baseUrl: "https://api.openai.com/v1", apiKey: "k" }, new Date(), () => "m2");
     expect(s.localModelId).toBeNull();

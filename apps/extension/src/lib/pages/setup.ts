@@ -19,12 +19,15 @@ export function onboardingSettings(
     model: input.model.trim(),
     provider: input.provider,
   };
+  // Running setup again must not add a second copy of the same model: the existing row is updated and keeps its id.
+  const same = current.models.find((m) => m.baseUrl === model.baseUrl && m.model === model.model && m.provider === model.provider);
+  if (same) model.id = same.id;
   return {
     ...current,
     onboarded: true,
     consentAt: now.toISOString(),
     language: input.language,
-    models: [...current.models, model],
+    models: same ? current.models.map((m) => (m === same ? model : m)) : [...current.models, model],
     defaultModelId: model.id,
     localModelId: isLocalUrl(model.baseUrl) ? model.id : current.localModelId,
   };

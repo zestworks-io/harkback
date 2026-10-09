@@ -44,18 +44,24 @@ To use Ollama on another computer, start it with `OLLAMA_HOST=0.0.0.0` there and
 
 Small local models may write weaker concept cards (relations and aliases). That lowers recall quality but never stops an explanation from being recorded.
 
+## Chrome's built-in model
+
+**Chrome built-in (Gemini Nano)** runs on your computer through Chrome's Prompt API. It needs no address or API key, and counts as a local model, so a sensitive source can use it. Chrome only starts the download from a click, so use **Download model** in onboarding or settings; until it is ready a request says so instead of failing.
+
+It is a small model. Expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones. It works best in English, Spanish and Japanese (German and French are also accepted), and its small window means a prompt that does not fit is reported, not cut.
+
 ## Several models
 
 You can configure as many models as you like.
 
 - **Default model** – used for everything unless a rule says otherwise.
-- **For sensitive sources** – tick this on one _local_ model. Sensitive sources use it, and never any other.
+- **Sensitive provider** – tick this on one _local_ model. Sensitive sources use it, and never any other.
 - **Per site** – a site rule can name a model for matching pages.
 - **After a failure** – the explain card offers each of the other models as _Try with …_.
 
 ## Rate limits
 
-Harkback limits itself to 10 explanations per minute and 100 per hour by default (settings → _Limits and hints_). A request that fails before an answer arrives does not count.
+Harkback limits itself to 10 explanations per minute and 100 per hour by default (settings → _Rate limits_). A request that fails before an answer arrives does not count.
 
 ## API keys
 

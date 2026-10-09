@@ -77,14 +77,10 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Enter a valid model address and model name.": "有効なモデルのアドレスとモデル名を入力してください。",
   "Access to the model address is required.": "モデルのアドレスへのアクセス許可が必要です。",
   "Set up Harkback": "Harkback のセットアップ",
-  "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.":
-    "2 つのステップ：テキストの扱いを確認し、モデルを接続します。解説は上で選んだ言語で書かれます。",
   "Where your text goes": "テキストの送信先",
   "Read these before you continue.": "続ける前にお読みください。",
   "I have read and agree": "読んで同意しました",
   "Connect a model": "モデルを接続",
-  "Ollama keeps text on this computer; cloud services need an API key.":
-    "Ollama ならテキストはこのコンピューターの外に出ません。クラウドサービスには API キーが必要です。",
   Address: "アドレス",
   Show: "表示",
   Hide: "非表示",
@@ -97,9 +93,9 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "3 週間前に 2106.09685 でこの用語を読みました。Harkback は新しい論文でもこの用語に印を付け、そのとき理解した内容を呼び戻します。",
   "You're set up": "セットアップが完了しました",
   "Try it once:": "試してみましょう：",
-  "Open any arXiv paper.": "任意の arXiv 論文を開きます。",
-  "Select a term.": "用語を選択します。",
-  "Click “Explain”, or press ": "「解説」をクリックするか、",
+  "Open an arXiv paper in Chrome, for example ": "Chrome で arXiv の論文を開きます。例: ",
+  "Drag to select a word or phrase you want explained.": "解説してほしい単語やフレーズをドラッグして選択します。",
+  "Click the Explain button next to your selection, or press ": "選択範囲の横に出る「解説」ボタンをクリックするか、",
   ".": "を押します。",
   "History and search": "履歴と検索",
   "Open settings": "設定を開く",
@@ -118,7 +114,7 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Name: "名前",
   Model: "モデル",
   Default: "既定",
-  "For sensitive sources": "機密ソース用",
+  "Sensitive provider": "機密用プロバイダー",
   "+ Add model": "+ モデルを追加",
   "(default model)": "(既定のモデル)",
   "Auto-scan": "自動スキャン",
@@ -140,10 +136,18 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Sites: "サイト",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "自動でスキャンするのは arxiv.org のみです。他のサイトはここで許可するか、機密に指定してください。",
-  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.':
-    "「機密」は、内容をこのコンピューターの外に出したくないサイト（機密論文、社内文書など）向けです。これらのサイトでは、選択したテキスト、その段落、節、ページタイトルは Ollama などのローカルモデルにのみ送られ、リモートサービスには送られません。ローカルモデルがない場合、リモートモデルに切り替えず、解説はエラーになります。記録はこのブラウザに保存されます。先に上でローカルモデルを追加し、「機密ソース用」にチェックを入れてください。",
+  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
+    "「機密」は、内容をこのコンピューターの外に出したくないサイト（機密論文、社内文書など）向けです。これらのサイトでは、選択したテキスト、その段落、節、ページタイトルは Ollama などのローカルモデルにのみ送られ、リモートサービスには送られません。ローカルモデルがない場合、リモートモデルに切り替えず、解説はエラーになります。記録はこのブラウザに保存されます。先に上でローカルモデルを追加し、「機密用プロバイダー」にチェックを入れてください。",
   "No site rules yet.": "サイトのルールはまだありません。",
-  "Limits and hints": "上限とヒント",
+  "Rate limits": "レート制限",
+  "Reunion hints": "再会ヒント",
+  "Model timeouts": "モデルのタイムアウト",
+  "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.":
+    "Harkback がモデルに解説を依頼できる回数を制限し、従量課金の API キーで思わぬ請求が出ないようにします。上限に達すると、新しい依頼は拒否され、待つ秒数が表示されます。",
+  "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
+    "再会ヒントは、以前に見たことのある用語を新しいページで下線表示します。間隔は、その用語を最後に見てから再び表示するまでに必要な日数です（0 なら直ちに表示）。1 ページあたりの上限は、ページが下線だらけになるのを防ぎます。",
+  "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
+    "お使いのコンピューターで動く小さなモデルです。クラウドのモデルより遅く（特に最初の依頼）、回答も簡素になります。短い解説に向いており、長いものにはクラウドや Ollama のモデルをお使いください。",
   "Explanations per minute": "1 分あたりの解説回数",
   "Explanations per hour": "1 時間あたりの解説回数",
   "Reunion gap (days)": "再会の間隔（日）",
@@ -228,8 +232,8 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Graph: "グラフ",
   "Dash: inherit; ticked: on; empty: off": "—：継承、チェック：オン、空：オフ",
   "Leave sensitive sources out of backups and exports": "バックアップと書き出しに機密ソースを含めない",
-  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "プレーンな http は、このコンピューター（127.0.0.1 / localhost）と自分のネットワーク内のサーバー（192.168.x.x、10.x.x.x、name.local、Tailscale）にのみ許可され、それ以外のアドレスは https が必要です。自分のネットワーク内のサーバーもリモート扱いです。「機密ソース用」にチェックしたローカルモデル（127.0.0.1 / localhost）が機密ソースに使われ、機密ソースは他のモデルを使いません。",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
+    "プレーンな http は、このコンピューター（127.0.0.1 / localhost）と自分のネットワーク内のサーバー（192.168.x.x、10.x.x.x、name.local、Tailscale）にのみ許可され、それ以外のアドレスは https が必要です。自分のネットワーク内のサーバーもリモート扱いです。「機密用プロバイダー」にチェックしたローカルモデル（127.0.0.1 / localhost）が機密ソースに使われ、機密ソースは他のモデルを使いません。",
   "Languages for scanned PDFs": "スキャンPDFの言語",
   "Text in scanned PDFs is read on this computer; page images never leave it.":
     "スキャンしたPDFの文字はこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。",
@@ -337,4 +341,18 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Download model": "モデルをダウンロード",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "このコンピューター上で動作し、アドレスや API キーは不要です。英語・スペイン語・日本語で最も良く動作します。",
+  "Ships with Chrome, nothing to set up": "Chrome に付属、設定は不要です",
+  "Get Chrome's built-in model ready first, or pick another service.":
+    "まず Chrome 内蔵モデルを使える状態にするか、別のサービスを選んでください。",
+  Welcome: "ようこそ",
+  "Setup progress": "設定の進み具合",
+  "Three steps: see what it does, see how your text is handled, then connect a model. Explanations use the language chosen above.":
+    "3 ステップ：何ができるかを見て、テキストの扱われ方を確認し、モデルを接続します。説明は上で選んだ言語で表示されます。",
+  "Ollama and Chrome's built-in model keep text on this computer; cloud services need an API key.":
+    "Ollama と Chrome 内蔵モデルはテキストをこのコンピューターの外に送りません。クラウドサービスには API キーが必要です。",
+  "You can add more models and change options later in Settings.": "モデルの追加やその他のオプションは、あとから設定で変更できます。",
+  Back: "戻る",
+  Next: "次へ",
+  "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
+    "設定では、追加のモデル、サイト別ルール、スキャンした PDF、復習、データのエクスポートも使えます。",
 };

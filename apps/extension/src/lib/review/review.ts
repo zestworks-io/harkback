@@ -1,5 +1,6 @@
 import { DAY_MS, gradeOf, type Grade, type State } from "@harkback/core";
 import type { Action } from "@harkback/spec";
+import { sourceUrl } from "../records/history";
 import { understandingOf, type Understanding } from "../records/concept-detail";
 import { orderByPrerequisites, prerequisiteMap } from "./prerequisites";
 import { firstMemory, nextMemory, previewDays, scheduledDays, type Memory } from "./fsrs";
@@ -28,6 +29,7 @@ export interface ReviewItem {
   selection: string;
   explanation: string;
   sourceTitle: string;
+  sourceUrl: string | null;
 }
 
 interface Schedule {
@@ -112,6 +114,7 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number; r
         selection: latest.selection,
         explanation: latest.explanation.text,
         sourceTitle: state.sources.get(latest.sourceId)?.title || latest.sourceId,
+        sourceUrl: sourceUrl(state, latest.sourceId),
       },
     });
   }

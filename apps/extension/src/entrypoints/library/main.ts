@@ -55,6 +55,12 @@ async function main(): Promise<void> {
   const selected = new Set<string>();
   let visibleIds: string[] = [];
 
+  /** The source's title, opening the page it came from in a new tab when it has a web address. */
+  const sourceLink = (title: string, url: string | null): HTMLElement =>
+    url
+      ? h("a", { className: "src", href: url, target: "_blank", rel: "noopener noreferrer", title: url }, title)
+      : h("span", { className: "src" }, title);
+
   const checkbox = (id: string, onChange: (checked: boolean) => void, hb: string, label: string): HTMLInputElement => {
     const box = h("input", { type: "checkbox", className: "pick", "data-hb": hb, "data-id": id, "aria-label": label });
     box.checked = selected.has(id);
@@ -216,7 +222,7 @@ async function main(): Promise<void> {
         "div",
         { className: "meta" },
         choose,
-        h("span", { className: "src" }, quoteTitle(e.sourceTitle, settings.language)),
+        sourceLink(quoteTitle(e.sourceTitle, settings.language), e.sourceUrl),
         h("span", {}, e.date),
         h("span", { className: `tier ${e.tier}` }, tier),
         e.sensitive ? sensitiveBadge(e.sourceId) : null,
@@ -645,7 +651,7 @@ async function main(): Promise<void> {
       h(
         "div",
         { className: "meta" },
-        h("span", { className: "src" }, quoteTitle(item.sourceTitle, settings.language)),
+        sourceLink(quoteTitle(item.sourceTitle, settings.language), item.sourceUrl),
         h("span", {}, L("还剩 {n} 个", "{n} left", { n: dueItems().length })),
         item.unlocks.length > 0
           ? h(

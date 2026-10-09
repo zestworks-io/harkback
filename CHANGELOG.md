@@ -4,6 +4,17 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+## 1.0.1 - 2026-10-09
+
+### Changed
+
+- **Onboarding is a three-step stepper**: Welcome, Privacy and Model, with a progress bar (finished steps can be clicked to go back). _Next_ is disabled on the Privacy step until the consent box is ticked, and the done screen lists what Settings offers.
+- **Chrome's built-in model is a card on the Model step**, with its status, a _Download model_ button and a note that it is a small model that can be slow. _Finish_ waits while it downloads, and the progress keeps showing when you move between steps.
+- **Settings → Limits and hints is split** into _Rate limits_ and _Reunion hints_ (General tab), each with an explanation; _Model timeouts_ moved to the Models tab.
+- **"For sensitive sources" is now "Sensitive provider"** on a model row.
+- **History and review link back to the source.** A source title opens the page it came from (its address, or its arXiv or DOI page) in a new tab.
+- All pages share one set of design tokens, so light and dark look the same everywhere.
+
 ### Added
 
 - **Review with a memory model.** Terms are scheduled with FSRS-7, the newest version of the memory model, which keeps a fast and a slow trace of each memory, and a wait is never longer than a year: answer _Again_, _Hard_, _Good_ or _Easy_, and each button shows when the term comes back. This replaces the fixed 1, 3, 7, 14, 30 and 60 day ladder. Older _Got it_ and _Still confused_ marks count as Good and Again. Settings → Review sets the target recall (90% by default).
@@ -23,6 +34,9 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- Chrome's built-in model: requests now name their language, so Chrome no longer warns about a missing output language. Languages it does not handle fall back to English.
+- Drop-down arrows had no room on the right; they are drawn with space around them on every page.
+- Running onboarding again no longer adds a second copy of the same model; it updates the one you have.
 - Settings: after pressing _Save_, a later edit to a model row was lost, because the row still pointed at the settings from before the save.
 - A failed request gives back its own rate-limit slot, not the latest one.
 - Two backups can no longer run at once.

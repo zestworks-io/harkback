@@ -1,0 +1,82 @@
+/* Shared design tokens for every extension page. Pages add layout; colors live here. */
+:root {
+  color-scheme: light dark;
+  --bg: #fafafa;
+  --card: #ffffff;
+  --fg: #18181b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --subtle: #f4f4f5;
+  --primary: #18181b;
+  --primary-fg: #fafafa;
+  --accent: #2e4bd6;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(46, 75, 214, 0.08);
+  --defined: #15803d;
+  --defined-soft: rgba(21, 128, 61, 0.1);
+  --external: #a16207;
+  --external-soft: rgba(161, 98, 7, 0.1);
+  --ring: rgba(24, 24, 27, 0.14);
+  --err: #b91c1c;
+  --ok: #15803d;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --serif: Charter, "Iowan Old Style", "Palatino Linotype", "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #09090b;
+    --card: #111113;
+    --fg: #fafafa;
+    --muted: #a1a1aa;
+    --border: #27272a;
+    --subtle: #1b1b1f;
+    --primary: #fafafa;
+    --primary-fg: #18181b;
+    --accent: #8ea2ff;
+    --accent-fg: #0b1020;
+    --accent-soft: rgba(142, 162, 255, 0.12);
+    --defined: #4ade80;
+    --defined-soft: rgba(74, 222, 128, 0.12);
+    --external: #facc15;
+    --external-soft: rgba(250, 204, 21, 0.12);
+    --ring: rgba(250, 250, 250, 0.16);
+    --err: #f87171;
+    --ok: #4ade80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #09090b;
+  --card: #111113;
+  --fg: #fafafa;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  --subtle: #1b1b1f;
+  --primary: #fafafa;
+  --primary-fg: #18181b;
+  --accent: #8ea2ff;
+  --accent-fg: #0b1020;
+  --accent-soft: rgba(142, 162, 255, 0.12);
+  --defined: #4ade80;
+  --defined-soft: rgba(74, 222, 128, 0.12);
+  --external: #facc15;
+  --external-soft: rgba(250, 204, 21, 0.12);
+  --ring: rgba(250, 250, 250, 0.16);
+  --err: #f87171;
+  --ok: #4ade80;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* The native arrow sits against the edge of the box; draw it with room to spare. */
+select:not([multiple]) {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%2371717a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}

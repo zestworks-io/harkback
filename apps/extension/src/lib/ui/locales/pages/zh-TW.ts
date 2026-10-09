@@ -77,13 +77,10 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Enter a valid model address and model name.": "請輸入有效的模型位址和模型名稱。",
   "Access to the model address is required.": "需要允許存取模型位址。",
   "Set up Harkback": "設定 Harkback",
-  "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.":
-    "共兩步：了解你的文字如何被處理，再連接模型。解釋會使用上方選擇的語言。",
   "Where your text goes": "你的文字會去哪裡",
   "Read these before you continue.": "繼續之前請先閱讀。",
   "I have read and agree": "我已閱讀並同意",
   "Connect a model": "連接模型",
-  "Ollama keeps text on this computer; cloud services need an API key.": "本機的 Ollama 不會把文字傳出這台電腦；雲端服務需要 API key。",
   Address: "位址",
   Show: "顯示",
   Hide: "隱藏",
@@ -96,9 +93,9 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "三週前你在 2106.09685 讀過它。Harkback 會在新論文中標出它，並帶回你當時的理解。",
   "You're set up": "設定完成",
   "Try it once:": "試一次：",
-  "Open any arXiv paper.": "開啟任何一篇 arXiv 論文。",
-  "Select a term.": "選取一個術語。",
-  "Click “Explain”, or press ": "點「解釋」，或按 ",
+  "Open an arXiv paper in Chrome, for example ": "在 Chrome 中開啟一篇 arXiv 論文，例如 ",
+  "Drag to select a word or phrase you want explained.": "拖曳選取想要解釋的字詞或片語。",
+  "Click the Explain button next to your selection, or press ": "點選範圍旁邊的「解釋」按鈕，或按 ",
   ".": "。",
   "History and search": "歷史與搜尋",
   "Open settings": "開啟設定",
@@ -117,7 +114,7 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Name: "名稱",
   Model: "模型",
   Default: "預設",
-  "For sensitive sources": "敏感來源用",
+  "Sensitive provider": "敏感來源服務",
   "+ Add model": "+ 新增模型",
   "(default model)": "(預設模型)",
   "Auto-scan": "自動掃描",
@@ -139,10 +136,18 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Sites: "網站",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "預設只在 arxiv.org 自動掃描。其他網站可以在這裡允許，或標為敏感。",
-  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.':
-    "「敏感」適用於不希望內容離開這台電腦的網站（機密論文、內部文件等）：在這些網站上，選取的文字、所在段落、章節和頁面標題只會傳給 Ollama 這類本機模型，不會傳給遠端服務。若沒有可用的本機模型，解釋會出錯，而不是改用遠端模型。記錄仍保存在這個瀏覽器中。請先在上方新增本機模型，並勾選「敏感來源用」。",
+  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
+    "「敏感」適用於不希望內容離開這台電腦的網站（機密論文、內部文件等）：在這些網站上，選取的文字、所在段落、章節和頁面標題只會傳給 Ollama 這類本機模型，不會傳給遠端服務。若沒有可用的本機模型，解釋會出錯，而不是改用遠端模型。記錄仍保存在這個瀏覽器中。請先在上方新增本機模型，並勾選「敏感來源服務」。",
   "No site rules yet.": "還沒有網站規則。",
-  "Limits and hints": "限制與提示",
+  "Rate limits": "速率限制",
+  "Reunion hints": "重逢提示",
+  "Model timeouts": "模型逾時",
+  "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.":
+    "限制 Harkback 向你的模型發出解釋請求的次數，避免計量付費的 API 金鑰產生意外帳單。達到上限後，新的請求會被拒絕，並提示需等待幾秒。",
+  "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
+    "重逢提示會在新頁面上標出你以前見過的術語。間隔是指距離你上次查看該術語至少要過幾天才會再次標出（0 表示立即標出）；每頁上限可避免一頁被底線鋪滿。",
+  "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
+    "這是在你電腦上執行的小型模型：比雲端模型慢（第一次請求尤其慢），回答也較簡單。適合簡短的解釋；較長的內容請改用雲端或 Ollama 模型。",
   "Explanations per minute": "每分鐘解釋上限（次）",
   "Explanations per hour": "每小時解釋上限（次）",
   "Reunion gap (days)": "重逢間隔（天）",
@@ -225,8 +230,8 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Graph: "關係圖",
   "Dash: inherit; ticked: on; empty: off": "—：繼承；勾選：開；空：關",
   "Leave sensitive sources out of backups and exports": "備份和匯出時不包含敏感來源的內容",
-  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "純 http 只允許用於本機（127.0.0.1 / localhost）和你自己網路裡的伺服器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他位址必須使用 https。自己網路裡的伺服器仍算遠端。勾選「敏感來源用」的本機模型（127.0.0.1 / localhost）會用於敏感來源；敏感來源不會使用其他模型。",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
+    "純 http 只允許用於本機（127.0.0.1 / localhost）和你自己網路裡的伺服器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他位址必須使用 https。自己網路裡的伺服器仍算遠端。勾選「敏感來源服務」的本機模型（127.0.0.1 / localhost）會用於敏感來源；敏感來源不會使用其他模型。",
   "Languages for scanned PDFs": "掃描版 PDF 的辨識語言",
   "Text in scanned PDFs is read on this computer; page images never leave it.": "掃描版 PDF 的文字在本機辨識，頁面影像不會離開你的電腦。",
   Languages: "語言",
@@ -329,4 +334,17 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Download model": "下載模型",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "在這台電腦上執行，不需要位址和 API 金鑰。英文、西班牙文、日文效果最好。",
+  "Ships with Chrome, nothing to set up": "Chrome 內建，無需設定",
+  "Get Chrome's built-in model ready first, or pick another service.": "請先讓 Chrome 的內建模型可用，或選擇其他服務。",
+  Welcome: "歡迎",
+  "Setup progress": "設定進度",
+  "Three steps: see what it does, see how your text is handled, then connect a model. Explanations use the language chosen above.":
+    "三步：看看它能做什麼，了解你的文字如何被處理，然後連接一個模型。解釋會使用上面選擇的語言。",
+  "Ollama and Chrome's built-in model keep text on this computer; cloud services need an API key.":
+    "Ollama 和 Chrome 內建模型不會把文字傳出這台電腦；雲端服務需要 API key。",
+  "You can add more models and change options later in Settings.": "更多模型和選項可以之後在設定中新增。",
+  Back: "上一步",
+  Next: "下一步",
+  "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
+    "設定裡還可以新增更多模型、依網站調整、掃描版 PDF、複習和資料匯出。",
 };

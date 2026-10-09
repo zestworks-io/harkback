@@ -158,20 +158,20 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 
 ## Connect a model
 
-Onboarding walks you through this, including a built-in example explanation you can try first without calling any model. You can change it later on the settings page, where you can also set how long a model may stay quiet before a request is given up.
+Onboarding is three steps: **Welcome** (an example reunion hint and a built-in example explanation you can try without calling any model), **Privacy** (where your text goes; you must tick the consent box before _Next_ is enabled) and **Model** (pick a provider, then _Finish_). Running onboarding again updates the model you already have instead of adding a copy. You can add more models and change options later on the settings page, which also sets rate limits, reunion hints and how long a model may stay quiet before a request is given up.
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider                      | Base URL                                           | Notes                                                                                                    |
-| ----------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Ollama                        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                |
-| Chrome built-in (Gemini Nano) | none                                               | On this computer, no key. Download it in settings; best in English, Spanish and Japanese.                |
-| OpenAI                        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                        |
-| Anthropic                     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                        |
-| Google Gemini                 | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                        |
-| xAI Grok                      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                        |
-| OpenRouter                    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                        |
-| Custom                        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale). |
+| Provider                      | Base URL                                           | Notes                                                                                                                                            |
+| ----------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ollama                        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                                                        |
+| Chrome built-in (Gemini Nano) | none                                               | On this computer, no key. Download it in setup or settings. A small model: slower than a cloud model, and best in English, Spanish and Japanese. |
+| OpenAI                        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                                                                |
+| Anthropic                     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                                                                |
+| Google Gemini                 | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                                                                |
+| xAI Grok                      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                                                                |
+| OpenRouter                    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                                                                |
+| Custom                        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale).                                         |
 
 Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
 
@@ -187,18 +187,18 @@ then restart Ollama.
 
 ## Using Harkback
 
-| You want to                       | Do this                                                                                        |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Explain a term                    | Select it and click **Explain**, or press `Alt+Shift+E`.                                       |
-| Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.          |
-| Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.     |
-| Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader. |
-| See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live.          |
-| Keep your records                 | History page → **Export Markdown**, **Export Anki cards** or **Back up JSONL now**.            |
-| Restore from a backup             | History page → **Import JSONL**.                                                               |
-| See how concepts connect          | History page → **Graph**.                                                                      |
-| Stop a term from being underlined | Hover the underline → **Don't show again**.                                                    |
-| Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.         |
+| You want to                       | Do this                                                                                                                                                  |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Explain a term                    | Select it and click **Explain**, or press `Alt+Shift+E`.                                                                                                 |
+| Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.                                                                    |
+| Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.                                                               |
+| Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader.                                                           |
+| See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live, and each entry's source title links back to the page it came from. |
+| Keep your records                 | History page → **Export Markdown**, **Export Anki cards** or **Back up JSONL now**.                                                                      |
+| Restore from a backup             | History page → **Import JSONL**.                                                                                                                         |
+| See how concepts connect          | History page → **Graph**.                                                                                                                                |
+| Stop a term from being underlined | Hover the underline → **Don't show again**.                                                                                                              |
+| Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.                                                                   |
 
 ## Documentation
 

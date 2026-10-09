@@ -77,14 +77,10 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Enter a valid model address and model name.": "올바른 모델 주소와 모델 이름을 입력하세요.",
   "Access to the model address is required.": "모델 주소에 대한 접근 권한이 필요합니다.",
   "Set up Harkback": "Harkback 설정",
-  "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.":
-    "두 단계로 진행합니다. 텍스트가 어떻게 처리되는지 확인한 다음 모델을 연결합니다. 설명은 위에서 선택한 언어로 작성됩니다.",
   "Where your text goes": "텍스트가 전송되는 곳",
   "Read these before you continue.": "계속하기 전에 읽어 주세요.",
   "I have read and agree": "읽고 동의합니다",
   "Connect a model": "모델 연결",
-  "Ollama keeps text on this computer; cloud services need an API key.":
-    "Ollama는 텍스트를 이 컴퓨터 밖으로 내보내지 않습니다. 클라우드 서비스에는 API 키가 필요합니다.",
   Address: "주소",
   Show: "표시",
   Hide: "숨기기",
@@ -97,9 +93,9 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "3주 전에 2106.09685에서 이 용어를 읽었습니다. Harkback은 새 논문에서도 이 용어를 표시하고 그때 이해한 내용을 다시 보여줍니다.",
   "You're set up": "설정이 완료되었습니다",
   "Try it once:": "한번 해 보세요:",
-  "Open any arXiv paper.": "아무 arXiv 논문이나 엽니다.",
-  "Select a term.": "용어를 선택합니다.",
-  "Click “Explain”, or press ": "'설명'을 클릭하거나 ",
+  "Open an arXiv paper in Chrome, for example ": "Chrome에서 arXiv 논문을 엽니다. 예: ",
+  "Drag to select a word or phrase you want explained.": "설명이 필요한 단어나 구절을 드래그해서 선택합니다.",
+  "Click the Explain button next to your selection, or press ": "선택 영역 옆에 나타나는 '설명' 버튼을 클릭하거나 ",
   ".": " 키를 누르세요.",
   "History and search": "기록 및 검색",
   "Open settings": "설정 열기",
@@ -118,7 +114,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Name: "이름",
   Model: "모델",
   Default: "기본",
-  "For sensitive sources": "민감한 출처용",
+  "Sensitive provider": "민감 출처용 제공자",
   "+ Add model": "+ 모델 추가",
   "(default model)": "(기본 모델)",
   "Auto-scan": "자동 스캔",
@@ -140,10 +136,18 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Sites: "사이트",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "자동 스캔은 arxiv.org에서만 이루어집니다. 다른 사이트는 여기서 허용하거나 민감으로 지정하세요.",
-  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.':
-    "'민감'은 내용이 이 컴퓨터 밖으로 나가면 안 되는 사이트(기밀 논문, 내부 문서 등)를 위한 설정입니다. 이런 사이트에서는 선택한 텍스트, 해당 단락, 섹션, 페이지 제목이 Ollama 같은 로컬 모델로만 전송되고 원격 서비스로는 전송되지 않습니다. 사용할 수 있는 로컬 모델이 없으면 원격 모델로 대체하지 않고 설명이 실패합니다. 기록은 이 브라우저에 계속 저장됩니다. 먼저 위에서 로컬 모델을 추가하고 '민감한 출처용'에 체크하세요.",
+  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
+    "'민감'은 내용이 이 컴퓨터 밖으로 나가면 안 되는 사이트(기밀 논문, 내부 문서 등)를 위한 설정입니다. 이런 사이트에서는 선택한 텍스트, 해당 단락, 섹션, 페이지 제목이 Ollama 같은 로컬 모델로만 전송되고 원격 서비스로는 전송되지 않습니다. 사용할 수 있는 로컬 모델이 없으면 원격 모델로 대체하지 않고 설명이 실패합니다. 기록은 이 브라우저에 계속 저장됩니다. 먼저 위에서 로컬 모델을 추가하고 '민감 출처용 제공자'에 체크하세요.",
   "No site rules yet.": "아직 사이트 규칙이 없습니다.",
-  "Limits and hints": "제한 및 힌트",
+  "Rate limits": "요청 제한",
+  "Reunion hints": "재회 힌트",
+  "Model timeouts": "모델 시간 제한",
+  "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.":
+    "Harkback이 모델에 설명을 요청할 수 있는 횟수를 제한해, 유료 API 키로 뜻밖의 요금이 나오지 않게 합니다. 한도에 도달하면 새 요청은 거부되고 기다려야 할 시간(초)이 표시됩니다.",
+  "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
+    "재회 힌트는 이전에 본 적 있는 용어를 새 페이지에서 밑줄로 표시합니다. 간격은 해당 용어를 마지막으로 본 뒤 다시 표시되기까지 지나야 하는 일수입니다(0이면 바로 표시). 페이지당 한도는 한 페이지가 밑줄로 뒤덮이는 것을 막아 줍니다.",
+  "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
+    "내 컴퓨터에서 실행되는 작은 모델입니다. 클라우드 모델보다 느리고(특히 첫 요청), 답변도 더 단순합니다. 짧은 설명에 적합하며, 긴 내용에는 클라우드나 Ollama 모델을 사용하세요.",
   "Explanations per minute": "분당 설명 횟수",
   "Explanations per hour": "시간당 설명 횟수",
   "Reunion gap (days)": "재회 간격(일)",
@@ -227,8 +231,8 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Graph: "그래프",
   "Dash: inherit; ticked: on; empty: off": "—: 상속, 체크: 켬, 비움: 끔",
   "Leave sensitive sources out of backups and exports": "백업과 내보내기에 민감한 출처 제외",
-  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    '일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 써야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. "민감한 출처용"에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 쓰지 않습니다.',
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
+    '일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 써야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. "민감 출처용 제공자"에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 쓰지 않습니다.',
   "Languages for scanned PDFs": "스캔 PDF 언어",
   "Text in scanned PDFs is read on this computer; page images never leave it.":
     "스캔한 PDF의 글자는 이 컴퓨터에서 읽으며, 페이지 이미지는 밖으로 나가지 않습니다.",
@@ -335,4 +339,18 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Download model": "모델 내려받기",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "이 컴퓨터에서 실행되며 주소나 API 키가 필요 없습니다. 영어, 스페인어, 일본어에서 가장 잘 작동합니다.",
+  "Ships with Chrome, nothing to set up": "Chrome에 포함되어 있어 따로 설정할 것이 없습니다",
+  "Get Chrome's built-in model ready first, or pick another service.":
+    "먼저 Chrome 내장 모델을 사용할 수 있게 하거나 다른 서비스를 고르세요.",
+  Welcome: "시작",
+  "Setup progress": "설정 진행 상황",
+  "Three steps: see what it does, see how your text is handled, then connect a model. Explanations use the language chosen above.":
+    "세 단계: 무엇을 하는지 보고, 텍스트가 어떻게 처리되는지 확인한 다음 모델을 연결합니다. 설명은 위에서 고른 언어로 표시됩니다.",
+  "Ollama and Chrome's built-in model keep text on this computer; cloud services need an API key.":
+    "Ollama와 Chrome 내장 모델은 텍스트를 이 컴퓨터 밖으로 보내지 않습니다. 클라우드 서비스에는 API 키가 필요합니다.",
+  "You can add more models and change options later in Settings.": "모델 추가와 다른 옵션은 나중에 설정에서 바꿀 수 있습니다.",
+  Back: "이전",
+  Next: "다음",
+  "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
+    "설정에는 추가 모델, 사이트별 규칙, 스캔한 PDF, 복습, 데이터 내보내기도 있습니다.",
 };

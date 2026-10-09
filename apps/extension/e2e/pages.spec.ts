@@ -19,19 +19,40 @@ test("onboarding connects to a local model and saves settings", async ({ context
   const page =
     context.pages().find((p) => p.url().endsWith("/onboarding.html")) ??
     (await context.waitForEvent("page", { predicate: (p) => p.url().endsWith("/onboarding.html") }));
+  await page.locator("[data-hb=next]").click();
+  await expect(page.locator("[data-hb=next]")).toBeDisabled();
+  await page.locator("[data-hb=consent]").check();
+  await expect(page.locator("[data-hb=next]")).toBeEnabled();
+  await page.locator("[data-hb=next]").click();
   await page.locator("[data-hb=base-url]").fill(`${stub.url}/v1`);
   await page.locator("[data-hb=test]").click();
   await expect(page.locator("[data-hb=test-result]")).toContainText("Connected");
   await expect(page.locator("[data-hb=model]")).toHaveValue("stub-model");
-  await page.locator("[data-hb=finish]").click();
-  await expect(page.locator("[data-hb=test-result]")).toContainText("Please read and accept");
-  await page.locator("[data-hb=consent]").check();
   await page.locator("[data-hb=finish]").click();
   await expect(page.locator("[data-hb=done]")).toBeVisible();
   const settings = await storedSettings(sw);
   expect(settings.onboarded).toBe(true);
   expect(settings.defaultModelId).not.toBeNull();
   expect(settings.localModelId).toBe(settings.defaultModelId);
+});
+
+test("onboarding offers Chrome's built-in model, hides the address fields for it and points to settings", async ({ context }) => {
+  const page =
+    context.pages().find((p) => p.url().endsWith("/onboarding.html")) ??
+    (await context.waitForEvent("page", { predicate: (p) => p.url().endsWith("/onboarding.html") }));
+  await page.locator("[data-hb=next]").click();
+  await page.locator("[data-hb=consent]").check();
+  await page.locator("[data-hb=next]").click();
+  await expect(page.locator("[data-hb=more-in-settings]")).toBeVisible();
+  await page.locator("[data-hb=template] label", { hasText: "Chrome" }).click();
+  await expect(page.locator("[data-hb=remote-fields]")).toBeHidden();
+  await expect(page.locator("[data-hb=builtin-panel]")).toBeVisible();
+  await expect(page.locator("[data-hb=builtin-result]")).not.toBeEmpty();
+  // Without a ready model, finishing says so instead of saving a model that cannot answer.
+  if ((await page.locator("[data-hb=builtin-result]").getAttribute("data-state")) !== "ok") {
+    await page.locator("[data-hb=finish]").click();
+    await expect(page.locator("[data-hb=test-result]")).toContainText("built-in model");
+  }
 });
 
 test("options save site rules and reject an insecure remote model", async ({ context, sw, stub, extensionId }) => {

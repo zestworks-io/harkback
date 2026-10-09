@@ -4,50 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Harkback · PDF</title>
+    <link rel="stylesheet" href="../../lib/ui/tokens.css" />
     <style>
       :root {
-        color-scheme: light dark;
-        font:
-          15px/1.6 system-ui,
-          -apple-system,
-          "PingFang SC",
-          "Microsoft YaHei",
-          sans-serif;
         --bg: #e9e9ec;
-        --card: #ffffff;
-        --fg: #18181b;
-        --muted: #71717a;
-        --border: #e4e4e7;
-        --primary: #2563eb;
-        --primary-fg: #ffffff;
-        --ring: rgba(37, 99, 235, 0.22);
       }
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme="light"]) {
           --bg: #2b2b2e;
-          --card: #111113;
-          --fg: #fafafa;
-          --muted: #a1a1aa;
-          --border: #27272a;
-          --primary: #60a5fa;
-          --primary-fg: #08111f;
-          --ring: rgba(96, 165, 250, 0.28);
-          color-scheme: dark;
         }
       }
       :root[data-theme="dark"] {
         --bg: #2b2b2e;
-        --card: #111113;
-        --fg: #fafafa;
-        --muted: #a1a1aa;
-        --border: #27272a;
-        --primary: #60a5fa;
-        --primary-fg: #08111f;
-        --ring: rgba(96, 165, 250, 0.28);
-        color-scheme: dark;
-      }
-      :root[data-theme="light"] {
-        color-scheme: light;
       }
       body {
         margin: 0;
@@ -88,15 +56,15 @@
         padding: 0 16px;
         border-radius: 8px;
         cursor: pointer;
-        border: 1px solid var(--primary);
-        background: var(--primary);
-        color: var(--primary-fg);
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: var(--accent-fg);
       }
       #notice button:hover {
-        background: color-mix(in srgb, var(--primary) 88%, var(--fg));
+        background: color-mix(in srgb, var(--accent) 88%, var(--fg));
       }
       #notice button:focus-visible {
-        outline: 2px solid var(--primary);
+        outline: 2px solid var(--fg);
         outline-offset: 2px;
       }
       #notice button:disabled {

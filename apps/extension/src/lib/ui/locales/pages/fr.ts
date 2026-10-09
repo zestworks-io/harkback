@@ -77,14 +77,10 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Enter a valid model address and model name.": "Saisissez une adresse de modèle et un nom de modèle valides.",
   "Access to the model address is required.": "L'accès à l'adresse du modèle est requis.",
   "Set up Harkback": "Configurer Harkback",
-  "Two steps: see how your text is handled, then connect a model. Explanations use the language chosen above.":
-    "Deux étapes : voir comment votre texte est traité, puis connecter un modèle. Les explications utilisent la langue choisie ci-dessus.",
   "Where your text goes": "Où va votre texte",
   "Read these before you continue.": "À lire avant de continuer.",
   "I have read and agree": "J'ai lu et j'accepte",
   "Connect a model": "Connecter un modèle",
-  "Ollama keeps text on this computer; cloud services need an API key.":
-    "Ollama garde le texte sur cet ordinateur ; les services cloud nécessitent une clé API.",
   Address: "Adresse",
   Show: "Afficher",
   Hide: "Masquer",
@@ -97,9 +93,10 @@ export const pages_fr: Readonly<Record<string, string>> = {
     "Vous l'avez lu dans 2106.09685 il y a trois semaines. Harkback le marque dans les nouveaux articles et ramène ce que vous aviez compris alors.",
   "You're set up": "Tout est prêt",
   "Try it once:": "Essayez une fois :",
-  "Open any arXiv paper.": "Ouvrez n'importe quel article arXiv.",
-  "Select a term.": "Sélectionnez un terme.",
-  "Click “Explain”, or press ": "Cliquez sur « Expliquer » ou appuyez sur ",
+  "Open an arXiv paper in Chrome, for example ": "Ouvrez un article arXiv dans Chrome, par exemple ",
+  "Drag to select a word or phrase you want explained.": "Faites glisser pour sélectionner un mot ou une expression à expliquer.",
+  "Click the Explain button next to your selection, or press ":
+    "Cliquez sur le bouton « Expliquer » à côté de votre sélection ou appuyez sur ",
   ".": ".",
   "History and search": "Historique et recherche",
   "Open settings": "Ouvrir les paramètres",
@@ -118,7 +115,7 @@ export const pages_fr: Readonly<Record<string, string>> = {
   Name: "Nom",
   Model: "Modèle",
   Default: "Par défaut",
-  "For sensitive sources": "Pour les sources sensibles",
+  "Sensitive provider": "Fournisseur sensible",
   "+ Add model": "+ Ajouter un modèle",
   "(default model)": "(modèle par défaut)",
   "Auto-scan": "Analyse automatique",
@@ -140,10 +137,18 @@ export const pages_fr: Readonly<Record<string, string>> = {
   Sites: "Sites",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "Seul arxiv.org est analysé automatiquement. Autorisez ici d'autres sites, ou marquez-les comme sensibles.",
-  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.':
-    "« Sensible » est destiné aux sites dont le contenu ne doit pas quitter cet ordinateur (articles confidentiels, documents internes). Sur ces sites, le texte sélectionné, son paragraphe, la section et le titre de la page ne sont envoyés qu'à un modèle local comme Ollama, jamais à un service distant. Sans modèle local disponible, l'explication échoue au lieu de se rabattre sur un modèle distant. Les enregistrements restent conservés dans ce navigateur. Ajoutez d'abord un modèle local ci-dessus et cochez « Pour les sources sensibles ».",
+  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
+    "« Sensible » est destiné aux sites dont le contenu ne doit pas quitter cet ordinateur (articles confidentiels, documents internes). Sur ces sites, le texte sélectionné, son paragraphe, la section et le titre de la page ne sont envoyés qu'à un modèle local comme Ollama, jamais à un service distant. Sans modèle local disponible, l'explication échoue au lieu de se rabattre sur un modèle distant. Les enregistrements restent conservés dans ce navigateur. Ajoutez d'abord un modèle local ci-dessus et cochez « Fournisseur sensible ».",
   "No site rules yet.": "Aucune règle de site pour l'instant.",
-  "Limits and hints": "Limites et conseils",
+  "Rate limits": "Limites de débit",
+  "Reunion hints": "Indices de retrouvailles",
+  "Model timeouts": "Délais d'attente du modèle",
+  "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.":
+    "Limite le nombre de fois où Harkback peut demander une explication à votre modèle, afin qu'une clé d'API payante ne génère pas de facture surprise. Une fois la limite atteinte, les nouvelles demandes sont refusées avec le nombre de secondes à attendre.",
+  "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
+    "Un indice de retrouvailles souligne sur une nouvelle page un terme que vous avez déjà rencontré. L'intervalle est le nombre de jours qui doivent s'être écoulés depuis la dernière fois que vous avez vu un terme pour qu'il soit de nouveau marqué (0 le marque tout de suite) ; la limite par page évite qu'une page soit couverte de soulignements.",
+  "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
+    "C'est un petit modèle qui tourne sur votre ordinateur : attendez-vous à ce qu'il soit plus lent qu'un modèle cloud, surtout à la première requête, et à des réponses plus simples. Il convient aux explications courtes ; pour les plus longues, utilisez un modèle cloud ou Ollama.",
   "Explanations per minute": "Explications par minute",
   "Explanations per hour": "Explications par heure",
   "Reunion gap (days)": "Intervalle de retrouvailles (jours)",
@@ -229,8 +234,8 @@ export const pages_fr: Readonly<Record<string, string>> = {
   Graph: "Graphe",
   "Dash: inherit; ticked: on; empty: off": "— : hériter ; coché : activé ; vide : désactivé",
   "Leave sensitive sources out of backups and exports": "Exclure les sources sensibles des sauvegardes et des exportations",
-  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.':
-    "Le http simple n’est autorisé que pour cet ordinateur (127.0.0.1 / localhost) et pour les serveurs de votre propre réseau (192.168.x.x, 10.x.x.x, name.local, Tailscale) ; toute autre adresse doit utiliser https. Un serveur de votre propre réseau compte quand même comme distant. Le modèle local (127.0.0.1 / localhost) coché « Pour les sources sensibles » est celui utilisé pour les sources sensibles ; elles n’utilisent jamais un autre modèle.",
+  'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
+    "Le http simple n’est autorisé que pour cet ordinateur (127.0.0.1 / localhost) et pour les serveurs de votre propre réseau (192.168.x.x, 10.x.x.x, name.local, Tailscale) ; toute autre adresse doit utiliser https. Un serveur de votre propre réseau compte quand même comme distant. Le modèle local (127.0.0.1 / localhost) coché « Fournisseur sensible » est celui utilisé pour les sources sensibles ; elles n’utilisent jamais un autre modèle.",
   "Languages for scanned PDFs": "Langues pour les PDF numérisés",
   "Text in scanned PDFs is read on this computer; page images never leave it.":
     "Le texte des PDF numérisés est lu sur cet ordinateur ; les images des pages ne le quittent jamais.",
@@ -339,4 +344,19 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Download model": "Télécharger le modèle",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "S’exécute sur cet ordinateur, sans adresse ni clé d’API. Fonctionne mieux en anglais, espagnol et japonais.",
+  "Ships with Chrome, nothing to set up": "Fourni avec Chrome, rien à configurer",
+  "Get Chrome's built-in model ready first, or pick another service.":
+    "Préparez d'abord le modèle intégré de Chrome, ou choisissez un autre service.",
+  Welcome: "Bienvenue",
+  "Setup progress": "Progression de la configuration",
+  "Three steps: see what it does, see how your text is handled, then connect a model. Explanations use the language chosen above.":
+    "Trois étapes : voyez ce qu'il fait, voyez comment votre texte est traité, puis connectez un modèle. Les explications utilisent la langue choisie ci-dessus.",
+  "Ollama and Chrome's built-in model keep text on this computer; cloud services need an API key.":
+    "Ollama et le modèle intégré de Chrome gardent le texte sur cet ordinateur ; les services cloud demandent une clé d'API.",
+  "You can add more models and change options later in Settings.":
+    "Vous pourrez ajouter d'autres modèles et changer les options plus tard dans les Paramètres.",
+  Back: "Retour",
+  Next: "Suivant",
+  "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
+    "Les Paramètres offrent plus : modèles supplémentaires, règles par site, PDF numérisés, révision et export des données.",
 };

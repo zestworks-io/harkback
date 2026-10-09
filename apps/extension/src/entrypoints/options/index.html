@@ -5,56 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="manifest.open_in_tab" content="true" />
     <title>Harkback · Settings</title>
+    <link rel="stylesheet" href="../../lib/ui/tokens.css" />
     <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #fafafa;
-        --card: #ffffff;
-        --fg: #18181b;
-        --muted: #71717a;
-        --border: #e4e4e7;
-        --subtle: #f4f4f5;
-        --primary: #2563eb;
-        --primary-fg: #ffffff;
-        --ring: rgba(37, 99, 235, 0.22);
-        --ok: #15803d;
-        --err: #b91c1c;
-        --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #09090b;
-          --card: #111113;
-          --fg: #fafafa;
-          --muted: #a1a1aa;
-          --border: #27272a;
-          --subtle: #1b1b1f;
-          --primary: #60a5fa;
-          --primary-fg: #08111f;
-          --ring: rgba(96, 165, 250, 0.28);
-          --ok: #4ade80;
-          --err: #f87171;
-          color-scheme: dark;
-        }
-      }
-      :root[data-theme="dark"] {
-        --bg: #09090b;
-        --card: #111113;
-        --fg: #fafafa;
-        --muted: #a1a1aa;
-        --border: #27272a;
-        --subtle: #1b1b1f;
-        --primary: #60a5fa;
-        --primary-fg: #08111f;
-        --ring: rgba(96, 165, 250, 0.28);
-        --ok: #4ade80;
-        --err: #f87171;
-        color-scheme: dark;
-      }
-      :root[data-theme="light"] {
-        color-scheme: light;
-      }
       * {
         box-sizing: border-box;
       }
@@ -76,7 +28,7 @@
         text-underline-offset: 3px;
       }
       :focus-visible {
-        outline: 2px solid var(--primary);
+        outline: 2px solid var(--fg);
         outline-offset: 2px;
       }
 
@@ -138,7 +90,7 @@
       }
       .tab[aria-selected="true"] {
         color: var(--fg);
-        border-bottom-color: var(--primary);
+        border-bottom-color: var(--accent);
       }
       .tab-panel[hidden] {
         display: none;
@@ -195,6 +147,9 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
       }
+      .grid > .field {
+        align-content: end;
+      }
       .grid.four {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
@@ -234,7 +189,7 @@
       input[type="number"]:focus,
       select:focus {
         outline: none;
-        border-color: var(--primary);
+        border-color: var(--fg);
         box-shadow: 0 0 0 3px var(--ring);
       }
 
@@ -254,12 +209,12 @@
         background: var(--subtle);
       }
       button.primary {
-        background: var(--primary);
-        color: var(--primary-fg);
-        border-color: var(--primary);
+        background: var(--accent);
+        color: var(--accent-fg);
+        border-color: var(--accent);
       }
       button.primary:hover {
-        background: color-mix(in srgb, var(--primary) 88%, var(--fg));
+        background: color-mix(in srgb, var(--accent) 88%, var(--fg));
       }
       button.ghost {
         border-color: transparent;
@@ -348,13 +303,13 @@
         margin: 0;
         width: 16px;
         height: 16px;
-        accent-color: var(--primary);
+        accent-color: var(--accent);
       }
       .choice:has(input:checked) {
         color: var(--fg);
       }
       a {
-        text-decoration-color: var(--primary);
+        text-decoration-color: var(--accent);
       }
 
       .site {

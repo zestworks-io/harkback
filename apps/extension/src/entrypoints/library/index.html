@@ -4,71 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Harkback · History</title>
+    <link rel="stylesheet" href="../../lib/ui/tokens.css" />
     <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #fafafa;
-        --card: #ffffff;
-        --fg: #18181b;
-        --muted: #71717a;
-        --border: #e4e4e7;
-        --subtle: #f4f4f5;
-        --primary: #18181b;
-        --primary-fg: #fafafa;
-        --accent: #2e4bd6;
-        --accent-soft: rgba(46, 75, 214, 0.08);
-        --defined: #15803d;
-        --defined-soft: rgba(21, 128, 61, 0.1);
-        --external: #a16207;
-        --external-soft: rgba(161, 98, 7, 0.1);
-        --ring: rgba(24, 24, 27, 0.14);
-        --err: #b91c1c;
-        --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-        --serif: Charter, "Iowan Old Style", "Palatino Linotype", "Songti SC", "Noto Serif CJK SC", Georgia, serif;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #09090b;
-          --card: #111113;
-          --fg: #fafafa;
-          --muted: #a1a1aa;
-          --border: #27272a;
-          --subtle: #1b1b1f;
-          --primary: #fafafa;
-          --primary-fg: #18181b;
-          --accent: #8ea2ff;
-          --accent-soft: rgba(142, 162, 255, 0.12);
-          --defined: #4ade80;
-          --defined-soft: rgba(74, 222, 128, 0.12);
-          --external: #facc15;
-          --external-soft: rgba(250, 204, 21, 0.12);
-          --ring: rgba(250, 250, 250, 0.16);
-          --err: #f87171;
-          color-scheme: dark;
-        }
-      }
-      :root[data-theme="dark"] {
-        --bg: #09090b;
-        --card: #111113;
-        --fg: #fafafa;
-        --muted: #a1a1aa;
-        --border: #27272a;
-        --subtle: #1b1b1f;
-        --primary: #fafafa;
-        --primary-fg: #18181b;
-        --accent: #8ea2ff;
-        --accent-soft: rgba(142, 162, 255, 0.12);
-        --defined: #4ade80;
-        --defined-soft: rgba(74, 222, 128, 0.12);
-        --external: #facc15;
-        --external-soft: rgba(250, 204, 21, 0.12);
-        --ring: rgba(250, 250, 250, 0.16);
-        --err: #f87171;
-        color-scheme: dark;
-      }
-      :root[data-theme="light"] {
-        color-scheme: light;
-      }
       * {
         box-sizing: border-box;
       }
@@ -135,7 +72,7 @@
       }
       button.primary {
         background: var(--accent);
-        color: #fff;
+        color: var(--accent-fg);
         border-color: var(--accent);
       }
       button.primary:hover {
@@ -396,6 +333,14 @@
       .meta .src {
         color: var(--fg);
         font-weight: 550;
+      }
+      .meta a.src {
+        text-decoration: underline;
+        text-decoration-color: var(--border);
+        text-underline-offset: 3px;
+      }
+      .meta a.src:hover {
+        text-decoration-color: var(--fg);
       }
       .quote {
         font: 14px/1.5 var(--serif);

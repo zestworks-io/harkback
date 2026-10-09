@@ -238,6 +238,14 @@ async function main(): Promise<void> {
                     "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.",
                   ),
                 ),
+                h(
+                  "p",
+                  { className: "note", style: "grid-column: 1 / -1", "data-hb": "model-builtin-slow" },
+                  L(
+                    "这是一个运行在本机的小模型：比云端模型慢，第一次请求尤其慢，回答也更简单。适合简短的解释；长内容请用云端或 Ollama 模型。",
+                    "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.",
+                  ),
+                ),
               ]
             : [
                 field(
@@ -266,7 +274,7 @@ async function main(): Promise<void> {
           "div",
           { className: "item-foot" },
           choice(isDefault, L("默认模型", "Default")),
-          choice(isLocal, L("敏感来源用", "For sensitive sources")),
+          choice(isLocal, L("敏感来源服务", "Sensitive provider")),
           h("span", { className: "spacer" }),
           ...(builtIn ? [download] : []),
           test,
@@ -447,7 +455,7 @@ async function main(): Promise<void> {
               ),
             ),
           ]),
-          card(L("限制与提示", "Limits and hints"), null, [
+          card(L("速率限制", "Rate limits"), null, [
             h(
               "div",
               { className: "grid four" },
@@ -459,6 +467,20 @@ async function main(): Promise<void> {
                 L("每小时解释上限（次）", "Explanations per hour"),
                 numberInput(draft.rateLimit.perHour, (v) => (draft.rateLimit.perHour = v), { min: "1" }),
               ),
+            ),
+            h(
+              "p",
+              { className: "note" },
+              L(
+                "限制 Harkback 向你的模型发出解释请求的次数，避免按量计费的 API 产生意外账单。达到上限后，新的请求会被拒绝，并提示多少秒后重试。",
+                "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.",
+              ),
+            ),
+          ]),
+          card(L("重逢提示", "Reunion hints"), null, [
+            h(
+              "div",
+              { className: "grid four" },
               field(
                 L("重逢间隔（天）", "Reunion gap (days)"),
                 numberInput(draft.reunion.minGapDays, (v) => (draft.reunion.minGapDays = v), { min: "0" }),
@@ -468,6 +490,37 @@ async function main(): Promise<void> {
                 numberInput(draft.reunion.maxPerPage, (v) => (draft.reunion.maxPerPage = v), { min: "1", max: "10" }),
               ),
             ),
+            h(
+              "p",
+              { className: "note" },
+              L(
+                "重逢提示是在新页面上标出你以前见过的术语。间隔是指距你上次查看该术语至少过了多少天才会再次标出（0 表示立即标出）；每页上限避免一页被下划线铺满。",
+                "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.",
+              ),
+            ),
+          ]),
+        ],
+        [
+          card(
+            L("模型", "Models"),
+            L(
+              "纯 http 只允许用于本机（127.0.0.1 / localhost）和你自己网络里的服务器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他地址必须使用 https。自己网络里的服务器仍算远程。勾选「敏感来源服务」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
+              'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.',
+            ),
+            [
+              ...modelRows,
+              addModel,
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "API key 未加密保存在浏览器扩展存储中：其他网站和扩展读不到，但能读取本机磁盘的人可以。它只会发送到你填写的模型地址，不会写入备份或日志。建议使用有额度限制的 key，或使用本机模型（无需 key）。",
+                  "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).",
+                ),
+              ),
+            ],
+          ),
+          card(L("模型超时", "Model timeouts"), null, [
             h(
               "div",
               { className: "grid four" },
@@ -500,27 +553,6 @@ async function main(): Promise<void> {
         ],
         [
           card(
-            L("模型", "Models"),
-            L(
-              "纯 http 只允许用于本机（127.0.0.1 / localhost）和你自己网络里的服务器（192.168.x.x、10.x.x.x、name.local、Tailscale）；其他地址必须使用 https。自己网络里的服务器仍算远程。勾选「敏感来源用」的本机模型（127.0.0.1 / localhost）会用于敏感来源；敏感来源不会使用其他模型。",
-              'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "For sensitive sources" is the one used for sensitive sources; they never use any other model.',
-            ),
-            [
-              ...modelRows,
-              addModel,
-              h(
-                "p",
-                { className: "note" },
-                L(
-                  "API key 未加密保存在浏览器扩展存储中：其他网站和扩展读不到，但能读取本机磁盘的人可以。它只会发送到你填写的模型地址，不会写入备份或日志。建议使用有额度限制的 key，或使用本机模型（无需 key）。",
-                  "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).",
-                ),
-              ),
-            ],
-          ),
-        ],
-        [
-          card(
             L("网站", "Sites"),
             L(
               "默认只在 arxiv.org 自动扫描。其他网站可以在这里允许，或标为敏感。",
@@ -531,8 +563,8 @@ async function main(): Promise<void> {
                 "p",
                 { className: "note" },
                 L(
-                  "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源用」。",
-                  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "For sensitive sources" first.',
+                  "「敏感」适用于不想让内容离开本机的网站（保密论文、内部文档等）：在这些网站上划词时，选中的文字、所在段落、章节和页面标题只会发给本机模型（如 Ollama），不会发给远程服务。若没有可用的本机模型，解释会报错，而不是改用远程模型。记录仍保存在本机浏览器中。使用前请先在上方「模型」里添加本机模型并勾选「敏感来源服务」。",
+                  '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.',
                 ),
               ),
               ...siteRows,

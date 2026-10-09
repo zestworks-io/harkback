@@ -97,6 +97,7 @@ test("store screenshots", async ({ context, sw, stub, extensionId }) => {
   await onboarding.setViewportSize(SIZE);
   await onboarding.goto(`chrome-extension://${extensionId}/onboarding.html`);
   await onboarding.locator("[data-hb=language]").selectOption("en");
+  await onboarding.locator("[data-hb=next]").click();
   await onboarding.waitForTimeout(300);
   await shot(onboarding, "5-privacy.png");
 });

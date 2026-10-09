@@ -125,7 +125,7 @@ Drag to move, scroll to zoom, click a concept to open it. The search box filters
 
 ## History
 
-Everything is grouped by concept, newest first, and updates live while other tabs record. Search covers names, quotes, explanations and follow-up conversations. **Select** lets you delete several entries at once. A source you marked sensitive shows a badge with **Mark as normal** (two clicks, because it allows its content to go to remote models again).
+Everything is grouped by concept, newest first, and updates live while other tabs record. Search covers names, quotes, explanations and follow-up conversations. **Select** lets you delete several entries at once. Each entry names its source; when the source has a web address (its page, or its arXiv or DOI page) the title is a link that opens it in a new tab, and the same link appears on the review card. A source you marked sensitive shows a badge with **Mark as normal** (two clicks, because it allows its content to go to remote models again).
 
 Deleting an entry removes it from the app and clears its text from the stored log. Exported backups cannot be recalled.
 

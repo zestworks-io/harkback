@@ -28,7 +28,7 @@ Mark a source sensitive when its content must not leave your computer.
 
 For sensitive material:
 
-- the request goes only to the model ticked **For sensitive sources**, which must be local (`127.0.0.1`, `localhost`, `[::1]`). A server on your own network does not qualify. With no such model, the explanation fails with a message instead of falling back to a remote one;
+- the request goes only to the model ticked **Sensitive provider**, which must be local (`127.0.0.1`, `localhost`, `[::1]`). A server on your own network does not qualify. With no such model, the explanation fails with a message instead of falling back to a remote one;
 - earlier concepts known only from sensitive sources are not listed to a remote model, even for a different, normal page;
 - **Compare** refuses to send a sensitive earlier record to a remote model;
 - records are still kept in your browser, and the history shows a **Sensitive source** badge.

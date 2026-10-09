@@ -157,20 +157,20 @@ pnpm --filter @harkback/extension build
 
 ## 连接模型
 
-引导页会带你完成这一步，还提供一个内置的示例解释，可以先试一试而不调用任何模型。之后也可以在设置页修改，包括模型多久没有回应就放弃请求。
+引导页分三步：**欢迎**（一个重逢提示示例和一个内置的示例解释，可以先试一试而不调用任何模型）、**隐私**（你的文字去向；勾选同意后「下一步」才可点击）和**模型**（选择服务后点「完成设置」）。再次运行引导页会更新已有的模型，而不是再添加一个副本。更多模型和选项可以之后在设置页添加，设置页还能调整速率限制、重逢提示，以及模型多久没有回应就放弃请求。
 
 ![设置页：一个模型的名称、模型、地址、API key 和「测试连接」按钮](assets/settings.png)
 
-| 服务                       | Base URL                                           | 说明                                                                                             |
-| -------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Chrome 内置（Gemini Nano） | 无                                                 | 在本机运行，无需 key。在设置中下载；英语、西班牙语、日语效果最好。                               |
-| Ollama                     | `http://127.0.0.1:11434/v1`                        | 本机，无需 key。见下文。                                                                         |
-| OpenAI                     | `https://api.openai.com/v1`                        | 需要 API key。                                                                                   |
-| Anthropic                  | `https://api.anthropic.com/v1`                     | 需要 API key。                                                                                   |
-| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta` | 需要 API key。                                                                                   |
-| xAI Grok                   | `https://api.x.ai/v1`                              | 需要 API key。                                                                                   |
-| OpenRouter                 | `https://openrouter.ai/api/v1`                     | 需要 API key。                                                                                   |
-| 自定义                     | 任意地址                                           | 必须使用 `https`，本机和你自己的网络（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）除外。 |
+| 服务                       | Base URL                                           | 说明                                                                                                 |
+| -------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Chrome 内置（Gemini Nano） | 无                                                 | 在本机运行，无需 key。在引导页或设置中下载；这是小模型，比云端模型慢，英语、西班牙语、日语效果最好。 |
+| Ollama                     | `http://127.0.0.1:11434/v1`                        | 本机，无需 key。见下文。                                                                             |
+| OpenAI                     | `https://api.openai.com/v1`                        | 需要 API key。                                                                                       |
+| Anthropic                  | `https://api.anthropic.com/v1`                     | 需要 API key。                                                                                       |
+| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta` | 需要 API key。                                                                                       |
+| xAI Grok                   | `https://api.x.ai/v1`                              | 需要 API key。                                                                                       |
+| OpenRouter                 | `https://openrouter.ai/api/v1`                     | 需要 API key。                                                                                       |
+| 自定义                     | 任意地址                                           | 必须使用 `https`，本机和你自己的网络（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）除外。     |
 
 每个服务使用自己的通信格式：Anthropic 和 Google Gemini 使用各自的原生接口，其余（包括 Ollama、Grok、OpenRouter 以及公司内部代理等自定义地址）都使用 OpenAI 兼容格式。选择服务会自动填好地址，地址仍可修改。其他 OpenAI 兼容的服务请选择「自定义」。
 

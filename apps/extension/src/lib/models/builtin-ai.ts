@@ -15,7 +15,24 @@ interface PromptSession {
   destroy(): void;
 }
 
+/** The languages Chrome's model accepts and answers in; a request that names none logs a warning and is not attested. */
+const SUPPORTED_LANGUAGES = ["en", "es", "ja", "de", "fr"] as const;
+type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+/** `lang` may be an interface language such as `pt-BR`; one the model does not handle falls back to English. */
+export const modelLanguage = (lang?: string): SupportedLanguage => {
+  const base = lang?.split("-")[0];
+  return SUPPORTED_LANGUAGES.find((l) => l === base) ?? "en";
+};
+
+const languageOptions = (lang?: string): Pick<CreateOptions, "expectedInputs" | "expectedOutputs"> => {
+  const languages = [modelLanguage(lang)];
+  return { expectedInputs: [{ type: "text", languages }], expectedOutputs: [{ type: "text", languages }] };
+};
+
 interface CreateOptions {
+  expectedInputs?: { type: "text"; languages: string[] }[];
+  expectedOutputs?: { type: "text"; languages: string[] }[];
   initialPrompts?: { role: "system" | "user" | "assistant"; content: string }[];
   signal?: AbortSignal;
   monitor?(m: EventTarget): void;
@@ -49,6 +66,7 @@ export async function downloadBuiltIn(
   if (!api) return "unsupported";
   try {
     const session = await api.create({
+      ...languageOptions(),
       monitor(m) {
         m.addEventListener("downloadprogress", (e) => onProgress(Number((e as Event & { loaded?: number }).loaded ?? 0)));
       },
@@ -64,6 +82,8 @@ export interface BuiltInOptions {
   signal?: AbortSignal;
   idleTimeoutMs?: number;
   firstTextTimeoutMs?: number;
+  /** The language the reply is expected in; defaults to English. */
+  language?: string;
   api?: PromptApi;
 }
 
@@ -130,7 +150,7 @@ async function run(
   let session: PromptSession | undefined;
   try {
     arm();
-    session = await api.create({ initialPrompts, signal: controller.signal });
+    session = await api.create({ ...languageOptions(opts.language), initialPrompts, signal: controller.signal });
     const reader = session.promptStreaming(input, { signal: controller.signal }).getReader();
     // A stream that does not notice the abort would otherwise leave this waiting for ever.
     const stopped = new Promise<never>((_, reject) => {

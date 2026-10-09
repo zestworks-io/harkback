@@ -10,16 +10,16 @@
 | "Cannot reach the model service"                          | Wrong address, service not running, or no network. For Ollama, make sure it is started.                                                 |
 | "The model stopped responding"                            | No text for 2 minutes at the start or 30 seconds in the middle. Reasoning models can think a long time; try again or use another model. |
 | "The model service is rate limiting (429)"                | Wait, or lower your usage on that provider.                                                                                             |
-| "Too many explanations. Try again in … seconds."          | Harkback's own limit (settings → _Limits and hints_). Failed requests are not counted.                                                  |
+| "Too many explanations. Try again in … seconds."          | Harkback's own limit (settings → _Rate limits_). Failed requests are not counted.                                                       |
 | "Invalid / insecure model address"                        | Plain `http` is only allowed for this computer and your own network. Use `https` otherwise.                                             |
-| "This source is sensitive and can only use a local model" | Add a local model and tick **For sensitive sources**, or mark the source normal.                                                        |
+| "This source is sensitive and can only use a local model" | Add a local model and tick **Sensitive provider**, or mark the source normal.                                                           |
 
 After any failure the card offers **Try again**, and **Try with …** when you have more than one model.
 
 ## Nothing is underlined
 
 - Pages other than arXiv are scanned only after you click the toolbar button, press `Alt+Shift+E`, or allow the site under _Sites_.
-- You must have looked up the term on a **different page** first, at least _reunion gap_ days ago (default 3). Lower the gap to 0 to test.
+- You must have looked up the term on a **different page** first, at least _reunion gap_ days ago (default 3). Lower the gap to 0 (settings → _Reunion hints_) to test.
 - The term may be muted (concept page → Unmute).
 - Short or ambiguous terms need help: an abbreviation like `SAM` or `GP` shows only when another term from the same field is on the page. Chinese names need three characters.
 - Private windows never scan.
