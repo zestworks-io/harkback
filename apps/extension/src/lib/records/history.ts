@@ -1,4 +1,4 @@
-import type { State } from "@harkback/core";
+import { isSensitiveSource, type State } from "@harkback/core";
 import type { Domain, Tier } from "@harkback/spec";
 
 /** One follow-up question asked on the card and the answer it got. */
@@ -54,7 +54,7 @@ export function historyEntries(state: State, conceptId: string): HistoryEntry[] 
       sourceId: e.sourceId,
       sourceTitle: state.sources.get(e.sourceId)?.title || e.sourceId,
       sourceUrl: sourceUrl(state, e.sourceId),
-      sensitive: state.sources.get(e.sourceId)?.sensitivity === "sensitive",
+      sensitive: isSensitiveSource(state, e.sourceId),
       tier: e.explanation.tier,
       selection: e.selection,
       explanation: e.explanation.text,

@@ -92,3 +92,16 @@ export function sameSource(state: Pick<State, "sourceIdentity">, a: string, b: s
   const kb = normalizeSourceId(b);
   return (state.sourceIdentity.get(ka) ?? ka) === (state.sourceIdentity.get(kb) ?? kb);
 }
+
+/** True when the source, or the same paper under its other id, is marked sensitive. */
+export function isSensitiveSource(state: Pick<State, "sources" | "sourceIdentity">, sourceId: string): boolean {
+  if (state.sources.get(sourceId)?.sensitivity === "sensitive") return true;
+  const k = normalizeSourceId(sourceId);
+  const root = state.sourceIdentity.get(k) ?? k;
+  for (const [id, src] of state.sources) {
+    if (src.sensitivity !== "sensitive") continue;
+    const ik = normalizeSourceId(id);
+    if ((state.sourceIdentity.get(ik) ?? ik) === root) return true;
+  }
+  return false;
+}

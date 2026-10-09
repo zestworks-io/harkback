@@ -1,7 +1,7 @@
 import { DOMAINS } from "@harkback/spec";
 import type { Candidate } from "../concepts/candidates";
 import { explainLanguageName } from "./languages";
-import type { State } from "../events/state";
+import { isSensitiveSource, type State } from "../events/state";
 
 export interface EarlierEncounter {
   title: string;
@@ -268,7 +268,7 @@ export function buildPreviewExplainPrompt(req: PreviewExplainRequest): ChatMessa
 function sourceIsSensitive(state: State, encounterId: string): boolean {
   const enc = state.encounters.get(encounterId);
   if (!enc) return true;
-  return state.sources.get(enc.sourceId)?.sensitivity === "sensitive";
+  return isSensitiveSource(state, enc.sourceId);
 }
 
 export function isSensitiveOnly(state: State, conceptId: string): boolean {

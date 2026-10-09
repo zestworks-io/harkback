@@ -107,6 +107,23 @@ describe("sensitive candidates", () => {
   });
 });
 
+describe("sensitive paper under its other id", () => {
+  it("treats an encounter under the arXiv id as sensitive when the paper was marked sensitive under its DOI", () => {
+    const state = replay([
+      ev("source.seen", {
+        source_id: "doi:10.1/x",
+        ids: { doi: "10.1/x", arxiv: "2" },
+        title: "Draft",
+        license: "unknown",
+        sensitivity: "sensitive",
+      }),
+      concept(1, "Secret Method"),
+      encounter(10, 1, "arxiv:2v2"),
+    ]);
+    expect(isSensitiveOnly(state, id(1))).toBe(true);
+  });
+});
+
 describe("injection and sensitivity edge cases", () => {
   it("strips nested delimiter injection", () => {
     const p = buildExplainPrompt({

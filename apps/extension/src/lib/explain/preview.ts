@@ -1,4 +1,4 @@
-import { findCandidates, type State } from "@harkback/core";
+import { findCandidates, isSensitiveSource, type State } from "@harkback/core";
 import { understandingOf } from "../records/concept-detail";
 import { applySiteRules } from "./explain";
 import type { ErrorCode } from "../messaging/messages";
@@ -63,7 +63,7 @@ export function routePreview(settings: Settings, recorded: State, url: string, s
   const rule = effectiveRule(settings.sites, url);
   if (rule.disabled) return { kind: "error", code: "site_disabled" };
   const state = applySiteRules(recorded, settings.sites);
-  const sensitive = rule.sensitive || state.sources.get(sourceId)?.sensitivity === "sensitive";
+  const sensitive = rule.sensitive || isSensitiveSource(state, sourceId);
   const chosen = chooseModel(settings, rule, sensitive);
   if (chosen.kind === "error") return { kind: "error", code: chosen.code };
   return { kind: "ok", model: chosen.model, remote: chosen.remote, sensitive };
