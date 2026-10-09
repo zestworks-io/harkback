@@ -121,6 +121,12 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   Sensitive: "Sensível",
   Disabled: "Desativado",
   "+ Add site": "+ Adicionar site",
+  "+ YouTube captions": "+ Legendas do YouTube",
+  "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.":
+    "YouTube adicionado. Salve para conceder o acesso; o navegador pergunta uma vez. Ative as legendas (CC) enquanto assiste.",
+  "YouTube already has a rule.": "O YouTube já tem uma regra.",
+  "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
+    "O YouTube não está entre os sites sugeridos; adicione-o quando quiser. O Harkback lê apenas as legendas que o player está mostrando, não baixa arquivos de legenda, e os sublinhados não fazem parte da página do YouTube.",
   "+ Suggested research sites": "+ Sites de pesquisa sugeridos",
   "Added {n} sites. Save to grant site access; the browser asks once.":
     "{n} sites adicionados. Salve para conceder acesso; o navegador pergunta uma só vez.",

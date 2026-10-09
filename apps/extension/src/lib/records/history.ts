@@ -1,5 +1,6 @@
 import { isSensitiveSource, type State } from "@harkback/core";
 import type { Domain, Tier } from "@harkback/spec";
+import { videoIdFromSourceId, watchUrlAt } from "../video/youtube";
 
 /** One follow-up question asked on the card and the answer it got. */
 export interface FollowUp {
@@ -8,8 +9,13 @@ export interface FollowUp {
   answer: string;
 }
 
-/** Where a source can be opened again: its recorded address, or the arXiv or DOI page; never a local file or a non-web address. */
-export function sourceUrl(state: State, sourceId: string): string | null {
+/**
+ * Where a source can be opened again: its recorded address, or the arXiv or DOI page; never a local file or a non-web address.
+ * A video met at playback position `t` opens at that moment.
+ */
+export function sourceUrl(state: State, sourceId: string, t?: number): string | null {
+  const video = t === undefined ? null : videoIdFromSourceId(sourceId);
+  if (video) return watchUrlAt(video, t!);
   const ids = state.sources.get(sourceId)?.ids;
   const candidates = [
     ids?.url,
@@ -24,8 +30,10 @@ export interface HistoryEntry {
   date: string;
   sourceId: string;
   sourceTitle: string;
-  /** Where to open the source again, when it has a web address. */
+  /** Where to open the source again, when it has a web address; for a video, at the moment it was met. */
   sourceUrl: string | null;
+  /** Playback position in seconds when the term was met in a video; null for any other source. */
+  t: number | null;
   /** The source is marked sensitive: its content stays on this computer. */
   sensitive: boolean;
   tier: Tier;
@@ -53,7 +61,8 @@ export function historyEntries(state: State, conceptId: string): HistoryEntry[] 
       date: new Date(e.createdAt).toISOString().slice(0, 10),
       sourceId: e.sourceId,
       sourceTitle: state.sources.get(e.sourceId)?.title || e.sourceId,
-      sourceUrl: sourceUrl(state, e.sourceId),
+      sourceUrl: sourceUrl(state, e.sourceId, e.locator.t),
+      t: e.locator.t ?? null,
       sensitive: isSensitiveSource(state, e.sourceId),
       tier: e.explanation.tier,
       selection: e.selection,

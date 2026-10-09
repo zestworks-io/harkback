@@ -1,3 +1,4 @@
+import { formatTimestamp } from "@harkback/core";
 import { h } from "./dom";
 import type { ReunionCard } from "../records/reunion-cards";
 import type { Overlay } from "./overlay";
@@ -12,7 +13,7 @@ const HIDE_DELAY_MS = 300;
 export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionAction) => void): HTMLElement {
   const title =
     card.kind === "direct"
-      ? `${card.conceptName} · ${t(lang, "daysAgo", { n: card.daysAgo })} · ${quoteTitle(card.sourceTitle, lang)}${card.section ? ` §${card.section}` : ""}`
+      ? `${card.conceptName} · ${t(lang, "daysAgo", { n: card.daysAgo })} · ${quoteTitle(card.sourceTitle, lang)}${card.section ? ` §${card.section}` : card.t !== null ? ` ${formatTimestamp(card.t)}` : ""}`
       : t(lang, "related", { a: card.conceptName, n: card.daysAgo, b: card.viaName ?? "" });
   const tier = t(lang, card.tier === "defined_in_source" ? "tierDefined" : "tierExternal");
   return h(

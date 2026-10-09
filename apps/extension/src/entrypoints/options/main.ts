@@ -10,7 +10,7 @@ import { BUILTIN_MODEL, builtInState, downloadBuiltIn } from "../../lib/models/b
 import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/storage/settings";
 import { applyTheme } from "../../lib/ui/theme";
 import { PROVIDERS, providerById } from "../../lib/models/providers";
-import { addSuggestedSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
+import { addSuggestedSites, addVideoSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
@@ -339,6 +339,22 @@ async function main(): Promise<void> {
       render();
     });
 
+    const addYouTube = h(
+      "button",
+      { type: "button", className: "add", "data-hb": "add-youtube" },
+      L("+ YouTube 字幕", "+ YouTube captions"),
+    );
+    addYouTube.addEventListener("click", () => {
+      suggestMessage =
+        addVideoSites(draft.sites) > 0
+          ? L(
+              "已添加 YouTube。点击保存后，浏览器会询问网站访问权限。播放时请打开字幕（CC）。",
+              "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.",
+            )
+          : L("YouTube 已有规则。", "YouTube already has a rule.");
+      render();
+    });
+
     const suggestNote = h("p", { className: "note", "data-hb": "suggest-note" }, suggestMessage);
     const suggestSites = h(
       "button",
@@ -596,6 +612,7 @@ async function main(): Promise<void> {
               draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
               addSite,
               suggestSites,
+              addYouTube,
               suggestNote,
               h(
                 "p",
@@ -603,6 +620,14 @@ async function main(): Promise<void> {
                 L(
                   "推荐网站：bioRxiv、medRxiv、PubMed（只有摘要）、SSRN、OpenReview 和 ACL Anthology，都会自动扫描。",
                   "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.",
+                ),
+              ),
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "YouTube 不在推荐网站里，需要时单独添加。Harkback 只读取播放器正在显示的字幕，不会下载字幕文件；字幕里划线的词也不会出现在 YouTube 页面的代码中。",
+                  "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.",
                 ),
               ),
             ],

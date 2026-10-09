@@ -49,6 +49,35 @@ describe("parseEvent", () => {
   });
 });
 
+const encounterCreated = (locator: Record<string, unknown>) => ({
+  ...base,
+  type: "encounter.created",
+  payload: {
+    encounter_id: "01J8Z3K4M5N6P7Q8R9S0T1V2W5",
+    concept_id: "01J8Z3K4M5N6P7Q8R9S0T1V2W4",
+    source_id: "youtube:dQw4w9WgXcQ",
+    locator: { exact: "LoRA", prefix: "we fine-tune with ", suffix: " adapters", ...locator },
+    selection: "LoRA",
+    explanation: { text: "A method.", tier: "external_knowledge", evidence_span: null, model: "m" },
+    flags: [],
+  },
+});
+
+describe("locator timestamp", () => {
+  it("accepts a locator without t, as in every earlier log", () => {
+    expect(parseEvent(encounterCreated({})).kind).toBe("event");
+  });
+
+  it("accepts a whole-second playback position", () => {
+    expect(parseEvent(encounterCreated({ t: 754 })).kind).toBe("event");
+    expect(parseEvent(encounterCreated({ t: 0 })).kind).toBe("event");
+  });
+
+  it.each([-1, 1.5, 1_000_001, "754"])("rejects t = %s", (t) => {
+    expect(parseEvent(encounterCreated({ t })).kind).toBe("invalid");
+  });
+});
+
 describe("JSON Schema", () => {
   it("committed schema matches the zod definition", () => {
     const committed = JSON.parse(readFileSync("packages/spec/schema/event.schema.json", "utf8"));

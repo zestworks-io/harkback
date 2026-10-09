@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head><meta charset="utf-8"><title>Low-Rank Adaptation, explained - YouTube</title></head>
+  <body>
+    <h1>Low-Rank Adaptation, explained</h1>
+    <div id="movie_player" style="position: relative; width: 640px; height: 360px; background: #111">
+      <video class="html5-main-video" style="width: 100%; height: 100%"></video>
+      <div class="ytp-caption-window-container" style="position: absolute; bottom: 20px; left: 40px; color: white; font-size: 24px">
+        <div class="caption-window ytp-caption-window-bottom">
+          <span class="captions-text"></span>
+        </div>
+      </div>
+    </div>
+    <script>
+      const video = document.querySelector("video");
+      // Set natively (a getter defined here would not be seen by the extension's isolated world).
+      video.currentTime = 83.4;
+      // The test drives the captions; each line is `[before, term, after]` so the term can be selected.
+      window.setCaptions = (lines) => {
+        document.querySelector(".captions-text").innerHTML = lines
+          .map(([a, term, b]) => `<span class="caption-visual-line"><span class="ytp-caption-segment">${a}<span class="term">${term}</span>${b}</span></span>`)
+          .join("");
+      };
+      window.setCaptions([["so we fine-tune with ", "LoRA", " which is cheap"]]);
+    </script>
+  </body>
+</html>

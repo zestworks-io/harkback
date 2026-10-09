@@ -44,6 +44,9 @@ export const test = base.extend<{ stub: StubServer; context: BrowserContext; sw:
     await context.route("https://blog.example.com/**", (route) =>
       route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("blog.html") }),
     );
+    await context.route("https://www.youtube.com/**", (route) =>
+      route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("youtube/watch.html") }),
+    );
     await use(context);
     await context.close();
   },

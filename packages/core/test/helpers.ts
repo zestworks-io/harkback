@@ -28,14 +28,14 @@ export function concept(n: number, name: string, domain: Domain = "ml", aliases:
   return ev("concept.created", { concept_id: id(n), canonical_name: name, aliases, domain }, ts ? { ts } : {});
 }
 
-export function encounter(n: number, conceptN: number, sourceId: string, ts = "2026-09-10T00:00:00Z") {
+export function encounter(n: number, conceptN: number, sourceId: string, ts = "2026-09-10T00:00:00Z", t?: number) {
   return ev(
     "encounter.created",
     {
       encounter_id: id(n),
       concept_id: id(conceptN),
       source_id: sourceId,
-      locator: { exact: "x", prefix: "", suffix: "" },
+      locator: { exact: "x", prefix: "", suffix: "", ...(t !== undefined && { t }) },
       selection: "x",
       explanation: { text: `explanation ${n}`, tier: "external_knowledge", evidence_span: null, model: "test" },
       flags: [],

@@ -25,14 +25,14 @@ export function world(start = Date.UTC(2026, 8, 1)) {
       add(f.make("concept.created", { concept_id: conceptId, canonical_name: name, aliases, domain: "ml" }));
       return conceptId;
     },
-    encounter(conceptId: string, sourceId: string, text = "earlier explanation"): string {
+    encounter(conceptId: string, sourceId: string, text = "earlier explanation", t?: number): string {
       const encounterId = ulid();
       add(
         f.make("encounter.created", {
           encounter_id: encounterId,
           concept_id: conceptId,
           source_id: sourceId,
-          locator: { exact: "LoRA", prefix: "we use", suffix: "here", section: "2 Method" },
+          locator: { exact: "LoRA", prefix: "we use", suffix: "here", ...(t === undefined ? { section: "2 Method" } : { t }) },
           selection: "LoRA",
           explanation: { text, tier: "external_knowledge", evidence_span: null, model: "m" },
           flags: [],

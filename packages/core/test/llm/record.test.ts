@@ -174,6 +174,19 @@ describe("buildRecordEvents: field limits and sensitivity", () => {
     for (const e of events) expect(parseEvent(e).kind).toBe("event");
   });
 
+  it("keeps the playback position of a video locator through recording and replay", () => {
+    const events = buildRecordEvents(input({ locator: { exact: "LoRA", prefix: "we apply ", suffix: " to", t: 754 } }));
+    const created = events.find((e) => e.type === "encounter.created");
+    expect(created?.payload?.locator.t).toBe(754);
+    for (const e of events) expect(parseEvent(e).kind).toBe("event");
+    expect([...replay(events).encounters.values()][0]?.locator.t).toBe(754);
+  });
+
+  it("leaves t out of a locator that has none", () => {
+    const created = buildRecordEvents(input({})).find((e) => e.type === "encounter.created");
+    expect(created?.payload?.locator).not.toHaveProperty("t");
+  });
+
   it("never downgrades a sensitive source to normal", () => {
     const prior = [ev("source.seen", { ...source, sensitivity: "sensitive" })];
     const events = buildRecordEvents(input({ source: { ...source, sensitivity: "normal" } }, prior));

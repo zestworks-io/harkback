@@ -1,6 +1,6 @@
 import { Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain/explain";
-import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../source/extract";
+import { contextForRange, extractPage, rangeFor, type ExtractedPage, type SelectionContext } from "../source/extract";
 import { h } from "../ui/dom";
 import type { PageInfo, PortIn, PortOut } from "../messaging/messages";
 import type { PreviewTerm } from "../explain/preview";
@@ -16,6 +16,8 @@ import type { PortLike, Rpc } from "./rpc";
 const MAX_SELECTION = 200;
 const PING_MS = 20_000;
 const PREVIEW_CONTEXT_CHARS = 400;
+/** Screens of captions whose reunion cards are kept; a long video has many. */
+const MAX_CACHED_SCREENS = 200;
 
 export interface ExplainOptions {
   mode: ExplainRequestMsg["mode"];
@@ -23,6 +25,8 @@ export interface ExplainOptions {
   conceptId?: string;
   /** The reader chose this model after a failure. */
   modelId?: string;
+  /** The selected text, kept for a retry: a caption line may be gone from the page, and its Range with it. */
+  text?: string;
 }
 
 interface Session {
@@ -40,12 +44,28 @@ function lastRect(range: Range): DOMRect | null {
   return r.width === 0 && r.height === 0 ? null : r;
 }
 
+/** A source whose text changes under the reader's eyes, such as the captions of a video. */
+export interface LiveSource {
+  /** Whether live text is on screen now (a video page) or the page is to be read like any other. */
+  active(): boolean;
+  /** What is on screen now. */
+  page(): ExtractedPage;
+  /** Calls `onSettled` when the text has stopped changing and `onReset` when another document opens. Returns a function that stops. */
+  watch(onSettled: () => void, onReset: () => void): () => void;
+  /** The text around a selection from what has been shown, and where in the document it was. */
+  context(selection: string): SelectionContext | null;
+  /** Everything shown so far: what a quoted definition is checked against. */
+  text(): string;
+}
+
 /** Where a page's text and identity come from when it is not an ordinary web page. */
 export interface PageSource {
   /** The address that site rules and history refer to. */
-  url: string;
+  readonly url: string;
   detect(): DetectedSource;
-  root(): Element;
+  /** Where the text is; undefined to find it as for any web page. */
+  root(): Element | undefined;
+  live?: LiveSource;
 }
 
 export class ContentApp {
@@ -64,6 +84,15 @@ export class ContentApp {
   private observer: MutationObserver | null = null;
   private watch: ReturnType<typeof setTimeout> | undefined;
   private href = location.href;
+  private scanGen = 0;
+  /**
+   * Reunion cards found for a video, by the set of terms on screen. A caption repeats the same terms often, and the choice of
+   * cards (page limit, ambiguous abbreviations that need a corroborating term) depends on all the terms together, so a screen
+   * is asked about as a whole.
+   */
+  private readonly reunions = new Map<string, { key: string; card: ReunionCard }[]>();
+  /** Concepts the reader has answered for on this video; not shown again on it. */
+  private readonly answered = new Set<string>();
 
   constructor(
     private readonly rpc: Rpc,
@@ -71,8 +100,14 @@ export class ContentApp {
     private readonly source?: PageSource,
   ) {}
 
+  /** The source's live text, when it has some on screen now. */
+  private live(): LiveSource | null {
+    const live = this.source?.live;
+    return live?.active() ? live : null;
+  }
+
   private extract(): ExtractedPage {
-    return extractPage(document, this.source?.url ?? location.href, this.source?.root());
+    return this.live()?.page() ?? extractPage(document, this.source?.url ?? location.href, this.source?.root());
   }
 
   private detect(): DetectedSource {
@@ -106,36 +141,78 @@ export class ContentApp {
   async activate(known?: PageInfo): Promise<void> {
     this.info = this.take(known ?? (await this.rpc.request({ type: "page-info" })));
     if (!this.info.enabled) return;
-    if (!this.listening) {
+    // New page-info means new records: reunions found before no longer hold.
+    this.reunions.clear();
+    const first = !this.listening;
+    if (first) {
       this.listening = true;
       document.addEventListener("mouseup", this.onMouseUp, true);
       document.addEventListener("mousedown", this.onMouseDown, true);
       document.addEventListener("keyup", this.onKeyUp, true);
       document.addEventListener("touchend", this.onTouchEnd, true);
-      this.observe();
+      // Live text tells when it has changed; the page-wide observer would fire on every caption.
+      // Watching lasts as long as the page does.
+      if (this.source?.live) this.source.live.watch(this.onLiveSettled, this.onLiveReset);
+      else this.observe();
     }
-    await this.scan();
+    // The first read of live text is started by the watcher itself.
+    if (!(first && this.source?.live)) await this.scan();
   }
 
   async scan(): Promise<void> {
     const info = this.info;
+    const gen = ++this.scanGen;
+    if (this.source?.live && !this.live()) {
+      this.layer?.clear();
+      return;
+    }
     if (!info?.scan || info.entries.length === 0) return;
-    await new Promise<void>((resolve) => {
-      if ("requestIdleCallback" in window) requestIdleCallback(() => resolve(), { timeout: 2000 });
-      else setTimeout(resolve, 50);
-    });
+    // Live text moves on in a few seconds: waiting for an idle moment would show marks on a line that is gone.
+    if (!this.live())
+      await new Promise<void>((resolve) => {
+        if ("requestIdleCallback" in window) requestIdleCallback(() => resolve(), { timeout: 2000 });
+        else setTimeout(resolve, 50);
+      });
+    if (gen !== this.scanGen) return;
     const page = this.extract();
     this.page = page;
     const firstPerKey = new Map<string, Hit>();
     if (this.matcher?.entries !== info.entries) this.matcher = { entries: info.entries, value: new Matcher(info.entries) };
     for (const hit of this.matcher.value.scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
+    if (firstPerKey.size === 0) {
+      this.layer?.clear();
+      return;
+    }
+    const sourceId = this.detect().source_id;
+    const hits = [...firstPerKey.values()];
+    let cards: ReunionCard[];
+    if (this.live()) {
+      const screen = hits
+        .map((hit) => hit.key)
+        .sort()
+        .join("\u0000");
+      let found = this.reunions.get(screen);
+      if (!found) {
+        const { cards: fresh } = await this.rpc.request({ type: "reunions", sourceId, hits });
+        const keyAt = new Map(hits.map((hit) => [`${hit.start}:${hit.end}`, hit.key]));
+        found = fresh.flatMap((card) => {
+          const key = keyAt.get(`${card.start}:${card.end}`);
+          return key === undefined ? [] : [{ key, card }];
+        });
+        if (this.reunions.size >= MAX_CACHED_SCREENS) this.reunions.clear();
+        this.reunions.set(screen, found);
+      }
+      const hitOf = new Map(hits.map((hit) => [hit.key, hit]));
+      cards = found.flatMap(({ key, card }) => {
+        const hit = hitOf.get(key);
+        // The same terms may stand at other places in the line this time.
+        return hit && !this.answered.has(card.conceptId) ? [{ ...card, start: hit.start, end: hit.end, matched: hit.text }] : [];
+      });
+    } else {
+      cards = (await this.rpc.request({ type: "reunions", sourceId, hits })).cards;
+    }
+    if (gen !== this.scanGen) return;
     this.layer?.clear();
-    if (firstPerKey.size === 0) return;
-    const { cards } = await this.rpc.request({
-      type: "reunions",
-      sourceId: this.detect().source_id,
-      hits: [...firstPerKey.values()],
-    });
     const entries = cards.flatMap((card) => {
       const range = rangeFor(page, card.start, card.end);
       return range ? [{ card, range }] : [];
@@ -143,6 +220,33 @@ export class ContentApp {
     if (entries.length === 0) return;
     this.layer ??= new ReunionLayer(this.ensureOverlay(), this.lang, (card, action, range) => this.onReunionAction(card, action, range));
     this.layer.show(entries);
+  }
+
+  /** The caption has held still: read it again. */
+  private readonly onLiveSettled = (): void => {
+    this.page = null;
+    void this.scan().catch(() => undefined);
+  };
+
+  /** Another video opened: nothing about the last one applies. */
+  private readonly onLiveReset = (): void => {
+    this.scanGen++;
+    this.endSession();
+    this.closePreview();
+    this.layer?.clear();
+    this.page = null;
+    this.reunions.clear();
+    this.answered.clear();
+    void this.refresh().catch(() => undefined);
+  };
+
+  /** Records may have changed since the page opened (a single-page site never reloads): read the page info again. */
+  private async refresh(): Promise<void> {
+    const info = this.take(await this.rpc.request({ type: "page-info" }));
+    if (!info.enabled) return;
+    this.info = info;
+    this.reunions.clear();
+    await this.scan();
   }
 
   /** Pages change after they load: more text arrives, or a single-page app moves to another document. */
@@ -187,15 +291,18 @@ export class ContentApp {
   }
 
   private onReunionAction(card: ReunionCard, action: ReunionAction, range: Range): void {
+    // A term the reader has answered for is not shown again on the same video.
+    if (this.source?.live && (action === "recalled" || action === "mute")) this.answered.add(card.conceptId);
     if (action === "recalled") void this.rpc.request({ type: "action", encounterId: card.encounterId, action: "reunion_recalled" });
     else if (action === "mute") void this.rpc.request({ type: "mute", conceptId: card.conceptId });
-    else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId });
+    else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId, text: card.matched });
   }
 
   /** The toolbar button and its shortcut: offer to scan the page for its key concepts. Nothing is sent until the reader agrees. */
   async offerPreview(): Promise<void> {
     this.info ??= this.take(await this.rpc.request({ type: "page-info" }));
-    if (!this.info.enabled || this.previewPanel) return;
+    // A video's captions are only what has been shown so far, so there is no whole page to pick key terms from.
+    if (!this.info.enabled || this.previewPanel || this.live()) return;
     const source = this.detect();
     const panel: PreviewPanel = new PreviewPanel(this.lang, {
       onScan: () => {
@@ -266,7 +373,9 @@ export class ContentApp {
 
   explain(range: Range, opts: ExplainOptions): void {
     const page = (this.page ??= this.extract());
-    const ctx = contextForRange(page, range);
+    const live = this.live();
+    // Selected in the captions, or elsewhere on the page (the description, a comment): the latter is read like any page.
+    const ctx = (live ? live.context(opts.text ?? range.toString()) : null) ?? contextForRange(page, range);
     if (!ctx) return;
     const selection = ctx.selection.slice(0, MAX_SELECTION);
     const key = `${opts.mode}\u0000${selection}\u0000${ctx.paragraphId}`;
@@ -283,7 +392,7 @@ export class ContentApp {
       section: ctx.section,
       pageTitle: source.title,
       abstractFirstSentence: page.abstractFirstSentence,
-      pageText: page.text,
+      pageText: live ? live.text() : page.text,
       locator: ctx.locator,
       source,
       ...(opts.earlierEncounterId ? { earlierEncounterId: opts.earlierEncounterId } : {}),
@@ -317,12 +426,12 @@ export class ContentApp {
           onRetry: () => {
             if (this.session !== session) return;
             this.endSession();
-            this.explain(range, opts);
+            this.explain(range, { ...opts, text: ctx.selection });
           },
           onRetryWith: (modelId) => {
             if (this.session !== session) return;
             this.endSession();
-            this.explain(range, { ...opts, modelId });
+            this.explain(range, { ...opts, text: ctx.selection, modelId });
           },
           onCancel: () => send({ type: "cancel" }),
           onClose: () => {

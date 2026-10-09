@@ -15,6 +15,7 @@ const card: ReunionCard = {
   daysAgo: 12,
   sourceTitle: "QLoRA",
   section: "3",
+  t: null,
   tier: "defined_in_source",
   preview: "在冻结的权重旁加两个低秩矩阵……",
 };
@@ -29,6 +30,12 @@ describe("reunionCardView", () => {
     expect([...el.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["想起来了", "再解释一次", "对比两处用法", "不再提示"]);
     el.querySelector<HTMLButtonElement>('[data-hb="compare"]')!.click();
     expect(act).toHaveBeenCalledWith("compare");
+  });
+
+  it("gives the position in the video where the term was met", () => {
+    const video = { ...card, sourceTitle: "A talk", section: "", t: 754 };
+    const el = reunionCardView(video, "en", () => {});
+    expect(el.querySelector('[data-hb="reunion-title"]')!.textContent).toBe("LoRA · 12 days ago · “A talk” 12:34");
   });
 
   it("phrases related reunions around the concept understood before", () => {

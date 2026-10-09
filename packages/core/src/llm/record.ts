@@ -126,6 +126,7 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
     prefix: input.locator.prefix.slice(-64),
     suffix: input.locator.suffix.slice(0, 64),
     ...(input.locator.section !== undefined && { section: input.locator.section.slice(0, 200) }),
+    ...(input.locator.t !== undefined && { t: input.locator.t }),
   };
 
   const known = new Set<string>();

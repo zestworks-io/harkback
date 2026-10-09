@@ -47,6 +47,8 @@ export const locatorSchema = z.object({
   prefix: z.string().max(64),
   suffix: z.string().max(64),
   section: z.string().max(200).optional(),
+  /** Playback position in whole seconds, for a source that is a video. */
+  t: z.number().int().min(0).max(1_000_000).optional(),
 });
 
 export const explanationSchema = z.object({

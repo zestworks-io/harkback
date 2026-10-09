@@ -1,4 +1,4 @@
-import type { State } from "@harkback/core";
+import { formatTimestamp, type State } from "@harkback/core";
 import { conceptDetail, type ConceptDetail, type RelatedConcept } from "../records/concept-detail";
 import type { Lang } from "../ui/strings";
 
@@ -70,7 +70,9 @@ export function conceptNote(d: ConceptDetail, language: Lang, titleOf: TitleOf =
   );
   lines.push(`## ${t.timeline}`);
   for (const e of d.entries) {
-    lines.push(`- ${e.date} · ${t.source(e.sourceTitle)} · ${t.tier[e.tier]}`);
+    // A video is linked at the moment the term was met.
+    const at = e.t === null ? "" : e.sourceUrl ? ` [${formatTimestamp(e.t)}](${e.sourceUrl})` : ` ${formatTimestamp(e.t)}`;
+    lines.push(`- ${e.date} · ${t.source(e.sourceTitle)}${at} · ${t.tier[e.tier]}`);
     lines.push(`  > ${e.explanation.replace(/\s*\n\s*/g, " ").trim()}`);
   }
   lines.push("", NOTE_END, "");

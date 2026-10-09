@@ -121,6 +121,12 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Sensitive: "敏感",
   Disabled: "停用",
   "+ Add site": "+ 新增網站",
+  "+ YouTube captions": "+ YouTube 字幕",
+  "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.":
+    "已新增 YouTube。儲存後瀏覽器會詢問網站存取權限。播放時請開啟字幕（CC）。",
+  "YouTube already has a rule.": "YouTube 已有規則。",
+  "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
+    "YouTube 不在建議的網站中，需要時請自行新增。Harkback 只讀取播放器正在顯示的字幕，不會下載字幕檔；字幕上的底線也不會出現在 YouTube 頁面的程式碼中。",
   "+ Suggested research sites": "+ 建議的研究網站",
   "Added {n} sites. Save to grant site access; the browser asks once.": "已新增 {n} 個網站。儲存後瀏覽器會一次詢問網站存取權限。",
   "These sites already have rules.": "這些網站都已有規則。",

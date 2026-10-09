@@ -49,7 +49,10 @@ export default defineConfig({
     // OCR runs WebAssembly; nothing else in the policy is loosened.
     content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
     optional_host_permissions: ["*://*/*", "file:///*"],
-    host_permissions: mode === "e2e" ? ["http://127.0.0.1/*", "*://blog.example.com/*", "*://*.blog.example.com/*"] : [],
+    host_permissions:
+      mode === "e2e"
+        ? ["http://127.0.0.1/*", "*://blog.example.com/*", "*://*.blog.example.com/*", "*://youtube.com/*", "*://*.youtube.com/*"]
+        : [],
     action: { default_title: "Harkback: scan this page" },
     commands: {
       "explain-selection": {

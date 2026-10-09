@@ -266,6 +266,7 @@ describe("reunion cards", () => {
         daysAgo: 12,
         sourceTitle: "LoRA paper",
         section: "2 Method",
+        t: null,
         tier: "external_knowledge",
         preview: "在冻结的权重旁加两个低秩矩阵。",
       },

@@ -16,6 +16,8 @@ export interface ReunionCard {
   daysAgo: number;
   sourceTitle: string;
   section: string;
+  /** Playback position in seconds when the term was met in a video; null for any other source. */
+  t: number | null;
   tier: Tier;
   preview: string;
 }
@@ -44,6 +46,7 @@ export function reunionCards(
       daysAgo: Math.max(0, Math.floor((o.now - enc.createdAt) / DAY_MS)),
       sourceTitle: state.sources.get(enc.sourceId)?.title || enc.sourceId,
       section: enc.locator.section ?? "",
+      t: enc.locator.t ?? null,
       tier: enc.explanation.tier,
       preview: preview(enc.explanation.text),
     };

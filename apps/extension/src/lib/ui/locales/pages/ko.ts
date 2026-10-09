@@ -121,6 +121,12 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Sensitive: "민감",
   Disabled: "사용 안 함",
   "+ Add site": "+ 사이트 추가",
+  "+ YouTube captions": "+ YouTube 자막",
+  "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.":
+    "YouTube를 추가했습니다. 저장하면 브라우저가 사이트 접근 권한을 한 번 묻습니다. 시청하는 동안 자막(CC)을 켜 두세요.",
+  "YouTube already has a rule.": "YouTube에는 이미 규칙이 있습니다.",
+  "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
+    "YouTube는 추천 사이트에 포함되어 있지 않으니 필요할 때 추가하세요. Harkback은 플레이어가 표시하는 자막만 읽고 자막 파일은 내려받지 않으며, 밑줄은 YouTube 페이지의 일부가 아닙니다.",
   "+ Suggested research sites": "+ 추천 연구 사이트",
   "Added {n} sites. Save to grant site access; the browser asks once.":
     "사이트 {n}개를 추가했습니다. 저장하면 접근 권한을 한 번만 묻습니다.",

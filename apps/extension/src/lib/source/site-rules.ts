@@ -93,10 +93,22 @@ export const SUGGESTED_RESEARCH_SITES: readonly string[] = [
   "aclanthology.org",
 ];
 
-/** Adds an auto-scan rule for each suggested site that has no rule yet; a rule the reader already has is left as it is. Returns how many were added. */
-export function addSuggestedSites(rules: SiteRule[]): number {
+/** Video sites whose captions are read. Never part of the research sites: the reader adds them on purpose. */
+export const VIDEO_SITES: readonly string[] = ["youtube.com"];
+
+function addAutoScanRules(rules: SiteRule[], patterns: readonly string[]): number {
   const have = new Set(rules.map((r) => normalizePattern(r.pattern)));
-  const missing = SUGGESTED_RESEARCH_SITES.filter((p) => !have.has(p));
+  const missing = patterns.filter((p) => !have.has(p));
   for (const pattern of missing) rules.push({ pattern, autoScan: true });
   return missing.length;
+}
+
+/** Adds an auto-scan rule for each suggested site that has no rule yet; a rule the reader already has is left as it is. Returns how many were added. */
+export function addSuggestedSites(rules: SiteRule[]): number {
+  return addAutoScanRules(rules, SUGGESTED_RESEARCH_SITES);
+}
+
+/** Same for the video sites. */
+export function addVideoSites(rules: SiteRule[]): number {
+  return addAutoScanRules(rules, VIDEO_SITES);
 }

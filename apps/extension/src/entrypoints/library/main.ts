@@ -1,4 +1,14 @@
-import { DAY_MS, exportMarkdown, parseJsonl, replay, withoutSensitive, type Grade, type ReviewAction, type State } from "@harkback/core";
+import {
+  DAY_MS,
+  exportMarkdown,
+  formatTimestamp,
+  parseJsonl,
+  replay,
+  withoutSensitive,
+  type Grade,
+  type ReviewAction,
+  type State,
+} from "@harkback/core";
 import { DOMAINS, type Domain } from "@harkback/spec";
 import { browser } from "wxt/browser";
 import { ankiTsv } from "../../lib/export/anki";
@@ -60,6 +70,10 @@ async function main(): Promise<void> {
     url
       ? h("a", { className: "src", href: url, target: "_blank", rel: "noopener noreferrer", title: url }, title)
       : h("span", { className: "src" }, title);
+
+  /** Where in a video a term was met; the link above already opens the video at that moment. */
+  const timestamp = (t: number | null): HTMLElement | null =>
+    t === null ? null : h("span", { className: "ts", "data-hb": "timestamp" }, formatTimestamp(t));
 
   const checkbox = (id: string, onChange: (checked: boolean) => void, hb: string, label: string): HTMLInputElement => {
     const box = h("input", { type: "checkbox", className: "pick", "data-hb": hb, "data-id": id, "aria-label": label });
@@ -223,6 +237,7 @@ async function main(): Promise<void> {
         { className: "meta" },
         choose,
         sourceLink(quoteTitle(e.sourceTitle, settings.language), e.sourceUrl),
+        timestamp(e.t),
         h("span", {}, e.date),
         h("span", { className: `tier ${e.tier}` }, tier),
         e.sensitive ? sensitiveBadge(e.sourceId) : null,
@@ -652,6 +667,7 @@ async function main(): Promise<void> {
         "div",
         { className: "meta" },
         sourceLink(quoteTitle(item.sourceTitle, settings.language), item.sourceUrl),
+        timestamp(item.t),
         h("span", {}, L("还剩 {n} 个", "{n} left", { n: dueItems().length })),
         item.unlocks.length > 0
           ? h(

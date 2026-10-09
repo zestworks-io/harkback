@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exportMarkdown, parseJsonl, replay, serializeJsonl } from "../../src";
+import { exportMarkdown, formatTimestamp, parseJsonl, replay, serializeJsonl } from "../../src";
 import { concept, encounter, ev, id } from "../helpers";
 
 const events = [
@@ -49,5 +49,36 @@ describe("exportMarkdown", () => {
   it("labels entries in the requested language", () => {
     const md = exportMarkdown(replay(events), "en");
     expect(md).toContain("2026-09-10 · “LoRA Paper” · External knowledge");
+  });
+});
+
+describe("video timestamps", () => {
+  const video = [
+    ev("source.seen", { source_id: "youtube:dQw4w9WgXcQ", ids: {}, title: "A talk", license: "unknown", sensitivity: "normal" }),
+    concept(1, "LoRA"),
+    encounter(10, 1, "youtube:dQw4w9WgXcQ", "2026-09-10T00:00:00Z", 754),
+    encounter(11, 1, "youtube:dQw4w9WgXcQ", "2026-09-11T00:00:00Z", 3725),
+  ];
+
+  it("formats a position as m:ss or h:mm:ss", () => {
+    expect(formatTimestamp(0)).toBe("0:00");
+    expect(formatTimestamp(754)).toBe("12:34");
+    expect(formatTimestamp(3725.9)).toBe("1:02:05");
+    expect(formatTimestamp(-3)).toBe("0:00");
+  });
+
+  it("puts the position after the source in the Markdown export", () => {
+    const md = exportMarkdown(replay(video), "en");
+    expect(md).toContain("2026-09-10 · “A talk” 12:34 · External knowledge");
+    expect(md).toContain("2026-09-11 · “A talk” 1:02:05 · External knowledge");
+  });
+
+  it("leaves it out for a source with no position", () => {
+    expect(exportMarkdown(replay(events), "en")).toContain("2026-09-10 · “LoRA Paper” · External knowledge");
+  });
+
+  it("keeps it in the JSONL log", () => {
+    expect(parseJsonl(serializeJsonl(video)).events).toEqual(video);
+    expect(serializeJsonl(video)).toContain('"t":754');
   });
 });

@@ -30,6 +30,8 @@ export interface ReviewItem {
   explanation: string;
   sourceTitle: string;
   sourceUrl: string | null;
+  /** Playback position in seconds when the term was last met in a video; null for any other source. */
+  t: number | null;
 }
 
 interface Schedule {
@@ -114,7 +116,8 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number; r
         selection: latest.selection,
         explanation: latest.explanation.text,
         sourceTitle: state.sources.get(latest.sourceId)?.title || latest.sourceId,
-        sourceUrl: sourceUrl(state, latest.sourceId),
+        sourceUrl: sourceUrl(state, latest.sourceId, latest.locator.t),
+        t: latest.locator.t ?? null,
       },
     });
   }

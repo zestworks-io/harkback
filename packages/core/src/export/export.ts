@@ -1,5 +1,6 @@
 import { LIMITS, parseEvent, utf8Length, type HarkEvent } from "@harkback/spec";
 import type { State } from "../events/state";
+import { formatTimestamp } from "./timestamp";
 
 export function serializeJsonl(events: readonly HarkEvent[]): string {
   return events.map((e) => JSON.stringify(e)).join("\n") + (events.length > 0 ? "\n" : "");
@@ -58,7 +59,8 @@ export function exportMarkdown(state: State, language = "en"): string {
       const title = state.sources.get(e.sourceId)?.title || e.sourceId;
       const date = new Date(e.createdAt).toISOString().slice(0, 10);
       const source = labels === "zh" ? `《${title}》` : `“${title}”`;
-      lines.push(`- ${date} · ${source} · ${TIER_LABEL[labels][e.explanation.tier]}`);
+      const at = e.locator.t !== undefined ? ` ${formatTimestamp(e.locator.t)}` : "";
+      lines.push(`- ${date} · ${source}${at} · ${TIER_LABEL[labels][e.explanation.tier]}`);
       lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
     }
     lines.push("");

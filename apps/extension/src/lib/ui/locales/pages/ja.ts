@@ -121,6 +121,12 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Sensitive: "機密",
   Disabled: "無効",
   "+ Add site": "+ サイトを追加",
+  "+ YouTube captions": "+ YouTube の字幕",
+  "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.":
+    "YouTube を追加しました。保存するとサイトへのアクセス許可をブラウザが一度だけ尋ねます。視聴中は字幕（CC）をオンにしてください。",
+  "YouTube already has a rule.": "YouTube にはすでにルールがあります。",
+  "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
+    "YouTube はおすすめサイトに含まれていません。必要なときに追加してください。Harkback はプレーヤーが表示している字幕だけを読み、字幕ファイルはダウンロードしません。下線は YouTube のページの一部にはなりません。",
   "+ Suggested research sites": "+ おすすめの研究サイト",
   "Added {n} sites. Save to grant site access; the browser asks once.":
     "{n} 件のサイトを追加しました。保存するとアクセス許可を求められます(ブラウザの確認は一度だけです)。",
