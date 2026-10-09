@@ -23,6 +23,8 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
   daysAgo: "vor {n} Tagen",
   related: "Sie haben „{a}“ nicht nachgeschlagen, aber vor {n} Tagen „{b}“ verstanden",
   thenExplained: "Frühere Erklärung: {text}",
+  whyDirect: "Unterstrichen, weil „{text}“ auf dieser Seite der Begriff „{name}“ ist, den Sie nachgeschlagen haben.",
+  whyRelated: "Unterstrichen, weil „{text}“ auf dieser Seite mit „{via}“ zusammenhängt, das Sie verstanden haben.",
   recalled: "Ich erinnere mich",
   reexplain: "Nochmal erklären",
   compare: "Verwendungen vergleichen",

@@ -28,6 +28,13 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
     h("div", { className: "hb-body" }, t(lang, "thenExplained", { text: card.preview })),
     h(
       "div",
+      { className: "hb-why", "data-hb": "reunion-why" },
+      card.kind === "direct"
+        ? t(lang, "whyDirect", { text: card.matched, name: card.conceptName })
+        : t(lang, "whyRelated", { text: card.matched, via: card.viaName ?? "" }),
+    ),
+    h(
+      "div",
       { className: "hb-footer" },
       ...ACTIONS.map((a) =>
         h(

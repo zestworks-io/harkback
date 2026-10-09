@@ -23,6 +23,8 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   daysAgo: "{n} 天前",
   related: "你沒查過「{a}」，但 {n} 天前弄懂了「{b}」",
   thenExplained: "當時的解釋：{text}",
+  whyDirect: "劃線原因：頁面上的「{text}」就是你查過的「{name}」。",
+  whyRelated: "劃線原因：頁面上的「{text}」與你弄懂的「{via}」有關。",
   recalled: "想起來了",
   reexplain: "再解釋一次",
   compare: "比較兩處用法",

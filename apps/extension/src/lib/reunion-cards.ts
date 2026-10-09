@@ -8,6 +8,8 @@ export interface ReunionCard {
   conceptName: string;
   /** For related reunions: the concept the reader understood before. */
   viaName: string | null;
+  /** The text on the page that matched, which may be an alias or another spelling of the concept. */
+  matched: string;
   start: number;
   end: number;
   encounterId: string;
@@ -35,6 +37,7 @@ export function reunionCards(
       conceptId: r.conceptId,
       conceptName: state.concepts.get(r.conceptId)?.canonicalName ?? r.hit.text,
       viaName: r.kind === "related" ? (state.concepts.get(r.viaConceptId)?.canonicalName ?? null) : null,
+      matched: r.hit.text,
       start: r.hit.start,
       end: r.hit.end,
       encounterId: enc.id,

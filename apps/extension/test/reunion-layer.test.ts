@@ -8,6 +8,7 @@ const card: ReunionCard = {
   conceptId: "01J00000000000000000000001",
   conceptName: "LoRA",
   viaName: null,
+  matched: "low-rank adaptation",
   start: 0,
   end: 4,
   encounterId: "01J00000000000000000000002",
@@ -33,6 +34,17 @@ describe("reunionCardView", () => {
   it("phrases related reunions around the concept understood before", () => {
     const el = reunionCardView({ ...card, kind: "related", conceptName: "QLoRA", viaName: "LoRA" }, "zh", () => {});
     expect(el.querySelector('[data-hb="reunion-title"]')!.textContent).toBe("你没查过「QLoRA」，但 12 天前弄懂了「LoRA」");
+  });
+
+  it("says why the text was underlined", () => {
+    const direct = reunionCardView(card, "en", () => {});
+    expect(direct.querySelector('[data-hb="reunion-why"]')!.textContent).toBe(
+      "Underlined because “low-rank adaptation” on this page is the term “LoRA” you looked up.",
+    );
+    const related = reunionCardView({ ...card, kind: "related", conceptName: "QLoRA", viaName: "LoRA", matched: "QLoRA" }, "en", () => {});
+    expect(related.querySelector('[data-hb="reunion-why"]')!.textContent).toBe(
+      "Underlined because “QLoRA” on this page is linked to “LoRA”, which you understood.",
+    );
   });
 
   it("inserts page-derived text as text", () => {

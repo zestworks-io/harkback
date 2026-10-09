@@ -23,6 +23,8 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   daysAgo: "{n}일 전",
   related: "'{a}'은(는) 찾아본 적이 없지만, {n}일 전에 '{b}'을(를) 이해했습니다",
   thenExplained: "이전 설명: {text}",
+  whyDirect: "밑줄 이유: 이 페이지의 '{text}'은(는) 찾아본 '{name}'입니다.",
+  whyRelated: "밑줄 이유: 이 페이지의 '{text}'은(는) 이해한 '{via}'와(과) 관련이 있습니다.",
   recalled: "기억남",
   reexplain: "다시 설명",
   compare: "용법 비교",

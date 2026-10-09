@@ -118,6 +118,7 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-reunion .hb-footer { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hb-border); }
 .hb-reunion [data-hb="reunion-title"] { color: var(--hb-fg); font-weight: 600; }
 .hb-reunion .hb-body { color: var(--hb-muted); font-size: 13.5px; }
+.hb-reunion .hb-why { color: var(--hb-muted); font-size: 12px; margin-top: 8px; font-style: italic; }
 
 .hb-trigger {
   position: absolute; padding: 5px 12px; font-weight: 550; background: var(--hb-primary); color: var(--hb-primary-fg);

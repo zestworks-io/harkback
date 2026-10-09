@@ -23,6 +23,8 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   daysAgo: "{n} 日前",
   related: "「{a}」は調べていませんが、{n} 日前に「{b}」を理解しています",
   thenExplained: "以前の解説：{text}",
+  whyDirect: "下線の理由：このページの「{text}」は、あなたが調べた「{name}」です。",
+  whyRelated: "下線の理由：このページの「{text}」は、あなたが理解した「{via}」に関連しています。",
   recalled: "思い出した",
   reexplain: "もう一度解説",
   compare: "用法を比較",
