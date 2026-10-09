@@ -2,9 +2,11 @@ import { Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@h
 import type { ExplainRequestMsg } from "../explain/explain";
 import { contextForRange, extractPage, rangeFor, type ExtractedPage, type SelectionContext } from "../source/extract";
 import { h } from "../ui/dom";
-import type { PageInfo, PortIn, PortOut } from "../messaging/messages";
+import type { PageInfo, PortIn, PortOut, PrivacyFields } from "../messaging/messages";
 import type { PreviewTerm } from "../explain/preview";
 import type { ReunionCard } from "../records/reunion-cards";
+import type { Choice } from "../source/privacy-gate";
+import { profileFor, type Privacy } from "../source/site-profiles";
 import { detectSource, type DetectedSource } from "../source/source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
@@ -93,6 +95,8 @@ export class ContentApp {
   private readonly reunions = new Map<string, { key: string; card: ReunionCard }[]>();
   /** Concepts the reader has answered for on this video; not shown again on it. */
   private readonly answered = new Set<string>();
+  /** What the reader chose about pages that looked private, by source, for as long as this page lives. */
+  private readonly choices = new Map<string, Choice>();
 
   constructor(
     private readonly rpc: Rpc,
@@ -108,6 +112,19 @@ export class ContentApp {
 
   private extract(): ExtractedPage {
     return this.live()?.page() ?? extractPage(document, this.source?.url ?? location.href, this.source?.root());
+  }
+
+  /** What the page suggests about being private and what the reader chose about it; the background decides what to do. */
+  private privacyFields(sourceId: string): PrivacyFields {
+    const href = this.source?.url ?? location.href;
+    let privacy: Privacy = "unknown";
+    try {
+      privacy = profileFor(href)?.privacy(new URL(href), document) ?? "unknown";
+    } catch {
+      // The page's address or markup is not usable: nothing is known about it.
+    }
+    const choice = this.choices.get(sourceId);
+    return { privacy, ...(choice ? { choice } : {}) };
   }
 
   private detect(): DetectedSource {
@@ -319,6 +336,7 @@ export class ContentApp {
             sourceId: source.source_id,
             title: source.title,
             text: page.text.slice(0, MAX_PREVIEW_PAGE_CHARS),
+            ...this.privacyFields(source.source_id),
           })
           .then(
             (r) => {
@@ -341,13 +359,22 @@ export class ContentApp {
           term: term.term,
           conceptId: term.conceptId,
           context,
+          ...this.privacyFields(source.source_id),
         });
+      },
+      onChoose: (choice, remember) => {
+        this.applyChoice(source, choice, remember);
+        if (this.previewPanel === panel) this.planPreview(panel, source);
       },
       onClose: () => this.closePreview(),
     });
     this.previewPanel = panel;
     this.ensureOverlay().root.append(panel.el);
-    this.rpc.request({ type: "preview-plan", sourceId: source.source_id }).then(
+    this.planPreview(panel, source);
+  }
+
+  private planPreview(panel: PreviewPanel, source: DetectedSource): void {
+    this.rpc.request({ type: "preview-plan", sourceId: source.source_id, ...this.privacyFields(source.source_id) }).then(
       (r) => {
         if (this.previewPanel !== panel) return;
         if (r.ok) panel.offer(r);
@@ -355,6 +382,15 @@ export class ContentApp {
       },
       () => this.previewPanel === panel && panel.unavailable("internal"),
     );
+  }
+
+  /** Remembers the reader's answer for this page and, outside a private window, records it. */
+  private applyChoice(source: DetectedSource, choice: Choice, remember: boolean): void {
+    this.choices.set(source.source_id, choice);
+    // A private window records nothing; the answer then holds for this page only.
+    if (this.info?.incognito) return;
+    void this.rpc.request(choice === "local" ? { type: "mark-sensitive", source } : { type: "choose-normal", source });
+    if (remember) void this.rpc.request({ type: "remember-site", sensitive: choice === "local" });
   }
 
   private closePreview(): void {
@@ -398,6 +434,7 @@ export class ContentApp {
       ...(opts.earlierEncounterId ? { earlierEncounterId: opts.earlierEncounterId } : {}),
       ...(opts.conceptId ? { conceptId: opts.conceptId } : {}),
       ...(opts.modelId ? { modelId: opts.modelId } : {}),
+      ...this.privacyFields(source.source_id),
     };
 
     const port = this.rpc.connect();
@@ -423,6 +460,12 @@ export class ContentApp {
           },
           onFollowUp: (question) => send({ type: "followup", question }),
           onMarkSensitive: () => void this.rpc.request({ type: "mark-sensitive", source }),
+          onChoose: (choice, remember) => {
+            this.applyChoice(source, choice, remember);
+            if (this.session !== session) return;
+            this.endSession();
+            this.explain(range, { ...opts, text: ctx.selection });
+          },
           onRetry: () => {
             if (this.session !== session) return;
             this.endSession();
@@ -479,7 +522,8 @@ export class ContentApp {
         break;
       case "error":
         s.finished = true;
-        s.card.error(m.code, m.retryAfterMs);
+        if (m.code === "needs_choice") s.card.choose();
+        else s.card.error(m.code, m.retryAfterMs);
         break;
     }
   }

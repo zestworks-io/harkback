@@ -58,6 +58,20 @@ export function effectiveRule(rules: readonly SiteRule[], url: string): Effectiv
   };
 }
 
+/** What the most specific rule that states sensitivity says for this address, true or false; null when no rule states it. */
+export function sensitiveStated(rules: readonly SiteRule[], url: string): boolean | null {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return null;
+  }
+  const stated = rules
+    .filter((r) => typeof r.sensitive === "boolean" && ruleMatches(r.pattern, u))
+    .sort((a, b) => specificity(b.pattern) - specificity(a.pattern))[0];
+  return stated?.sensitive ?? null;
+}
+
 /** Whether the reader's site rules call a recorded source sensitive, whatever it was recorded as. */
 export function sensitiveBySiteRule(rules: readonly SiteRule[], source: { ids: { url?: string } }): boolean {
   return source.ids.url !== undefined && effectiveRule(rules, source.ids.url).sensitive;
@@ -95,6 +109,18 @@ export const SUGGESTED_RESEARCH_SITES: readonly string[] = [
 
 /** Video sites whose captions are read. Never part of the research sites: the reader adds them on purpose. */
 export const VIDEO_SITES: readonly string[] = ["youtube.com"];
+
+/** Sites whose pages are mostly private. A page there that cannot be judged public is asked about before anything is sent. */
+export const PRIVATE_BY_DEFAULT_SITES: readonly string[] = ["notion.so", "docs.google.com"];
+
+export function onPrivateByDefaultSite(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return PRIVATE_BY_DEFAULT_SITES.some((site) => u.hostname === site || u.hostname.endsWith(`.${site}`));
+  } catch {
+    return false;
+  }
+}
 
 function addAutoScanRules(rules: SiteRule[], patterns: readonly string[]): number {
   const have = new Set(rules.map((r) => normalizePattern(r.pattern)));

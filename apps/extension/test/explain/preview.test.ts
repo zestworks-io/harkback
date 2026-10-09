@@ -116,6 +116,19 @@ describe("routePreview", () => {
     expect(routePreview(both, w.state(), url, "s1")).toMatchObject({ kind: "ok", remote: false, sensitive: true });
   });
 
+  it("does not choose a model for a page that looks private until the reader has chosen", () => {
+    const { w } = setup();
+    const settings = withDefaults({ models: [remote, local], defaultModelId: "r", localModelId: "l" });
+    const hint = { privacy: "likely-private" as const };
+    expect(routePreview(settings, w.state(), url, "s1", hint)).toEqual({ kind: "error", code: "needs_choice" });
+    expect(routePreview(settings, w.state(), url, "s1", { ...hint, choice: "local" })).toMatchObject({
+      kind: "ok",
+      remote: false,
+      sensitive: true,
+    });
+    expect(routePreview(settings, w.state(), url, "s1", { ...hint, choice: "anyway" })).toMatchObject({ kind: "ok", remote: true });
+  });
+
   it("refuses a disabled site and a missing model", () => {
     const { w } = setup();
     expect(

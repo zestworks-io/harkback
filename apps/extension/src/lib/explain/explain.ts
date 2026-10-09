@@ -4,6 +4,7 @@ import {
   DAY_MS,
   candidatesForModel,
   findCandidates,
+  isSensitiveSource,
   parseModelOutput,
   resolveConcept,
   verifyEvidence,
@@ -19,6 +20,8 @@ import { understandingOf } from "../records/concept-detail";
 import { cooccurrenceEdge, type LastLookup } from "../records/cooccurrence";
 import { chooseModel } from "../models/model-policy";
 import { explainLanguageOf, type ModelConfig, type Settings, type SiteRule } from "../storage/settings";
+import { gateSource, type Choice } from "../source/privacy-gate";
+import type { Privacy } from "../source/site-profiles";
 import { effectiveRule } from "../source/site-rules";
 import type { DetectedSource } from "../source/source-id";
 
@@ -39,6 +42,10 @@ export interface ExplainRequestMsg {
   conceptId?: string;
   /** A model the reader picked for this explanation, instead of the one the settings choose. */
   modelId?: string;
+  /** What the page itself suggests about being private; a page that looks private is not sent anywhere until the reader chooses. */
+  privacy?: Privacy;
+  /** The reader's answer to that question on this page, for when it could not be recorded. */
+  choice?: Choice;
 }
 
 export interface PageContext {
@@ -46,7 +53,8 @@ export interface PageContext {
   incognito: boolean;
 }
 
-export type PlanError = "site_disabled" | "no_model" | "needs_local_model" | "insecure_model" | "sensitive_compare" | "empty_selection";
+export type PlanError =
+  "site_disabled" | "no_model" | "needs_local_model" | "insecure_model" | "sensitive_compare" | "empty_selection" | "needs_choice";
 
 export interface ExplainPlan {
   model: ModelConfig;
@@ -76,7 +84,17 @@ type Routed =
 function route(req: ExplainRequestMsg, ctx: PageContext, settings: Settings, state: State): Routed {
   const rule = effectiveRule(settings.sites, ctx.url);
   if (rule.disabled) return { kind: "error", code: "site_disabled" };
-  const sensitive = rule.sensitive || state.sources.get(req.source.source_id)?.sensitivity === "sensitive";
+  const gate = gateSource({
+    rules: settings.sites,
+    state,
+    sourceId: req.source.source_id,
+    url: ctx.url,
+    privacy: req.privacy ?? "unknown",
+    choice: req.choice,
+  });
+  // With no model at all there is nothing to choose between.
+  if (gate === "ask") return { kind: "error", code: settings.models.length === 0 ? "no_model" : "needs_choice" };
+  const sensitive = gate === "sensitive";
   const chosen = chooseModel(settings, rule, sensitive, req.modelId);
   if (chosen.kind === "error") return chosen;
   return { kind: "ok", rule, sensitive, model: chosen.model, remote: chosen.remote };
@@ -110,7 +128,7 @@ export function planExplain(
     const enc = state.encounters.get(req.earlierEncounterId);
     if (enc) {
       const source = state.sources.get(enc.sourceId);
-      if (source?.sensitivity === "sensitive" && routed.remote) return { kind: "error", code: "sensitive_compare" };
+      if (isSensitiveSource(state, enc.sourceId) && routed.remote) return { kind: "error", code: "sensitive_compare" };
       earlier = {
         title: source?.title || enc.sourceId,
         context: `${enc.locator.prefix} ${enc.locator.exact} ${enc.locator.suffix}`.trim(),

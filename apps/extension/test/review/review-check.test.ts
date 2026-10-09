@@ -54,6 +54,16 @@ describe("routeCheck", () => {
     expect(routeCheck(settings, state, c)).toEqual({ kind: "error", code: "needs_local_model" });
   });
 
+  it("treats an issue as sensitive when its repository was marked sensitive after the issue was recorded", () => {
+    const w = world();
+    w.source("github:acme/secret#4", "normal", "Issue");
+    const c = w.concept("LoRA");
+    w.encounter(c, "github:acme/secret#4", "Adds two small matrices.");
+    w.source("github:acme/secret", "sensitive", "Repo", {}, true);
+    const onlyRemote = withDefaults({ models: [remote], defaultModelId: "r" });
+    expect(routeCheck(onlyRemote, w.state(), c)).toEqual({ kind: "error", code: "needs_local_model" });
+  });
+
   it("reports an unknown concept", () => {
     const { state } = scenario();
     expect(routeCheck(withDefaults({ models: [local], defaultModelId: "l" }), state, "missing")).toEqual({

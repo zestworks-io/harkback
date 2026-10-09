@@ -8,6 +8,7 @@ function setup() {
     onScan: vi.fn(),
     onExplain: vi.fn(async () => ({ ok: true as const, explanation: "Earlier text.", stored: true })),
     onClose: vi.fn(),
+    onChoose: vi.fn(),
   };
   const panel = new PreviewPanel("en", handlers);
   document.body.append(panel.el);
@@ -20,6 +21,19 @@ const term = (name: string, status: PreviewTerm["status"]): PreviewTerm => ({
   conceptId: status === "new" ? null : `id-${name}`,
   name,
   status,
+});
+
+describe("PreviewPanel for a page that looks private", () => {
+  it("asks how to handle the page instead of showing an error, whether the plan or the scan was refused", () => {
+    for (const refused of ["unavailable", "error"] as const) {
+      const { panel, handlers, q } = setup();
+      panel[refused]("needs_choice");
+      expect(q("choice")).not.toBeNull();
+      expect(q("error")).toBeNull();
+      q("choose-local")!.click();
+      expect(handlers.onChoose).toHaveBeenCalledWith("local", false);
+    }
+  });
 });
 
 describe("PreviewPanel", () => {

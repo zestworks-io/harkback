@@ -1,5 +1,5 @@
 import type { Action, Domain, EdgeSource, EncounterFlag, Explanation, Locator, Rel, Sensitivity, SourceIds } from "@harkback/spec";
-import { normalizeSourceId } from "./source-identity";
+import { normalizeSourceId, parentSourceId } from "./source-identity";
 import type { Script } from "../concepts/normalize";
 
 export interface ConceptState {
@@ -54,6 +54,8 @@ export interface SourceState {
   title: string;
   license: string;
   sensitivity: Sensitivity;
+  /** True once the reader has chosen the sensitivity themselves, whichever way; an automatic record never sets it. */
+  chosen?: true;
 }
 
 export type EdgeStatus = "proposed" | "confirmed" | "rejected";
@@ -93,15 +95,46 @@ export function sameSource(state: Pick<State, "sourceIdentity">, a: string, b: s
   return (state.sourceIdentity.get(ka) ?? ka) === (state.sourceIdentity.get(kb) ?? kb);
 }
 
-/** True when the source, or the same paper under its other id, is marked sensitive. */
-export function isSensitiveSource(state: Pick<State, "sources" | "sourceIdentity">, sourceId: string): boolean {
-  if (state.sources.get(sourceId)?.sensitivity === "sensitive") return true;
-  const k = normalizeSourceId(sourceId);
-  const root = state.sourceIdentity.get(k) ?? k;
-  for (const [id, src] of state.sources) {
-    if (src.sensitivity !== "sensitive") continue;
-    const ik = normalizeSourceId(id);
-    if ((state.sourceIdentity.get(ik) ?? ik) === root) return true;
-  }
+type SourceView = Pick<State, "sources" | "sourceIdentity">;
+
+/** The id that all spellings of one paper share. */
+function identityRoot(state: SourceView, id: string): string {
+  const k = normalizeSourceId(id);
+  return state.sourceIdentity.get(k) ?? k;
+}
+
+/** The paper (or other source) behind each id for which `flagged` holds, and whether `id`, its paper or its repository is among them. */
+function reaches(state: SourceView, roots: ReadonlySet<string>, id: string): boolean {
+  for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) if (roots.has(identityRoot(state, cur))) return true;
   return false;
+}
+
+function rootsWhere(state: SourceView, flagged: (s: SourceState) => boolean): Set<string> {
+  const roots = new Set<string>();
+  for (const [id, src] of state.sources) if (flagged(src)) roots.add(identityRoot(state, id));
+  return roots;
+}
+
+/** True when the source, or the same paper under its other id, or the repository an issue or pull request belongs to, is marked sensitive. */
+export function isSensitiveSource(state: SourceView, sourceId: string): boolean {
+  return reaches(
+    state,
+    rootsWhere(state, (s) => s.sensitivity === "sensitive"),
+    sourceId,
+  );
+}
+
+/** Every recorded source for which `isSensitiveSource` holds, found in one pass. */
+export function sensitiveSourceIds(state: SourceView): Set<string> {
+  const roots = rootsWhere(state, (s) => s.sensitivity === "sensitive");
+  return new Set([...state.sources.keys()].filter((id) => reaches(state, roots, id)));
+}
+
+/** True when the reader chose the sensitivity of the source, its paper's other id, or its repository. */
+export function isChosenSource(state: SourceView, sourceId: string): boolean {
+  return reaches(
+    state,
+    rootsWhere(state, (s) => s.chosen === true),
+    sourceId,
+  );
 }

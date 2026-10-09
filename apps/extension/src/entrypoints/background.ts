@@ -27,7 +27,15 @@ import {
   type ExplainRecord,
   type ExplainRequestMsg,
 } from "../lib/explain/explain";
-import { isRequest, type ErrorCode, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messaging/messages";
+import {
+  isRequest,
+  type ErrorCode,
+  type PortIn,
+  type PortOut,
+  type PrivacyFields,
+  type ResponseMap,
+  type TabMessage,
+} from "../lib/messaging/messages";
 import { classifyTerms, routePreview, storedExplanation } from "../lib/explain/preview";
 import { routeCheck } from "../lib/review/review-check";
 import { ModelError, streamChat } from "../lib/models/model-client";
@@ -367,11 +375,12 @@ export default defineBackground(() => {
   async function previewModel<T>(
     url: string,
     sourceId: string,
+    hint: PrivacyFields,
     ask: (model: ModelConfig, settings: Settings) => Promise<string>,
     read: (raw: string) => T | null,
   ): Promise<{ ok: true; value: T; model: ModelConfig; remote: boolean } | { ok: false; code: ErrorCode; retryAfterMs?: number }> {
     const settings = await loadSettings();
-    const routed = routePreview(settings, await getState(), url, sourceId);
+    const routed = routePreview(settings, await getState(), url, sourceId, hint);
     if (routed.kind === "error") return { ok: false, code: routed.code };
     if (!(await canReach(routed.model))) return { ok: false, code: "no_permission" };
     const asked = Date.now();
@@ -391,7 +400,7 @@ export default defineBackground(() => {
   }
 
   async function previewPlan(req: Parameters<RequestDeps["previewPlan"]>[0]): Promise<ResponseMap["preview-plan"]> {
-    const routed = routePreview(await loadSettings(), await getState(), req.url, req.sourceId);
+    const routed = routePreview(await loadSettings(), await getState(), req.url, req.sourceId, req);
     return routed.kind === "ok" ? { ok: true, model: routed.model.label, remote: routed.remote } : { ok: false, code: routed.code };
   }
 
@@ -399,6 +408,7 @@ export default defineBackground(() => {
     const result = await previewModel(
       req.url,
       req.sourceId,
+      req,
       (model, settings) =>
         streamChat(
           model,
@@ -430,6 +440,7 @@ export default defineBackground(() => {
     const result = await previewModel(
       req.url,
       req.sourceId,
+      req,
       (model, settings) =>
         streamChat(
           model,
@@ -453,6 +464,7 @@ export default defineBackground(() => {
       cache.invalidate();
     },
     runBackup,
+    saveSettings: (settings) => browser.storage.local.set({ settings }),
     checkAnswer,
     previewPlan,
     previewTerms,

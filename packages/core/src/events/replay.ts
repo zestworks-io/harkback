@@ -40,6 +40,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
           // Sensitive is sticky: only the reader's own choice makes a source normal again, so a later, automatic record
           // (another device that never knew the source was sensitive) cannot expose it.
           sensitivity: prev?.sensitivity === "sensitive" && p.sensitivity === "normal" && !p.by_user ? "sensitive" : p.sensitivity,
+          ...(p.by_user || prev?.chosen ? { chosen: true as const } : {}),
         });
         break;
       }

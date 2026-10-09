@@ -91,8 +91,8 @@ const github: Profile = {
         if (flag === "true") return "likely-public";
         for (const label of doc.querySelectorAll("#repository-container-header .Label")) {
           const text = label.textContent?.trim().toLowerCase();
-          if (text === "private") return "likely-private";
-          if (text === "public") return "likely-public";
+          if (text && /^private\b/.test(text)) return "likely-private";
+          if (text && /^public\b/.test(text)) return "likely-public";
         }
         return "unknown";
       },

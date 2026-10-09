@@ -1,7 +1,9 @@
 import type { Tier } from "@harkback/spec";
+import { choiceBox } from "./choice";
 import { h } from "./dom";
 import { renderMarkdown } from "./markdown";
 import type { ErrorCode } from "../messaging/messages";
+import type { Choice } from "../source/privacy-gate";
 import { errorText, t, type Lang } from "./strings";
 
 export type CardAction = "marked_understood" | "marked_confused";
@@ -11,6 +13,8 @@ export interface ExplainCardHandlers {
   onAction(action: CardAction): void;
   onFollowUp(question: string): void;
   onMarkSensitive(): void;
+  /** The reader answered the question about a page that looks private; `remember` makes the answer a rule for the whole site. */
+  onChoose(choice: Choice, remember: boolean): void;
   onRetry(): void;
   /** Explain again with another of the configured models. */
   onRetryWith(modelId: string): void;
@@ -153,6 +157,15 @@ export class ExplainCard {
       ...(this.compose.childElementCount > 0 ? [] : [askMore]),
       sensitive,
     );
+  }
+
+  /** The page looks private: nothing has been sent, and nothing is until the reader answers. */
+  choose(): void {
+    this.asking = false;
+    this.footer.replaceChildren();
+    this.meta.replaceChildren();
+    this.body.classList.remove("hb-loading");
+    this.body.replaceChildren(choiceBox(this.lang, (choice, remember) => this.handlers.onChoose(choice, remember)));
   }
 
   error(code: ErrorCode, retryAfterMs?: number): void {

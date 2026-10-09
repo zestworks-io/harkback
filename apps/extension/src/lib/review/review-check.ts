@@ -1,4 +1,4 @@
-import type { State } from "@harkback/core";
+import { isSensitiveSource, type State } from "@harkback/core";
 import { applySiteRules } from "../explain/explain";
 import type { ErrorCode } from "../messaging/messages";
 import { chooseModel } from "../models/model-policy";
@@ -20,8 +20,9 @@ export function routeCheck(settings: Settings, state: State, conceptId: string):
   const concept = state.concepts.get(id);
   const latest = state.encounters.get(state.encountersByConcept.get(id)?.at(-1) ?? "");
   if (!concept || concept.isPlaceholder || !latest) return { kind: "error", code: "expired" };
-  const source = applySiteRules(state, settings.sites).sources.get(latest.sourceId);
-  const sensitive = source?.sensitivity === "sensitive";
+  const ruled = applySiteRules(state, settings.sites);
+  const source = ruled.sources.get(latest.sourceId);
+  const sensitive = isSensitiveSource(ruled, latest.sourceId);
   const chosen = chooseModel(settings, effectiveRule(settings.sites, source?.ids.url ?? ""), sensitive);
   if (chosen.kind === "error") return { kind: "error", code: chosen.code };
   return {

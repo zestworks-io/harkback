@@ -2,7 +2,7 @@ import type { HarkEvent } from "@harkback/spec";
 import { parseEdgeId } from "../events/ids";
 import { isSensitiveOnly } from "../llm/prompt";
 import { replay } from "../events/replay";
-import type { SourceState } from "../events/state";
+import { sensitiveSourceIds, type SourceState } from "../events/state";
 
 /**
  * The events without anything that came from a sensitive source: the source itself, its encounters and what was done to
@@ -19,7 +19,7 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
     ]),
   );
   const state = { ...replayed, sources };
-  const sensitiveSources = new Set([...sources.values()].filter((s) => s.sensitivity === "sensitive").map((s) => s.id));
+  const sensitiveSources = sensitiveSourceIds(state);
   if (sensitiveSources.size === 0) return [...events];
 
   const sensitiveEncounters = new Set<string>();

@@ -1,12 +1,16 @@
+import { choiceBox } from "./choice";
 import { h } from "./dom";
 import type { ErrorCode, ResponseMap } from "../messaging/messages";
 import type { PreviewStatus, PreviewTerm } from "../explain/preview";
+import type { Choice } from "../source/privacy-gate";
 import { errorText, t, type Lang, type StringKey } from "./strings";
 
 export interface PreviewHandlers {
   onScan(): void;
   /** The reader's own explanation for a known term, or a model's for a new one. */
   onExplain(term: PreviewTerm): Promise<ResponseMap["preview-explain"]>;
+  /** The reader answered the question about a page that looks private. */
+  onChoose(choice: Choice, remember: boolean): void;
   onClose(): void;
 }
 
@@ -66,7 +70,16 @@ export class PreviewPanel {
   /** No scan is possible (no model, a disabled site, a sensitive page without a local model): the reason, and nothing to press. */
   unavailable(code: ErrorCode, retryAfterMs?: number): void {
     this.body.className = "hb-body";
+    if (code === "needs_choice") return this.choose();
     this.body.replaceChildren(h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs)));
+    this.footer.replaceChildren(
+      h("button", { type: "button", className: "hb-quiet", onclick: () => this.handlers.onClose() }, t(this.lang, "close")),
+    );
+  }
+
+  /** The page looks private: nothing is offered until the reader says how to handle it. */
+  private choose(): void {
+    this.body.replaceChildren(choiceBox(this.lang, (choice, remember) => this.handlers.onChoose(choice, remember)));
     this.footer.replaceChildren(
       h("button", { type: "button", className: "hb-quiet", onclick: () => this.handlers.onClose() }, t(this.lang, "close")),
     );
@@ -80,6 +93,7 @@ export class PreviewPanel {
 
   error(code: ErrorCode, retryAfterMs?: number): void {
     this.body.className = "hb-body";
+    if (code === "needs_choice") return this.choose();
     this.body.replaceChildren(h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs)));
     this.footer.replaceChildren(
       h(

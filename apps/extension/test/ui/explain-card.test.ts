@@ -8,6 +8,7 @@ function setup(models: { id: string; label: string }[] = []) {
     onAction: vi.fn(),
     onFollowUp: vi.fn(),
     onMarkSensitive: vi.fn(),
+    onChoose: vi.fn(),
     onRetry: vi.fn(),
     onRetryWith: vi.fn(),
     onCancel: vi.fn(),
@@ -18,6 +19,33 @@ function setup(models: { id: string; label: string }[] = []) {
   const q = (hb: string) => card.el.querySelector<HTMLElement>(`[data-hb="${hb}"]`);
   return { card, handlers, q };
 }
+
+describe("ExplainCard when the page looks private", () => {
+  it("asks before anything is sent and answers local only", () => {
+    const { card, handlers, q } = setup();
+    card.choose();
+    expect(q("choice")!.textContent).toContain("这个页面看起来是私有的。只使用本机模型吗？");
+    expect(q("stop")).toBeNull();
+    q("choose-local")!.click();
+    expect(handlers.onChoose).toHaveBeenCalledWith("local", false);
+  });
+
+  it("passes on whether to remember the answer for the site", () => {
+    const { card, handlers, q } = setup();
+    card.choose();
+    (q("choose-remember") as HTMLInputElement).click();
+    q("choose-anyway")!.click();
+    expect(handlers.onChoose).toHaveBeenCalledWith("anyway", true);
+  });
+
+  it("answers only once", () => {
+    const { card, handlers, q } = setup();
+    card.choose();
+    q("choose-local")!.click();
+    q("choose-anyway")?.click();
+    expect(handlers.onChoose).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("ExplainCard", () => {
   it("streams Markdown, then shows the tier", () => {

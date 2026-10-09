@@ -6,6 +6,7 @@ const codes: ErrorCode[] = [
   "site_disabled",
   "no_model",
   "needs_local_model",
+  "needs_choice",
   "insecure_model",
   "sensitive_compare",
   "empty_selection",

@@ -5,6 +5,8 @@ import type { ModelErrorCode } from "../models/model-client";
 import type { PreviewTerm } from "../explain/preview";
 import type { ReunionCard } from "../records/reunion-cards";
 import type { Theme } from "../storage/settings";
+import type { Choice } from "../source/privacy-gate";
+import type { Privacy } from "../source/site-profiles";
 import type { DetectedSource } from "../source/source-id";
 import type { Lang, StringKey } from "../ui/strings";
 
@@ -46,6 +48,12 @@ export interface PageInfo {
   entries: MatcherEntry[];
 }
 
+/** What the page suggests about being private and what the reader chose about it; see the privacy gate. */
+export interface PrivacyFields {
+  privacy?: Privacy;
+  choice?: Choice;
+}
+
 export type Request =
   | { type: "page-info" }
   | { type: "reunions"; sourceId: string; hits: Hit[] }
@@ -53,13 +61,17 @@ export type Request =
   | { type: "mute"; conceptId: string }
   | { type: "mark-sensitive"; source: DetectedSource }
   | { type: "mark-normal"; sourceId: string }
+  /** The reader chose to send a page that looked private. Refused for a source that is sensitive. */
+  | { type: "choose-normal"; source: DetectedSource }
+  /** Makes the choice for the whole site this message came from, as a site rule. */
+  | { type: "remember-site"; sensitive: boolean }
   | { type: "import-events"; events: HarkEvent[] }
   | { type: "delete-encounter"; encounterId: string }
   | { type: "review-answer"; conceptId: string; action: ReviewAction }
   | { type: "check-answer"; conceptId: string; answer: string }
-  | { type: "preview-plan"; sourceId: string }
-  | { type: "preview-terms"; sourceId: string; title: string; text: string }
-  | { type: "preview-explain"; sourceId: string; title: string; term: string; conceptId: string | null; context: string }
+  | ({ type: "preview-plan"; sourceId: string } & PrivacyFields)
+  | ({ type: "preview-terms"; sourceId: string; title: string; text: string } & PrivacyFields)
+  | ({ type: "preview-explain"; sourceId: string; title: string; term: string; conceptId: string | null; context: string } & PrivacyFields)
   | { type: "merge-concepts"; fromId: string; intoId: string }
   | { type: "add-alias"; conceptId: string; alias: string }
   | { type: "reject-edge"; edgeId: string }
@@ -74,6 +86,8 @@ export interface ResponseMap {
   mute: { ok: boolean };
   "mark-sensitive": { ok: boolean };
   "mark-normal": { ok: boolean };
+  "choose-normal": { ok: boolean };
+  "remember-site": { ok: boolean };
   "import-events": { ok: boolean; added?: number };
   "delete-encounter": { ok: boolean };
   "review-answer": { ok: boolean };
@@ -107,6 +121,8 @@ const REQUEST_TYPES = new Set<string>([
   "mute",
   "mark-sensitive",
   "mark-normal",
+  "choose-normal",
+  "remember-site",
   "import-events",
   "delete-encounter",
   "review-answer",

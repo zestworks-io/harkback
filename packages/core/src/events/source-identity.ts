@@ -14,6 +14,12 @@ export function normalizeSourceId(id: string): string {
   return id;
 }
 
+/** The source a part belongs to: the repository of a GitHub issue or pull request, `github:owner/repo#12` -> `github:owner/repo`. */
+export function parentSourceId(id: string): string | null {
+  const at = id.startsWith("github:") ? id.indexOf("#") : -1;
+  return at > 0 ? id.slice(0, at) : null;
+}
+
 /** The ids a source is known by, in the form source ids use: `arxiv:<id>` and `doi:<id>`. */
 function idKeys(ids: SourceIds): string[] {
   const keys: string[] = [];

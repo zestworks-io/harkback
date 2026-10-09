@@ -35,6 +35,11 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
   err_site_disabled: "Auf dieser Website deaktiviert.",
   err_no_model: "Noch kein Modell eingerichtet. Fügen Sie in den Einstellungen eines hinzu.",
   err_needs_local_model: "Diese Quelle ist sensibel und darf nur ein lokales Modell verwenden. Richten Sie in den Einstellungen eines ein.",
+  err_needs_choice: "Diese Seite wirkt privat. Zuerst wählen, wie sie behandelt wird.",
+  choiceTitle: "Diese Seite wirkt privat. Nur ein lokales Modell verwenden?",
+  choiceLocal: "Nur lokal",
+  choiceAnyway: "Trotzdem senden",
+  choiceRemember: "Für diese Website merken",
   err_insecure_model: "Unsichere Modelladresse: Nicht lokale Adressen müssen https verwenden.",
   err_sensitive_compare:
     "Der frühere Eintrag stammt aus einer sensiblen Quelle und kann nicht an ein nicht lokales Modell gesendet werden.",

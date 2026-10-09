@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { Request } from "../../src/lib/messaging/messages";
 import { handleRequest, pageInfo, type RequestDeps } from "../../src/lib/messaging/requests";
 import type { SenderInfo } from "../../src/lib/messaging/sender-auth";
-import { withDefaults } from "../../src/lib/storage/settings";
+import { withDefaults, type Settings } from "../../src/lib/storage/settings";
 import { world } from "../helpers";
 
 const DAY = 86_400_000;
@@ -19,6 +19,8 @@ function setup(settings: unknown = {}) {
   const imported: HarkEvent[] = [];
   const calls = { compact: 0, backup: 0, sync: 0 };
   const checked: { conceptId: string; answer: string }[] = [];
+  const saved: Settings[] = [];
+  const previewed: unknown[] = [];
   const deps: RequestDeps = {
     loadSettings: async () => withDefaults({ reunion: { minGapDays: 0 }, ...(settings as object) }),
     getState: async () => w.state(),
@@ -37,13 +39,17 @@ function setup(settings: unknown = {}) {
       checked.push({ conceptId, answer });
       return { ok: true as const, verdict: "partial" as const, feedback: "close", suggested: 2 as const, model: "m" };
     },
-    previewPlan: async () => ({ ok: true as const, model: "m", remote: false }),
+    saveSettings: async (settings: Settings) => void saved.push(settings),
+    previewPlan: async (req) => {
+      previewed.push(req);
+      return { ok: true as const, model: "m", remote: false };
+    },
     previewTerms: async () => ({ ok: true as const, terms: [], model: "m", remote: false }),
     previewExplain: async () => ({ ok: true as const, explanation: "x", stored: false }),
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
-  return { deps, written, imported, calls, checked, conceptId, encounterId, w };
+  return { deps, written, imported, calls, checked, saved, previewed, conceptId, encounterId, w };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -380,5 +386,53 @@ describe("page-only requests", () => {
     const { deps, calls } = setup();
     expect(await handleRequest(deps, { type: "settings-changed" }, extensionPage)).toEqual({ ok: true });
     expect(calls.sync).toBe(1);
+  });
+});
+
+describe("the reader's answer about a page that looks private", () => {
+  const github = { url: "https://github.com/acme/secret", tab: { id: 1, incognito: false } };
+  const githubPrivate = { url: "https://github.com/acme/secret", tab: { id: 1, incognito: true } };
+
+  it("records that the reader chose to send it, as their own decision", async () => {
+    const { deps, written } = setup();
+    expect(await handleRequest(deps, { type: "choose-normal", source: sourceFor("github:acme/secret") }, github)).toEqual({ ok: true });
+    expect(written[0]!.payload).toMatchObject({ source_id: "github:acme/secret", sensitivity: "normal", by_user: true });
+  });
+
+  it("will not make a sensitive source normal this way, nor write from a private window", async () => {
+    const { deps, written, w } = setup();
+    w.source("github:acme/secret", "sensitive", "t", {}, true);
+    expect(await handleRequest(deps, { type: "choose-normal", source: sourceFor("github:acme/secret") }, github)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "choose-normal", source: sourceFor("github:acme/secret#4") }, github)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "choose-normal", source: sourceFor("other") }, githubPrivate)).toEqual({ ok: false });
+    expect(written).toEqual([]);
+  });
+
+  it("remembers the answer for the whole site as a rule", async () => {
+    const { deps, saved } = setup({ sites: [{ pattern: "github.com", autoScan: true }] });
+    expect(await handleRequest(deps, { type: "remember-site", sensitive: true }, github)).toEqual({ ok: true });
+    expect(saved[0]!.sites).toEqual([{ pattern: "github.com", autoScan: true, sensitive: true }]);
+    expect(await handleRequest(deps, { type: "remember-site", sensitive: false }, github)).toEqual({ ok: true });
+    expect(saved[1]!.sites).toEqual([{ pattern: "github.com", autoScan: true, sensitive: false }]);
+  });
+
+  it("adds a rule when the site has none, and refuses a private window or a page that is not a website", async () => {
+    const { deps, saved } = setup();
+    expect(await handleRequest(deps, { type: "remember-site", sensitive: true }, github)).toEqual({ ok: true });
+    expect(saved[0]!.sites).toEqual([{ pattern: "github.com", sensitive: true }]);
+    expect(await handleRequest(deps, { type: "remember-site", sensitive: true }, githubPrivate)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "remember-site", sensitive: true }, { url: "chrome-extension://abc/x.html" })).toEqual({
+      ok: false,
+    });
+    expect(saved).toHaveLength(1);
+  });
+
+  it("passes what the page suggests and the reader chose on to the preview, and drops anything else", async () => {
+    const { deps, previewed } = setup();
+    await handleRequest(deps, { type: "preview-plan", sourceId: "s", privacy: "likely-private", choice: "local" }, page);
+    await handleRequest(deps, { type: "preview-plan", sourceId: "s", privacy: "bogus" as never, choice: "x" as never }, page);
+    expect(previewed[0]).toMatchObject({ privacy: "likely-private", choice: "local" });
+    expect(previewed[1]).not.toHaveProperty("privacy");
+    expect(previewed[1]).not.toHaveProperty("choice");
   });
 });

@@ -1,10 +1,11 @@
-import { findCandidates, isSensitiveSource, type State } from "@harkback/core";
+import { findCandidates, type State } from "@harkback/core";
 import { understandingOf } from "../records/concept-detail";
 import { applySiteRules } from "./explain";
-import type { ErrorCode } from "../messaging/messages";
+import type { ErrorCode, PrivacyFields } from "../messaging/messages";
 import { chooseModel } from "../models/model-policy";
 import { dueAtOf } from "../review/review";
 import type { ModelConfig, Settings } from "../storage/settings";
+import { gateSource } from "../source/privacy-gate";
 import { effectiveRule } from "../source/site-rules";
 
 /** How a term on a page stands with this reader: `rusty` is shaky or due for review, `new` was never looked up. */
@@ -59,11 +60,13 @@ export type PreviewRoute = { kind: "ok"; model: ModelConfig; remote: boolean; se
  * Where a page scan would go, without sending anything: the model the settings choose for this page. A page that is
  * sensitive, by site rule or because it was marked, only ever goes to a local model, as an explanation would.
  */
-export function routePreview(settings: Settings, recorded: State, url: string, sourceId: string): PreviewRoute {
+export function routePreview(settings: Settings, recorded: State, url: string, sourceId: string, hint: PrivacyFields = {}): PreviewRoute {
   const rule = effectiveRule(settings.sites, url);
   if (rule.disabled) return { kind: "error", code: "site_disabled" };
   const state = applySiteRules(recorded, settings.sites);
-  const sensitive = rule.sensitive || isSensitiveSource(state, sourceId);
+  const gate = gateSource({ rules: settings.sites, state, sourceId, url, privacy: hint.privacy ?? "unknown", choice: hint.choice });
+  if (gate === "ask") return { kind: "error", code: settings.models.length === 0 ? "no_model" : "needs_choice" };
+  const sensitive = gate === "sensitive";
   const chosen = chooseModel(settings, rule, sensitive);
   if (chosen.kind === "error") return { kind: "error", code: chosen.code };
   return { kind: "ok", model: chosen.model, remote: chosen.remote, sensitive };

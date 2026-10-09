@@ -78,6 +78,23 @@ describe("withoutSensitive", () => {
   });
 });
 
+describe("withoutSensitive with a sensitive repository", () => {
+  it("also drops its issues, whether or not they were recorded as sensitive", () => {
+    const l = log();
+    l.source("github:acme/secret", "sensitive");
+    l.source("github:acme/secret#4", "normal");
+    l.source("github:acme/open#1", "normal");
+    const hidden = l.concept("Hidden");
+    const open = l.concept("Open");
+    const eIssue = l.encounter(hidden, "github:acme/secret#4");
+    const eOpen = l.encounter(open, "github:acme/open#1");
+    const kept = replay(withoutSensitive(l.events));
+    expect([...kept.sources.keys()]).toEqual(["github:acme/open#1"]);
+    expect(kept.encounters.has(eIssue)).toBe(false);
+    expect(kept.encounters.has(eOpen)).toBe(true);
+  });
+});
+
 describe("sensitive sources stay sensitive", () => {
   it("ignores a later automatic normal record but obeys the reader's own choice", () => {
     const l = log();

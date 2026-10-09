@@ -132,6 +132,32 @@ describe("planExplain", () => {
   });
 });
 
+describe("comparing with an earlier look-up", () => {
+  it("is refused for a remote model when the earlier source is sensitive only because its repository is", () => {
+    const w = world();
+    w.source("github:acme/secret#4", "normal", "Issue");
+    const lora = w.concept("LoRA");
+    const earlier = w.encounter(lora, "github:acme/secret#4", "internal note");
+    w.source("github:acme/secret", "sensitive", "Repo", {}, true);
+    expect(planExplain(req({ mode: "compare", earlierEncounterId: earlier }), ctx, settings(), w.state())).toEqual({
+      kind: "error",
+      code: "sensitive_compare",
+    });
+  });
+});
+
+describe("a model is needed before a question is worth asking", () => {
+  it("reports a missing model rather than asking about a page that looks private", () => {
+    const r = planExplain(
+      req({ privacy: "likely-private" }),
+      ctx,
+      settings({ models: [], defaultModelId: null, localModelId: null }),
+      world().state(),
+    );
+    expect(r).toEqual({ kind: "error", code: "no_model" });
+  });
+});
+
 describe("finishExplain", () => {
   it("verifies evidence against the page and resolves the model's match", () => {
     const w = world();
@@ -301,5 +327,40 @@ describe("sensitivity decided after the fact", () => {
     const plan = planOf(planExplain(req(), ctx, s, state));
     expect(plan.prompt.labels.size).toBe(0);
     expect(plan.candidates.map((c) => c.conceptId)).toEqual([lora]);
+  });
+});
+
+describe("a page that looks private", () => {
+  const priv = { privacy: "likely-private" as const };
+  const calls = (r: ReturnType<typeof planExplain>) => (r.kind === "ok" ? "plan" : r.code);
+
+  it("is not planned until the reader chooses, so nothing can be sent", () => {
+    expect(calls(planExplain(req(priv), ctx, settings(), world().state()))).toBe("needs_choice");
+    expect(routeFollowUp(req(priv), ctx, settings(), world().state())).toEqual({ kind: "error", code: "needs_choice" });
+  });
+
+  it("goes only to the local model when the reader chose that, and fails without one", () => {
+    expect(planOf(planExplain(req({ ...priv, choice: "local" }), ctx, settings(), world().state())).remote).toBe(false);
+    expect(calls(planExplain(req({ ...priv, choice: "local" }), ctx, settings({ localModelId: null }), world().state()))).toBe(
+      "needs_local_model",
+    );
+  });
+
+  it("goes to the usual model when the reader chose to send it", () => {
+    const plan = planOf(planExplain(req({ ...priv, choice: "anyway" }), ctx, settings(), world().state()));
+    expect(plan.remote).toBe(true);
+    expect(plan.sensitive).toBe(false);
+  });
+
+  it("is not asked about again once the source records the reader's choice", () => {
+    const w = world();
+    w.source("arxiv:2305.14314", "normal", "QLoRA", {}, true);
+    expect(planOf(planExplain(req(priv), ctx, settings(), w.state())).remote).toBe(true);
+  });
+
+  it("is also asked about on a private-by-default site when nothing says it is public", () => {
+    const docs = { url: "https://docs.google.com/document/d/1/edit", incognito: false };
+    expect(calls(planExplain(req({ privacy: "unknown" }), docs, settings(), world().state()))).toBe("needs_choice");
+    expect(calls(planExplain(req({ privacy: "likely-public" }), docs, settings(), world().state()))).toBe("plan");
   });
 });

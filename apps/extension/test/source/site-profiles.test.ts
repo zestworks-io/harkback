@@ -107,6 +107,13 @@ describe("GitHub profile: privacy hints", () => {
     expect(privacy(url, "", '<div id="repository-container-header"><span class="Label">Public</span></div>')).toBe("likely-public");
   });
 
+  it("reads a label that starts with Private or Public, such as an archived repository", () => {
+    const badge = (text: string) => `<div id="repository-container-header"><span class="Label">${text}</span></div>`;
+    expect(privacy(url, "", badge("Private archive"))).toBe("likely-private");
+    expect(privacy(url, "", badge("Public archive"))).toBe("likely-public");
+    expect(privacy(url, "", badge("Privately owned"))).toBe("unknown");
+  });
+
   it("does not guess when there is no hint", () => {
     expect(privacy(url, "")).toBe("unknown");
     expect(privacy(url, "", '<div id="repository-container-header"><span class="Label">Archived</span></div>')).toBe("unknown");

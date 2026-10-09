@@ -6,15 +6,17 @@ import {
   MAX_PREVIEW_PAGE_CHARS,
   REVIEW_ACTIONS,
   type EventFactory,
+  isSensitiveSource,
   type Hit,
   type State,
 } from "@harkback/core";
 import { CARD_LIMITS, parseEvent, type HarkEvent } from "@harkback/spec";
-import type { PageInfo, Request, ResponseMap } from "./messages";
+import type { PageInfo, PrivacyFields, Request, ResponseMap } from "./messages";
 import { reunionCards } from "../records/reunion-cards";
 import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "../storage/settings";
-import { effectiveRule } from "../source/site-rules";
+import { isChoice, isPrivacy } from "../source/privacy-gate";
+import { effectiveRule, normalizePattern } from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
 
@@ -34,29 +36,42 @@ export interface RequestDeps {
   /** Adds events from a backup; the ones already present are skipped. Returns how many were new. */
   importEvents(events: HarkEvent[]): Promise<number>;
   runBackup(): Promise<void>;
+  saveSettings(settings: Settings): Promise<void>;
   /** Asks the model whether a typed answer matches the stored explanation; the model, rate limit and sensitivity rules are the background's. */
   checkAnswer(conceptId: string, answer: string): Promise<ResponseMap["check-answer"]>;
   /** Which model a scan would use, without sending anything. */
-  previewPlan(req: { url: string; sourceId: string }): Promise<ResponseMap["preview-plan"]>;
+  previewPlan(req: { url: string; sourceId: string } & PrivacyFields): Promise<ResponseMap["preview-plan"]>;
   /** Asks a model for the key terms of a page and sorts them by what the reader knows; nothing is recorded. */
-  previewTerms(req: {
-    url: string;
-    sourceId: string;
-    title: string;
-    text: string;
-    incognito: boolean;
-  }): Promise<ResponseMap["preview-terms"]>;
+  previewTerms(
+    req: {
+      url: string;
+      sourceId: string;
+      title: string;
+      text: string;
+      incognito: boolean;
+    } & PrivacyFields,
+  ): Promise<ResponseMap["preview-terms"]>;
   /** A stored explanation, or a model's short one for a term never looked up; nothing is recorded. */
-  previewExplain(req: {
-    url: string;
-    sourceId: string;
-    title: string;
-    term: string;
-    conceptId: string | null;
-    context: string;
-  }): Promise<ResponseMap["preview-explain"]>;
+  previewExplain(
+    req: {
+      url: string;
+      sourceId: string;
+      title: string;
+      term: string;
+      conceptId: string | null;
+      context: string;
+    } & PrivacyFields,
+  ): Promise<ResponseMap["preview-explain"]>;
   syncContentScripts(): Promise<void>;
   now(): number;
+}
+
+/** The page's privacy hint and the reader's choice, when they are what they should be; a message is not a trusted channel. */
+function privacyFields(msg: { privacy?: unknown; choice?: unknown }): PrivacyFields {
+  return {
+    ...(isPrivacy(msg.privacy) && { privacy: msg.privacy }),
+    ...(isChoice(msg.choice) && { choice: msg.choice }),
+  };
 }
 
 function isHit(h: unknown): h is Hit {
@@ -117,6 +132,31 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       await deps.append((f) => [f.make("source.seen", clampSource(detected, "normal", true))]);
       return { ok: true };
     }
+    case "choose-normal": {
+      if (incognito) return { ok: false };
+      const state = await deps.getState();
+      // Only a source nobody called sensitive: this is the answer to a question, not a way to unmark one.
+      if (isSensitiveSource(state, String(msg.source?.source_id))) return { ok: false };
+      await deps.append((f) => [f.make("source.seen", clampSource(msg.source, "normal", true))]);
+      return { ok: true };
+    }
+    case "remember-site": {
+      let host: string | null = null;
+      try {
+        const u = new URL(sender.url ?? "");
+        host = u.protocol === "http:" || u.protocol === "https:" ? normalizePattern(u.hostname) : null;
+      } catch {
+        host = null;
+      }
+      if (incognito || !host) return { ok: false };
+      const settings = await deps.loadSettings();
+      const sensitive = msg.sensitive === true;
+      const sites = settings.sites.some((r) => normalizePattern(r.pattern) === host)
+        ? settings.sites.map((r) => (normalizePattern(r.pattern) === host ? { ...r, sensitive } : r))
+        : [...settings.sites, { pattern: host, sensitive }];
+      await deps.saveSettings({ ...settings, sites });
+      return { ok: true };
+    }
     case "import-events": {
       if (!Array.isArray(msg.events)) return { ok: false };
       // The page parsed them, but a message is not a trusted channel: check each event again.
@@ -146,11 +186,18 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       return deps.checkAnswer(String(msg.conceptId), answer);
     }
     case "preview-plan":
-      return deps.previewPlan({ url: sender.url ?? "", sourceId: String(msg.sourceId) });
+      return deps.previewPlan({ url: sender.url ?? "", sourceId: String(msg.sourceId), ...privacyFields(msg) });
     case "preview-terms": {
       const text = typeof msg.text === "string" ? msg.text.slice(0, MAX_PREVIEW_PAGE_CHARS) : "";
       if (!text.trim()) return { ok: false, code: "internal" };
-      return deps.previewTerms({ url: sender.url ?? "", sourceId: String(msg.sourceId), title: String(msg.title ?? ""), text, incognito });
+      return deps.previewTerms({
+        url: sender.url ?? "",
+        sourceId: String(msg.sourceId),
+        title: String(msg.title ?? ""),
+        text,
+        incognito,
+        ...privacyFields(msg),
+      });
     }
     case "preview-explain": {
       const term = typeof msg.term === "string" ? msg.term.trim().slice(0, MAX_TERM_CHARS) : "";
@@ -163,6 +210,7 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
         // A private window never reads the records.
         conceptId: incognito || typeof msg.conceptId !== "string" ? null : msg.conceptId,
         context: typeof msg.context === "string" ? msg.context.slice(0, 2000) : "",
+        ...privacyFields(msg),
       });
     }
     case "merge-concepts": {
