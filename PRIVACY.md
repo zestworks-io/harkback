@@ -14,7 +14,7 @@ Harkback is a browser extension that explains terms while you read and remembers
 
 ## What leaves your browser
 
-Only the request you trigger. When you ask for an explanation, Harkback sends the selected text, its paragraph, the section and the page title to the **model service you configured** (for example a hosted API or a local server such as Ollama). That service handles the data under its own terms and privacy policy. Content from sources you mark as sensitive is never sent to a non-local model.
+Only the request you trigger. When you ask for an explanation, Harkback sends the selected text, its paragraph, the section and the page title to the **model service you configured** (for example a hosted API or a local server such as Ollama). That service handles the data under its own terms and privacy policy. Content from sources you mark as sensitive is never sent to a non-local model. The same is true of the optional "Check my answer" button in review: only when you press it, Harkback sends the term, the answer you typed and the stored explanation to your model. You can turn it off in settings.
 
 Scanned PDFs are read on your computer: the page images never leave it. The one network request OCR can make is downloading a language pack (English is built in) from `cdn.jsdelivr.net`, once, and only when you install a language under Languages. That request carries no document content, and the pack is checked against a checksum shipped with Harkback before it is used.
 

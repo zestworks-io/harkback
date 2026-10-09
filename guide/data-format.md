@@ -53,7 +53,7 @@ Enumerations:
 
 - `domain`: `ml`, `systems`, `networking`, `security`, `data`, `math`, `physics`, `bio`, `other`
 - `tier`: `defined_in_source`, `external_knowledge`
-- `action`: `followed_up`, `marked_understood`, `marked_confused`, `reunion_recalled`, `reunion_reexplain`, `reunion_compare`
+- `action`: `followed_up`, `marked_understood`, `marked_confused`, `reunion_recalled`, `reunion_reexplain`, `reunion_compare`, `review_again`, `review_hard`, `review_good`, `review_easy` (the four review grades; older marks count as Good for `marked_understood` and `reunion_recalled`, and as Again for `marked_confused`, except a `marked_*` made less than a day after the look-up, which is the explain-card mark and not a review)
 - `rel`: `variant_of` (from is a variant or kind of to), `prerequisite` (from requires to first), `related`
 - edge `source`: `llm_explain`, `cooccurrence`, `user`, plus reserved external ones
 

@@ -7,6 +7,7 @@
 - [Reunions](#reunions)
 - [Concepts and spellings](#concepts-and-spellings)
 - [Review](#review)
+- [Weekly digest](#weekly-digest)
 - [Graph](#graph)
 - [History](#history)
 - [Export, backup and restore](#export-backup-and-restore)
@@ -70,24 +71,37 @@ On a concept page you can **add an alias**, **merge** two concepts that are the 
 
 **Review (n)** on the History page opens the queue of concepts that are due. The toolbar icon shows the same number.
 
-For each concept you see its name first. Press **Show explanation** when you have tried to remember it, then **Remembered**, **Still confused** or **Skip**.
+For each concept you see its name first. Try to remember it; you can type what you remember in the box. Then press **Show explanation** and grade yourself:
 
-| After…                      | The concept returns in |
-| --------------------------- | ---------------------- |
-| You look it up (no answer)  | 1 day                  |
-| **Still confused**          | 1 day                  |
-| 1st **Remembered** in a row | 3 days                 |
-| 2nd **Remembered** in a row | 7 days                 |
-| 3rd **Remembered** in a row | 14 days                |
-| 4th **Remembered** in a row | 30 days                |
-| 5th and later               | 60 days                |
-| **Skip**                    | no change              |
+| Grade     | Meaning                           |
+| --------- | --------------------------------- |
+| **Again** | You did not remember it.          |
+| **Hard**  | You remembered it, with effort.   |
+| **Good**  | You remembered it.                |
+| **Easy**  | You remembered it without trying. |
+| **Skip**  | Nothing changes; it stays due.    |
 
-Marking a reunion as remembered counts as a successful review. Muted concepts are never due.
+Each button shows how long until the term returns if you pick it. The wait comes from [FSRS](https://github.com/open-spaced-repetition/fsrs4anki), a model of memory: every term has a stability (how long it takes you to forget it) and a difficulty, and each answer updates both. A term you remember easily is spaced out quickly; one you forget comes back soon. A term you looked up but never graded returns after 1 day; _Understood_ or _Confused_ on the explain card, pressed right after a look-up, does not count as a review. Marks made in an earlier version's review, a day or more after the look-up, count as **Good** (_Got it_, _Remembered_, a recalled reunion) and **Again** (_Still confused_). Muted concepts are never due.
+
+**Order.** Confused terms come first, then shaky ones (last answered _Hard_), then the most overdue. A term that builds on another (its prerequisite, see the graph) comes after that prerequisite when both are due, and the card says which due terms build on it. Rejected relations are ignored.
+
+**Target recall** in settings (Review) is how likely you want to be to remember a term when it comes due; the default is 90%. A higher number means more reviews.
+
+**Keyboard.** `Space` shows the explanation, `1`–`4` grade (Again to Easy), `S` skips. These keys are ignored while you are typing in the answer box.
+
+### Check my answer
+
+If you typed an answer, **Check my answer** asks your model whether it matches the stored explanation. It shows a short verdict and highlights a suggested grade; it never grades for you, and it never suggests _Easy_. The button names the model and says whether it is on this computer or a remote service. It sends the term, your answer and the stored explanation, only when you press it, and it follows the same rules as an explanation: a concept from a sensitive source only goes to your local model. Each check counts against your rate limit. Nothing from the check is saved; only the grade you pick afterwards.
+
+To turn it off, clear **Offer "Check my answer" in review** under Review in settings. The button then never appears and nothing is sent.
+
+## Weekly digest
+
+**Digest** on the History page shows one week, Monday to Sunday: how many terms you met (new and revisited, compared with the week before), how many answers were remembered, hard or forgotten, the days you were active, the terms you are still confused about, where you read most, and the connections between concepts that appeared that week. Use _Previous week_ and _Next week_ to move. It is built on your computer from your records and calls no model.
 
 ## Graph
 
-**Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
+**Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, pale yellow shaky, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
 
 Drag to move, scroll to zoom, click a concept to open it. The search box filters the graph to matching concepts and their neighbours. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out.
 

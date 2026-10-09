@@ -12,7 +12,8 @@ Only the request you trigger: when you ask for an explanation or a follow-up, th
 - the first sentence of the abstract,
 - the names of up to three of your earlier concepts that look like the term, and whether you understood them,
 - for _Compare_: the earlier quote, source title and explanation,
-- for a follow-up: your question and the earlier explanation.
+- for a follow-up: your question and the earlier explanation,
+- for **Check my answer** in review (only when you press it, and it can be turned off in settings): the term, what you typed, and the stored explanation. The same model and sensitive-source rules apply, and each check counts against your rate limit. The check itself is not saved; only the grade you pick afterwards is.
 
 Nothing else is sent: not the rest of the page, not your history, not your other settings. There is no analytics and no developer server.
 

@@ -36,7 +36,7 @@ The interface starts in English. You can change its language, and the language o
 2. Select a term, for example `LoRA`.
 3. Click **Explain** next to the selection, or press `Alt+Shift+E`.
 4. Read the answer as it streams in. A green tag says the page itself defines the term; a yellow one says the answer comes from the model's own knowledge.
-5. Press **Got it** or **Still confused**. That answer decides when Harkback brings the term back for review.
+5. Press **Got it** or **Still confused**. That answer is the first grade for the term and decides when Harkback brings it back for review.
 
 Other ways to start: the right-click menu on selected text, and a selection made with the keyboard or by touch.
 

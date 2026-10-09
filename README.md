@@ -85,14 +85,14 @@ Then select a term on any page and press `Alt+Shift+E`. See [Install](#install) 
 
 You can paste a term into a chatbot and get a good answer. Harkback does not try to give a better answer. It adds the part a chat window lacks: **memory**. Every term you look up becomes a record tied to the page, the quote and the date, and the records are connected into a knowledge graph that belongs to you.
 
-|                    | Asking a chatbot                                 | Harkback                                                                                          |
-| ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| **Context**        | Copy the term and some text, switch tabs         | Select the term on the page; its paragraph and section go with it, and the quote is verified      |
-| **Next time**      | A new chat starts empty, or you forget you asked | The term is underlined on later pages, with what you understood last time                         |
-| **Structure**      | A pile of transcripts                            | Concepts with aliases, prerequisites, variants and related terms                                  |
-| **Retention**      | None                                             | A review queue: confused terms return after a day, remembered ones after 3, 7, 14, 30 and 60 days |
-| **Your records**   | Live in the provider's account                   | Stay in your browser; export Markdown, Obsidian notes or JSONL                                    |
-| **Model and cost** | One service, one plan                            | Any of the supported models: local Ollama costs nothing, or use your own API key                  |
+|                    | Asking a chatbot                                 | Harkback                                                                                         |
+| ------------------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Context**        | Copy the term and some text, switch tabs         | Select the term on the page; its paragraph and section go with it, and the quote is verified     |
+| **Next time**      | A new chat starts empty, or you forget you asked | The term is underlined on later pages, with what you understood last time                        |
+| **Structure**      | A pile of transcripts                            | Concepts with aliases, prerequisites, variants and related terms                                 |
+| **Retention**      | None                                             | A review queue scheduled by a memory model: each term comes back just before you would forget it |
+| **Your records**   | Live in the provider's account                   | Stay in your browser; export Markdown, Obsidian notes or JSONL                                   |
+| **Model and cost** | One service, one plan                            | Any of the supported models: local Ollama costs nothing, or use your own API key                 |
 
 Harkback is free and open source (Apache-2.0), has no server and no subscription. It does need a model to write the explanations: a local model is free, and a hosted one is billed by its provider to your own key.
 
@@ -101,11 +101,12 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **Explain in context.** Select a term, click _Explain_ or press `Alt+Shift+E`. The answer streams in from the model you configured and is marked _defined in source_ (the page defines the term, and the quote is verified against the page text) or _external knowledge_.
 - **Remember.** Each explanation, follow-up question and "got it / still confused" mark is stored as an event in IndexedDB. Nothing leaves your browser except the model request you trigger.
 - **Follow-up conversations.** Ask more on the card; each question stays above its answer, and the conversation is saved with the explanation. History shows it in full, and search finds it. Formulas are typeset.
-- **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, then mark it remembered, explain it again, compare the two usages, or mute it.
+- **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, and a line saying which text on the page matched, then mark it remembered, explain it again, compare the two usages, or mute it.
 - **One concept, many spellings.** `LLM`, `LLMs`, `the LLM`, `large language model` and `Large-Language Models` are the same concept. So are `β-VAE` and `beta-VAE`, and `fine-tuning` and `ﬁne-tuning` with a ligature. Near matches are put to you as "is this the term you looked up 3 days ago?".
 - **Related terms.** If a model says `QLoRA` is a variant of `LoRA`, a page that only mentions `QLoRA` reminds you of what you understood about `LoRA`.
 - **Concept pages.** Open any term in History to see how well you understood it, what it builds on (prerequisites), its variants and related terms, and every time you met it. You can add an alias, merge two concepts that are the same, remove a wrong relation, or mute a term.
-- **Review.** History shows a _Review_ button with the number of terms due. Terms you were confused about come back after a day; terms you remembered come back after 3, 7, 14, 30 and 60 days. The toolbar icon shows the same number, and every term shows when it is due and what each answer does to its schedule.
+- **Review.** History shows a _Review_ button with the number of terms due. Each term is scheduled with [FSRS](https://github.com/open-spaced-repetition/fsrs4anki), a memory model: grade an answer _Again_, _Hard_, _Good_ or _Easy_ and the term comes back just before you would forget it, so easy terms space out quickly and hard ones return soon. Every button shows when the term will come back. You can type what you remember before revealing the explanation, and an optional **Check my answer** button asks your model how close you were (it only suggests a grade; you choose, and you can turn it off in settings). The whole review works from the keyboard: `Space` shows the explanation, `1`–`4` grade, `S` skips. Terms that build on others come after their prerequisites when both are due. A setting chooses how likely you want to be to remember a term when it comes due (90% by default). The toolbar icon shows the number due.
+- **Weekly digest.** History → _Digest_ shows what you met in a week: new and revisited terms, answers, the terms you are still confused about, where you read, and new connections between concepts. It is built on your computer from your records and calls no model.
 - **Builds on what you know.** When a term you look up is close to one you already understand, the model is told so and can explain the difference instead of starting over.
 - **Private by design.** Automatic scanning is limited to arxiv.org. Sensitive sites can be forced onto a local model, and private windows never record or scan.
 - **Portable records.** Export everything as Markdown, as Anki cards, as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian; what you write below the marker line survives the next export), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`, and **Import JSONL** in History restores it (records you already have are skipped). A setting can leave sensitive sources out of backups and exports.
@@ -123,7 +124,7 @@ Each look-up adds to a graph of what you have read, built from your own reading 
 - **The graph does work.** A page that only mentions `QLoRA` reminds you of `LoRA`, the model is told what you already know so it can explain the difference, and review is scheduled per concept.
 - **It is yours.** Export a folder of linked notes (`[[links]]`, one file per concept) and open it in Obsidian to see the graph there, or export the full event log as JSONL.
 
-Open **Graph** in History to see it as a map: concepts coloured by how well you understood them, with arrows for prerequisites and variants. Drag to move, scroll to zoom, click a concept to open it. You can also browse it through concept pages, and through Obsidian after exporting.
+Open **Graph** in History to see it as a map: concepts coloured by how well you understood them (understood, shaky, confused or new), with arrows for prerequisites and variants. Filter by field, understanding, or when you last looked a term up. Drag to move, scroll to zoom, click a concept to open it. You can also browse it through concept pages, and through Obsidian after exporting.
 
 ## How it works
 
@@ -156,7 +157,7 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 
 ## Connect a model
 
-Onboarding walks you through this, and you can change it later on the settings page.
+Onboarding walks you through this, including a built-in example explanation you can try first without calling any model. You can change it later on the settings page, where you can also set how long a model may stay quiet before a request is given up.
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
@@ -209,6 +210,7 @@ The [`guide/`](guide/README.md) folder has the details:
 ## Privacy
 
 - When you ask for an explanation, the selected text, its paragraph, the section and the page title go to the model service you configured, under that provider's terms.
+- In review, the optional **Check my answer** button sends the term, your typed answer and its stored explanation to your model, only when you press it. Turn it off in settings and the button never appears. It follows the same model and sensitive-source rules as an explanation.
 - Records stay in this browser. Backups contain records only, never settings or API keys.
 - Pages are scanned automatically only on arxiv.org. Anywhere else you must click the button, press `Alt+Shift+E`, or allow the site.
 - Content from a sensitive source is never sent to a non-local model, including as context for later comparisons. A server on your own network counts as non-local. A source stays sensitive until you mark it normal on its History entry.

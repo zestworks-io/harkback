@@ -96,7 +96,7 @@ Report vulnerabilities as described in [SECURITY.md](../SECURITY.md).
 | Change how names are matched      | `packages/core/src/normalize.ts`, `matcher.ts`, `replay-concepts.ts`                              |
 | Change reunion rules              | `packages/core/src/reunion.ts`, `constants.ts`                                                    |
 | Change the prompt or reply format | `packages/core/src/prompt.ts`, `parse-output.ts`                                                  |
-| Change the review schedule        | `lib/review.ts`                                                                                   |
+| Change the review schedule        | `lib/review.ts` (replay), `lib/fsrs.ts` (the memory model), `lib/prerequisites.ts` (order)        |
 | Add an event type or field        | `packages/spec/src/schema.ts`, then `replay.ts`; regenerate the schema                            |
 | Add a page setting                | `lib/settings.ts` (type, default, `withDefaults`, `validateSettings`), then `entrypoints/options` |
 | Add a language                    | see [CONTRIBUTING](../CONTRIBUTING.md#adding-a-language)                                          |
