@@ -29,17 +29,18 @@ Inside `packages/core/src`, a folder holds one kind of logic, and `index.ts` re-
 
 Inside `apps/extension/src/lib`, the same idea, by what the code is about. The tests under `apps/extension/test` have the same folders.
 
-| Folder                                      | Holds                                                                                                      |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `models/`                                   | Talking to a model: providers, the HTTP client and adapters, Chrome's built-in model, routing, rate limit. |
-| `review/`                                   | The review schedule: FSRS, due dates, order, prerequisite gaps, the toolbar badge, "check my answer".      |
-| `records/`                                  | Views of what was recorded: concept pages, names, graph, history, digest, reunion cards.                   |
-| `explain/`                                  | Turning a selection or a page into a request for a model: the plan, the page preview.                      |
-| `source/`                                   | Where the text comes from: page extraction, source ids, site rules.                                        |
-| `storage/`                                  | The event store, its cache, backups and settings.                                                          |
-| `messaging/`                                | The messages between content script, background and pages, and who may send which.                         |
-| `export/`                                   | Anki and note-folder export.                                                                               |
-| `content/`, `ui/`, `pages/`, `pdf/`, `ocr/` | The content script, its shadow-DOM interface, the logic of the extension pages, the PDF reader, OCR.       |
+| Folder                                      | Holds                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `models/`                                   | Talking to a model: providers, the HTTP client and adapters, Chrome's built-in model, routing, rate limit.   |
+| `review/`                                   | The review schedule: FSRS, due dates, order, prerequisite gaps, the toolbar badge, "check my answer".        |
+| `records/`                                  | Views of what was recorded: concept pages, names, graph, history, digest, reunion cards.                     |
+| `explain/`                                  | Turning a selection or a page into a request for a model: the plan, the page preview.                        |
+| `source/`                                   | Where the text comes from: page extraction, source ids, site rules.                                          |
+| `storage/`                                  | The event store, its cache, backups and settings.                                                            |
+| `messaging/`                                | The messages between content script, background and pages, and who may send which.                           |
+| `export/`                                   | Anki and note-folder export.                                                                                 |
+| `content/`, `ui/`, `pages/`, `pdf/`, `ocr/` | The content script, its shadow-DOM interface, the logic of the extension pages, the PDF reader, OCR.         |
+| `video/`                                    | YouTube captions: the caption tracker, the rolling buffer of lines shown, the `PageSource` for a watch page. |
 
 Keep `packages/core` and `packages/spec` free of browser APIs. They run in plain Node tests and must stay portable.
 

@@ -155,6 +155,16 @@ When several rules match a page, each setting comes from the **most specific** r
 
 **Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
 
+## YouTube captions
+
+Add YouTube under _Sites_ with the _+ YouTube captions_ button, press _Save changes_ and allow site access when the browser asks. Nothing runs on YouTube before that. Then open a video and turn on captions (CC).
+
+- **Hints.** A term you have looked up before is underlined in the caption line, and hovering the underline shows what you understood and where. The captions move on after a few seconds, so a hint is only there while its line is.
+- **Explain.** Pause the video (the caption stays), select the term in the caption and press _Explain_ or `Alt+Shift+E`. The explanation uses the captions you have already watched as its context, so a definition the speaker gave earlier can be quoted ("defined in source"). Text from before you opened the page, or after the point you have reached, is not available.
+- **Records.** The lookup is a normal record with the playback position. In History, Review and the exports the position shows as `12:34`, and the source link opens the video at that moment. A video is one source however you reached it (`watch`, `youtu.be`, a playlist or a start-time link).
+- **Privacy.** Only the caption line on screen is read; no caption file is downloaded. The underlines are drawn by Harkback, not in YouTube's page. A _Sensitive_ rule for `youtube.com` makes explanations use a local model, as on any site. The _Preview_ button is not offered on video pages.
+- **Limits.** Auto-generated captions misspell technical terms and a misspelt term will not match. Only `youtube.com/watch` is supported; in full-screen mode the player hides Harkback's hints (use theater mode).
+
 ## Keyboard and shortcuts
 
 | Key            | Action                                       |

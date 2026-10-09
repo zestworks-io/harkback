@@ -35,19 +35,19 @@ Events are ordered by `ts`, then `device`, then `seq`, then `id`.
 
 ## Event types
 
-| Type                                | Payload                                                                                                                                                                                              |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source.seen`                       | `source_id`, `ids` (`arxiv`, `doi`, `url`), `title`, `license`, `sensitivity` (`normal` / `sensitive`), optional `by_user`                                                                           |
-| `concept.created`                   | `concept_id`, `canonical_name`, `aliases`, `domain`                                                                                                                                                  |
-| `concept.alias_added`               | `concept_id`, `alias`                                                                                                                                                                                |
-| `concept.merged`                    | `from`, `into`                                                                                                                                                                                       |
-| `concept.muted` / `concept.unmuted` | `concept_id`                                                                                                                                                                                         |
-| `encounter.created`                 | `encounter_id`, `concept_id`, `source_id`, `locator` (`exact`, `prefix`, `suffix`, `section`), `selection`, `explanation` (`text`, `tier`, `evidence_span`, `model`), `flags`; `null` after deletion |
-| `encounter.action`                  | `encounter_id`, `action`, optional `detail` (`question`, `answer`); `null` after deletion                                                                                                            |
-| `encounter.deleted`                 | `encounter_id`                                                                                                                                                                                       |
-| `edge.proposed`                     | `from`, `to`, `rel`, `source`, `confidence`, `evidence` (`encounter_id`)                                                                                                                             |
-| `edge.confirmed` / `edge.rejected`  | `edge_id` (`<from>><rel>><to>` of the representatives)                                                                                                                                               |
-| `contribution.consent`              | Reserved.                                                                                                                                                                                            |
+| Type                                | Payload                                                                                                                                                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source.seen`                       | `source_id`, `ids` (`arxiv`, `doi`, `url`), `title`, `license`, `sensitivity` (`normal` / `sensitive`), optional `by_user`                                                                                         |
+| `concept.created`                   | `concept_id`, `canonical_name`, `aliases`, `domain`                                                                                                                                                                |
+| `concept.alias_added`               | `concept_id`, `alias`                                                                                                                                                                                              |
+| `concept.merged`                    | `from`, `into`                                                                                                                                                                                                     |
+| `concept.muted` / `concept.unmuted` | `concept_id`                                                                                                                                                                                                       |
+| `encounter.created`                 | `encounter_id`, `concept_id`, `source_id`, `locator` (`exact`, `prefix`, `suffix`, `section`, optional `t`), `selection`, `explanation` (`text`, `tier`, `evidence_span`, `model`), `flags`; `null` after deletion |
+| `encounter.action`                  | `encounter_id`, `action`, optional `detail` (`question`, `answer`); `null` after deletion                                                                                                                          |
+| `encounter.deleted`                 | `encounter_id`                                                                                                                                                                                                     |
+| `edge.proposed`                     | `from`, `to`, `rel`, `source`, `confidence`, `evidence` (`encounter_id`)                                                                                                                                           |
+| `edge.confirmed` / `edge.rejected`  | `edge_id` (`<from>><rel>><to>` of the representatives)                                                                                                                                                             |
+| `contribution.consent`              | Reserved.                                                                                                                                                                                                          |
 
 Enumerations:
 
@@ -61,7 +61,7 @@ Limits: names ≤ 80 characters, ≤ 8 aliases, selection ≤ 200, explanation �
 
 ## Source ids
 
-A source is identified, in this order, by `arxiv:<id>`, `doi:<doi>`, or `url:<canonical or cleaned URL>` (tracking parameters and the fragment removed). A local PDF is identified by `pdf:sha256:<hash>`, and its path is never recorded.
+A source is identified, in this order, by `arxiv:<id>`, `doi:<doi>`, or `url:<canonical or cleaned URL>` (tracking parameters and the fragment removed). A YouTube video is `youtube:<video id>` whichever address it was reached by, with `ids.url` set to `https://www.youtube.com/watch?v=<id>`; its encounters carry the playback position in `locator.t` (whole seconds). `t` is optional and absent from every other source. A local PDF is identified by `pdf:sha256:<hash>`, and its path is never recorded.
 
 ## Replay rules worth knowing
 

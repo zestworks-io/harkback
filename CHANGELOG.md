@@ -6,6 +6,7 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **YouTube captions.** Add YouTube under Settings → Sites (_+ YouTube captions_) and, with captions (CC) on, terms you have looked up before are underlined in the caption line of a watch page. Hover an underline to see what you understood last time; pause the video and select a term to explain it, and the explanation uses the captions you have already watched as its context. A lookup on a video is recorded like any other, with the playback position: concept pages, review cards, reunion hints and exports show it as `12:34`, and History and Review open the video at that moment. Nothing is downloaded: Harkback reads only the captions the player is showing, and it does nothing on YouTube until you add the site. A video is one source (`youtube:<id>`) however you reached it. The event format gains an optional `locator.t` (whole seconds); logs without it replay as before.
 - **Suggested research sites.** Settings → Sites has a _Suggested research sites_ button that adds auto-scan rules for bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology in one step. It skips sites that already have a rule and never changes one you edited. Saving asks the browser for site access once for all of them.
 
 ### Changed
