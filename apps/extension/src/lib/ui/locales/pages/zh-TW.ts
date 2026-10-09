@@ -146,6 +146,8 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API key 未加密儲存在瀏覽器擴充功能的儲存空間：其他網站和擴充功能讀不到，但能存取這台電腦磁碟的人可以。它只會傳送到你填寫的模型位址，不會寫入備份或記錄。建議使用有額度限制的 key，或使用本機模型（不需要 key）。",
   Sites: "網站",
+  "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
+    "notion.so 和 docs.google.com 上的頁面，除非已發布或上面的規則另有設定，否則在傳送任何內容之前都會先詢問。GitHub 頁面只有在看起來是私有的時候才會詢問。",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "預設只在 arxiv.org 自動掃描。其他網站可以在這裡允許，或標為敏感。",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':

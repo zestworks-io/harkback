@@ -56,6 +56,8 @@ export interface SourceState {
   sensitivity: Sensitivity;
   /** True once the reader has chosen the sensitivity themselves, whichever way; an automatic record never sets it. */
   chosen?: true;
+  /** Where in the log the reader last decided about it; a later decision about a part beats an earlier one about the whole. */
+  decidedAt?: number;
 }
 
 export type EdgeStatus = "proposed" | "confirmed" | "rejected";
@@ -103,21 +105,38 @@ function identityRoot(state: SourceView, id: string): string {
   return state.sourceIdentity.get(k) ?? k;
 }
 
-/** The paper (or other source) behind each id for which `flagged` holds, and whether `id`, its paper or its repository is among them. */
-function reaches(state: SourceView, roots: ReadonlySet<string>, id: string): boolean {
-  for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) if (roots.has(identityRoot(state, cur))) return true;
-  return false;
-}
-
 function rootsWhere(state: SourceView, flagged: (s: SourceState) => boolean): Set<string> {
   const roots = new Set<string>();
   for (const [id, src] of state.sources) if (flagged(src)) roots.add(identityRoot(state, id));
   return roots;
 }
 
+/** Whether `id`, its paper under another id, or a repository above it is among `roots`. */
+function reaches(state: SourceView, roots: ReadonlySet<string>, id: string): boolean {
+  for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) if (roots.has(identityRoot(state, cur))) return true;
+  return false;
+}
+
+/**
+ * Like `reaches` for sensitivity, except that a part the reader said is fine stops what the whole above it passes down, unless the
+ * reader marked the whole after that.
+ */
+function sensitiveThrough(state: SourceView, roots: ReadonlySet<string>, id: string): boolean {
+  let exemption: SourceState | undefined;
+  for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) {
+    if (roots.has(identityRoot(state, cur))) {
+      const markedAt = state.sources.get(cur)?.decidedAt ?? -1;
+      return !(exemption && (exemption.decidedAt ?? -1) > markedAt);
+    }
+    const own = state.sources.get(cur);
+    if (!exemption && own?.chosen && own.sensitivity === "normal") exemption = own;
+  }
+  return false;
+}
+
 /** True when the source, or the same paper under its other id, or the repository an issue or pull request belongs to, is marked sensitive. */
 export function isSensitiveSource(state: SourceView, sourceId: string): boolean {
-  return reaches(
+  return sensitiveThrough(
     state,
     rootsWhere(state, (s) => s.sensitivity === "sensitive"),
     sourceId,
@@ -127,7 +146,7 @@ export function isSensitiveSource(state: SourceView, sourceId: string): boolean 
 /** Every recorded source for which `isSensitiveSource` holds, found in one pass. */
 export function sensitiveSourceIds(state: SourceView): Set<string> {
   const roots = rootsWhere(state, (s) => s.sensitivity === "sensitive");
-  return new Set([...state.sources.keys()].filter((id) => reaches(state, roots, id)));
+  return new Set([...state.sources.keys()].filter((id) => sensitiveThrough(state, roots, id)));
 }
 
 /** True when the reader chose the sensitivity of the source, its paper's other id, or its repository. */

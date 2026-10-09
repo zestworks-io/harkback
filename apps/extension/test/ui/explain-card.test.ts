@@ -20,6 +20,22 @@ function setup(models: { id: string; label: string }[] = []) {
   return { card, handlers, q };
 }
 
+describe("ExplainCard for a source that is already sensitive", () => {
+  it("does not offer to mark it sensitive again, and says it stayed on this computer", () => {
+    const { card, q } = setup();
+    card.setExplained("低秩适配。", "defined_in_source");
+    card.done(true, true);
+    expect(q("mark-sensitive")).toBeNull();
+    expect(q("note")!.textContent).toContain("本机");
+  });
+
+  it("offers it for a source that is not", () => {
+    const { card, q } = setup();
+    card.done(true, false);
+    expect(q("mark-sensitive")).not.toBeNull();
+  });
+});
+
 describe("ExplainCard when the page looks private", () => {
   it("asks before anything is sent and answers local only", () => {
     const { card, handlers, q } = setup();

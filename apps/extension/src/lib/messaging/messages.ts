@@ -5,12 +5,12 @@ import type { ModelErrorCode } from "../models/model-client";
 import type { PreviewTerm } from "../explain/preview";
 import type { ReunionCard } from "../records/reunion-cards";
 import type { Theme } from "../storage/settings";
-import type { Choice } from "../source/privacy-gate";
+import type { Choice, Gate } from "../source/privacy-gate";
 import type { Privacy } from "../source/site-profiles";
 import type { DetectedSource } from "../source/source-id";
 import type { Lang, StringKey } from "../ui/strings";
 
-export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "no_permission" | "expired" | "internal";
+export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "no_permission" | "expired" | "internal" | "unreadable_page";
 
 /** Content script → background, on the "explain" port. */
 export type PortIn =
@@ -25,7 +25,7 @@ export type PortOut =
   | { type: "delta"; text: string }
   | { type: "explained"; explanation: string; tier: Tier }
   | { type: "ask"; name: string; daysAgo: number }
-  | { type: "done"; encounterId: string | null; recorded: boolean }
+  | { type: "done"; encounterId: string | null; recorded: boolean; sensitive: boolean }
   | { type: "followup_delta"; text: string }
   | { type: "followup_done"; answer: string }
   | { type: "followup_error"; code: ErrorCode; retryAfterMs?: number }
@@ -60,9 +60,12 @@ export type Request =
   | { type: "action"; encounterId: string; action: "marked_understood" | "marked_confused" | "reunion_recalled" }
   | { type: "mute"; conceptId: string }
   | { type: "mark-sensitive"; source: DetectedSource }
-  | { type: "mark-normal"; sourceId: string }
+  /** `source` is for a page that has no record yet but is sensitive through its repository. */
+  | { type: "mark-normal"; sourceId: string; source?: DetectedSource }
   /** The reader chose to send a page that looked private. Refused for a source that is sensitive. */
   | { type: "choose-normal"; source: DetectedSource }
+  /** Whether this page is sensitive, would be asked about, or is fine, as the privacy gate sees it. */
+  | ({ type: "source-status"; sourceId: string } & PrivacyFields)
   /** Makes the choice for the whole site this message came from, as a site rule. */
   | { type: "remember-site"; sensitive: boolean }
   | { type: "import-events"; events: HarkEvent[] }
@@ -87,6 +90,8 @@ export interface ResponseMap {
   "mark-sensitive": { ok: boolean };
   "mark-normal": { ok: boolean };
   "choose-normal": { ok: boolean };
+  /** `byRule`: a site rule makes the page sensitive, which the reader cannot undo from the page. */
+  "source-status": { status: Gate; byRule?: true };
   "remember-site": { ok: boolean };
   "import-events": { ok: boolean; added?: number };
   "delete-encounter": { ok: boolean };
@@ -122,6 +127,7 @@ const REQUEST_TYPES = new Set<string>([
   "mark-sensitive",
   "mark-normal",
   "choose-normal",
+  "source-status",
   "remember-site",
   "import-events",
   "delete-encounter",

@@ -608,6 +608,14 @@ async function main(): Promise<void> {
                   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.',
                 ),
               ),
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "notion.so 和 docs.google.com 上的页面，除非已发布或上面的规则另有设置，否则在发送任何内容之前都会先询问。GitHub 页面只有在看起来是私有的时候才会询问。",
+                  "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.",
+                ),
+              ),
               ...siteRows,
               draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
               addSite,

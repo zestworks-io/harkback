@@ -44,6 +44,17 @@ export const test = base.extend<{ stub: StubServer; context: BrowserContext; sw:
     await context.route("https://blog.example.com/**", (route) =>
       route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("blog.html") }),
     );
+    const page = (file: string) => (route: { fulfill(o: { contentType: string; body: string }): Promise<void> }) =>
+      route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture(file) });
+    const pathOf = (route: { request(): { url(): string } }) => new URL(route.request().url()).pathname;
+    await context.route("https://github.com/**", (route) =>
+      page(/^\/acme\/secret(\/|$)/.test(pathOf(route)) ? "github/private.html" : "github/public.html")(route),
+    );
+    await context.route(/^https:\/\/(www\.notion\.so|[\w-]+\.notion\.site)\//, (route) => page("notion/page.html")(route));
+    // The published and mobile views are written as HTML; every other view of a document is the editor.
+    await context.route("https://docs.google.com/**", (route) =>
+      page(/\/(pub|mobilebasic)\/?$/.test(pathOf(route)) ? "gdocs/pub.html" : "gdocs/edit.html")(route),
+    );
     await context.route("https://www.youtube.com/**", (route) =>
       route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("youtube/watch.html") }),
     );

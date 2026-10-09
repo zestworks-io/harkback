@@ -80,6 +80,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 
 .hb-footer { display: flex; flex-wrap: wrap; gap: 6px; }
 .hb-footer:empty { display: none; }
+.hb-lock { position: fixed; right: 16px; bottom: 16px; max-width: 320px; background: var(--hb-bg); color: var(--hb-fg); border: 1px solid var(--hb-border); border-radius: 10px; padding: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); z-index: 2147483000; }
+.hb-lock[hidden] { display: none; }
+.hb-lock .hb-choice { margin-top: 8px; padding: 4px; }
 .hb-choice p { margin: 0 0 8px; }
 .hb-choice label { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 12px; color: var(--hb-muted, inherit); }
 .hb-actions { display: flex; flex-wrap: wrap; gap: 6px; }

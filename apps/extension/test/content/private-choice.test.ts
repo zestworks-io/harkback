@@ -9,6 +9,9 @@ const asked: Request[] = [];
 const posted: PortIn[] = [];
 let incoming: ((m: PortOut) => void) | null = null;
 let incognito = false;
+let status = "normal";
+let byRule = false;
+let failStatus = false;
 
 const info = (): PageInfo => ({
   enabled: true,
@@ -25,6 +28,10 @@ const info = (): PageInfo => ({
 const rpc: Rpc = {
   request: (async (msg: Request) => {
     asked.push(msg);
+    if (msg.type === "source-status") {
+      if (failStatus) throw new Error("asleep");
+      return { status, ...(byRule ? { byRule } : {}) };
+    }
     return msg.type === "page-info" ? info() : { ok: true };
   }) as Rpc["request"],
   connect: () => ({
@@ -55,6 +62,9 @@ beforeEach(async () => {
   posted.length = 0;
   incoming = null;
   incognito = false;
+  status = "normal";
+  byRule = false;
+  failStatus = false;
 });
 
 describe("ContentApp on a page that looks private", () => {
@@ -117,5 +127,107 @@ describe("ContentApp on a page that looks private", () => {
     click("choose-local");
     expect(asked.filter((m) => m.type === "mark-sensitive" || m.type === "choose-normal" || m.type === "remember-site")).toEqual([]);
     expect(starts()[1]!.request).toMatchObject({ choice: "local" });
+  });
+});
+
+describe("the lock on a page", () => {
+  const chip = () => card().querySelector<HTMLElement>('[data-hb="lock-chip"]');
+
+  it("is not shown for a page that is fine", async () => {
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    expect(asked.some((m) => m.type === "source-status")).toBe(true);
+    expect(document.documentElement.children.length).toBeGreaterThan(0);
+    const host = [...document.documentElement.children].find((e) => e.shadowRoot);
+    expect(host?.shadowRoot?.querySelector('[data-hb="lock-chip"]')).toBeFalsy();
+  });
+
+  it("shows a sensitive page and lets the reader unmark it", async () => {
+    status = "sensitive";
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    await Promise.resolve();
+    expect(chip()!.hidden).toBe(false);
+    status = "normal";
+    click("lock");
+    await Promise.resolve();
+    expect(asked.find((m) => m.type === "mark-normal")).toMatchObject({
+      sourceId: "github:acme/secret",
+      source: { source_id: "github:acme/secret" },
+    });
+  });
+
+  it("asks about a page that looks private before anything is selected, then looks again", async () => {
+    status = "ask";
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    await Promise.resolve();
+    click("lock");
+    status = "sensitive";
+    click("choose-local");
+    await new Promise((r) => setTimeout(r, 0));
+    expect(asked.find((m) => m.type === "mark-sensitive")).toMatchObject({ source: { source_id: "github:acme/secret" } });
+    expect(asked.filter((m) => m.type === "source-status").length).toBeGreaterThanOrEqual(2);
+    expect(chip()!.textContent).toContain("Sensitive");
+  });
+});
+
+describe("the lock after the reader's own answers", () => {
+  const chip = () => card().querySelector<HTMLElement>('[data-hb="lock-chip"]');
+
+  it("lets go of a local-only answer when the page is unmarked, so later explanations are not forced local", async () => {
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    selectTerm(app);
+    incoming!({ type: "error", code: "needs_choice" });
+    click("choose-local");
+    expect(starts()[1]!.request).toMatchObject({ choice: "local" });
+    status = "sensitive";
+    await new Promise((r) => setTimeout(r, 0));
+    click("lock");
+    await new Promise((r) => setTimeout(r, 0));
+    posted.length = 0;
+    const text = document.querySelector("article p")!.firstChild!;
+    const range = document.createRange();
+    range.setStart(text, 17);
+    range.setEnd(text, 23);
+    app.explain(range, { mode: "explain" });
+    expect(starts()[0]!.request).not.toHaveProperty("choice");
+  });
+
+  it("shows a site rule's sensitivity without a button that does nothing", async () => {
+    status = "sensitive";
+    byRule = true;
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    await Promise.resolve();
+    expect(card().querySelector<HTMLButtonElement>('[data-hb="lock"]')!.disabled).toBe(true);
+  });
+
+  it("drops the lock of the page before when it cannot tell about this one", async () => {
+    status = "sensitive";
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    await Promise.resolve();
+    expect(chip()!.hidden).toBe(false);
+    failStatus = true;
+    await app.activate();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(chip()!.hidden).toBe(true);
+  });
+
+  it("does not leave an unhandled failure when the background is asleep", async () => {
+    status = "sensitive";
+    const app = new ContentApp(rpc, "open");
+    await app.start();
+    await Promise.resolve();
+    const unhandled: unknown[] = [];
+    const on = (e: unknown) => unhandled.push(e);
+    process.on("unhandledRejection", on);
+    failStatus = true;
+    click("lock");
+    await new Promise((r) => setTimeout(r, 20));
+    process.off("unhandledRejection", on);
+    expect(unhandled).toEqual([]);
   });
 });

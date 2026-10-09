@@ -40,6 +40,12 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
   choiceLocal: "Nur lokal",
   choiceAnyway: "Trotzdem senden",
   choiceRemember: "Für diese Website merken",
+  sensitiveSource: "Sensible Quelle: Es wurde nur ein lokales Modell verwendet.",
+  lockSensitive: "Sensibel · nur lokales Modell (klicken zum Aufheben)",
+  lockAsk: "Wirkt privat · klicken zum Auswählen",
+  lockRule: "Sensibel laut Website-Regel",
+  err_unreadable_page:
+    "Der Editor von Google Docs zeichnet seinen Text und gibt ihn nicht preis. Öffnen Sie die veröffentlichte oder mobile Ansicht des Dokuments.",
   err_insecure_model: "Unsichere Modelladresse: Nicht lokale Adressen müssen https verwenden.",
   err_sensitive_compare:
     "Der frühere Eintrag stammt aus einer sensiblen Quelle und kann nicht an ein nicht lokales Modell gesendet werden.",

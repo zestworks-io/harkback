@@ -124,8 +124,10 @@ export class ExplainCard {
     );
   }
 
-  done(recorded: boolean): void {
+  /** `sensitive`: the source was already sensitive, so there is nothing to mark. */
+  done(recorded: boolean, sensitiveSource = false): void {
     if (!recorded) this.note.textContent = t(this.lang, "notRecorded");
+    else if (sensitiveSource) this.note.textContent = t(this.lang, "sensitiveSource");
     const choice = (hb: string, action: CardAction, key: "understood" | "confused") => {
       const button = h("button", { type: "button", "data-hb": hb, "data-choice": true, disabled: !recorded }, t(this.lang, key));
       button.addEventListener("click", () => {
@@ -155,7 +157,7 @@ export class ExplainCard {
       choice("confused", "marked_confused", "confused"),
       h("span", { className: "hb-spacer" }),
       ...(this.compose.childElementCount > 0 ? [] : [askMore]),
-      sensitive,
+      ...(sensitiveSource ? [] : [sensitive]),
     );
   }
 

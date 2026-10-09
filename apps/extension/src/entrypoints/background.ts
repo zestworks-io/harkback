@@ -5,6 +5,7 @@ import {
   parseTerms,
   buildFollowUpPrompt,
   canonicalOrder,
+  isSensitiveSource,
   parseCheckReply,
   serializeJsonl,
   streamingExplanation,
@@ -182,7 +183,7 @@ export default defineBackground(() => {
       if (!closed) port.postMessage(m);
     };
     // The explanation is already on screen; a failed write must not replace it with an error.
-    const unrecorded = (): void => post({ type: "done", encounterId: null, recorded: false });
+    const unrecorded = (): void => post({ type: "done", encounterId: null, recorded: false, sensitive: false });
     const fail = (e: unknown): void => post({ type: "error", code: e instanceof ModelError ? e.code : "internal" });
 
     const record = (p: Pending, conceptId: string | null): Promise<void> => {
@@ -210,7 +211,12 @@ export default defineBackground(() => {
         const waiting = last.unsaved.splice(0);
         for (const turn of waiting) await saveFollowUp(out.record.encounterId, turn).catch(() => undefined);
       }
-      post({ type: "done", encounterId: out.record.encounterId, recorded: true });
+      post({
+        type: "done",
+        encounterId: out.record.encounterId,
+        recorded: true,
+        sensitive: isSensitiveSource(state, p.req.source.source_id),
+      });
     }
 
     const saveFollowUp = (encounterId: string, turn: Turn): Promise<unknown> =>
@@ -241,7 +247,8 @@ export default defineBackground(() => {
         const outcome = finishExplain(raw, plan, req, await getState());
         last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
         post({ type: "explained", explanation: outcome.parsed.explanation, tier: outcome.tier });
-        if (incognito) return post({ type: "done", encounterId: null, recorded: false });
+        if (incognito)
+          return post({ type: "done", encounterId: null, recorded: false, sensitive: isSensitiveSource(state, req.source.source_id) });
         // Started from a reunion card: the concept is already known.
         const hinted = req.conceptId ? state.representative.get(req.conceptId) : undefined;
         if (outcome.resolution.kind === "ask_user" && !hinted) {

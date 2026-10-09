@@ -15,8 +15,8 @@ import type { PageInfo, PrivacyFields, Request, ResponseMap } from "./messages";
 import { reunionCards } from "../records/reunion-cards";
 import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "../storage/settings";
-import { isChoice, isPrivacy } from "../source/privacy-gate";
-import { effectiveRule, normalizePattern } from "../source/site-rules";
+import { gateSource, isChoice, isPrivacy } from "../source/privacy-gate";
+import { effectiveRule, normalizePattern, sensitiveStated } from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
 
@@ -126,9 +126,18 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       return { ok: true };
     }
     case "mark-normal": {
-      const src = (await deps.getState()).sources.get(String(msg.sourceId));
-      if (!src || src.sensitivity !== "sensitive") return { ok: false };
-      const detected = { source_id: src.id, ids: src.ids, title: src.title, license: src.license };
+      if (incognito) return { ok: false };
+      const state = await deps.getState();
+      const sourceId = String(msg.sourceId);
+      if (!isSensitiveSource(state, sourceId)) return { ok: false };
+      // A source recorded as sensitive keeps what it is called; one that is sensitive through its repository may not be recorded.
+      const recorded = state.sources.get(sourceId);
+      const detected = recorded
+        ? { source_id: recorded.id, ids: recorded.ids, title: recorded.title, license: recorded.license }
+        : msg.source?.source_id === sourceId
+          ? msg.source
+          : null;
+      if (!detected) return { ok: false };
       await deps.append((f) => [f.make("source.seen", clampSource(detected, "normal", true))]);
       return { ok: true };
     }
@@ -139,6 +148,22 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       if (isSensitiveSource(state, String(msg.source?.source_id))) return { ok: false };
       await deps.append((f) => [f.make("source.seen", clampSource(msg.source, "normal", true))]);
       return { ok: true };
+    }
+    case "source-status": {
+      const settings = await deps.loadSettings();
+      const hint = privacyFields(msg);
+      const status = gateSource({
+        rules: settings.sites,
+        state: await deps.getState(),
+        sourceId: String(msg.sourceId),
+        url: sender.url ?? "",
+        privacy: hint.privacy ?? "unknown",
+        choice: hint.choice,
+      });
+      return {
+        status,
+        ...(status === "sensitive" && sensitiveStated(settings.sites, sender.url ?? "") === true ? { byRule: true as const } : {}),
+      };
     }
     case "remember-site": {
       let host: string | null = null;

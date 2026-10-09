@@ -7,6 +7,7 @@ const codes: ErrorCode[] = [
   "no_model",
   "needs_local_model",
   "needs_choice",
+  "unreadable_page",
   "insecure_model",
   "sensitive_compare",
   "empty_selection",

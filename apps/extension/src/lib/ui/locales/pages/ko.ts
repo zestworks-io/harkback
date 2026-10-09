@@ -148,6 +148,8 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API 키는 확장 프로그램 저장소에 암호화되지 않은 채 저장됩니다. 다른 사이트나 확장 프로그램은 읽을 수 없지만, 이 컴퓨터의 디스크에 접근할 수 있는 사람은 읽을 수 있습니다. 키는 입력한 모델 주소로만 전송되며 백업이나 로그에는 포함되지 않습니다. 사용 한도가 있는 키나 로컬 모델(키 불필요)을 권장합니다.",
   Sites: "사이트",
+  "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
+    "notion.so와 docs.google.com에서는 페이지가 게시되었거나 위 규칙에서 달리 정하지 않은 한, 무언가를 보내기 전에 먼저 묻습니다. GitHub에서는 페이지가 비공개로 보일 때만 묻습니다.",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "자동 스캔은 arxiv.org에서만 이루어집니다. 다른 사이트는 여기서 허용하거나 민감으로 지정하세요.",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':

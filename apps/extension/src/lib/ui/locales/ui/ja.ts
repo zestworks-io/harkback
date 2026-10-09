@@ -40,6 +40,12 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   choiceLocal: "ローカルのみ",
   choiceAnyway: "そのまま送信",
   choiceRemember: "このサイトで記憶",
+  sensitiveSource: "機密ソース：ローカルモデルのみ使用しました。",
+  lockSensitive: "機密 · ローカルモデルのみ（クリックで解除）",
+  lockAsk: "非公開に見えます · クリックして選択",
+  lockRule: "サイトのルールにより機密",
+  err_unreadable_page:
+    "Google ドキュメントのエディタは文字を描画するため読み取れません。ドキュメントの公開ビューまたはモバイルビューを開いてください。",
   err_insecure_model: "安全でないモデルのアドレス：ローカル以外のアドレスは https が必須です。",
   err_sensitive_compare: "以前の記録は機密ソースのものなので、ローカル以外のモデルには送信できません。",
   err_empty_selection: "選択範囲に解説できるテキストがありません。",

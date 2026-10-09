@@ -8,6 +8,8 @@ export interface SiteProfile {
   /** Where the document's text is; null when the page no longer looks as expected, so the generic search takes over. */
   root(doc: Document): Element | null;
   privacy(url: URL, doc: Document): Privacy;
+  /** False for a page that has a document but no text to read, such as an editor that draws on a canvas. */
+  readonly readable?: false;
 }
 
 interface Profile {
@@ -171,6 +173,7 @@ const googleDocs: Profile = {
       sourceId: () => `gdoc:${published ? "e/" : ""}${m[2]}`,
       // The editor draws its text on a canvas, so the page around it is menus and toolbars, not the document.
       root: (doc) => (m[3] === "edit" ? nothingToRead(doc) : firstMatch(doc, GDOC_ROOT)),
+      ...(m[3] === "edit" ? { readable: false as const } : {}),
       // Publishing a document to the web is a deliberate act; opening one by its address says nothing either way.
       privacy: () => (published ? "likely-public" : "unknown"),
     };

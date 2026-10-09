@@ -27,11 +27,13 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const proposals: EventOf<"edge.proposed">[] = [];
   const statuses: (EventOf<"edge.confirmed"> | EventOf<"edge.rejected">)[] = [];
 
+  let seenCount = 0;
   for (const e of sorted) {
     switch (e.type) {
       case "source.seen": {
         const p = e.payload;
         const prev = sources.get(p.source_id);
+        seenCount++;
         sources.set(p.source_id, {
           id: p.source_id,
           ids: { ...prev?.ids, ...definedOnly(p.ids) },
@@ -41,6 +43,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
           // (another device that never knew the source was sensitive) cannot expose it.
           sensitivity: prev?.sensitivity === "sensitive" && p.sensitivity === "normal" && !p.by_user ? "sensitive" : p.sensitivity,
           ...(p.by_user || prev?.chosen ? { chosen: true as const } : {}),
+          ...(p.by_user ? { decidedAt: seenCount } : prev?.decidedAt !== undefined ? { decidedAt: prev.decidedAt } : {}),
         });
         break;
       }

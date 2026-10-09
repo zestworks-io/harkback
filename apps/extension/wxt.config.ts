@@ -51,7 +51,18 @@ export default defineConfig({
     optional_host_permissions: ["*://*/*", "file:///*"],
     host_permissions:
       mode === "e2e"
-        ? ["http://127.0.0.1/*", "*://blog.example.com/*", "*://*.blog.example.com/*", "*://youtube.com/*", "*://*.youtube.com/*"]
+        ? [
+            "http://127.0.0.1/*",
+            "*://blog.example.com/*",
+            "*://*.blog.example.com/*",
+            "*://youtube.com/*",
+            "*://*.youtube.com/*",
+            "*://github.com/*",
+            "*://notion.so/*",
+            "*://*.notion.so/*",
+            "*://*.notion.site/*",
+            "*://docs.google.com/*",
+          ]
         : [],
     action: { default_title: "Harkback: scan this page" },
     commands: {

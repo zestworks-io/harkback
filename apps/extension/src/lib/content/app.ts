@@ -10,6 +10,7 @@ import { profileFor, type Privacy } from "../source/site-profiles";
 import { detectSource, type DetectedSource } from "../source/source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
+import { LockChip } from "../ui/lock-chip";
 import { PreviewPanel } from "../ui/preview-panel";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
 import { t, useStrings, type Lang } from "../ui/strings";
@@ -97,6 +98,8 @@ export class ContentApp {
   private readonly answered = new Set<string>();
   /** What the reader chose about pages that looked private, by source, for as long as this page lives. */
   private readonly choices = new Map<string, Choice>();
+  private lockChip: LockChip | null = null;
+  private lockGen = 0;
 
   constructor(
     private readonly rpc: Rpc,
@@ -151,13 +154,54 @@ export class ContentApp {
   async start(): Promise<void> {
     const info = this.take(await this.rpc.request({ type: "page-info" }));
     if (info.enabled && info.autoScan) await this.activate(info);
-    else this.info = info;
+    else {
+      this.info = info;
+      void this.refreshLock();
+    }
+  }
+
+  /** Shows the lock when the page is sensitive or would be asked about, and hides it otherwise or when that cannot be found out. */
+  private async refreshLock(): Promise<void> {
+    const gen = ++this.lockGen;
+    // What the lock says is about the page in front of the reader: when that is unknown, it says nothing.
+    if (!this.info?.enabled) return this.lockChip?.set("normal");
+    const source = this.detect();
+    let answer: { status?: unknown; byRule?: unknown };
+    try {
+      answer = await this.rpc.request({ type: "source-status", sourceId: source.source_id, ...this.privacyFields(source.source_id) });
+    } catch {
+      if (gen === this.lockGen) this.lockChip?.set("normal");
+      return;
+    }
+    if (gen !== this.lockGen) return;
+    const status = answer.status;
+    if (status !== "sensitive" && status !== "ask" && status !== "normal") return void this.lockChip?.set("normal");
+    if (status === "normal" && !this.lockChip) return;
+    this.lockChip ??= this.createLock();
+    this.lockChip.set(status, answer.byRule === true);
+  }
+
+  private createLock(): LockChip {
+    const chip = new LockChip(this.lang, {
+      onUnmark: () => {
+        const source = this.detect();
+        // An answer given on this page would otherwise keep it sensitive.
+        this.choices.delete(source.source_id);
+        void this.rpc
+          .request({ type: "mark-normal", sourceId: source.source_id, source })
+          .catch(() => undefined)
+          .then(() => this.refreshLock());
+      },
+      onChoose: (choice, remember) => this.applyChoice(this.detect(), choice, remember),
+    });
+    this.ensureOverlay().root.append(chip.el);
+    return chip;
   }
 
   /** Also the "rescan" action: the toolbar button calls it again. `known` is a page-info answer that is still fresh. */
   async activate(known?: PageInfo): Promise<void> {
     this.info = this.take(known ?? (await this.rpc.request({ type: "page-info" })));
-    if (!this.info.enabled) return;
+    if (!this.info.enabled) return void this.refreshLock();
     // New page-info means new records: reunions found before no longer hold.
     this.reunions.clear();
     const first = !this.listening;
@@ -174,6 +218,7 @@ export class ContentApp {
     }
     // The first read of live text is started by the watcher itself.
     if (!(first && this.source?.live)) await this.scan();
+    void this.refreshLock();
   }
 
   async scan(): Promise<void> {
@@ -321,6 +366,7 @@ export class ContentApp {
     // A video's captions are only what has been shown so far, so there is no whole page to pick key terms from.
     if (!this.info.enabled || this.previewPanel || this.live()) return;
     const source = this.detect();
+    const unreadable = profileFor(this.source?.url ?? location.href)?.readable === false;
     const panel: PreviewPanel = new PreviewPanel(this.lang, {
       onScan: () => {
         panel.scanning();
@@ -370,7 +416,8 @@ export class ContentApp {
     });
     this.previewPanel = panel;
     this.ensureOverlay().root.append(panel.el);
-    this.planPreview(panel, source);
+    if (unreadable) panel.unavailable("unreadable_page");
+    else this.planPreview(panel, source);
   }
 
   private planPreview(panel: PreviewPanel, source: DetectedSource): void {
@@ -388,9 +435,11 @@ export class ContentApp {
   private applyChoice(source: DetectedSource, choice: Choice, remember: boolean): void {
     this.choices.set(source.source_id, choice);
     // A private window records nothing; the answer then holds for this page only.
-    if (this.info?.incognito) return;
-    void this.rpc.request(choice === "local" ? { type: "mark-sensitive", source } : { type: "choose-normal", source });
-    if (remember) void this.rpc.request({ type: "remember-site", sensitive: choice === "local" });
+    if (this.info?.incognito) return void this.refreshLock();
+    const writes = [this.rpc.request(choice === "local" ? { type: "mark-sensitive", source } : { type: "choose-normal", source })];
+    if (remember) writes.push(this.rpc.request({ type: "remember-site", sensitive: choice === "local" }));
+    // The lock reads what was just written.
+    void Promise.allSettled(writes).then(() => this.refreshLock());
   }
 
   private closePreview(): void {
@@ -408,6 +457,8 @@ export class ContentApp {
   }
 
   explain(range: Range, opts: ExplainOptions): void {
+    // A page that draws its text has nothing of the document to read; what is selected there is its menus.
+    if (profileFor(this.source?.url ?? location.href)?.readable === false) return;
     const page = (this.page ??= this.extract());
     const live = this.live();
     // Selected in the captions, or elsewhere on the page (the description, a comment): the latter is read like any page.
@@ -459,7 +510,11 @@ export class ContentApp {
             if (session.encounterId) void this.rpc.request({ type: "action", encounterId: session.encounterId, action });
           },
           onFollowUp: (question) => send({ type: "followup", question }),
-          onMarkSensitive: () => void this.rpc.request({ type: "mark-sensitive", source }),
+          onMarkSensitive: () =>
+            void this.rpc
+              .request({ type: "mark-sensitive", source })
+              .catch(() => undefined)
+              .then(() => this.refreshLock()),
           onChoose: (choice, remember) => {
             this.applyChoice(source, choice, remember);
             if (this.session !== session) return;
@@ -509,7 +564,7 @@ export class ContentApp {
       case "done":
         s.finished = true;
         s.encounterId = m.encounterId;
-        s.card.done(m.recorded);
+        s.card.done(m.recorded, m.sensitive);
         break;
       case "followup_delta":
         s.card.followUpDelta(m.text);

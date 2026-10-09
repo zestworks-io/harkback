@@ -436,3 +436,69 @@ describe("the reader's answer about a page that looks private", () => {
     expect(previewed[1]).not.toHaveProperty("choice");
   });
 });
+
+describe("unmarking a source that is sensitive only because of its repository", () => {
+  const github = { url: "https://github.com/acme/secret/issues/4", tab: { id: 1, incognito: false } };
+
+  it("records the reader's word on that one source, even if it was never recorded", async () => {
+    const { deps, written, w } = setup();
+    w.source("github:acme/secret", "sensitive", "Repo", {}, true);
+    const source = sourceFor("github:acme/secret#4");
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: source.source_id, source }, github)).toEqual({ ok: true });
+    expect(written[0]!.payload).toMatchObject({ source_id: "github:acme/secret#4", sensitivity: "normal", by_user: true });
+  });
+
+  it("still refuses a source nothing makes sensitive", async () => {
+    const { deps, written } = setup();
+    const source = sourceFor("github:acme/open#4");
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: source.source_id, source }, github)).toEqual({ ok: false });
+    expect(written).toEqual([]);
+  });
+});
+
+describe("source-status", () => {
+  const github = { url: "https://github.com/acme/secret", tab: { id: 1, incognito: false } };
+  const status = async (deps: RequestDeps, o: object, from = github) =>
+    handleRequest(deps, { type: "source-status", sourceId: "github:acme/secret", ...o } as Request, from);
+
+  it("says whether the page is sensitive, would be asked about, or is fine", async () => {
+    const { deps, w } = setup();
+    expect(await status(deps, {})).toEqual({ status: "normal" });
+    expect(await status(deps, { privacy: "likely-private" })).toEqual({ status: "ask" });
+    expect(await status(deps, { privacy: "likely-private", choice: "anyway" })).toEqual({ status: "normal" });
+    w.source("github:acme/secret", "sensitive", "t", {}, true);
+    expect(await status(deps, { privacy: "likely-public" })).toEqual({ status: "sensitive" });
+  });
+
+  it("follows a site rule", async () => {
+    const { deps } = setup({ sites: [{ pattern: "github.com", sensitive: true }] });
+    expect(await status(deps, {})).toEqual({ status: "sensitive", byRule: true });
+  });
+});
+
+describe("unmarking and the lock", () => {
+  const github = { url: "https://github.com/acme/secret", tab: { id: 1, incognito: false } };
+  const inPrivate = { url: "https://github.com/acme/secret", tab: { id: 1, incognito: true } };
+
+  it("never writes from a private window", async () => {
+    const { deps, written, w } = setup();
+    w.source("github:acme/secret", "sensitive", "Repo", {}, true);
+    const source = sourceFor("github:acme/secret");
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: source.source_id, source }, inPrivate)).toEqual({ ok: false });
+    expect(written).toEqual([]);
+  });
+
+  it("says when a site rule is what makes a page sensitive, since the lock cannot undo that", async () => {
+    const { deps } = setup({ sites: [{ pattern: "github.com", sensitive: true }] });
+    expect(await handleRequest(deps, { type: "source-status", sourceId: "github:acme/secret" }, github)).toEqual({
+      status: "sensitive",
+      byRule: true,
+    });
+  });
+
+  it("does not say so for a source the reader marked", async () => {
+    const { deps, w } = setup();
+    w.source("github:acme/secret", "sensitive", "Repo", {}, true);
+    expect(await handleRequest(deps, { type: "source-status", sourceId: "github:acme/secret" }, github)).toEqual({ status: "sensitive" });
+  });
+});
