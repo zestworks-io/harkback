@@ -121,6 +121,14 @@ export const pages_es: Readonly<Record<string, string>> = {
   Sensitive: "Sensible",
   Disabled: "Desactivado",
   "+ Add site": "+ Añadir sitio",
+  "+ Suggested research sites": "+ Sitios de investigación sugeridos",
+  "Added {n} sites. Save to grant site access; the browser asks once.":
+    "Se añadieron {n} sitios. Guarda para dar acceso; el navegador pregunta una sola vez.",
+  "These sites already have rules.": "Estos sitios ya tienen reglas.",
+  "Saved, but site access was not granted, so automatic scanning will not run.":
+    "Guardado, pero no se concedió el acceso a los sitios, así que el escaneo automático no funcionará.",
+  "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.":
+    "Sitios sugeridos: bioRxiv, medRxiv, PubMed (solo resúmenes), SSRN, OpenReview y ACL Anthology, todos con escaneo automático.",
   "Save changes": "Guardar cambios",
   "Back up now": "Copia de seguridad ahora",
   "Harkback settings": "Ajustes de Harkback",

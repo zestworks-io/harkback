@@ -121,6 +121,12 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Sensitive: "敏感",
   Disabled: "停用",
   "+ Add site": "+ 新增網站",
+  "+ Suggested research sites": "+ 建議的研究網站",
+  "Added {n} sites. Save to grant site access; the browser asks once.": "已新增 {n} 個網站。儲存後瀏覽器會一次詢問網站存取權限。",
+  "These sites already have rules.": "這些網站都已有規則。",
+  "Saved, but site access was not granted, so automatic scanning will not run.": "已儲存，但未授予網站存取權限，自動掃描不會運作。",
+  "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.":
+    "建議網站：bioRxiv、medRxiv、PubMed（僅摘要）、SSRN、OpenReview 與 ACL Anthology，皆會自動掃描。",
   "Save changes": "儲存變更",
   "Back up now": "立即備份",
   "Harkback settings": "Harkback 設定",

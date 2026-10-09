@@ -121,6 +121,14 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Sensitive: "민감",
   Disabled: "사용 안 함",
   "+ Add site": "+ 사이트 추가",
+  "+ Suggested research sites": "+ 추천 연구 사이트",
+  "Added {n} sites. Save to grant site access; the browser asks once.":
+    "사이트 {n}개를 추가했습니다. 저장하면 접근 권한을 한 번만 묻습니다.",
+  "These sites already have rules.": "이 사이트들에는 이미 규칙이 있습니다.",
+  "Saved, but site access was not granted, so automatic scanning will not run.":
+    "저장했지만 사이트 접근 권한이 허용되지 않아 자동 스캔이 동작하지 않습니다.",
+  "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.":
+    "추천 사이트: bioRxiv, medRxiv, PubMed(초록만), SSRN, OpenReview, ACL Anthology. 모두 자동으로 스캔됩니다.",
   "Save changes": "변경 사항 저장",
   "Back up now": "지금 백업",
   "Harkback settings": "Harkback 설정",

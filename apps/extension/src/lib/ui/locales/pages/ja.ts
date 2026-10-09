@@ -121,6 +121,14 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Sensitive: "機密",
   Disabled: "無効",
   "+ Add site": "+ サイトを追加",
+  "+ Suggested research sites": "+ おすすめの研究サイト",
+  "Added {n} sites. Save to grant site access; the browser asks once.":
+    "{n} 件のサイトを追加しました。保存するとアクセス許可を求められます(ブラウザの確認は一度だけです)。",
+  "These sites already have rules.": "これらのサイトにはすでにルールがあります。",
+  "Saved, but site access was not granted, so automatic scanning will not run.":
+    "保存しましたが、サイトへのアクセスが許可されていないため、自動スキャンは動作しません。",
+  "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.":
+    "おすすめのサイト: bioRxiv、medRxiv、PubMed(要旨のみ)、SSRN、OpenReview、ACL Anthology。いずれも自動でスキャンされます。",
   "Save changes": "変更を保存",
   "Back up now": "今すぐバックアップ",
   "Harkback settings": "Harkback の設定",

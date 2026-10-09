@@ -82,3 +82,21 @@ export function originPattern(url: string): string | null {
     return null;
   }
 }
+
+/** Sites that publish papers, scanned automatically once the reader adds them. */
+export const SUGGESTED_RESEARCH_SITES: readonly string[] = [
+  "biorxiv.org",
+  "medrxiv.org",
+  "pubmed.ncbi.nlm.nih.gov",
+  "papers.ssrn.com",
+  "openreview.net",
+  "aclanthology.org",
+];
+
+/** Adds an auto-scan rule for each suggested site that has no rule yet; a rule the reader already has is left as it is. Returns how many were added. */
+export function addSuggestedSites(rules: SiteRule[]): number {
+  const have = new Set(rules.map((r) => normalizePattern(r.pattern)));
+  const missing = SUGGESTED_RESEARCH_SITES.filter((p) => !have.has(p));
+  for (const pattern of missing) rules.push({ pattern, autoScan: true });
+  return missing.length;
+}

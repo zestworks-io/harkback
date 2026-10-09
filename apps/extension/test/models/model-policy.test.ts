@@ -1,8 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { RateLimiter } from "../../src/lib/models/rate-limit";
 import { chooseModel, isLocalUrl, modelUrlError } from "../../src/lib/models/model-policy";
-import { DEFAULT_SETTINGS, validateSettings, withDefaults, type ModelConfig, type Settings } from "../../src/lib/storage/settings";
-import { effectiveRule, hostPermissionPatterns, normalizePattern, originPattern } from "../../src/lib/source/site-rules";
+import {
+  DEFAULT_SETTINGS,
+  validateSettings,
+  withDefaults,
+  type ModelConfig,
+  type Settings,
+  type SiteRule,
+} from "../../src/lib/storage/settings";
+import {
+  addSuggestedSites,
+  effectiveRule,
+  hostPermissionPatterns,
+  normalizePattern,
+  originPattern,
+  SUGGESTED_RESEARCH_SITES,
+} from "../../src/lib/source/site-rules";
 
 const remote: ModelConfig = {
   id: "r",
@@ -222,5 +236,26 @@ describe("RateLimiter", () => {
     rl.load([5000, 1000, 999999]);
     expect(rl.tryAcquire({ perMinute: 10, perHour: 10 }, 6000).ok).toBe(true);
     expect(rl.stamps()).toEqual([1000, 5000, 6000]);
+  });
+});
+
+describe("suggested research sites", () => {
+  it("are valid patterns that a reader gets auto-scan rules for", () => {
+    for (const p of SUGGESTED_RESEARCH_SITES) {
+      expect(normalizePattern(p)).toBe(p);
+      expect(hostPermissionPatterns(p)).toEqual([`*://${p}/*`, `*://*.${p}/*`]);
+    }
+    const rules: SiteRule[] = [];
+    expect(addSuggestedSites(rules)).toBe(SUGGESTED_RESEARCH_SITES.length);
+    expect(rules.every((r) => r.autoScan === true)).toBe(true);
+    expect(effectiveRule(rules, "https://www.biorxiv.org/content/10.1101/2024.01.01.123456v1").autoScan).toBe(true);
+  });
+
+  it("add nothing twice and leave a rule the reader already has alone", () => {
+    const rules: SiteRule[] = [{ pattern: "BioRxiv.org", sensitive: true }];
+    expect(addSuggestedSites(rules)).toBe(SUGGESTED_RESEARCH_SITES.length - 1);
+    expect(rules[0]).toEqual({ pattern: "BioRxiv.org", sensitive: true });
+    expect(addSuggestedSites(rules)).toBe(0);
+    expect(rules).toHaveLength(SUGGESTED_RESEARCH_SITES.length);
   });
 });

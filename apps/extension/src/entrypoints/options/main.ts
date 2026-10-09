@@ -10,7 +10,7 @@ import { BUILTIN_MODEL, builtInState, downloadBuiltIn } from "../../lib/models/b
 import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/storage/settings";
 import { applyTheme } from "../../lib/ui/theme";
 import { PROVIDERS, providerById } from "../../lib/models/providers";
-import { hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
+import { addSuggestedSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
@@ -93,16 +93,22 @@ async function main(): Promise<void> {
         ...next.sites.filter((r) => r.autoScan && !r.disabled).flatMap((r) => hostPermissionPatterns(r.pattern)),
       ]),
     ];
-    if (origins.length > 0) await requestOrigins(origins);
+    const granted = origins.length === 0 || (await requestOrigins(origins));
     Object.assign(draft, next);
     await browser.storage.local.set({ settings: next });
     await request({ type: "settings-changed" });
     // The rows still hold the objects from before the save; drawing them again keeps the next edit from being lost.
     render();
-    status.textContent = L("已保存。", "Saved.");
+    status.textContent = granted
+      ? L("已保存。", "Saved.")
+      : L(
+          "已保存，但网站访问权限未授予，自动扫描暂不生效。",
+          "Saved, but site access was not granted, so automatic scanning will not run.",
+        );
   }
 
   const ocrHost = h("div", { "data-hb": "ocr-host" });
+  let suggestMessage = "";
 
   function render(): void {
     void languagePanel({ L }).then((panel) => ocrHost.replaceChildren(panel));
@@ -330,6 +336,25 @@ async function main(): Promise<void> {
     const addSite = h("button", { type: "button", className: "add", "data-hb": "add-site" }, L("+ 添加网站", "+ Add site"));
     addSite.addEventListener("click", () => {
       draft.sites.push({ pattern: "" });
+      render();
+    });
+
+    const suggestNote = h("p", { className: "note", "data-hb": "suggest-note" }, suggestMessage);
+    const suggestSites = h(
+      "button",
+      { type: "button", className: "add", "data-hb": "suggest-sites" },
+      L("+ 推荐的研究网站", "+ Suggested research sites"),
+    );
+    suggestSites.addEventListener("click", () => {
+      const added = addSuggestedSites(draft.sites);
+      suggestMessage =
+        added > 0
+          ? L(
+              "已添加 {n} 个网站。点击保存后，浏览器会一次性询问网站访问权限。",
+              "Added {n} sites. Save to grant site access; the browser asks once.",
+              { n: added },
+            )
+          : L("这些网站都已有规则。", "These sites already have rules.");
       render();
     });
 
@@ -570,6 +595,16 @@ async function main(): Promise<void> {
               ...siteRows,
               draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
               addSite,
+              suggestSites,
+              suggestNote,
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "推荐网站：bioRxiv、medRxiv、PubMed（只有摘要）、SSRN、OpenReview 和 ACL Anthology，都会自动扫描。",
+                  "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.",
+                ),
+              ),
             ],
           ),
         ],

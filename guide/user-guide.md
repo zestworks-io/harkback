@@ -153,6 +153,8 @@ Under _Sites_ in settings, each rule has a pattern and three switches, plus an o
 
 When several rules match a page, each setting comes from the **most specific** rule that sets it: a URL prefix beats a domain, and a longer pattern beats a shorter one. So you can mark a whole site sensitive and switch that off for one public path, or the other way round.
 
+**Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
+
 ## Keyboard and shortcuts
 
 | Key            | Action                                       |

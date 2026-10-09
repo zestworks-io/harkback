@@ -4,6 +4,10 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+### Added
+
+- **Suggested research sites.** Settings → Sites has a _Suggested research sites_ button that adds auto-scan rules for bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology in one step. It skips sites that already have a rule and never changes one you edited. Saving asks the browser for site access once for all of them.
+
 ### Fixed
 
 - A term selected in another language no longer creates a second concept. When the model's card gives the English name of a concept you already have (as its name or one of its aliases, in the same field), the lookup joins that concept and adds the selected text as an alias, so the next page matches either language. Names shared by several concepts, or by concepts in another field, still stay separate.
