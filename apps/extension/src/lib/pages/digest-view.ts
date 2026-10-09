@@ -1,5 +1,5 @@
-import { h } from "../dom";
-import type { Digest } from "../digest";
+import { h } from "../ui/dom";
+import type { Digest } from "../records/digest";
 import { pick } from "../ui/pick";
 import type { Lang } from "../ui/languages";
 

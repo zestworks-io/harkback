@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import type { Request, ResponseMap } from "../messages";
+import type { Request, ResponseMap } from "../messaging/messages";
 import type { Lang } from "../ui/languages";
 import { pick } from "../ui/pick";
 

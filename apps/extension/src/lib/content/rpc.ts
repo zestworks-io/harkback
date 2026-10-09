@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import type { PortIn, PortOut, Request, ResponseMap } from "../messages";
+import type { PortIn, PortOut, Request, ResponseMap } from "../messaging/messages";
 
 export interface PortLike {
   postMessage(message: PortIn): void;

@@ -1,7 +1,7 @@
 import type { Tier } from "@harkback/spec";
-import { h } from "../dom";
-import { renderMarkdown } from "../markdown";
-import type { ErrorCode } from "../messages";
+import { h } from "./dom";
+import { renderMarkdown } from "./markdown";
+import type { ErrorCode } from "../messaging/messages";
 import { errorText, t, type Lang } from "./strings";
 
 export type CardAction = "marked_understood" | "marked_confused";

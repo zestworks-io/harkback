@@ -1,7 +1,7 @@
-import type { BuiltInState } from "../builtin-ai";
-import { ollamaOriginsHelp, type ConnectionResult } from "../connection";
-import { isLocalUrl } from "../model-policy";
-import type { ModelConfig, Settings } from "../settings";
+import type { BuiltInState } from "../models/builtin-ai";
+import { ollamaOriginsHelp, type ConnectionResult } from "../models/connection";
+import { isLocalUrl } from "../models/model-policy";
+import type { ModelConfig, Settings } from "../storage/settings";
 import type { Lang } from "../ui/languages";
 import { pick } from "../ui/pick";
 

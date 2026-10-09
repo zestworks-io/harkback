@@ -1,4 +1,4 @@
-import type { ErrorCode } from "../messages";
+import type { ErrorCode } from "../messaging/messages";
 import type { Lang } from "./languages";
 
 export type { Lang };

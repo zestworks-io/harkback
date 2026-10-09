@@ -8,8 +8,8 @@ import { PAGE_STRINGS } from "../src/lib/ui/locales/pages";
 import { UI_STRINGS } from "../src/lib/ui/locales/ui";
 import { pick } from "../src/lib/ui/pick";
 import { t, useStrings } from "../src/lib/ui/strings";
-import { dueText } from "../src/lib/due";
-import { withDefaults } from "../src/lib/settings";
+import { dueText } from "../src/lib/review/due";
+import { withDefaults } from "../src/lib/storage/settings";
 
 const extra = UI_LANGUAGES.map((l) => l.code).filter((c) => c !== "zh" && c !== "en");
 

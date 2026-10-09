@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { withDefaults } from "../src/lib/settings";
-import { sensitiveBySiteRule } from "../src/lib/site-rules";
-import { StateCache } from "../src/lib/state-cache";
+import { withDefaults } from "../src/lib/storage/settings";
+import { sensitiveBySiteRule } from "../src/lib/source/site-rules";
+import { StateCache } from "../src/lib/storage/state-cache";
 
 describe("sensitiveBySiteRule", () => {
   const rules = [

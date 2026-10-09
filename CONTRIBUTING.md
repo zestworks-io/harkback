@@ -14,11 +14,11 @@ Start with [guide/architecture.md](guide/architecture.md): it explains the piece
 
 Tests:
 
-| Where                 | What                                                                                             |
-| --------------------- | ------------------------------------------------------------------------------------------------ |
-| `packages/*/test`     | Pure logic, including property tests for replay.                                                 |
-| `apps/extension/test` | Everything in `src/lib`; a browser-like DOM comes from happy-dom, IndexedDB from fake-indexeddb. |
-| `apps/extension/e2e`  | The real extension in Chromium against a stub model server and HTML fixtures.                    |
+| Where                 | What                                                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `packages/*/test`     | Pure logic, including property tests for replay.                                                                      |
+| `apps/extension/test` | Everything in `src/lib`, in the same folders; a browser-like DOM comes from happy-dom, IndexedDB from fake-indexeddb. |
+| `apps/extension/e2e`  | The real extension in Chromium against a stub model server and HTML fixtures.                                         |
 
 `pnpm exec playwright install chromium` once, then `pnpm e2e`. Run a single file with `pnpm exec vitest run path/to/file.test.ts`, or with `npx playwright test e2e/file.spec.ts` from `apps/extension`.
 
@@ -51,21 +51,21 @@ The ESLint setup lives in `tools/lint` with its own TypeScript 6, because typesc
 
 ### Adding a model provider
 
-Add an entry to `PROVIDERS` in `apps/extension/src/lib/providers.ts`. If the service speaks the OpenAI chat-completions format, that is all. If not, add an adapter in `lib/model-client.ts` (URL, headers, request body, how to read a streamed chunk and a whole reply) and tests with a fake `fetch` in `test/model-client.test.ts`. Also list it in the README table and [guide/models.md](guide/models.md).
+Add an entry to `PROVIDERS` in `apps/extension/src/lib/models/providers.ts`. If the service speaks the OpenAI chat-completions format, that is all. If not, add an adapter in `lib/models/model-client.ts` (URL, headers, request body, how to read a streamed chunk and a whole reply) and tests with a fake `fetch` in `test/model-client.test.ts`. Also list it in the README table and [guide/models.md](guide/models.md).
 
 ### Adding a language
 
 The interface language and the explanation language are separate lists.
 
 1. **Interface:** add the code to `UI_LANGUAGES` in `lib/ui/languages.ts`. Create `lib/ui/locales/ui/<code>.ts` (the explain card and reunion text, one entry per key of `strings.ts`) and `lib/ui/locales/pages/<code>.ts` (the settings, history and onboarding text, keyed by the English sentence), and register both in the `index.ts` beside them.
-2. **Explanations:** the language must also be in `EXPLAIN_LANGUAGES` in `packages/core/src/languages.ts`.
+2. **Explanations:** the language must also be in `EXPLAIN_LANGUAGES` in `packages/core/src/llm/languages.ts`.
 3. Run `pnpm test`: `test/locales.test.ts` lists every sentence that is missing, unused or has different `{placeholders}`.
 
 New English text in a page is written as `L("中文", "English")` or `pick(lang, zh, en)`; the test then requires a translation in every table.
 
 ### Adding an event type or field
 
-Change `packages/spec/src/schema.ts`, regenerate the schema with `pnpm --filter @harkback/spec gen:schema`, handle it in `packages/core/src/replay.ts` and add a replay test. New optional fields keep old logs valid. A change that old versions cannot read needs a new envelope version `v`.
+Change `packages/spec/src/schema.ts`, regenerate the schema with `pnpm --filter @harkback/spec gen:schema`, handle it in `packages/core/src/events/replay.ts` and add a replay test. New optional fields keep old logs valid. A change that old versions cannot read needs a new envelope version `v`.
 
 ### Adding a setting
 
@@ -73,7 +73,7 @@ Add it to the `Settings` type, `DEFAULT_SETTINGS`, `withDefaults` (so stored set
 
 ### Adding a request between pages and the background
 
-Add it to `Request`, `ResponseMap` and `REQUEST_TYPES` in `lib/messages.ts`, handle it in `lib/requests.ts` with a test, and decide who may send it in `lib/sender-auth.ts`. Anything that writes or deletes is for extension pages only.
+Add it to `Request`, `ResponseMap` and `REQUEST_TYPES` in `lib/messaging/messages.ts`, handle it in `lib/messaging/requests.ts` with a test, and decide who may send it in `lib/messaging/sender-auth.ts`. Anything that writes or deletes is for extension pages only.
 
 ## Releasing
 

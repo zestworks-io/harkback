@@ -1,30 +1,36 @@
 import { DAY_MS, exportMarkdown, parseJsonl, replay, withoutSensitive, type Grade, type ReviewAction, type State } from "@harkback/core";
 import { DOMAINS, type Domain } from "@harkback/spec";
 import { browser } from "wxt/browser";
-import { ankiTsv } from "../../lib/anki";
-import { h } from "../../lib/dom";
-import { buildDigest, weekOf } from "../../lib/digest";
-import { buildGraph } from "../../lib/graph";
+import { ankiTsv } from "../../lib/export/anki";
+import { h } from "../../lib/ui/dom";
+import { buildDigest, weekOf } from "../../lib/records/digest";
+import { buildGraph } from "../../lib/records/graph";
 import { digestView } from "../../lib/pages/digest-view";
-import type { Request, ResponseMap } from "../../lib/messages";
-import { foundationGaps } from "../../lib/foundation";
-import { conceptDetail, understandingOf, type ConceptDetail, type RelatedConcept, type Understanding } from "../../lib/concept-detail";
-import { localizeNames } from "../../lib/names";
-import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
-import { renderMarkdown } from "../../lib/markdown";
+import type { Request, ResponseMap } from "../../lib/messaging/messages";
+import { foundationGaps } from "../../lib/review/foundation";
+import {
+  conceptDetail,
+  understandingOf,
+  type ConceptDetail,
+  type RelatedConcept,
+  type Understanding,
+} from "../../lib/records/concept-detail";
+import { localizeNames } from "../../lib/records/names";
+import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/records/history";
+import { renderMarkdown } from "../../lib/ui/markdown";
 import { backupNow, request } from "../../lib/pages/request";
-import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/notes";
-import { dueText, daysText } from "../../lib/due";
-import { dueAtOf, nextDueAt, reviewQueue } from "../../lib/review";
-import { routeCheck } from "../../lib/review-check";
-import { explainLanguageOf, withDefaults } from "../../lib/settings";
-import { sensitiveBySiteRule } from "../../lib/site-rules";
-import { initTheme } from "../../lib/theme";
+import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/export/notes";
+import { dueText, daysText } from "../../lib/review/due";
+import { dueAtOf, nextDueAt, reviewQueue } from "../../lib/review/review";
+import { routeCheck } from "../../lib/review/review-check";
+import { explainLanguageOf, withDefaults } from "../../lib/storage/settings";
+import { sensitiveBySiteRule } from "../../lib/source/site-rules";
+import { initTheme } from "../../lib/ui/theme";
 import { quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 import { errorText, useStrings } from "../../lib/ui/strings";
 import { UI_STRINGS } from "../../lib/ui/locales/ui";
-import { CHANGE_CHANNEL, EventStore } from "../../lib/store";
+import { CHANGE_CHANNEL, EventStore } from "../../lib/storage/store";
 
 async function main(): Promise<void> {
   void initTheme();

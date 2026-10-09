@@ -1,16 +1,16 @@
 import { ulid } from "@harkback/core";
 import { browser } from "wxt/browser";
-import { testConnection, type ConnectionResult } from "../../lib/connection";
-import { h } from "../../lib/dom";
+import { testConnection, type ConnectionResult } from "../../lib/models/connection";
+import { h } from "../../lib/ui/dom";
 import { privacyNotes } from "../../lib/pages/privacy";
 import { request, requestOrigins } from "../../lib/pages/request";
 import { connectionMessage, onboardingSettings } from "../../lib/pages/setup";
-import { PROVIDERS, providerById } from "../../lib/providers";
-import { modelUrlError } from "../../lib/model-policy";
-import { withDefaults } from "../../lib/settings";
-import { initTheme } from "../../lib/theme";
+import { PROVIDERS, providerById } from "../../lib/models/providers";
+import { modelUrlError } from "../../lib/models/model-policy";
+import { withDefaults } from "../../lib/storage/settings";
+import { initTheme } from "../../lib/ui/theme";
 import { secretInput } from "../../lib/ui/secret-input";
-import { originPattern } from "../../lib/site-rules";
+import { originPattern } from "../../lib/source/site-rules";
 import { isLang, UI_LANGUAGES, type Lang } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 

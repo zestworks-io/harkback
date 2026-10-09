@@ -1,6 +1,6 @@
-import { h } from "../dom";
-import type { ErrorCode, ResponseMap } from "../messages";
-import type { PreviewStatus, PreviewTerm } from "../preview";
+import { h } from "./dom";
+import type { ErrorCode, ResponseMap } from "../messaging/messages";
+import type { PreviewStatus, PreviewTerm } from "../explain/preview";
 import { errorText, t, type Lang, type StringKey } from "./strings";
 
 export interface PreviewHandlers {

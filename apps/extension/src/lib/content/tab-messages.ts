@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import type { TabMessage } from "../messages";
+import type { TabMessage } from "../messaging/messages";
 import type { ContentApp } from "./app";
 
 /** The toolbar button and the shortcut reach a page through these messages; only this extension may send them. */

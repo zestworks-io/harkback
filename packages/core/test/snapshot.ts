@@ -1,4 +1,4 @@
-import type { State } from "../src/state";
+import type { State } from "../src/events/state";
 
 function sortedObject<V>(map: Map<string, V>): Record<string, V> {
   return Object.fromEntries([...map.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));

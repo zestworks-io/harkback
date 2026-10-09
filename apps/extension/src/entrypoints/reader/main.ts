@@ -12,9 +12,9 @@ import { getChoice, getPack, installedPacks, putChoice } from "../../lib/ocr/sto
 import { takeHandoff } from "../../lib/pdf/handoff";
 import { createScanner, type Scanner } from "../../lib/pdf/scan";
 import { mountViewer, type ScanProgress, type Viewer } from "../../lib/pdf/viewer";
-import { withDefaults } from "../../lib/settings";
-import { initTheme } from "../../lib/theme";
-import { detectPdfSource, type PdfFacts } from "../../lib/source-id";
+import { withDefaults } from "../../lib/storage/settings";
+import { initTheme } from "../../lib/ui/theme";
+import { detectPdfSource, type PdfFacts } from "../../lib/source/source-id";
 import { pick } from "../../lib/ui/pick";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;

@@ -1,4 +1,4 @@
-import { h } from "../dom";
+import { h } from "./dom";
 
 /** A password input with a button that reveals the value, so a pasted key can be checked. */
 export function secretInput(input: HTMLInputElement, labels: { show: string; hide: string }): HTMLDivElement {

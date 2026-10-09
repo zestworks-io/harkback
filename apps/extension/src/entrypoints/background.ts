@@ -14,8 +14,8 @@ import {
 import type { HarkEvent } from "@harkback/spec";
 import { browser, type Browser } from "wxt/browser";
 import { defineBackground } from "wxt/utils/define-background";
-import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue, waitForDownload, type BackupState } from "../lib/backup";
-import type { LastLookup } from "../lib/cooccurrence";
+import { applyRetention, backupFilename, EMPTY_BACKUP_STATE, isBackupDue, waitForDownload, type BackupState } from "../lib/storage/backup";
+import type { LastLookup } from "../lib/records/cooccurrence";
 import {
   buildExplainRecord,
   daysSinceLastEncounter,
@@ -26,24 +26,24 @@ import {
   type ExplainPlan,
   type ExplainRecord,
   type ExplainRequestMsg,
-} from "../lib/explain";
-import { isRequest, type ErrorCode, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messages";
-import { classifyTerms, routePreview, storedExplanation } from "../lib/preview";
-import { routeCheck } from "../lib/review-check";
-import { ModelError, streamChat } from "../lib/model-client";
-import { reviewQueue } from "../lib/review";
-import { badgeFor } from "../lib/review-badge";
-import { RateLimiter, type RateResult } from "../lib/rate-limit";
-import { handleRequest, type RequestDeps } from "../lib/requests";
+} from "../lib/explain/explain";
+import { isRequest, type ErrorCode, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messaging/messages";
+import { classifyTerms, routePreview, storedExplanation } from "../lib/explain/preview";
+import { routeCheck } from "../lib/review/review-check";
+import { ModelError, streamChat } from "../lib/models/model-client";
+import { reviewQueue } from "../lib/review/review";
+import { badgeFor } from "../lib/review/review-badge";
+import { RateLimiter, type RateResult } from "../lib/models/rate-limit";
+import { handleRequest, type RequestDeps } from "../lib/messaging/requests";
 import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
 import { putHandoff } from "../lib/pdf/handoff";
-import { allowed, readerSource, senderKind } from "../lib/sender-auth";
-import { explainLanguageOf, withDefaults, type ModelConfig, type Settings } from "../lib/settings";
-import { effectiveRule, hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/site-rules";
-import { arxivHtmlUrl } from "../lib/source-id";
-import { StateCache } from "../lib/state-cache";
+import { allowed, readerSource, senderKind } from "../lib/messaging/sender-auth";
+import { explainLanguageOf, withDefaults, type ModelConfig, type Settings } from "../lib/storage/settings";
+import { effectiveRule, hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/source/site-rules";
+import { arxivHtmlUrl } from "../lib/source/source-id";
+import { StateCache } from "../lib/storage/state-cache";
 import { UI_STRINGS } from "../lib/ui/locales/ui";
-import { CHANGE_CHANNEL, EventStore } from "../lib/store";
+import { CHANGE_CHANNEL, EventStore } from "../lib/storage/store";
 
 const CONTENT_SCRIPT = "/content-scripts/content.js";
 const ALLOWLIST_SCRIPT_ID = "allowlist";

@@ -1,4 +1,4 @@
-import { ownHosts } from "../extract";
+import { ownHosts } from "../source/extract";
 import { STYLES } from "./styles";
 
 export interface Overlay {

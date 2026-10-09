@@ -1,4 +1,4 @@
-import { h } from "../dom";
+import { h } from "../ui/dom";
 import { BUNDLED_LANGUAGE, languageName, OCR_LANGUAGES, PACK_HOST_NAME, type OcrLanguage } from "./languages";
 import { installPack, PackError } from "./install";
 import { installedPacks, removePack } from "./store";

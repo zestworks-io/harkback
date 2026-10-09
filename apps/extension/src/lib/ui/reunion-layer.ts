@@ -1,5 +1,5 @@
-import { h } from "../dom";
-import type { ReunionCard } from "../reunion-cards";
+import { h } from "./dom";
+import type { ReunionCard } from "../records/reunion-cards";
 import type { Overlay } from "./overlay";
 import { quoteTitle } from "./languages";
 import { t, type Lang } from "./strings";

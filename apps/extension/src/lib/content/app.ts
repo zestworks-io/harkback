@@ -1,11 +1,11 @@
 import { Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
-import type { ExplainRequestMsg } from "../explain";
-import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../extract";
-import { h } from "../dom";
-import type { PageInfo, PortIn, PortOut } from "../messages";
-import type { PreviewTerm } from "../preview";
-import type { ReunionCard } from "../reunion-cards";
-import { detectSource, type DetectedSource } from "../source-id";
+import type { ExplainRequestMsg } from "../explain/explain";
+import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../source/extract";
+import { h } from "../ui/dom";
+import type { PageInfo, PortIn, PortOut } from "../messaging/messages";
+import type { PreviewTerm } from "../explain/preview";
+import type { ReunionCard } from "../records/reunion-cards";
+import { detectSource, type DetectedSource } from "../source/source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
 import { PreviewPanel } from "../ui/preview-panel";
