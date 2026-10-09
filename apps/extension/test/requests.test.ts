@@ -3,6 +3,7 @@ import type { HarkEvent } from "@harkback/spec";
 import { describe, expect, it } from "vitest";
 import type { Request } from "../src/lib/messages";
 import { handleRequest, pageInfo, type RequestDeps } from "../src/lib/requests";
+import type { SenderInfo } from "../src/lib/sender-auth";
 import { withDefaults } from "../src/lib/settings";
 import { world } from "./helpers";
 
@@ -36,6 +37,9 @@ function setup(settings: unknown = {}) {
       checked.push({ conceptId, answer });
       return { ok: true as const, verdict: "partial" as const, feedback: "close", suggested: 2 as const, model: "m" };
     },
+    previewPlan: async () => ({ ok: true as const, model: "m", remote: false }),
+    previewTerms: async () => ({ ok: true as const, terms: [], model: "m", remote: false }),
+    previewExplain: async () => ({ ok: true as const, explanation: "x", stored: false }),
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
@@ -202,6 +206,68 @@ describe("page-only requests", () => {
       code: "internal",
     });
     expect(checked).toEqual([]);
+  });
+
+  it("asks which model a scan would use without passing any page text", async () => {
+    const { deps } = setup();
+    const seen: unknown[] = [];
+    deps.previewPlan = async (r) => {
+      seen.push(r);
+      return { ok: true, model: "Ollama", remote: false };
+    };
+    expect(
+      await handleRequest(
+        deps,
+        { type: "preview-plan", sourceId: "arxiv:1" },
+        { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } },
+      ),
+    ).toEqual({
+      ok: true,
+      model: "Ollama",
+      remote: false,
+    });
+    expect(seen).toEqual([{ url: "https://arxiv.org/abs/2", sourceId: "arxiv:1" }]);
+  });
+
+  it("passes the page text of a scan on, cut to a safe length, and refuses an empty page", async () => {
+    const seen: { text: string; incognito: boolean }[] = [];
+    const { deps } = setup();
+    deps.previewTerms = async (r) => {
+      seen.push({ text: r.text, incognito: r.incognito });
+      return { ok: true, terms: [], model: "m", remote: false };
+    };
+    const scan = (text: string, sender: SenderInfo = extensionPage) =>
+      handleRequest(deps, { type: "preview-terms", sourceId: "arxiv:1", title: "T", text }, sender);
+    expect(await scan("   ")).toEqual({ ok: false, code: "internal" });
+    expect(seen).toEqual([]);
+    await scan("x".repeat(50_000));
+    expect(seen[0]!.text).toHaveLength(16_000);
+    await scan("hello", { ...extensionPage, tab: { id: 1, incognito: true } });
+    expect(seen[1]!.incognito).toBe(true);
+  });
+
+  it("never reads the records for a preview from a private window", async () => {
+    const { deps, conceptId } = setup();
+    const asked: (string | null)[] = [];
+    deps.previewExplain = async (r) => {
+      asked.push(r.conceptId);
+      return { ok: true, explanation: "x", stored: false };
+    };
+    const ask = (sender: SenderInfo = extensionPage) =>
+      handleRequest(deps, { type: "preview-explain", sourceId: "arxiv:1", title: "T", term: " LoRA ", conceptId, context: "" }, sender);
+    await ask();
+    await ask({ ...extensionPage, tab: { id: 1, incognito: true } });
+    expect(asked).toEqual([conceptId, null]);
+    expect(
+      await handleRequest(
+        deps,
+        { type: "preview-explain", sourceId: "a", title: "", term: "  ", conceptId: null, context: "" },
+        extensionPage,
+      ),
+    ).toEqual({
+      ok: false,
+      code: "internal",
+    });
   });
 
   it("refuses a review answer for an unknown concept or an action it cannot take", async () => {

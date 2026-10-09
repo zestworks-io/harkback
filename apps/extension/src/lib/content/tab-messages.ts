@@ -9,7 +9,11 @@ export function listenForTabMessages(app: ContentApp): void {
     const m = message as TabMessage | null;
     if (m?.type === "hello") sendResponse(true);
     else if (m?.type === "activate") void app.activate();
-    else if (m?.type === "explain-selection") void app.explainSelection();
+    // The toolbar button and its shortcut: scan for reunions as before, and offer the preview without waiting for that scan.
+    else if (m?.type === "preview") {
+      void app.activate().catch(() => undefined);
+      void app.offerPreview().catch(() => undefined);
+    } else if (m?.type === "explain-selection") void app.explainSelection();
     return false;
   });
 }

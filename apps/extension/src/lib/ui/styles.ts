@@ -120,6 +120,20 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-reunion .hb-body { color: var(--hb-muted); font-size: 13.5px; }
 .hb-reunion .hb-why { color: var(--hb-muted); font-size: 12px; margin-top: 8px; font-style: italic; }
 
+.hb-compose:has(> .hb-footer:empty) { display: none; }
+.hb-preview { position: fixed; top: 16px; right: 16px; width: 360px; max-width: calc(100vw - 32px); }
+.hb-group { margin: 0 0 14px; }
+.hb-group h3, .hb-group summary { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--hb-muted); letter-spacing: 0.02em; cursor: default; }
+.hb-group summary { cursor: pointer; }
+.hb-term { padding: 4px 0; border-bottom: 1px solid var(--hb-border); }
+.hb-term:last-child { border-bottom: 0; }
+.hb-term-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hb-term-name { font-weight: 550; overflow-wrap: anywhere; }
+.hb-detail { font-size: 13.5px; line-height: 1.55; padding: 2px 0 6px; }
+.hb-detail:empty { display: none; }
+.hb-term[data-status="confused"] .hb-term-name { color: var(--hb-error); }
+.hb-term[data-status="rusty"] .hb-term-name { color: var(--hb-external); }
+
 .hb-trigger {
   position: absolute; padding: 5px 12px; font-weight: 550; background: var(--hb-primary); color: var(--hb-primary-fg);
   border: 0; border-radius: 999px; box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.35); animation: hb-in 120ms ease-out;

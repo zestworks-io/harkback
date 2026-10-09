@@ -54,6 +54,7 @@ const LIMITS = {
   question: 2000,
   followUpExplanation: 3000,
   answer: 2000,
+  previewContext: 1200,
 } as const;
 
 const DELIMITER = /<\/?(?:page_content|earlier_content|selected)>/gi;
@@ -176,6 +177,88 @@ export function buildCheckPrompt(req: CheckRequest): ChatMessage[] {
     "</earlier_content>",
     `The reader's answer from memory: ${clean(req.answer, LIMITS.answer)}`,
   ].join("\n");
+  return [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+}
+
+/** How much of a page a scan reads: the part of the page that is sent and the part the prompt keeps are the same. */
+export const MAX_PREVIEW_PAGE_CHARS = 16_000;
+export const MAX_PREVIEW_TERMS = 15;
+const MAX_TERM_CHARS = 80;
+
+export interface TermsRequest {
+  pageTitle: string;
+  pageText: string;
+  language: string;
+}
+
+/** Asks a model for the terms a reader would need to know to follow a page. The reply is read by `parseTerms`. */
+export function buildTermsPrompt(req: TermsRequest): ChatMessage[] {
+  const system = [
+    `List the ${MAX_PREVIEW_TERMS} most important technical terms, concepts or abbreviations that a reader needs in order to follow the page, most important first.`,
+    "Use each term as it is written on the page, in its short form (no articles, no surrounding words). Skip ordinary words, names of people and places, and section titles.",
+    "Reply with exactly one block and nothing else: <terms> containing one term per line.",
+    UNTRUSTED,
+  ].join("\n");
+  const user = [
+    "<page_content>",
+    `Title: ${clean(req.pageTitle, LIMITS.title)}`,
+    clean(req.pageText, MAX_PREVIEW_PAGE_CHARS),
+    "</page_content>",
+  ].join("\n");
+  return [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+}
+
+/** Reads the reply to `buildTermsPrompt`: distinct terms in the order given, at most `MAX_PREVIEW_TERMS`. Empty when the block is missing. */
+export function parseTerms(raw: string): string[] {
+  const closed = /<terms>([\s\S]*?)<\/terms>/i.exec(raw)?.[1];
+  // A reply cut off by the token limit still has a usable beginning.
+  const body = closed ?? /<terms>([\s\S]*)$/i.exec(raw)?.[1] ?? "";
+  const seen = new Set<string>();
+  const terms: string[] = [];
+  for (const line of body.split("\n")) {
+    const term = line
+      .replace(/<\/?terms?>/gi, "")
+      .replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "")
+      .trim();
+    const key = term.toLowerCase();
+    if (!term || term.length > MAX_TERM_CHARS || seen.has(key)) continue;
+    seen.add(key);
+    terms.push(term);
+    if (terms.length === MAX_PREVIEW_TERMS) break;
+  }
+  return terms;
+}
+
+export interface PreviewExplainRequest {
+  term: string;
+  pageTitle: string;
+  /** Text around the term's first occurrence on the page, if it appears. */
+  context: string;
+  language: string;
+}
+
+/** A short explanation of a term the reader has not met, for reading ahead. Plain text; nothing is recorded. */
+export function buildPreviewExplainPrompt(req: PreviewExplainRequest): ChatMessage[] {
+  const system = [
+    "A reader is about to read a document and wants a short preview of a technical term they have not met.",
+    `Explain it in ${explainLanguageName(req.language)} in at most 3 sentences of plain text; keep technical terms in their original form. Reply with the explanation only.`,
+    UNTRUSTED,
+  ].join("\n");
+  const user = [
+    `Term: ${clean(req.term, LIMITS.selection)}`,
+    "<page_content>",
+    `Title: ${clean(req.pageTitle, LIMITS.title)}`,
+    req.context ? `Where it appears: ${clean(req.context, LIMITS.previewContext)}` : "",
+    "</page_content>",
+  ]
+    .filter(Boolean)
+    .join("\n");
   return [
     { role: "system", content: system },
     { role: "user", content: user },

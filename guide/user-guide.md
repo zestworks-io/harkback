@@ -3,6 +3,7 @@
 ## Contents
 
 - [Explaining](#explaining)
+- [Preview a page before reading](#preview-a-page-before-reading)
 - [Follow-up questions](#follow-up-questions)
 - [Reunions](#reunions)
 - [Concepts and spellings](#concepts-and-spellings)
@@ -34,6 +35,19 @@ Each answer carries a tag:
 Explanations are written in the language you choose in settings (16 languages, or "follow the interface"). Technical terms keep their original form. Formulas are typeset, and tables and nested lists are shown.
 
 If the term is close to one you already looked up, the model is told so and can explain the difference instead of starting over. If it is very close, Harkback asks "Is this the term you looked up 3 days ago?" and records your answer.
+
+## Preview a page before reading
+
+Click the toolbar button, press `Alt+Shift+P`, or choose **Harkback: Preview this page** in the right-click menu, and a panel offers to scan the page. It names the model that would read the page and says whether it is local or remote. Nothing is sent until you press **Scan**. The page text then goes to your model once, which lists the page's key terms. Your own records sort them, on your computer:
+
+| Group              | Meaning                                                                         |
+| ------------------ | ------------------------------------------------------------------------------- |
+| **Still confused** | You looked it up and last answered that you were confused.                      |
+| **Rusty**          | You were unsure of it, or it is due for review.                                 |
+| **New to you**     | You have never looked it up (or only saw it named as a prerequisite).           |
+| **Known**          | Understood and not yet due. Collapsed, because it is not what to look at first. |
+
+**Preview** beside a term shows the explanation you were given earlier, with no model call. For a new term the model writes a short explanation. Nothing from a preview is recorded; to keep a term, select it on the page and explain it as usual. The model sees only the page text, never your concept list, and a sensitive page only uses a local model. A scan reads the first 16,000 characters of a page; for a longer page the panel says how much was left out, so terms further down are not listed. In a private window every term counts as new, because your records are not read there.
 
 ## Follow-up questions
 
@@ -144,6 +158,7 @@ When several rules match a page, each setting comes from the **most specific** r
 | Key            | Action                                       |
 | -------------- | -------------------------------------------- |
 | `Alt+Shift+E`  | Explain the selection                        |
+| `Alt+Shift+P`  | Offer to preview this page                   |
 | `Esc`          | Close the card                               |
 | `Enter`        | Send a follow-up question                    |
 | Shift + arrows | Select with the keyboard; the button appears |

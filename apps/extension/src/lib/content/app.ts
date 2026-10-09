@@ -1,18 +1,21 @@
-import { Matcher, type Hit, type MatcherEntry } from "@harkback/core";
+import { Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain";
 import { contextForRange, extractPage, rangeFor, type ExtractedPage } from "../extract";
 import { h } from "../dom";
 import type { PageInfo, PortIn, PortOut } from "../messages";
+import type { PreviewTerm } from "../preview";
 import type { ReunionCard } from "../reunion-cards";
 import { detectSource, type DetectedSource } from "../source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
+import { PreviewPanel } from "../ui/preview-panel";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
 import { t, useStrings, type Lang } from "../ui/strings";
 import type { PortLike, Rpc } from "./rpc";
 
 const MAX_SELECTION = 200;
 const PING_MS = 20_000;
+const PREVIEW_CONTEXT_CHARS = 400;
 
 export interface ExplainOptions {
   mode: ExplainRequestMsg["mode"];
@@ -54,6 +57,7 @@ export class ContentApp {
   private triggerRange: Range | null = null;
   private session: Session | null = null;
   private layer: ReunionLayer | null = null;
+  private previewPanel: PreviewPanel | null = null;
   private rescan: ReturnType<typeof setTimeout> | undefined;
   /** Rebuilt only when the page-info entries change, not on every rescan. */
   private matcher: { entries: MatcherEntry[]; value: Matcher } | null = null;
@@ -173,6 +177,7 @@ export class ContentApp {
       // Another page of a single-page app: the rules, the source and the card no longer apply.
       this.href = location.href;
       this.endSession();
+      this.closePreview();
       this.layer?.clear();
       this.page = null;
       await this.activate().catch(() => undefined);
@@ -185,6 +190,69 @@ export class ContentApp {
     if (action === "recalled") void this.rpc.request({ type: "action", encounterId: card.encounterId, action: "reunion_recalled" });
     else if (action === "mute") void this.rpc.request({ type: "mute", conceptId: card.conceptId });
     else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId });
+  }
+
+  /** The toolbar button and its shortcut: offer to scan the page for its key concepts. Nothing is sent until the reader agrees. */
+  async offerPreview(): Promise<void> {
+    this.info ??= this.take(await this.rpc.request({ type: "page-info" }));
+    if (!this.info.enabled || this.previewPanel) return;
+    const source = this.detect();
+    const panel: PreviewPanel = new PreviewPanel(this.lang, {
+      onScan: () => {
+        panel.scanning();
+        const page = (this.page ??= this.extract());
+        // A long page is read only up to a limit; the reader is told how much was left out.
+        const note =
+          page.text.length > MAX_PREVIEW_PAGE_CHARS
+            ? t(this.lang, "previewCovered", { n: MAX_PREVIEW_PAGE_CHARS, total: page.text.length })
+            : "";
+        this.rpc
+          .request({
+            type: "preview-terms",
+            sourceId: source.source_id,
+            title: source.title,
+            text: page.text.slice(0, MAX_PREVIEW_PAGE_CHARS),
+          })
+          .then(
+            (r) => {
+              if (this.previewPanel !== panel) return;
+              if (r.ok) panel.show(r.terms, note);
+              else panel.error(r.code, r.retryAfterMs);
+            },
+            () => this.previewPanel === panel && panel.error("internal"),
+          );
+      },
+      onExplain: (term: PreviewTerm) => {
+        const text = (this.page ??= this.extract()).text;
+        // Not `toLowerCase().indexOf`: some letters change length when lower-cased, which would shift the offset.
+        const at = new RegExp(term.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i").exec(text)?.index ?? -1;
+        const context = at < 0 ? "" : text.slice(Math.max(0, at - PREVIEW_CONTEXT_CHARS), at + term.term.length + PREVIEW_CONTEXT_CHARS);
+        return this.rpc.request({
+          type: "preview-explain",
+          sourceId: source.source_id,
+          title: source.title,
+          term: term.term,
+          conceptId: term.conceptId,
+          context,
+        });
+      },
+      onClose: () => this.closePreview(),
+    });
+    this.previewPanel = panel;
+    this.ensureOverlay().root.append(panel.el);
+    this.rpc.request({ type: "preview-plan", sourceId: source.source_id }).then(
+      (r) => {
+        if (this.previewPanel !== panel) return;
+        if (r.ok) panel.offer(r);
+        else panel.unavailable(r.code, r.retryAfterMs);
+      },
+      () => this.previewPanel === panel && panel.unavailable("internal"),
+    );
+  }
+
+  private closePreview(): void {
+    this.previewPanel?.close();
+    this.previewPanel = null;
   }
 
   async explainSelection(): Promise<void> {

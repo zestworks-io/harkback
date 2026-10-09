@@ -3,6 +3,7 @@ import {
   clampSource,
   identityKey,
   matcherEntriesFromState,
+  MAX_PREVIEW_PAGE_CHARS,
   REVIEW_ACTIONS,
   type EventFactory,
   type Hit,
@@ -21,6 +22,7 @@ const USER_ACTIONS = new Set(["marked_understood", "marked_confused", "reunion_r
 const REVIEW_ANSWERS = new Set<string>(REVIEW_ACTIONS);
 const MAX_HITS = 500;
 const MAX_ANSWER_CHARS = 2000;
+const MAX_TERM_CHARS = 200;
 
 /** What the one-shot request handlers need from the background page; tests supply fakes. */
 export interface RequestDeps {
@@ -34,6 +36,25 @@ export interface RequestDeps {
   runBackup(): Promise<void>;
   /** Asks the model whether a typed answer matches the stored explanation; the model, rate limit and sensitivity rules are the background's. */
   checkAnswer(conceptId: string, answer: string): Promise<ResponseMap["check-answer"]>;
+  /** Which model a scan would use, without sending anything. */
+  previewPlan(req: { url: string; sourceId: string }): Promise<ResponseMap["preview-plan"]>;
+  /** Asks a model for the key terms of a page and sorts them by what the reader knows; nothing is recorded. */
+  previewTerms(req: {
+    url: string;
+    sourceId: string;
+    title: string;
+    text: string;
+    incognito: boolean;
+  }): Promise<ResponseMap["preview-terms"]>;
+  /** A stored explanation, or a model's short one for a term never looked up; nothing is recorded. */
+  previewExplain(req: {
+    url: string;
+    sourceId: string;
+    title: string;
+    term: string;
+    conceptId: string | null;
+    context: string;
+  }): Promise<ResponseMap["preview-explain"]>;
   syncContentScripts(): Promise<void>;
   now(): number;
 }
@@ -123,6 +144,26 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       const answer = typeof msg.answer === "string" ? msg.answer.trim().slice(0, MAX_ANSWER_CHARS) : "";
       if (!answer) return { ok: false, code: "internal" };
       return deps.checkAnswer(String(msg.conceptId), answer);
+    }
+    case "preview-plan":
+      return deps.previewPlan({ url: sender.url ?? "", sourceId: String(msg.sourceId) });
+    case "preview-terms": {
+      const text = typeof msg.text === "string" ? msg.text.slice(0, MAX_PREVIEW_PAGE_CHARS) : "";
+      if (!text.trim()) return { ok: false, code: "internal" };
+      return deps.previewTerms({ url: sender.url ?? "", sourceId: String(msg.sourceId), title: String(msg.title ?? ""), text, incognito });
+    }
+    case "preview-explain": {
+      const term = typeof msg.term === "string" ? msg.term.trim().slice(0, MAX_TERM_CHARS) : "";
+      if (!term) return { ok: false, code: "internal" };
+      return deps.previewExplain({
+        url: sender.url ?? "",
+        sourceId: String(msg.sourceId),
+        title: String(msg.title ?? ""),
+        term,
+        // A private window never reads the records.
+        conceptId: incognito || typeof msg.conceptId !== "string" ? null : msg.conceptId,
+        context: typeof msg.context === "string" ? msg.context.slice(0, 2000) : "",
+      });
     }
     case "merge-concepts": {
       const { representative } = await deps.getState();

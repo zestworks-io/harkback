@@ -1,5 +1,8 @@
 import {
   buildCheckPrompt,
+  buildPreviewExplainPrompt,
+  buildTermsPrompt,
+  parseTerms,
   buildFollowUpPrompt,
   canonicalOrder,
   parseCheckReply,
@@ -24,7 +27,8 @@ import {
   type ExplainRecord,
   type ExplainRequestMsg,
 } from "../lib/explain";
-import { isRequest, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messages";
+import { isRequest, type ErrorCode, type PortIn, type PortOut, type ResponseMap, type TabMessage } from "../lib/messages";
+import { classifyTerms, routePreview, storedExplanation } from "../lib/preview";
 import { routeCheck } from "../lib/review-check";
 import { ModelError, streamChat } from "../lib/model-client";
 import { reviewQueue } from "../lib/review";
@@ -34,8 +38,8 @@ import { handleRequest, type RequestDeps } from "../lib/requests";
 import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
 import { putHandoff } from "../lib/pdf/handoff";
 import { allowed, readerSource, senderKind } from "../lib/sender-auth";
-import { explainLanguageOf, withDefaults, type Settings } from "../lib/settings";
-import { hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/site-rules";
+import { explainLanguageOf, withDefaults, type ModelConfig, type Settings } from "../lib/settings";
+import { effectiveRule, hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/site-rules";
 import { arxivHtmlUrl } from "../lib/source-id";
 import { StateCache } from "../lib/state-cache";
 import { UI_STRINGS } from "../lib/ui/locales/ui";
@@ -355,6 +359,89 @@ export default defineBackground(() => {
     }
   }
 
+  /**
+   * Both preview calls: route by the page's sensitivity, check access and the rate limit, ask once. `read` turns the reply into
+   * a result, or null when it is no use; then, like a failed call, the slot is given back.
+   */
+  async function previewModel<T>(
+    url: string,
+    sourceId: string,
+    ask: (model: ModelConfig, settings: Settings) => Promise<string>,
+    read: (raw: string) => T | null,
+  ): Promise<{ ok: true; value: T; model: ModelConfig; remote: boolean } | { ok: false; code: ErrorCode; retryAfterMs?: number }> {
+    const settings = await loadSettings();
+    const routed = routePreview(settings, await getState(), url, sourceId);
+    if (routed.kind === "error") return { ok: false, code: routed.code };
+    if (!(await canReach(routed.model))) return { ok: false, code: "no_permission" };
+    const asked = Date.now();
+    const rate = await acquireRate(settings, asked);
+    if (!rate.ok) return { ok: false, code: "local_rate", retryAfterMs: rate.retryAfterMs };
+    try {
+      const value = read(await ask(routed.model, settings));
+      if (value === null) {
+        await refundRate(asked);
+        return { ok: false, code: "http" };
+      }
+      return { ok: true, value, model: routed.model, remote: routed.remote };
+    } catch (e) {
+      await refundRate(asked);
+      return { ok: false, code: e instanceof ModelError ? e.code : "internal" };
+    }
+  }
+
+  async function previewPlan(req: Parameters<RequestDeps["previewPlan"]>[0]): Promise<ResponseMap["preview-plan"]> {
+    const routed = routePreview(await loadSettings(), await getState(), req.url, req.sourceId);
+    return routed.kind === "ok" ? { ok: true, model: routed.model.label, remote: routed.remote } : { ok: false, code: routed.code };
+  }
+
+  async function previewTerms(req: Parameters<RequestDeps["previewTerms"]>[0]): Promise<ResponseMap["preview-terms"]> {
+    const result = await previewModel(
+      req.url,
+      req.sourceId,
+      (model, settings) =>
+        streamChat(
+          model,
+          buildTermsPrompt({ pageTitle: req.title, pageText: req.text, language: explainLanguageOf(settings) }),
+          () => undefined,
+          timeoutsOf(settings),
+        ),
+      (raw) => {
+        const terms = parseTerms(raw);
+        return terms.length > 0 ? terms : null;
+      },
+    );
+    if (!result.ok) return result;
+    // A private window never reads the records, so every term is new there.
+    const sorted = req.incognito
+      ? result.value.map((term) => ({ term, conceptId: null, name: term, status: "new" as const }))
+      : classifyTerms(await getState(), result.value, Date.now());
+    return { ok: true, terms: sorted, model: result.model.label, remote: result.remote };
+  }
+
+  async function previewExplain(req: Parameters<RequestDeps["previewExplain"]>[0]): Promise<ResponseMap["preview-explain"]> {
+    if (req.conceptId) {
+      // A panel left open after the site was turned off no longer shows the reader's records.
+      if (effectiveRule((await loadSettings()).sites, req.url).disabled) return { ok: false, code: "site_disabled" };
+      const stored = storedExplanation(await getState(), req.conceptId);
+      if (stored === null) return { ok: false, code: "expired" };
+      return { ok: true, explanation: stored, stored: true };
+    }
+    const result = await previewModel(
+      req.url,
+      req.sourceId,
+      (model, settings) =>
+        streamChat(
+          model,
+          buildPreviewExplainPrompt({ term: req.term, pageTitle: req.title, context: req.context, language: explainLanguageOf(settings) }),
+          () => undefined,
+          timeoutsOf(settings),
+        ),
+      // Only the tags of the reply format are removed: an explanation may contain "x < 3 and y > 2".
+      (raw) => raw.replace(/<\/?(?:explanation|terms?)>/gi, "").trim() || null,
+    );
+    return result.ok ? { ok: true, explanation: result.value, stored: false } : result;
+  }
+
   const requestDeps: RequestDeps = {
     loadSettings,
     getState,
@@ -366,6 +453,9 @@ export default defineBackground(() => {
     },
     runBackup,
     checkAnswer,
+    previewPlan,
+    previewTerms,
+    previewExplain,
     async importEvents(events) {
       const { store, cache } = await getServices();
       try {
@@ -449,26 +539,38 @@ export default defineBackground(() => {
 
   browser.commands.onCommand.addListener((command, tab) => {
     if (command === "explain-selection" && tab) activateTab(tab, { type: "explain-selection" });
+    else if (command === "preview-page" && tab) activateTab(tab, { type: "preview" });
   });
 
-  browser.action.onClicked.addListener((tab) => activateTab(tab, { type: "activate" }));
+  browser.action.onClicked.addListener((tab) => activateTab(tab, { type: "preview" }));
 
   const MENU_ID = "explain-selection";
+  const PREVIEW_MENU_ID = "preview-page";
   const menuTitle = (lang: Settings["language"]): string =>
     `Harkback: ${UI_STRINGS[lang]?.explain ?? (lang === "zh" ? "解释" : "Explain")}`;
+  const previewMenuTitle = (lang: Settings["language"]): string =>
+    `Harkback: ${UI_STRINGS[lang]?.previewTitle ?? (lang === "zh" ? "预览本页概念" : "Preview this page")}`;
 
-  /** Creates the right-click entry, or renames it when the interface language changed. */
+  /** Creates the right-click entries, or renames them when the interface language changed. */
   async function ensureMenu(): Promise<void> {
-    const title = menuTitle((await loadSettings()).language);
-    try {
-      await browser.contextMenus.update(MENU_ID, { title });
-    } catch {
-      browser.contextMenus.create({ id: MENU_ID, title, contexts: ["selection"] }, () => void browser.runtime.lastError);
+    const { language } = await loadSettings();
+    const entries: { id: string; title: string; contexts: ["selection"] | ["page"] }[] = [
+      { id: MENU_ID, title: menuTitle(language), contexts: ["selection"] },
+      { id: PREVIEW_MENU_ID, title: previewMenuTitle(language), contexts: ["page"] },
+    ];
+    for (const { id, title, contexts } of entries) {
+      try {
+        await browser.contextMenus.update(id, { title });
+      } catch {
+        browser.contextMenus.create({ id, title, contexts }, () => void browser.runtime.lastError);
+      }
     }
   }
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === MENU_ID && tab) activateTab(tab, { type: "explain-selection" });
+    if (!tab) return;
+    if (info.menuItemId === MENU_ID) activateTab(tab, { type: "explain-selection" });
+    else if (info.menuItemId === PREVIEW_MENU_ID) activateTab(tab, { type: "preview" });
   });
 
   async function syncContentScripts(): Promise<void> {

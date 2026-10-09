@@ -19,6 +19,7 @@ describe.skipIf(!enabled)("production manifest", () => {
     expect(manifest.chrome_url_overrides).toBeUndefined();
     expect(manifest.content_scripts).toEqual([expect.objectContaining({ matches: ["https://arxiv.org/*"] })]);
     expect(manifest.commands["explain-selection"].suggested_key.default).toBe("Alt+Shift+E");
+    expect(manifest.commands["preview-page"].suggested_key.default).toBe("Alt+Shift+P");
   });
 
   it("keeps the schema library out of the script injected into web pages", () => {

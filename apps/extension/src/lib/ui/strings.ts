@@ -51,6 +51,21 @@ const zh = {
   err_no_permission: "还没有允许访问模型地址：请在设置中点“测试”或保存，并在弹窗中允许。",
   err_expired: "这次解释已失效，请重新解释。",
   err_internal: "出错了，请重试。",
+  previewTitle: "预览本页概念",
+  previewAsk: "Scan this page for its key concepts, to see which you know and which to read first?",
+  previewScan: "扫描",
+  previewScanning: "正在扫描…",
+  previewConfused: "仍困惑",
+  previewRusty: "有点生疏",
+  previewNew: "没见过",
+  previewUnderstood: "已懂",
+  previewShow: "预习",
+  previewWorking: "正在写…",
+  previewStored: "你之前的解释",
+  previewGenerated: "模型生成，不会记录",
+  previewLocal: "页面文字会留在本机，使用本机模型 {model}。",
+  previewRemote: "页面文字会发送给远程模型 {model}。",
+  previewCovered: "只扫描了页面开头的 {n} 个字符（共 {total} 个），后面的术语不在其中。",
 } as const;
 
 export type StringKey = keyof typeof zh;
@@ -103,6 +118,22 @@ const en: Record<StringKey, string> = {
   err_no_permission: "Access to the model address has not been granted. In settings, press Test or Save and allow the prompt.",
   err_expired: "This explanation expired. Please explain again.",
   err_internal: "Something went wrong. Try again.",
+  previewTitle: "Preview this page",
+  previewAsk:
+    "Scan this page for its key concepts, to see which you know and which to read first? The page text is sent to your configured model (sensitive sources only use a local model).",
+  previewScan: "Scan",
+  previewScanning: "Scanning…",
+  previewConfused: "Still confused",
+  previewRusty: "Rusty",
+  previewNew: "New to you",
+  previewUnderstood: "Known",
+  previewShow: "Preview",
+  previewWorking: "Writing…",
+  previewStored: "Your earlier explanation",
+  previewGenerated: "Written by the model, not recorded",
+  previewLocal: "The page text stays on this computer: local model {model}.",
+  previewRemote: "The page text will be sent to the remote model {model}.",
+  previewCovered: "Only the first {n} of {total} characters were scanned, so terms later in the page are missing.",
 };
 
 const TABLE: Partial<Record<Lang, Readonly<Partial<Record<StringKey, string>>>>> = { zh, en };

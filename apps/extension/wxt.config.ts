@@ -50,6 +50,10 @@ export default defineConfig({
         suggested_key: { default: "Alt+Shift+E" },
         description: "Explain the selected text",
       },
+      "preview-page": {
+        suggested_key: { default: "Alt+Shift+P" },
+        description: "Preview the concepts on this page",
+      },
     },
   }),
 });

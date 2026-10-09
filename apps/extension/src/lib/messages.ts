@@ -2,6 +2,7 @@ import type { Grade, Hit, MatcherEntry, ReviewAction, Verdict } from "@harkback/
 import type { HarkEvent, Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "./explain";
 import type { ModelErrorCode } from "./model-client";
+import type { PreviewTerm } from "./preview";
 import type { ReunionCard } from "./reunion-cards";
 import type { Theme } from "./settings";
 import type { DetectedSource } from "./source-id";
@@ -56,6 +57,9 @@ export type Request =
   | { type: "delete-encounter"; encounterId: string }
   | { type: "review-answer"; conceptId: string; action: ReviewAction }
   | { type: "check-answer"; conceptId: string; answer: string }
+  | { type: "preview-plan"; sourceId: string }
+  | { type: "preview-terms"; sourceId: string; title: string; text: string }
+  | { type: "preview-explain"; sourceId: string; title: string; term: string; conceptId: string | null; context: string }
   | { type: "merge-concepts"; fromId: string; intoId: string }
   | { type: "add-alias"; conceptId: string; alias: string }
   | { type: "reject-edge"; edgeId: string }
@@ -77,6 +81,13 @@ export interface ResponseMap {
   "check-answer":
     | { ok: true; verdict: Verdict; feedback: string; suggested: Grade; model: string }
     | { ok: false; code: ErrorCode; retryAfterMs?: number };
+  /** Which model a scan of this page would use, and whether it is remote; nothing is sent. */
+  "preview-plan": { ok: true; model: string; remote: boolean } | { ok: false; code: ErrorCode; retryAfterMs?: number };
+  /** The terms of a page sorted by what the reader knows. Nothing is recorded; `remote` says whether the page text left this machine. */
+  "preview-terms":
+    { ok: true; terms: PreviewTerm[]; model: string; remote: boolean } | { ok: false; code: ErrorCode; retryAfterMs?: number };
+  /** `stored`: the reader's own earlier explanation, no model involved. */
+  "preview-explain": { ok: true; explanation: string; stored: boolean } | { ok: false; code: ErrorCode; retryAfterMs?: number };
   "merge-concepts": { ok: boolean };
   /** `collides`: the alias belongs to another concept, so adding it would merge the two. */
   "add-alias": { ok: boolean; collides?: boolean };
@@ -87,7 +98,7 @@ export interface ResponseMap {
 }
 
 /** Background → content script, via tabs.sendMessage. */
-export type TabMessage = { type: "hello" } | { type: "activate" } | { type: "explain-selection" };
+export type TabMessage = { type: "hello" } | { type: "activate" } | { type: "preview" } | { type: "explain-selection" };
 
 const REQUEST_TYPES = new Set<string>([
   "page-info",
@@ -100,6 +111,9 @@ const REQUEST_TYPES = new Set<string>([
   "delete-encounter",
   "review-answer",
   "check-answer",
+  "preview-plan",
+  "preview-terms",
+  "preview-explain",
   "merge-concepts",
   "add-alias",
   "reject-edge",
