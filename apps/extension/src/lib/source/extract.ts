@@ -1,5 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import type { Locator } from "@harkback/spec";
+import { profileFor } from "./site-profiles";
 import { isArxivUrl } from "./source-id";
 
 /** Elements created by the extension; never scanned or used as context. */
@@ -155,6 +156,8 @@ function readabilityRoot(doc: Document): Element | null {
 }
 
 function contentRoot(doc: Document, url: string): Element {
+  const profiled = profileFor(url)?.root(doc);
+  if (profiled) return profiled;
   if (isArxivUrl(url)) {
     const ltx = doc.querySelector(".ltx_page_content") ?? doc.querySelector("article.ltx_document");
     if (ltx) return ltx;

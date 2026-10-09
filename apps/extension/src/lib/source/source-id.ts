@@ -1,4 +1,5 @@
 import type { SourceIds } from "@harkback/spec";
+import { profileFor } from "./site-profiles";
 
 const TRACKING = /^(utm_[a-z_]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|si|spm|ref|ref_src|_hsenc|_hsmi|mkt_tok)$/i;
 const ARXIV_URL = /^https?:\/\/(?:www\.|export\.)?arxiv\.org\/(?:abs|pdf|html)\/(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})(?:v\d+)?/i;
@@ -60,7 +61,8 @@ export function detectSource(url: string, doc: Document): DetectedSource {
       canonical = null;
     }
   }
-  const source_id = arxiv ? `arxiv:${arxiv}` : doi ? `doi:${doi}` : `url:${canonical ?? cleaned}`;
+  const profiled = profileFor(url)?.sourceId();
+  const source_id = profiled ?? (arxiv ? `arxiv:${arxiv}` : doi ? `doi:${doi}` : `url:${canonical ?? cleaned}`);
   const title =
     doc.querySelector("h1.ltx_title_document")?.textContent ??
     meta(doc, 'meta[name="citation_title"]') ??
