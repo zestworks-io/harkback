@@ -6,6 +6,7 @@ describe("providers", () => {
   it("gives each provider its wire format", () => {
     expect(PROVIDERS.map((p) => [p.id, p.apiType])).toEqual([
       ["ollama", "openai"],
+      ["chrome-ai", "builtin"],
       ["openai", "openai"],
       ["anthropic", "anthropic"],
       ["gemini", "gemini"],

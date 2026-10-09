@@ -49,6 +49,8 @@ export const ui_ptBR: Readonly<Record<StringKey, string>> = {
   err_no_permission: "O acesso ao endereço do modelo não foi concedido. Nas configurações, clique em Testar ou Salvar e permita o aviso.",
   err_expired: "Esta explicação expirou. Explique novamente.",
   err_internal: "Algo deu errado. Tente novamente.",
+  err_unavailable:
+    "O modelo integrado do Chrome não está pronto. Baixe-o nas configurações ou verifique se este computador e esta versão do Chrome o suportam.",
   previewTitle: "Prévia desta página",
   previewAsk: "Procurar os conceitos-chave desta página para ver quais você já conhece e quais ler primeiro?",
   previewScan: "Escanear",

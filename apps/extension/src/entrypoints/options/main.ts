@@ -5,7 +5,8 @@ import { h } from "../../lib/dom";
 import { languagePanel } from "../../lib/ocr/panel";
 import { privacyNotes } from "../../lib/pages/privacy";
 import { backupNow, request, requestOrigins } from "../../lib/pages/request";
-import { connectionMessage } from "../../lib/pages/setup";
+import { builtInMessage, connectionMessage } from "../../lib/pages/setup";
+import { BUILTIN_MODEL, builtInState, downloadBuiltIn } from "../../lib/builtin-ai";
 import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/settings";
 import { applyTheme } from "../../lib/theme";
 import { PROVIDERS, providerById } from "../../lib/providers";
@@ -96,6 +97,8 @@ async function main(): Promise<void> {
     Object.assign(draft, next);
     await browser.storage.local.set({ settings: next });
     await request({ type: "settings-changed" });
+    // The rows still hold the objects from before the save; drawing them again keeps the next edit from being lost.
+    render();
     status.textContent = L("已保存。", "Saved.");
   }
 
@@ -161,13 +164,44 @@ async function main(): Promise<void> {
         if (p.baseUrl) {
           m.baseUrl = p.baseUrl;
           if (!m.label.trim() || m.label === "Model" || m.label === previous.label) m.label = p.label;
+        } else if (previous.apiType === "builtin") {
+          // The built-in model's placeholder address is no address to keep.
+          m.baseUrl = "";
         }
+        // The built-in model has one fixed name; leaving it behind, the name is typed again.
+        if (p.apiType === "builtin") {
+          m.model = BUILTIN_MODEL;
+          // It takes no key; one left over from another provider would stay in the saved settings, out of sight.
+          m.apiKey = "";
+        } else if (previous.apiType === "builtin") m.model = "";
         render();
       });
       const preset = providerById(m.provider);
       const result = h("div", { className: "result", "data-hb": "model-result" });
       const test = h("button", { type: "button", className: "small", "data-hb": "model-test" }, L("测试连接", "Test connection"));
+      const builtIn = preset.apiType === "builtin";
+      const download = h(
+        "button",
+        { type: "button", className: "small", hidden: true, "data-hb": "model-download" },
+        L("下载模型", "Download model"),
+      );
+      const showState = async (): Promise<void> => {
+        const state = await builtInState();
+        result.textContent = builtInMessage(draft.language, state);
+        download.hidden = state !== "downloadable";
+      };
+      download.addEventListener("click", async () => {
+        download.disabled = true;
+        result.textContent = builtInMessage(draft.language, "downloading", 0);
+        // Chrome only starts a download from a click, so it runs here and not in the background.
+        const state = await downloadBuiltIn((fraction) => (result.textContent = builtInMessage(draft.language, "downloading", fraction)));
+        result.textContent = builtInMessage(draft.language, state);
+        download.hidden = state !== "downloadable";
+        download.disabled = false;
+      });
+      if (builtIn) void showState();
       test.addEventListener("click", async () => {
+        if (builtIn) return showState();
         const pattern = originPattern(m.baseUrl.trim());
         if (pattern) await requestOrigins([pattern]);
         result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
@@ -194,26 +228,39 @@ async function main(): Promise<void> {
             L("名称", "Name"),
             input(m.label, (v) => (m.label = v)),
           ),
-          field(
-            L("模型", "Model"),
-            input(m.model, (v) => (m.model = v), { "data-hb": "model-name", placeholder: preset.modelHint || "gpt-4o-mini" }),
-          ),
-          field(
-            L("地址", "Address"),
-            input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
-            "wide",
-          ),
-          field(
-            "API key",
-            secretInput(
-              input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }),
-              {
-                show: L("显示", "Show"),
-                hide: L("隐藏", "Hide"),
-              },
-            ),
-            "wide",
-          ),
+          ...(builtIn
+            ? [
+                h(
+                  "p",
+                  { className: "note", style: "grid-column: 1 / -1", "data-hb": "model-builtin-note" },
+                  L(
+                    "在这台电脑上运行，不需要地址和 API key。英语、西班牙语、日语效果最好。",
+                    "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.",
+                  ),
+                ),
+              ]
+            : [
+                field(
+                  L("模型", "Model"),
+                  input(m.model, (v) => (m.model = v), { "data-hb": "model-name", placeholder: preset.modelHint || "gpt-4o-mini" }),
+                ),
+                field(
+                  L("地址", "Address"),
+                  input(m.baseUrl, (v) => (m.baseUrl = v), { "data-hb": "model-base-url" }),
+                  "wide",
+                ),
+                field(
+                  "API key",
+                  secretInput(
+                    input(m.apiKey, (v) => (m.apiKey = v), { type: "password", autocomplete: "off" }),
+                    {
+                      show: L("显示", "Show"),
+                      hide: L("隐藏", "Hide"),
+                    },
+                  ),
+                  "wide",
+                ),
+              ]),
         ),
         h(
           "div",
@@ -221,6 +268,7 @@ async function main(): Promise<void> {
           choice(isDefault, L("默认模型", "Default")),
           choice(isLocal, L("敏感来源用", "For sensitive sources")),
           h("span", { className: "spacer" }),
+          ...(builtIn ? [download] : []),
           test,
           remove,
         ),

@@ -330,4 +330,13 @@ export const pages_es: Readonly<Record<string, string>> = {
     "Al pulsarlo, Harkback envía el término, tu respuesta escrita y su explicación guardada a tu modelo. Usa tu elección de modelo habitual: las fuentes sensibles solo van a un modelo local, y cada comprobación cuenta para tus límites por minuto y por hora. Si lo desactivas, el botón no aparece y no se envía nada.",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
     "En el repaso, el botón opcional «Comprobar mi respuesta» envía el término, tu respuesta escrita y su explicación guardada a tu modelo solo cuando lo pulsas; se puede desactivar en ajustes.",
+  "Ready. Chrome's model runs on this computer.": "Listo. El modelo de Chrome se ejecuta en este equipo.",
+  "Not downloaded yet. Press Download model.": "Aún no descargado. Pulsa Descargar modelo.",
+  "Downloading… {percent}%": "Descargando… {percent} %",
+  "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
+    "No disponible en este dispositivo. Chrome necesita suficiente espacio en disco y memoria, y una versión reciente.",
+  "This Chrome has no built-in model. Update Chrome.": "Este Chrome no tiene modelo integrado. Actualiza Chrome.",
+  "Download model": "Descargar modelo",
+  "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
+    "Se ejecuta en este equipo, sin dirección ni clave de API. Funciona mejor en inglés, español y japonés.",
 };

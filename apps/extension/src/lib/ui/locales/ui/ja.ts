@@ -50,6 +50,8 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
     "モデルのアドレスへのアクセスが許可されていません。設定で「テスト」または「保存」を押し、表示されたダイアログで許可してください。",
   err_expired: "この解説は期限切れです。もう一度解説してください。",
   err_internal: "問題が発生しました。もう一度お試しください。",
+  err_unavailable:
+    "Chrome 内蔵モデルを使えません。設定でダウンロードするか、このコンピューターと Chrome のバージョンが対応しているか確認してください。",
   previewTitle: "このページを下見",
   previewAsk: "このページの重要な概念を調べて、分かっているものと先に読むべきものを確認しますか？",
   previewScan: "調べる",

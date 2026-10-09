@@ -51,6 +51,7 @@ const zh = {
   err_no_permission: "还没有允许访问模型地址：请在设置中点“测试”或保存，并在弹窗中允许。",
   err_expired: "这次解释已失效，请重新解释。",
   err_internal: "出错了，请重试。",
+  err_unavailable: "Chrome 内置模型还不能用：请在设置的模型页下载它，或确认这台电脑和 Chrome 版本支持它。",
   previewTitle: "预览本页概念",
   previewAsk: "Scan this page for its key concepts, to see which you know and which to read first?",
   previewScan: "扫描",
@@ -118,6 +119,8 @@ const en: Record<StringKey, string> = {
   err_no_permission: "Access to the model address has not been granted. In settings, press Test or Save and allow the prompt.",
   err_expired: "This explanation expired. Please explain again.",
   err_internal: "Something went wrong. Try again.",
+  err_unavailable:
+    "Chrome's built-in model is not ready. Download it in settings, or check that this computer and Chrome version support it.",
   previewTitle: "Preview this page",
   previewAsk:
     "Scan this page for its key concepts, to see which you know and which to read first? The page text is sent to your configured model (sensitive sources only use a local model).",

@@ -49,6 +49,7 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   err_no_permission: "還沒有允許存取模型位址：請在設定中點「測試」或儲存，並在彈出視窗中允許。",
   err_expired: "這次解釋已失效，請重新解釋。",
   err_internal: "發生錯誤，請重試。",
+  err_unavailable: "Chrome 內建模型還不能用：請在設定的模型頁下載它，或確認這台電腦和 Chrome 版本支援它。",
   previewTitle: "預覽本頁概念",
   previewAsk: "先掃描這篇的概念，看看哪些你已經懂、哪些該先看？",
   previewScan: "掃描",

@@ -113,7 +113,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **Stop, retry, switch models.** A _Stop_ button ends an answer while it is written. After a failure the card offers _Try again_ and, with several models configured, _Try with…_ for each of the others.
 - **Preview a page before you read it.** Click the toolbar button, press `Alt+Shift+P` or use the right-click menu, and Harkback offers to scan the page, naming the model and whether it is remote; nothing is sent until you agree. One model call picks out the page's key terms, and your own records sort them into _still confused_, _rusty_, _new to you_ and _known_. _Preview_ shows your earlier explanation for a term you know, or a short model-written one for a new term, and records nothing. The model sees only the page text, never your concept list, and a sensitive page only uses a local model. A scan reads the first 16,000 characters of a page and tells you when a longer page was cut.
 - **Several ways to start.** Select text and click _Explain_ (mouse, keyboard or touch selections), press `Alt+Shift+E`, or use _Explain_ in the right-click menu. Pages that load more text or move to another page without reloading are rescanned.
-- **Your choice of model.** Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
+- **Your choice of model.** Chrome's built-in Gemini Nano (on your computer, nothing to configure), Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
 
 ## Your knowledge graph
 
@@ -162,15 +162,16 @@ Onboarding walks you through this, including a built-in example explanation you 
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider      | Base URL                                           | Notes                                                                                                    |
-| ------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Ollama        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                |
-| OpenAI        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                        |
-| Anthropic     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                        |
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                        |
-| xAI Grok      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                        |
-| OpenRouter    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                        |
-| Custom        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale). |
+| Provider                      | Base URL                                           | Notes                                                                                                    |
+| ----------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Ollama                        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                |
+| Chrome built-in (Gemini Nano) | none                                               | On this computer, no key. Download it in settings; best in English, Spanish and Japanese.                |
+| OpenAI                        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                        |
+| Anthropic                     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                        |
+| Google Gemini                 | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                        |
+| xAI Grok                      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                        |
+| OpenRouter                    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                        |
+| Custom                        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale). |
 
 Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
 

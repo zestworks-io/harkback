@@ -1,3 +1,4 @@
+import type { BuiltInState } from "../builtin-ai";
 import { ollamaOriginsHelp, type ConnectionResult } from "../connection";
 import { isLocalUrl } from "../model-policy";
 import type { ModelConfig, Settings } from "../settings";
@@ -27,6 +28,26 @@ export function onboardingSettings(
     defaultModelId: model.id,
     localModelId: isLocalUrl(model.baseUrl) ? model.id : current.localModelId,
   };
+}
+
+/** What the options page says about Chrome's built-in model: its state, and the progress while it downloads. */
+export function builtInMessage(lang: Lang, state: BuiltInState, percent?: number): string {
+  const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(lang, zh, en, vars);
+  switch (state) {
+    case "available":
+      return L("可以使用。Chrome 的模型在这台电脑上运行。", "Ready. Chrome's model runs on this computer.");
+    case "downloadable":
+      return L("还没有下载，请点“下载模型”。", "Not downloaded yet. Press Download model.");
+    case "downloading":
+      return L("正在下载… {percent}%", "Downloading… {percent}%", { percent: Math.round((percent ?? 0) * 100) });
+    case "unavailable":
+      return L(
+        "这台设备上用不了。Chrome 需要足够的磁盘空间和内存，并且版本较新。",
+        "Not available on this device. Chrome needs enough disk space and memory, and a recent version.",
+      );
+    case "unsupported":
+      return L("这个 Chrome 没有内置模型，请更新 Chrome。", "This Chrome has no built-in model. Update Chrome.");
+  }
 }
 
 export function connectionMessage(lang: Lang, result: ConnectionResult, extensionOrigin: string): string {

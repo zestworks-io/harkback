@@ -326,4 +326,13 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "누르면 Harkback이 용어, 입력한 답변, 저장된 설명을 모델로 보냅니다. 평소 모델 선택을 따르므로 민감한 출처는 로컬 모델로만 가고, 확인마다 분당·시간당 한도에 포함됩니다. 끄면 버튼이 나타나지 않고 아무것도 전송되지 않습니다.",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
     "복습에서 선택 사항인 '내 답변 확인' 버튼은 누를 때만 용어, 입력한 답변, 저장된 설명을 모델로 보내며, 설정에서 끌 수 있습니다.",
+  "Ready. Chrome's model runs on this computer.": "사용할 수 있습니다. Chrome 모델은 이 컴퓨터에서 실행됩니다.",
+  "Not downloaded yet. Press Download model.": "아직 내려받지 않았습니다. 모델 내려받기를 누르세요.",
+  "Downloading… {percent}%": "내려받는 중… {percent}%",
+  "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
+    "이 기기에서는 사용할 수 없습니다. Chrome에는 충분한 디스크 공간과 메모리, 최신 버전이 필요합니다.",
+  "This Chrome has no built-in model. Update Chrome.": "이 Chrome에는 내장 모델이 없습니다. Chrome을 업데이트하세요.",
+  "Download model": "모델 내려받기",
+  "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
+    "이 컴퓨터에서 실행되며 주소나 API 키가 필요 없습니다. 영어, 스페인어, 일본어에서 가장 잘 작동합니다.",
 };

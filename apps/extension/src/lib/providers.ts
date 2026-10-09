@@ -1,5 +1,9 @@
+import { BUILTIN_MODEL, BUILTIN_URL, isBuiltInUrl } from "./builtin-ai";
+
 /** The wire format of a provider, which follows from the provider alone. Most services copy OpenAI's; Anthropic and Gemini have native APIs. */
-export type ApiType = "openai" | "anthropic" | "gemini";
+export type HttpApiType = "openai" | "anthropic" | "gemini";
+/** `builtin` is the model that ships with Chrome, which is not reached over HTTP at all. */
+export type ApiType = HttpApiType | "builtin";
 
 export interface Provider {
   id: string;
@@ -14,6 +18,14 @@ export interface Provider {
 
 export const PROVIDERS: readonly Provider[] = [
   { id: "ollama", label: "Ollama", apiType: "openai", baseUrl: "http://127.0.0.1:11434/v1", modelHint: "qwen3", local: true },
+  {
+    id: "chrome-ai",
+    label: "Chrome built-in (Gemini Nano)",
+    apiType: "builtin",
+    baseUrl: BUILTIN_URL,
+    modelHint: BUILTIN_MODEL,
+    local: true,
+  },
   { id: "openai", label: "OpenAI", apiType: "openai", baseUrl: "https://api.openai.com/v1", modelHint: "gpt-4o-mini" },
   { id: "anthropic", label: "Anthropic", apiType: "anthropic", baseUrl: "https://api.anthropic.com/v1", modelHint: "claude-sonnet-5-5" },
   {
@@ -65,6 +77,7 @@ function detectApiType(baseUrl: string): ApiType {
 
 /** The provider that matches an address, or "custom"; used for models saved before a provider was recorded. */
 export function providerForAddress(baseUrl: string): Provider {
+  if (isBuiltInUrl(baseUrl)) return providerById("chrome-ai");
   const host = parse(baseUrl)?.host.toLowerCase();
   const found = PROVIDERS.find((p) => p.baseUrl && parse(p.baseUrl)?.host.toLowerCase() === host && detectApiType(baseUrl) === p.apiType);
   return found ?? CUSTOM;

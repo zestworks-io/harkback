@@ -27,7 +27,17 @@ export interface CardModel {
 /** Failures where trying again can help; a partial explanation stays visible. */
 const RETRYABLE = new Set<ErrorCode>(["timeout", "network", "http", "rate_limited", "internal", "aborted"]);
 /** Failures that another model may not have: worth offering the other models. */
-const MODEL_SPECIFIC = new Set<ErrorCode>(["timeout", "network", "http", "rate_limited", "auth", "aborted", "internal", "no_permission"]);
+const MODEL_SPECIFIC = new Set<ErrorCode>([
+  "timeout",
+  "network",
+  "http",
+  "rate_limited",
+  "auth",
+  "aborted",
+  "internal",
+  "no_permission",
+  "unavailable",
+]);
 
 // Buttons live in the extension's closed shadow root, which page scripts cannot reach,
 // so their clicks come from the user; the page-level trigger checks isTrusted itself.

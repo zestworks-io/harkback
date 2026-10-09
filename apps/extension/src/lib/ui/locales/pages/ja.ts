@@ -328,4 +328,13 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "押すと、Harkback は用語、入力した答え、保存済みの解説をモデルに送信します。通常のモデル選択に従うため、機密ソースはローカルモデルにのみ送られ、確認ごとに毎分・毎時の上限に数えられます。オフにするとボタンは表示されず、何も送信されません。",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
     "復習中の任意の「答えを確認」ボタンは、押したときだけ、用語・入力した答え・保存済みの解説をモデルに送信します。設定でオフにできます。",
+  "Ready. Chrome's model runs on this computer.": "使用できます。Chrome のモデルはこのコンピューター上で動作します。",
+  "Not downloaded yet. Press Download model.": "まだダウンロードされていません。「モデルをダウンロード」を押してください。",
+  "Downloading… {percent}%": "ダウンロード中… {percent}%",
+  "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
+    "このデバイスでは利用できません。Chrome には十分なディスク容量とメモリ、新しいバージョンが必要です。",
+  "This Chrome has no built-in model. Update Chrome.": "この Chrome には内蔵モデルがありません。Chrome を更新してください。",
+  "Download model": "モデルをダウンロード",
+  "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
+    "このコンピューター上で動作し、アドレスや API キーは不要です。英語・スペイン語・日本語で最も良く動作します。",
 };

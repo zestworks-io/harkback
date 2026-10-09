@@ -10,6 +10,7 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 - **Prerequisites decide the review order.** When a term and one it builds on are both due, the prerequisite comes first, even when it is reached through a concept that is not due. The card says which due terms build on it. Rejected or unlikely relations are ignored, and terms in a cycle keep the usual order.
 - **Start with the prerequisites.** On a concept page, and under the explanation in review, a term you are confused or shaky about names the prerequisites that may be what is missing: ones that are confused, shaky or never explained, followed down through weak ones to the weakest foundation. The page shows three and counts the rest.
 - **Preview a page before you read it.** The toolbar button, `Alt+Shift+P` or the right-click menu offers to scan the page, naming the model and whether it is remote; nothing is sent until you press _Scan_. One model call lists the page's key terms, and your own records sort them into _Still confused_, _Rusty_ (shaky or due for review), _New to you_ and _Known_. _Preview_ shows your earlier explanation for a term you know, or a short model-written one for a new term; nothing is recorded. The model only sees the page text, never your concept list, and sensitive pages only use a local model. A scan reads the first 16,000 characters of a page, and says so when a longer page was cut.
+- **Chrome's built-in model (Gemini Nano) as a model choice.** Pick _Chrome built-in (Gemini Nano)_ under Settings → Models: it runs on your computer, needs no address or API key, and counts as a local model, so sensitive sources can use it. It is downloaded from settings (Chrome only starts a download from a click), and until it is ready a request says so instead of failing. It works best in English, Spanish and Japanese, and its small window means a prompt that does not fit is reported, not cut.
 - **A _Shaky_ understanding level** for terms last answered _Hard_. It shows in the badge, the graph and its filter, and the digest counts _Hard_ answers apart from _Good_ and _Easy_. Review brings confused terms first, then shaky ones.
 - **Type your answer in review**, and an optional **Check my answer** button that asks your model how close you were. It says which model receives the answer and whether it is remote, suggests a grade without choosing it, follows the sensitive-source rules, and can be turned off in settings.
 - **Keyboard-only review.** `Space` shows the explanation, `1`–`4` grade, `S` skips.
@@ -22,6 +23,7 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- Settings: after pressing _Save_, a later edit to a model row was lost, because the row still pointed at the settings from before the save.
 - A failed request gives back its own rate-limit slot, not the latest one.
 - Two backups can no longer run at once.
 - Chat history keeps who said what for the Anthropic and Gemini formats.

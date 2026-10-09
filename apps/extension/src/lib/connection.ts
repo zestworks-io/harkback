@@ -1,4 +1,5 @@
 import { defaultFetch, normalizeBaseUrl, requestHeaders } from "./model-client";
+import { builtInState, isBuiltInUrl } from "./builtin-ai";
 import { isLocalUrl, modelUrlError } from "./model-policy";
 import type { ApiType } from "./providers";
 import { apiTypeOf, type ModelConfig } from "./settings";
@@ -49,6 +50,8 @@ export async function testConnection(
   cfg: Pick<ModelConfig, "baseUrl" | "apiKey" | "provider">,
   fetchImpl: typeof fetch = defaultFetch,
 ): Promise<ConnectionResult> {
+  // Nothing to reach: the question is whether the browser has the model ready.
+  if (isBuiltInUrl(cfg.baseUrl)) return (await builtInState()) === "available" ? { kind: "ok", models: [] } : { kind: "unreachable" };
   if (modelUrlError(cfg.baseUrl)) return { kind: "insecure" };
   const type = apiTypeOf(cfg);
   const { url, headers } = listRequest(cfg);

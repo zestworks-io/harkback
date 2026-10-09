@@ -1,21 +1,12 @@
 import type { ChatMessage } from "@harkback/core";
+import { builtInChat, isBuiltInUrl } from "./builtin-ai";
+import { ModelError } from "./model-error";
 import { modelUrlError } from "./model-policy";
 import { apiTypeOf, type ModelConfig } from "./settings";
-import type { ApiType } from "./providers";
+import type { HttpApiType } from "./providers";
 import { SseParser } from "./sse";
 
-export type ModelErrorCode = "auth" | "rate_limited" | "timeout" | "network" | "http" | "insecure" | "aborted";
-
-export class ModelError extends Error {
-  constructor(
-    readonly code: ModelErrorCode,
-    message: string,
-    readonly status?: number,
-  ) {
-    super(message);
-    this.name = "ModelError";
-  }
-}
+export { ModelError, type ModelErrorCode } from "./model-error";
 
 export function normalizeBaseUrl(raw: string): string {
   return raw
@@ -197,7 +188,7 @@ const gemini: Adapter = {
     status === 400 && /API_KEY_INVALID|API key not valid/i.test(body) ? new ModelError("auth", "HTTP 400", 400) : null,
 };
 
-const ADAPTERS: Record<ApiType, Adapter> = { openai, anthropic, gemini };
+const ADAPTERS: Record<HttpApiType, Adapter> = { openai, anthropic, gemini };
 
 export async function streamChat(
   cfg: ModelConfig,
@@ -205,8 +196,16 @@ export async function streamChat(
   onText: (full: string) => void,
   opts: StreamOptions = {},
 ): Promise<string> {
+  // The model that ships with Chrome has no address and no wire format; the Prompt API is used instead.
+  if (isBuiltInUrl(cfg.baseUrl)) {
+    return builtInChat(messages, onText, {
+      ...(opts.signal ? { signal: opts.signal } : {}),
+      ...(opts.idleTimeoutMs !== undefined ? { idleTimeoutMs: opts.idleTimeoutMs } : {}),
+      ...(opts.firstTextTimeoutMs !== undefined ? { firstTextTimeoutMs: opts.firstTextTimeoutMs } : {}),
+    });
+  }
   if (modelUrlError(cfg.baseUrl)) throw new ModelError("insecure", "model address rejected");
-  const adapter = ADAPTERS[apiTypeOf(cfg)];
+  const adapter = ADAPTERS[apiTypeOf(cfg) as HttpApiType];
   const fetchImpl = opts.fetchImpl ?? defaultFetch;
   const idleMs = opts.idleTimeoutMs ?? 30_000;
   const firstMs = Math.max(idleMs, opts.firstTextTimeoutMs ?? 120_000);

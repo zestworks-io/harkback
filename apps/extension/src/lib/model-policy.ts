@@ -1,3 +1,4 @@
+import { isBuiltInUrl } from "./builtin-ai";
 import type { ModelConfig, Settings } from "./settings";
 import type { EffectiveRule } from "./site-rules";
 
@@ -5,6 +6,8 @@ const LOCAL_HOSTS = new Set(["localhost", "[::1]", "::1"]);
 
 /** This machine: `localhost` and its subdomains, the whole 127.0.0.0/8 loopback range, and `::1`. */
 export function isLocalUrl(url: string): boolean {
+  // Chrome's own model runs on this computer.
+  if (isBuiltInUrl(url)) return true;
   let host: string;
   try {
     host = new URL(url).hostname.toLowerCase();
@@ -45,6 +48,7 @@ export function isPrivateNetworkUrl(url: string): boolean {
 }
 
 export function modelUrlError(url: string): "invalid" | "insecure" | null {
+  if (isBuiltInUrl(url)) return null;
   let u: URL;
   try {
     u = new URL(url.trim());

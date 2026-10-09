@@ -67,7 +67,8 @@ async function main(): Promise<void> {
     const providers = h(
       "div",
       { className: "providers", role: "radiogroup", "aria-label": L("模型服务", "Model service"), "data-hb": "template" },
-      ...PROVIDERS.map((tp) => {
+      // The built-in model has no address to test, so it is set up in settings instead.
+      ...PROVIDERS.filter((tp) => tp.apiType !== "builtin").map((tp) => {
         const radio = h("input", { type: "radio", name: "template", value: tp.id, checked: form.templateId === tp.id });
         radio.addEventListener("change", () => {
           form.templateId = tp.id;

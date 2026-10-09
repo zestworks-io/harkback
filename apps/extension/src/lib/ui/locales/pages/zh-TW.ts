@@ -320,4 +320,13 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "點擊這個按鈕時，Harkback 會把術語、你輸入的回答和當時的解釋傳給你的模型。它使用你平時的模型選擇：敏感來源只會傳給本機模型，並且計入每分鐘和每小時的上限。關閉後按鈕不會出現，也不會傳送任何內容。",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
     "複習時，可選的「檢查我的回答」只在你點擊時，才會把術語、你輸入的回答和當時的解釋傳給你的模型；可以在設定中關閉。",
+  "Ready. Chrome's model runs on this computer.": "可以使用。Chrome 的模型在這台電腦上執行。",
+  "Not downloaded yet. Press Download model.": "還沒有下載，請按「下載模型」。",
+  "Downloading… {percent}%": "正在下載… {percent}%",
+  "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
+    "這台裝置上無法使用。Chrome 需要足夠的磁碟空間和記憶體，而且版本要夠新。",
+  "This Chrome has no built-in model. Update Chrome.": "這個 Chrome 沒有內建模型，請更新 Chrome。",
+  "Download model": "下載模型",
+  "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
+    "在這台電腦上執行，不需要位址和 API 金鑰。英文、西班牙文、日文效果最好。",
 };

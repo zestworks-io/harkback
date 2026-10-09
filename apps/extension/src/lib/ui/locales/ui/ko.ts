@@ -49,6 +49,7 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   err_no_permission: "모델 주소에 대한 접근 권한이 없습니다. 설정에서 '테스트' 또는 '저장'을 누르고 표시되는 창에서 허용하세요.",
   err_expired: "이 설명은 만료되었습니다. 다시 설명해 주세요.",
   err_internal: "문제가 발생했습니다. 다시 시도하세요.",
+  err_unavailable: "Chrome 내장 모델을 사용할 수 없습니다. 설정에서 내려받거나, 이 컴퓨터와 Chrome 버전이 지원하는지 확인하세요.",
   previewTitle: "이 페이지 미리 보기",
   previewAsk: "이 페이지의 핵심 개념을 훑어서 이미 아는 것과 먼저 읽어야 할 것을 확인할까요?",
   previewScan: "스캔",

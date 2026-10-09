@@ -50,6 +50,8 @@ export const ui_fr: Readonly<Record<StringKey, string>> = {
     "L'accès à l'adresse du modèle n'a pas été accordé. Dans les paramètres, appuyez sur Tester ou Enregistrer et autorisez la demande.",
   err_expired: "Cette explication a expiré. Veuillez expliquer à nouveau.",
   err_internal: "Un problème est survenu. Réessayez.",
+  err_unavailable:
+    "Le modèle intégré de Chrome n’est pas prêt. Téléchargez-le dans les réglages ou vérifiez que cet ordinateur et cette version de Chrome le prennent en charge.",
   previewTitle: "Aperçu de cette page",
   previewAsk: "Analyser les concepts clés de cette page pour voir lesquels vous connaissez et lesquels lire d’abord ?",
   previewScan: "Analyser",
