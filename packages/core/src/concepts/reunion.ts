@@ -1,7 +1,7 @@
 import type { Domain } from "@harkback/spec";
 import { DAY_MS, REUNION_DEFAULTS, THRESHOLDS } from "../constants";
 import type { Hit } from "./matcher";
-import type { EncounterState, State } from "../events/state";
+import { sameSource, type EncounterState, type State } from "../events/state";
 
 export interface ReunionContext {
   sourceId: string;
@@ -57,7 +57,7 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
     const c = state.concepts.get(conceptId);
     if (!c || c.muted || c.isPlaceholder) return null;
     if (ctx.now - lastTouched(conceptId) < minGap) return null;
-    const fromOther = encountersOf(conceptId).filter((e) => e.sourceId !== ctx.sourceId);
+    const fromOther = encountersOf(conceptId).filter((e) => !sameSource(state, e.sourceId, ctx.sourceId));
     if (fromOther.length === 0) return null;
     return fromOther.reduce((a, b) => (b.lastTouchedAt > a.lastTouchedAt ? b : a));
   };

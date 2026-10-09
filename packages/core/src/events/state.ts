@@ -78,6 +78,13 @@ export interface State {
   /** Representative concept id -> encounter ids ordered by createdAt. */
   encountersByConcept: Map<string, string[]>;
   sources: Map<string, SourceState>;
+  /** Source id -> representative id of the paper it belongs to; ids that name the same paper (arXiv and DOI) share one. */
+  sourceIdentity: Map<string, string>;
   edges: Map<string, EdgeState>;
   warnings: string[];
+}
+
+/** True when both source ids name the same source, directly or through a paper's other id. */
+export function sameSource(state: Pick<State, "sourceIdentity">, a: string, b: string): boolean {
+  return a === b || (state.sourceIdentity.get(a) ?? a) === (state.sourceIdentity.get(b) ?? b);
 }

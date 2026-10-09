@@ -8,6 +8,11 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 - **Suggested research sites.** Settings → Sites has a _Suggested research sites_ button that adds auto-scan rules for bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology in one step. It skips sites that already have a rule and never changes one you edited. Saving asks the browser for site access once for all of them.
 
+### Changed
+
+- **More abbreviations are treated as ambiguous.** Common medical and machine-learning abbreviations (MS, CAD, PE, RA, CT, AD, PD, ER, CI, GAN, RNN, SVM) and any short key shared by two concepts, even in the same field, now underline only when another term from that field is also on the page.
+- **A paper seen under its arXiv id and its DOI counts as one source.** A reunion no longer calls a term new to a paper when you met it in the same paper under its other id. Existing records are unchanged.
+
 ### Fixed
 
 - A term selected in another language no longer creates a second concept. When the model's card gives the English name of a concept you already have (as its name or one of its aliases, in the same field), the lookup joins that concept and adds the selected text as an alias, so the next page matches either language. Names shared by several concepts, or by concepts in another field, still stay separate.

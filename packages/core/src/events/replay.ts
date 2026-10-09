@@ -4,6 +4,7 @@ import { edgeId, parseEdgeId } from "./ids";
 import { gradeOf } from "../review/grade";
 import { canonicalOrder } from "./order";
 import { resolveConcepts } from "./replay-concepts";
+import { resolveSourceIdentity } from "./source-identity";
 import type { EdgeState, EncounterState, SourceState, State } from "./state";
 
 export interface ReplayOptions {
@@ -157,5 +158,15 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     if (edge) edge.status = s.type === "edge.confirmed" ? "confirmed" : "rejected";
   }
 
-  return { concepts, representative, aliases, encounters, encountersByConcept, sources, edges, warnings };
+  return {
+    concepts,
+    representative,
+    aliases,
+    encounters,
+    encountersByConcept,
+    sources,
+    sourceIdentity: resolveSourceIdentity(sorted),
+    edges,
+    warnings,
+  };
 }

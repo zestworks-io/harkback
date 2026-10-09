@@ -93,3 +93,44 @@ describe("selectReunions: related", () => {
     expect(r.map((x) => x.kind)).toEqual(["direct"]);
   });
 });
+
+describe("selectReunions: one paper under two ids", () => {
+  const seen = (sourceId: string, ids: { arxiv?: string; doi?: string }) =>
+    ev("source.seen", { source_id: sourceId, ids, title: "t", license: "unknown", sensitivity: "normal" });
+  const base = [concept(1, "LoRA"), encounter(10, 1, "doi:10.1/x", "2026-09-01T00:00:00Z")];
+
+  it("treats arxiv and doi ids as one source when an event carries both", () => {
+    expect(run(base, "LoRA", "arxiv:2")).toHaveLength(1);
+    const linked = [...base, seen("arxiv:2", { arxiv: "2", doi: "10.1/x" })];
+    expect(run(linked, "LoRA", "arxiv:2")).toEqual([]);
+  });
+
+  it("links the arXiv DOI form to the arxiv id", () => {
+    const events = [
+      concept(1, "LoRA"),
+      encounter(10, 1, "doi:10.48550/arxiv.2106.09685", "2026-09-01T00:00:00Z"),
+      seen("doi:10.48550/arxiv.2106.09685", { doi: "10.48550/arXiv.2106.09685" }),
+    ];
+    expect(run(events, "LoRA", "arxiv:2106.09685")).toEqual([]);
+    expect(run(events, "LoRA", "arxiv:2106.09686")).toHaveLength(1);
+  });
+
+  it("links through a chain and ignores event order and version suffixes", () => {
+    const events = [
+      ...base,
+      seen("arxiv:2", { arxiv: "2v3", doi: "10.1/y" }),
+      seen("doi:10.1/y", { doi: "10.1/y", arxiv: "2" }),
+      seen("doi:10.1/x", { doi: "10.1/x", arxiv: "2v1" }),
+      seen("doi:10.1/z", { doi: "10.1/y" }),
+    ];
+    expect(run(events, "LoRA", "arxiv:2")).toEqual([]);
+    expect(run([...events].reverse(), "LoRA", "arxiv:2")).toEqual([]);
+  });
+
+  it("keeps unrelated papers apart and leaves stored source ids untouched", () => {
+    const events = [...base, seen("arxiv:3", { arxiv: "3", doi: "10.1/other" })];
+    expect(run(events, "LoRA", "arxiv:3")).toHaveLength(1);
+    const state = replay([...base, seen("arxiv:2", { arxiv: "2", doi: "10.1/x" })]);
+    expect(state.encounters.get(id(10))!.sourceId).toBe("doi:10.1/x");
+  });
+});

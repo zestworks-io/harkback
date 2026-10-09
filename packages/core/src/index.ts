@@ -7,6 +7,7 @@ export * from "./events/state";
 export * from "./events/union-find";
 export * from "./events/replay-concepts";
 export * from "./events/replay";
+export * from "./events/source-identity";
 export * from "./review/grade";
 export * from "./llm/check";
 export * from "./events/compact";
