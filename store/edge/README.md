@@ -2,17 +2,17 @@
 
 Edge runs Chrome's Manifest V3 extensions, so the package is the same code built with `wxt zip -b edge`. The listing text, screenshots and privacy answers are reused from the Chrome submission in the folder above; only the points below differ.
 
-| Partner Center field             | Source                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| Package                          | `pnpm zip:edge` → `apps/extension/.output/harkback-<version>-edge.zip`          |
-| Name, description, category      | `../listing.en.md` (default), `../listing.zh-CN.md` (add as a listing language) |
-| Screenshots (1280×800, up to 10) | `../assets/1-explain.png` … `../assets/6-model.png`                             |
-| Store logo (300×300, required)   | `../assets/store-logo-300x300.png` (redrawn from `assets/logo.png` at 300×300)  |
-| Small promo tile (440×280)       | `../assets/promo-small-440x280.png`                                             |
-| Marquee (1400×560, optional)     | `../assets/promo-marquee-1400x560.png`                                          |
-| Search terms (up to 7)           | see below                                                                       |
-| Privacy policy URL               | the deployed `site/privacy/` page                                               |
-| Notes for certification          | see below                                                                       |
+| Partner Center field             | Source                                                                                                                                                                           |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package                          | `pnpm zip:edge` → `apps/extension/.output/harkback-<version>-edge.zip`                                                                                                           |
+| Name, description, category      | `description.en.txt` (Edge wording; name and summary from `../listing.en.md`), `../listing.zh-CN.md` (add as a listing language; replace its Chrome-model sentence the same way) |
+| Screenshots (1280×800, up to 10) | `../assets/1-explain.png` … `../assets/6-model.png`                                                                                                                              |
+| Store logo (300×300, required)   | `../assets/store-logo-300x300.png` (redrawn from `assets/logo.png` at 300×300)                                                                                                   |
+| Small promo tile (440×280)       | `../assets/promo-small-440x280.png`                                                                                                                                              |
+| Marquee (1400×560, optional)     | `../assets/promo-marquee-1400x560.png`                                                                                                                                           |
+| Search terms (up to 7)           | see below                                                                                                                                                                        |
+| Privacy policy URL               | the deployed `site/privacy/` page                                                                                                                                                |
+| Notes for certification          | see below                                                                                                                                                                        |
 
 ## Differences from the Chrome submission
 
