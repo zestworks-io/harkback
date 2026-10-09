@@ -27,11 +27,14 @@ export interface StubServer {
   close(): Promise<void>;
 }
 
-function defaultOutput(user: string): string {
+function defaultOutput(user: string, domain = "ml"): string {
   const term = /<selected>([\s\S]*?)<\/selected>/.exec(user)?.[1]?.trim() || "term";
-  const card = { match: null, canonical: term, aliases: [], domain: "ml", broader: [], variants: [], prerequisites: [], confidence: {} };
+  const card = { match: null, canonical: term, aliases: [], domain, broader: [], variants: [], prerequisites: [], confidence: {} };
   return `<explanation>${term} 是一个测试解释。</explanation>\n<evidence>NONE</evidence>\n<card>${JSON.stringify(card)}</card>`;
 }
+
+/** A reply whose card says nothing about the field, so it never joins a concept by name and a close match is asked about instead. */
+export const otherDomainReply = (term: string): StubReply => ({ body: defaultOutput(`<selected>${term}</selected>`, "other") });
 
 export async function startStubServer(): Promise<StubServer> {
   const requests: { body: StubRequestBody }[] = [];

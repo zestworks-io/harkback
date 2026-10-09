@@ -1,5 +1,6 @@
 import type { Worker } from "@playwright/test";
 import { expect, eventsOf, openArxiv, readEvents, seedSettings, selectAndExplain, stubSettings, test, type ChromeApi } from "./harness";
+import { otherDomainReply } from "./stub-server";
 
 async function backupState(sw: Worker): Promise<{ lastAt: number | null; downloadIds: number[] } | undefined> {
   return sw.evaluate(
@@ -69,6 +70,7 @@ test("closing the card without answering 'same concept?' records a new concept",
   await selectAndExplain(first, "#t-lora");
   await expect(first.locator("[data-hb=understood]")).toBeEnabled();
 
+  stub.queue.push(otherDomainReply("LoRAs"));
   const second = await openArxiv(context, "2305.14314");
   await selectAndExplain(second, "#t-loras");
   await expect(second.locator("[data-hb=ask]")).toBeVisible();

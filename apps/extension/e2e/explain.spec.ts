@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, openArxiv, readEvents, seedSettings, selectAndExplain, stubSettings, test } from "./harness";
+import { otherDomainReply } from "./stub-server";
 
 const explainWord = (page: Page, selector: string): Promise<void> => selectAndExplain(page, selector);
 
@@ -61,6 +62,7 @@ test("asks whether a close match is the same concept", async ({ context, sw, stu
   await explainWord(first, "#t-lora");
   await expect(first.locator("[data-hb=understood]")).toBeEnabled();
 
+  stub.queue.push(otherDomainReply("LoRAs"));
   const second = await openArxiv(context, "2305.14314");
   await explainWord(second, "#t-loras");
   await expect(second.locator("[data-hb=ask]")).toContainText("这是你 0 天前查过的「LoRA」吗？");

@@ -1,5 +1,6 @@
 import type { BrowserContext, Worker } from "@playwright/test";
 import { eventsOf, expect, openArxiv, readEvents, seedSettings, selectAndExplain, stubSettings, test, type ChromeApi } from "./harness";
+import { otherDomainReply } from "./stub-server";
 
 async function lookUpLora(context: BrowserContext): Promise<void> {
   const page = await openArxiv(context, "2106.09685");
@@ -38,6 +39,7 @@ test("lists, searches and deletes recorded explanations", async ({ context, sw, 
 test("selects several explanations and deletes them together", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
   await lookUpLora(context);
+  stub.queue.push(otherDomainReply("LoRA"));
   const again = await openArxiv(context, "2106.09685");
   await selectAndExplain(again, "#t-lora");
   await again.locator("[data-hb=ask-yes]").click();
