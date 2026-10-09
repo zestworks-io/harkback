@@ -119,7 +119,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 
 Each look-up adds to a graph of what you have read, built from your own reading rather than from a general-purpose model's memory.
 
-- **Concepts are the nodes.** `LoRA` is one node, whatever spelling a page uses (`LoRA`, `low-rank adaptation`). It keeps its aliases, its field and how well you understood it.
+- **Concepts are the nodes.** `LoRA` is one node, whatever spelling a page uses (`LoRA`, `low-rank adaptation`), and whatever language you met it in. It keeps its aliases, its field and how well you understood it.
 - **Relations are the edges.** A model proposes `variant_of`, `prerequisite` and `related` links when you look a term up, for example `QLoRA` is a variant of `LoRA`. You can remove a wrong one, merge two concepts that are the same, or add an alias.
 - **Everything points back to evidence.** A concept lists every encounter: the page, the quote, the date, your explanation and the follow-up conversation.
 - **The graph does work.** A page that only mentions `QLoRA` reminds you of `LoRA`, the model is told what you already know so it can explain the difference, and review is scheduled per concept.

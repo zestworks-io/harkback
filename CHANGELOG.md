@@ -4,6 +4,10 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+### Fixed
+
+- A term selected in another language no longer creates a second concept. When the model's card gives the English name of a concept you already have (as its name or one of its aliases, in the same field), the lookup joins that concept and adds the selected text as an alias, so the next page matches either language. Names shared by several concepts, or by concepts in another field, still stay separate.
+
 ## 1.0.1 - 2026-10-09
 
 ### Changed

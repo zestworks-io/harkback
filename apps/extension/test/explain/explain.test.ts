@@ -140,12 +140,27 @@ describe("finishExplain", () => {
     const plan = planOf(planExplain(req(), ctx, settings(), w.state()));
     const raw =
       '<explanation>低秩适配。</explanation><evidence>LoRA freezes the pre-trained weights</evidence><card>{"match":"c1","canonical":"LoRA","aliases":[],"domain":"ml","broader":[],"variants":[],"prerequisites":[],"confidence":{}}</card>';
-    const out = finishExplain(raw, plan, req());
+    const out = finishExplain(raw, plan, req(), w.state());
     expect(out.tier).toBe("defined_in_source");
     expect(out.resolution).toEqual({ kind: "existing", conceptId: lora });
-    expect(finishExplain("<explanation>x</explanation><evidence>made up quote here</evidence>", plan, req()).tier).toBe(
+    expect(finishExplain("<explanation>x</explanation><evidence>made up quote here</evidence>", plan, req(), w.state()).tier).toBe(
       "external_knowledge",
     );
+  });
+});
+
+describe("finishExplain across languages", () => {
+  it("joins a selection written in another language to the concept already known by the card's English name", () => {
+    const w = world();
+    const attention = w.concept("Attention mechanism");
+    w.encounter(attention, "arxiv:1706.03762");
+    const state = w.state();
+    const r = req({ selection: "注意力机制" });
+    const plan = planOf(planExplain(r, ctx, settings(), state));
+    const raw =
+      '<explanation>让模型关注重要部分。</explanation><evidence>NONE</evidence><card>{"match":null,"canonical":"Attention mechanism","aliases":["注意力机制"],"domain":"ml","broader":[],"variants":[],"prerequisites":[],"confidence":{}}</card>';
+    expect(finishExplain(raw, plan, r, state).resolution).toEqual({ kind: "existing", conceptId: attention });
+    expect(finishExplain(raw, plan, r, world().state()).resolution).toEqual({ kind: "new" });
   });
 });
 
@@ -163,6 +178,7 @@ describe("buildExplainRecord", () => {
       `<explanation>量化。</explanation><evidence>NONE</evidence>${plainCard}`,
       plan,
       req({ selection: "QLoRA" }),
+      state,
     );
     let seq = 0;
     const f = createEventFactory({ device: "dev_bbbb", nextSeq: () => ++seq, now: () => Date.UTC(2026, 8, 25) });
@@ -198,7 +214,7 @@ describe("buildExplainRecord", () => {
     const state = w.state();
     const r = req({ mode: "compare", earlierEncounterId: earlier });
     const plan = planOf(planExplain(r, ctx, settings(), state));
-    const outcome = finishExplain("<explanation>对比。</explanation><evidence>NONE</evidence>", plan, r);
+    const outcome = finishExplain("<explanation>对比。</explanation><evidence>NONE</evidence>", plan, r, state);
     let seq = 0;
     const f = createEventFactory({ device: "dev_bbbb", nextSeq: () => ++seq });
     const record = buildExplainRecord(f, outcome, r, lora, {

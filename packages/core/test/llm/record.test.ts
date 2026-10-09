@@ -60,6 +60,46 @@ describe("resolveConcept", () => {
   it("creates a new concept otherwise", () => {
     expect(resolveConcept(parsed(card()), [{ ...candidate, score: 0.4 }])).toEqual({ kind: "new" });
   });
+
+  describe("by the names on the card", () => {
+    const attention = (o: Partial<NonNullable<ParsedOutput["card"]>> = {}) =>
+      parsed(card({ canonical: "Attention mechanism", aliases: ["注意力机制"], ...o }));
+
+    it("joins a selection in another language to the concept that already has the card's English name", () => {
+      const state = replay([concept(1, "Attention mechanism")]);
+      expect(resolveConcept(attention(), [], state)).toEqual({ kind: "existing", conceptId: id(1) });
+    });
+    it("also joins through an alias of the existing concept, and goes ahead of asking the user", () => {
+      const state = replay([concept(1, "Attention", "ml", ["Attention mechanism"])]);
+      const close = { conceptId: id(9), canonicalName: "Other", domain: "ml" as const, score: 0.8, isPlaceholder: false };
+      expect(resolveConcept(attention(), [close], state)).toEqual({ kind: "existing", conceptId: id(1) });
+    });
+    it("keeps the same name in another domain a different concept", () => {
+      const state = replay([concept(1, "Attention mechanism", "bio")]);
+      expect(resolveConcept(attention(), [], state)).toEqual({ kind: "new" });
+    });
+    it("does not join on a loose alias the model listed", () => {
+      const state = replay([concept(1, "Attention")]);
+      expect(resolveConcept(attention({ canonical: "Self-attention", aliases: ["Attention"] }), [], state)).toEqual({ kind: "new" });
+    });
+    it("never joins when the card's field is only 'other'", () => {
+      const state = replay([concept(1, "Attention mechanism", "other")]);
+      expect(resolveConcept(attention({ domain: "other" }), [], state)).toEqual({ kind: "new" });
+    });
+    it("prefers the model's own match, and does nothing without a state", () => {
+      const state = replay([concept(1, "Attention mechanism")]);
+      expect(resolveConcept(attention({ matchConceptId: id(7) }), [], state)).toEqual({ kind: "existing", conceptId: id(7) });
+      expect(resolveConcept(attention(), [])).toEqual({ kind: "new" });
+    });
+    it("records the selection and the card's names as aliases of the joined concept", () => {
+      const state = replay([concept(1, "Attention mechanism")]);
+      const out = buildRecordEvents(input({ state, selection: "注意力机制", parsed: attention(), conceptId: id(1) }));
+      expect(out.filter((e) => e.type === "concept.created").length).toBe(3); // placeholders only
+      const aliases = out.filter((e) => e.type === "concept.alias_added").map((e) => (e.payload as { alias: string }).alias);
+      expect(aliases).toContain("注意力机制");
+      expect(replay([...[concept(1, "Attention mechanism")], ...out]).concepts.size).toBe(4);
+    });
+  });
 });
 
 describe("buildRecordEvents", () => {

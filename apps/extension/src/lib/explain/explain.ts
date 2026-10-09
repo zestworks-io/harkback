@@ -142,10 +142,10 @@ export interface ExplainOutcome {
   resolution: Resolution;
 }
 
-export function finishExplain(raw: string, plan: ExplainPlan, req: ExplainRequestMsg): ExplainOutcome {
+export function finishExplain(raw: string, plan: ExplainPlan, req: ExplainRequestMsg, state: State): ExplainOutcome {
   const parsed = parseModelOutput(raw, plan.prompt.labels);
   const tier: Tier = verifyEvidence(parsed.evidence, req.pageText) ? "defined_in_source" : "external_knowledge";
-  return { parsed, tier, resolution: resolveConcept(parsed, plan.candidates) };
+  return { parsed, tier, resolution: resolveConcept(parsed, plan.candidates, state) };
 }
 
 export interface RecordContext {

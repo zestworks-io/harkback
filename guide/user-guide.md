@@ -79,7 +79,7 @@ Pages that load more text, or a single-page app that moves to another page witho
 - An abbreviation matches its full name when the name has at least three words. Two different full names for the same abbreviation in one field stay separate concepts.
 - Chinese names, and Japanese names written only in kanji, need at least three characters to be underlined. Names with kana or Hangul need two.
 
-On a concept page you can **add an alias**, **merge** two concepts that are the same (this cannot be undone), **remove** a wrong relation, or **mute** the concept. Adding an alias that already belongs to another concept is refused; merge instead.
+A term you select in another language joins the concept you already have when the model's card names it, so "注意力机制" and "attention mechanism" end up as one concept. On a concept page you can **add an alias**, **merge** two concepts that are the same (this cannot be undone), **remove** a wrong relation, or **mute** the concept. Adding an alias that already belongs to another concept is refused; merge instead.
 
 ## Review
 

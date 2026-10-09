@@ -20,12 +20,35 @@ import type { State } from "../events/state";
 
 export type Resolution = { kind: "existing"; conceptId: string } | { kind: "new" } | { kind: "ask_user"; candidate: Candidate };
 
+/**
+ * The one existing concept in the card's domain that already has the card's canonical name (as its name or an alias), if exactly one does.
+ * The canonical name is always English, so this joins a selection in another language to a concept first met in English. The card's
+ * other aliases are not used: the model may list a broader term there, and joining on it would merge two different concepts.
+ * A card whose domain is "other" says nothing about the field, so it never joins.
+ */
+function conceptNamedByCard(parsed: ParsedOutput, state: State): string | null {
+  const card = parsed.card;
+  if (!card || card.domain === "other") return null;
+  const info = state.aliases.get(identityKey(card.canonical));
+  // An ambiguous or abbreviation-derived key does not say which concept is meant.
+  if (!info || info.ambiguous || info.derived) return null;
+  const found = new Set<string>();
+  for (const id of info.conceptIds) {
+    const rep = state.representative.get(id) ?? id;
+    if (state.concepts.get(rep)?.domain === card.domain) found.add(rep);
+  }
+  return found.size === 1 ? [...found][0]! : null;
+}
+
 export function resolveConcept(
   parsed: ParsedOutput,
   candidates: readonly Candidate[],
+  state?: State,
   askThreshold: number = THRESHOLDS.askUserSimilarity,
 ): Resolution {
   if (parsed.card?.matchConceptId) return { kind: "existing", conceptId: parsed.card.matchConceptId };
+  const named = state ? conceptNamedByCard(parsed, state) : null;
+  if (named) return { kind: "existing", conceptId: named };
   const top = candidates[0];
   if (top && top.score >= askThreshold) return { kind: "ask_user", candidate: top };
   return { kind: "new" };

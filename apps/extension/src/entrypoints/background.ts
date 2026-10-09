@@ -229,7 +229,8 @@ export default defineBackground(() => {
           await refundRate(asked);
           throw e;
         });
-        const outcome = finishExplain(raw, plan, req);
+        // The model took a while: join against what is recorded now, not what was when the request started.
+        const outcome = finishExplain(raw, plan, req, await getState());
         last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
         post({ type: "explained", explanation: outcome.parsed.explanation, tier: outcome.tier });
         if (incognito) return post({ type: "done", encounterId: null, recorded: false });
