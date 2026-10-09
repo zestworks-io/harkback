@@ -18,6 +18,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Understood: "이해함",
   Confused: "아직 헷갈림",
   Shaky: "불안정",
+  "It may help to start with:": "먼저 이것부터 보면 도움이 될 수 있습니다:",
   "Comes first: {names} build on it": "먼저 복습: {names}이(가) 이것을 바탕으로 합니다",
   New: "새 항목",
   "Select all entries of this concept": "이 개념의 모든 기록 선택",

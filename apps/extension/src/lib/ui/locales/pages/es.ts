@@ -18,6 +18,7 @@ export const pages_es: Readonly<Record<string, string>> = {
   Understood: "Entendido",
   Confused: "Confuso",
   Shaky: "Poco firme",
+  "It may help to start with:": "Puede ayudar empezar por:",
   "Comes first: {names} build on it": "Va primero: {names} se apoyan en él",
   New: "Nuevo",
   "Select all entries of this concept": "Seleccionar todas las entradas de este concepto",

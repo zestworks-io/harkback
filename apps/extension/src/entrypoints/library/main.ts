@@ -7,6 +7,7 @@ import { buildDigest, weekOf } from "../../lib/digest";
 import { buildGraph } from "../../lib/graph";
 import { digestView } from "../../lib/pages/digest-view";
 import type { Request, ResponseMap } from "../../lib/messages";
+import { foundationGaps } from "../../lib/foundation";
 import { conceptDetail, understandingOf, type ConceptDetail, type RelatedConcept, type Understanding } from "../../lib/concept-detail";
 import { localizeNames } from "../../lib/names";
 import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/history";
@@ -397,6 +398,29 @@ async function main(): Promise<void> {
   const relatedGroup = (title: string, items: RelatedConcept[]): HTMLElement | null =>
     items.length === 0 ? null : h("div", { className: "group" }, h("h3", {}, title), h("div", { className: "chips" }, ...items.map(chip)));
 
+  /** For a term you are struggling with: the prerequisites that may be what is missing. */
+  const gapsNote = (conceptId: string): HTMLElement | null => {
+    const all = foundationGaps(state, conceptId);
+    if (all.length === 0) return null;
+    const gaps = all.slice(0, 3);
+    const reasonText = (r: (typeof gaps)[number]["reason"]): string =>
+      r === "confused" ? L("仍困惑", "Confused") : r === "shaky" ? L("不太牢", "Shaky") : L("还没解释过", "Not explained yet");
+    return h(
+      "div",
+      { className: "gaps note", "data-hb": "foundation-gaps" },
+      h("strong", {}, L("先补这些可能更有效：", "It may help to start with:")),
+      " ",
+      ...gaps.flatMap((g, i) => [
+        i > 0 ? ", " : "",
+        g.reason === "unstudied"
+          ? h("span", { "data-hb": "gap" }, names(g.name, g.aliases).name)
+          : h("a", { href: conceptHref(g.conceptId), "data-hb": "gap" }, names(g.name, g.aliases).name),
+        ` (${reasonText(g.reason)})`,
+      ]),
+      all.length > gaps.length ? ` +${all.length - gaps.length}` : "",
+    );
+  };
+
   const detailView = (d: ConceptDetail): HTMLElement => {
     const n = names(d.name, d.aliases);
     return h(
@@ -421,6 +445,7 @@ async function main(): Promise<void> {
             L("已静音：不会出现重逢提示，也不会进入复习。", "Muted: no reunion hints and no review."),
           )
         : null,
+      gapsNote(d.conceptId),
       editTools(d),
       relatedGroup(L("前置概念", "Prerequisites"), d.prerequisites),
       relatedGroup(L("变体", "Variants"), d.variants),
@@ -635,7 +660,7 @@ async function main(): Promise<void> {
         revealed ? null : show,
         revealed ? null : checkPanel(item),
       ),
-      revealed ? h("div", {}, h("blockquote", { className: "quote" }, item.selection), explanation) : null,
+      revealed ? h("div", {}, h("blockquote", { className: "quote" }, item.selection), explanation, gapsNote(item.conceptId)) : null,
       gradable
         ? h(
             "div",

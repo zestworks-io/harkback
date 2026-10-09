@@ -91,6 +91,19 @@ describe("reviewQueue", () => {
     expect(reviewQueue(s, day(1))[0]!.answers).toBe(0);
   });
 
+  it("treats a recalled reunion like a Good answer", () => {
+    const due = (action: Action) => {
+      const { w, act } = setup();
+      const c = w.concept("LoRA");
+      const e = w.encounter(c, "s1");
+      act(e, "review_good", day(1));
+      act(e, action, day(3));
+      return dueAtOf(w.state(), c);
+    };
+    expect(due("reunion_recalled")).toBe(due("review_good"));
+    expect(due("reunion_recalled")).toBeGreaterThan(day(3) + DAY_MS);
+  });
+
   it("spaces a term further apart each time it is remembered, following the memory model", () => {
     const { w, act } = setup();
     const c = w.concept("LoRA");

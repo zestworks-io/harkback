@@ -18,6 +18,7 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Understood: "懂了",
   Confused: "還是不懂",
   Shaky: "不太牢",
+  "It may help to start with:": "先補這些可能更有效：",
   "Comes first: {names} build on it": "先修概念：{names} 建立在它之上",
   New: "新",
   "Select all entries of this concept": "選取這個概念的所有記錄",

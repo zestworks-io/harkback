@@ -85,6 +85,10 @@ Each button shows how long until the term returns if you pick it. The wait comes
 
 **Order.** Confused terms come first, then shaky ones (last answered _Hard_), then the most overdue. A term that builds on another (its prerequisite, see the graph) comes after that prerequisite when both are due, and the card says which due terms build on it. Rejected relations are ignored.
 
+**Where to start.** When a term is confused or shaky, its concept page and the review card (after you show the explanation) suggest the prerequisites to learn first (three are shown, with a count of the rest): ones you are confused or shaky about, or have never had explained, followed down through weak ones to the weakest foundation. A prerequisite you understand ends the search there. Muted terms and rejected relations are ignored.
+
+**Reunions count.** Pressing _Remembered_ on a reunion hint on another page counts as a Good answer, so the next review of that term moves out.
+
 **Target recall** in settings (Review) is how likely you want to be to remember a term when it comes due; the default is 90%. A higher number means more reviews.
 
 **Keyboard.** `Space` shows the explanation, `1`–`4` grade (Again to Easy), `S` skips. These keys are ignored while you are typing in the answer box.

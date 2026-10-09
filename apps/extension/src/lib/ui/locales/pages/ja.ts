@@ -18,6 +18,7 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Understood: "理解した",
   Confused: "まだ分からない",
   Shaky: "あやふや",
+  "It may help to start with:": "先にこちらを押さえると効果的かもしれません：",
   "Comes first: {names} build on it": "先に復習：{names} がこれを前提にしています",
   New: "新規",
   "Select all entries of this concept": "この概念の記録をすべて選択",
