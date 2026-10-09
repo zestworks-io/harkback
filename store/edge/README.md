@@ -36,3 +36,5 @@ Harkback has no server and no account. To test it: open any arXiv paper (for exa
 4. Partner Center → Microsoft Edge → Overview → Create new extension → upload the zip → fill Availability, Properties, Store listings and Submit.
 
 If a release was built from another commit than the working tree, build it in a clean checkout of that commit (`git worktree add --detach <dir> <commit>`, then `pnpm install --frozen-lockfile && pnpm zip:edge` there).
+
+Partner Center rejects a package that contains a compressed file ("The uploaded package consists of a compressed file"). The build therefore unpacks the bundled OCR language pack to `ocr/eng.traineddata`; do not add `.gz`, `.zip` or similar files to the extension.

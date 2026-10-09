@@ -190,7 +190,7 @@ async function main(): Promise<void> {
           {
             worker: `${ocrAssets}worker.min.js`,
             core: `${ocrAssets}tesseract-core-simd-lstm.wasm.js`,
-            bundledPack: `${ocrAssets}eng.traineddata.gz`,
+            bundledPack: `${ocrAssets}eng.traineddata`,
           },
           (code) => getPack(code),
         ),

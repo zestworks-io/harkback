@@ -1,4 +1,6 @@
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { readdir } from "node:fs/promises";
+import { gunzipSync } from "node:zlib";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { defineConfig } from "wxt";
@@ -14,11 +16,15 @@ const englishPack = path.join(
   path.dirname(createRequire(import.meta.url).resolve("@tesseract.js-data/eng/package.json")),
   "4.0.0_best_int/eng.traineddata.gz",
 );
+// Edge Add-ons rejects a package that holds a compressed file, so the pack ships unpacked. Tesseract accepts either form.
+const unpackedPack = path.join(import.meta.dirname, ".wxt/ocr/eng.traineddata");
+mkdirSync(path.dirname(unpackedPack), { recursive: true });
+writeFileSync(unpackedPack, gunzipSync(readFileSync(englishPack)));
 // What OCR needs to run without a network: its worker, the one WebAssembly core (with SIMD) and the English pack.
 const OCR_ASSETS = [
   { absoluteSrc: path.join(tesseractDir, "dist/worker.min.js"), relativeDest: "ocr/worker.min.js" },
   { absoluteSrc: path.join(tesseractCoreDir, "tesseract-core-simd-lstm.wasm.js"), relativeDest: "ocr/tesseract-core-simd-lstm.wasm.js" },
-  { absoluteSrc: englishPack, relativeDest: "ocr/eng.traineddata.gz" },
+  { absoluteSrc: unpackedPack, relativeDest: "ocr/eng.traineddata" },
 ];
 
 export default defineConfig({
