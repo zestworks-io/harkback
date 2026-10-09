@@ -148,3 +148,180 @@ describe("extractPage with a profile", () => {
     expect(extractPage(doc, "https://github.com/octo/hello").text).toContain("Gradient descent");
   });
 });
+
+const NOTION_ID = "0123456789abcdef0123456789abcdef";
+
+describe("Notion profile", () => {
+  it("covers a page however its address is written, and nothing else on notion.so", () => {
+    for (const url of [
+      `https://www.notion.so/Plan-for-Q4-${NOTION_ID}`,
+      `https://notion.so/${NOTION_ID}`,
+      `https://www.notion.so/acme/Plan-for-Q4-${NOTION_ID}?pvs=4`,
+      `https://acme.notion.site/Plan-${NOTION_ID}`,
+      `https://www.notion.so/acme/${NOTION_ID.slice(0, 8)}-${NOTION_ID.slice(8, 12)}-${NOTION_ID.slice(12, 16)}-${NOTION_ID.slice(16, 20)}-${NOTION_ID.slice(20)}`,
+    ])
+      expect(profileFor(url), url).not.toBeNull();
+    for (const url of [
+      "https://www.notion.so/",
+      "https://www.notion.so/login",
+      "https://www.notion.so/product/ai",
+      "https://notion.so.evil.com/" + NOTION_ID,
+      "https://example.com/" + NOTION_ID,
+    ])
+      expect(profileFor(url), url).toBeNull();
+  });
+
+  it("names a page by its id alone, whatever its title, workspace, query or capitalisation", () => {
+    for (const url of [
+      `https://www.notion.so/Plan-for-Q4-${NOTION_ID}`,
+      `https://www.notion.so/Renamed-title-${NOTION_ID.toUpperCase()}#block`,
+      `https://notion.so/acme/${NOTION_ID}?v=1&pvs=4`,
+      `https://acme.notion.site/${NOTION_ID}`,
+    ])
+      expect(idOf(url), url).toBe(`notion:${NOTION_ID}`);
+  });
+
+  it("reads the page content and not the sidebar", () => {
+    const doc = page(
+      "",
+      `<div class="notion-sidebar">Workspaces Teamspaces</div><div class="notion-frame"><div class="notion-page-content"><div>Q4 goals</div></div></div>`,
+    );
+    const root = profileFor(`https://www.notion.so/${NOTION_ID}`)!.root(doc);
+    expect(root?.textContent).toBe("Q4 goals");
+  });
+
+  it("finds nothing when the page no longer has the expected structure", () => {
+    expect(profileFor(`https://www.notion.so/${NOTION_ID}`)!.root(page("", "<div>Changed</div>"))).toBeNull();
+  });
+
+  it("calls a published page public, and leaves a workspace page to the reader", () => {
+    const hint = (url: string) => profileFor(url)!.privacy(new URL(url), page("", ""));
+    expect(hint(`https://acme.notion.site/${NOTION_ID}`)).toBe("likely-public");
+    expect(hint(`https://www.notion.so/${NOTION_ID}`)).toBe("unknown");
+  });
+
+  it("names the page opened in a peek, not the database behind it", () => {
+    const peeked = "abcdefabcdefabcdefabcdefabcdefab";
+    expect(idOf(`https://www.notion.so/acme/Tasks-${NOTION_ID}?v=1234&p=${peeked}&pm=s`)).toBe(`notion:${peeked}`);
+    expect(idOf(`https://www.notion.so/Tasks-${NOTION_ID}?p=not-an-id`)).toBe(`notion:${NOTION_ID}`);
+  });
+
+  it("reads the page in the peek and not the page behind it", () => {
+    const doc = page(
+      "",
+      `<div class="notion-frame"><div class="notion-page-content">Tasks database</div></div>
+       <div class="notion-peek-renderer"><div class="notion-page-content">The opened task</div></div>`,
+    );
+    expect(profileFor(`https://www.notion.so/${NOTION_ID}?p=abcdefabcdefabcdefabcdefabcdefab`)!.root(doc)?.textContent).toBe(
+      "The opened task",
+    );
+  });
+
+  it("does not take something that only looks like a page address for a page", () => {
+    for (const url of [
+      `https://www.notion.so/invite/${NOTION_ID}`,
+      `https://www.notion.so/${NOTION_ID}0123456789`,
+      `https://www.notion.so/deadbeef-plan`,
+      `https://www.notion.so/${NOTION_ID}/settings`,
+    ])
+      expect(profileFor(url), url).toBeNull();
+  });
+
+  it("accepts a trailing slash", () => {
+    expect(idOf(`https://www.notion.so/Plan-${NOTION_ID}/`)).toBe(`notion:${NOTION_ID}`);
+  });
+});
+
+describe("Google Docs profile", () => {
+  const DOC = "1AbC_dEf-GhIjKlMnOpQrStUvWxYz0123456789";
+  const PUB = "2PACX-1vQabcdefghijklmnopqrstuvwxyz_0123456789";
+
+  it("covers a document in each of its views, and nothing else on docs.google.com", () => {
+    for (const url of [
+      `https://docs.google.com/document/d/${DOC}/edit`,
+      `https://docs.google.com/document/d/${DOC}/edit?tab=t.0#heading=h.1`,
+      `https://docs.google.com/document/d/${DOC}/preview`,
+      `https://docs.google.com/document/d/${DOC}/mobilebasic`,
+      `https://docs.google.com/document/u/1/d/${DOC}/edit`,
+      `https://docs.google.com/document/d/e/${PUB}/pub`,
+    ])
+      expect(profileFor(url), url).not.toBeNull();
+    for (const url of [
+      "https://docs.google.com/",
+      "https://docs.google.com/document/",
+      `https://docs.google.com/spreadsheets/d/${DOC}/edit`,
+      `https://docs.google.com/presentation/d/${DOC}/edit`,
+      `https://docs.google.com.evil.com/document/d/${DOC}/edit`,
+    ])
+      expect(profileFor(url), url).toBeNull();
+  });
+
+  it("names a document by its id, whichever view or account is open", () => {
+    for (const url of [
+      `https://docs.google.com/document/d/${DOC}/edit?tab=t.0`,
+      `https://docs.google.com/document/d/${DOC}/mobilebasic`,
+      `https://docs.google.com/document/u/2/d/${DOC}/preview`,
+    ])
+      expect(idOf(url), url).toBe(`gdoc:${DOC}`);
+  });
+
+  it("names a published document by its publishing id, which is not the document's own", () => {
+    expect(idOf(`https://docs.google.com/document/d/e/${PUB}/pub`)).toBe(`gdoc:e/${PUB}`);
+  });
+
+  it("reads the text of the published and mobile views", () => {
+    const published = page("", `<div id="header">Sign in</div><div id="contents"><div class="doc-content"><p>Q4 plan</p></div></div>`);
+    const root = profileFor(`https://docs.google.com/document/d/e/${PUB}/pub`)!.root(published);
+    expect(root?.textContent).toBe("Q4 plan");
+    const basic = page("", `<div class="doc-content"><p>Q4 plan</p></div>`);
+    expect(profileFor(`https://docs.google.com/document/d/${DOC}/mobilebasic`)!.root(basic)?.textContent).toBe("Q4 plan");
+  });
+
+  it("reads nothing in the editor, whose text is drawn rather than written", () => {
+    expect(profileFor(`https://docs.google.com/document/d/${DOC}/edit`)!.root(page("", `<canvas></canvas>`))?.textContent).toBe("");
+  });
+
+  it("calls only a published document public", () => {
+    const hint = (url: string) => profileFor(url)!.privacy(new URL(url), page("", ""));
+    expect(hint(`https://docs.google.com/document/d/e/${PUB}/pub`)).toBe("likely-public");
+    expect(hint(`https://docs.google.com/document/d/${DOC}/mobilebasic`)).toBe("unknown");
+    expect(hint(`https://docs.google.com/document/d/${DOC}/edit`)).toBe("unknown");
+  });
+});
+
+describe("profiles keep an id and its text together", () => {
+  const NID = "0123456789abcdef0123456789abcdef";
+  const ROW = "abcdefabcdefabcdefabcdefabcdefab";
+  const DOC = "1AbC_dEf-GhIjKlMnOpQrStUvWxYz0123456789";
+  const dashed = `${ROW.slice(0, 8)}-${ROW.slice(8, 12)}-${ROW.slice(12, 16)}-${ROW.slice(16, 20)}-${ROW.slice(20)}`;
+  const behind = `<div class="notion-frame"><div class="notion-page-content">Tasks database</div></div>`;
+
+  it("reads nothing, rather than the database behind it, while a peeked row has not rendered", () => {
+    const profile = profileFor(`https://www.notion.so/Tasks-${NID}?p=${ROW}`)!;
+    expect(profile.root(page("", behind))?.textContent).toBe("");
+  });
+
+  it("ignores a peek left in the page after the address went back to a full page", () => {
+    const stale = `${behind}<div class="notion-peek-renderer"><div class="notion-page-content">Old row</div></div>`;
+    expect(profileFor(`https://www.notion.so/Tasks-${NID}`)!.root(page("", stale))?.textContent).toBe("Tasks database");
+  });
+
+  it("names a peeked row given in the dashed form too", () => {
+    expect(idOf(`https://www.notion.so/Tasks-${NID}?p=${dashed}`)).toBe(`notion:${ROW}`);
+  });
+
+  it("leaves the app's own pages alone, and pages more than a workspace deep", () => {
+    for (const path of ["templates/Plan", "help/Plan", "product/Plan", "onboarding/Plan"])
+      expect(profileFor(`https://www.notion.so/${path}-${NID}`), path).toBeNull();
+    expect(profileFor(`https://www.notion.so/a/b/Plan-${NID}`)).toBeNull();
+  });
+
+  it("reads a Google document only in the views that show it, and not the editor's menus as its text", () => {
+    for (const view of ["copy", "export", "revisions", "comment"])
+      expect(profileFor(`https://docs.google.com/document/d/${DOC}/${view}`), view).toBeNull();
+    const editor = page("", `<div class="docs-menubar">File Edit View</div>`);
+    const root = profileFor(`https://docs.google.com/document/d/${DOC}/edit`)!.root(editor);
+    expect(root).not.toBeNull();
+    expect(root?.textContent).toBe("");
+  });
+});

@@ -100,7 +100,84 @@ const github: Profile = {
   },
 };
 
-const PROFILES: readonly Profile[] = [github];
+/** A root with no text, for a page that has a document but nothing to read yet: the generic search would read the page around it instead. */
+const nothingToRead = (doc: Document): Element => doc.createElement("div");
+
+/** The first element with text that is not inside `excluded`. */
+function firstOutside(doc: Document, selector: string, excluded: string): Element | null {
+  for (const el of doc.querySelectorAll(selector)) if (!el.closest(excluded) && el.textContent?.trim()) return el;
+  return null;
+}
+
+// A Notion page's address ends in its id, 32 hex digits or the dashed form, after the title when there is one.
+const NOTION_ID = "[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+const NOTION_PAGE_ID = new RegExp(`(?:^|-)(${NOTION_ID})$`, "i");
+const NOTION_PEEK_ID = new RegExp(`^(?:${NOTION_ID})$`, "i");
+const NOTION_CONTENT = ".notion-page-content";
+// A page opened in a peek sits over the page behind it, which stays in the document.
+const NOTION_PEEK = ".notion-peek-renderer";
+// First path segments of notion.so that are parts of the app, not workspaces.
+const NOTION_APP_PATHS = new Set([
+  "api",
+  "help",
+  "invite",
+  "login",
+  "my-integrations",
+  "onboarding",
+  "product",
+  "settings",
+  "signup",
+  "templates",
+]);
+
+const notion: Profile = {
+  match(url) {
+    const published = url.hostname.endsWith(".notion.site");
+    if (!published && url.hostname !== "notion.so" && url.hostname !== "www.notion.so") return null;
+    // A page is `/<title>-<id>`, `/<id>`, or either of those inside a workspace.
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (segments.length > 2 || NOTION_APP_PATHS.has(segments[0]?.toLowerCase() ?? "")) return null;
+    // Opening a row of a database in a peek leaves the database in the path and puts the row's id in `p`.
+    const param = url.searchParams.get("p") ?? "";
+    const peeked = NOTION_PEEK_ID.test(param) ? param : undefined;
+    const raw = peeked ?? NOTION_PAGE_ID.exec(segments.at(-1) ?? "")?.[1];
+    if (!raw) return null;
+    const id = raw.replace(/-/g, "").toLowerCase();
+    return {
+      sourceId: () => `notion:${id}`,
+      // While the peek has not rendered, the only text in the document is the database's, which is not the row.
+      root: (doc) =>
+        peeked
+          ? (firstOutside(doc, `${NOTION_PEEK} ${NOTION_CONTENT}`, "never-matches") ?? nothingToRead(doc))
+          : firstOutside(doc, NOTION_CONTENT, NOTION_PEEK),
+      // A page in a workspace may be private or shared; only a published one says it is public.
+      privacy: () => (published ? "likely-public" : "unknown"),
+    };
+  },
+};
+
+// /document/d/<id>/<view>, /document/u/<n>/d/<id>/<view> for the account in use, and /document/d/e/<publishing id>/pub for a published copy.
+const GDOC_PATH = /^\/document\/(?:u\/\d+\/)?d\/(e\/)?([\w-]+)(?:\/(edit|preview|view|mobilebasic|pub))?\/?$/;
+// The published and mobile views are written as HTML.
+const GDOC_ROOT = [".doc-content", "#contents"];
+
+const googleDocs: Profile = {
+  match(url) {
+    if (url.hostname !== "docs.google.com") return null;
+    const m = GDOC_PATH.exec(url.pathname);
+    if (!m) return null;
+    const published = m[1] !== undefined;
+    return {
+      sourceId: () => `gdoc:${published ? "e/" : ""}${m[2]}`,
+      // The editor draws its text on a canvas, so the page around it is menus and toolbars, not the document.
+      root: (doc) => (m[3] === "edit" ? nothingToRead(doc) : firstMatch(doc, GDOC_ROOT)),
+      // Publishing a document to the web is a deliberate act; opening one by its address says nothing either way.
+      privacy: () => (published ? "likely-public" : "unknown"),
+    };
+  },
+};
+
+const PROFILES: readonly Profile[] = [github, notion, googleDocs];
 
 /** The profile for a page address; null for pages that are read the generic way. */
 export function profileFor(url: string): SiteProfile | null {
