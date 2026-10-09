@@ -11,6 +11,10 @@ export const ACTIONS = [
   "reunion_recalled",
   "reunion_reexplain",
   "reunion_compare",
+  "review_again",
+  "review_hard",
+  "review_good",
+  "review_easy",
 ] as const;
 export const SENSITIVITIES = ["normal", "sensitive"] as const;
 export const CONSENT_SCOPES = ["this_record", "this_source", "all_public_sources"] as const;

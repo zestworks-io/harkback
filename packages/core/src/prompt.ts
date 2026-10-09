@@ -53,6 +53,7 @@ const LIMITS = {
   earlierExplanation: 1500,
   question: 2000,
   followUpExplanation: 3000,
+  answer: 2000,
 } as const;
 
 const DELIMITER = /<\/?(?:page_content|earlier_content|selected)>/gi;
@@ -142,6 +143,38 @@ export function buildFollowUpPrompt(req: FollowUpRequest): ChatMessage[] {
     `Term: ${clean(req.term, LIMITS.selection)}`,
     `Earlier explanation: ${clean(req.explanation, LIMITS.followUpExplanation)}`,
     `Question: ${clean(req.question, LIMITS.question)}`,
+  ].join("\n");
+  return [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+}
+
+export interface CheckRequest {
+  term: string;
+  /** The explanation stored when the term was looked up. */
+  explanation: string;
+  /** What the reader wrote from memory. */
+  answer: string;
+  language: string;
+}
+
+/** Asks a model to compare what the reader remembers with the stored explanation. The reply is read by `parseCheckReply`. */
+export function buildCheckPrompt(req: CheckRequest): ChatMessage[] {
+  const system = [
+    "A reader is testing their memory of a technical term. Compare what they wrote from memory with the earlier explanation they were given.",
+    "Judge only whether the reader's answer captures the main idea; wording, detail and style do not matter. Never reveal more than a short hint of what is missing.",
+    `Reply in ${explainLanguageName(req.language)} with exactly two parts and nothing else:`,
+    "<verdict>correct</verdict> or <verdict>partial</verdict> or <verdict>incorrect</verdict>",
+    "<feedback>one to three plain sentences telling the reader what they got right and what is missing</feedback>",
+    UNTRUSTED,
+  ].join("\n");
+  const user = [
+    `Term: ${clean(req.term, LIMITS.selection)}`,
+    "<earlier_content>",
+    `Earlier explanation: ${clean(req.explanation, LIMITS.followUpExplanation)}`,
+    "</earlier_content>",
+    `The reader's answer from memory: ${clean(req.answer, LIMITS.answer)}`,
   ].join("\n");
   return [
     { role: "system", content: system },

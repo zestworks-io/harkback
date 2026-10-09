@@ -649,7 +649,11 @@
                     "marked_confused",
                     "reunion_recalled",
                     "reunion_reexplain",
-                    "reunion_compare"
+                    "reunion_compare",
+                    "review_again",
+                    "review_hard",
+                    "review_good",
+                    "review_easy"
                   ]
                 },
                 "detail": {

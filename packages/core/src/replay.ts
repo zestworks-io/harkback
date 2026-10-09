@@ -1,6 +1,7 @@
 import type { EventOf, HarkEvent } from "@harkback/spec";
 import { DEFAULT_AMBIGUOUS_ACRONYMS } from "./constants";
 import { edgeId, parseEdgeId } from "./ids";
+import { gradeOf } from "./grade";
 import { canonicalOrder } from "./order";
 import { resolveConcepts } from "./replay-concepts";
 import type { EdgeState, EncounterState, SourceState, State } from "./state";
@@ -101,7 +102,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     enc.actions.push(a.payload.detail ? { action: a.payload.action, at, detail: a.payload.detail } : { action: a.payload.action, at });
     enc.lastAction = a.payload.action;
     enc.lastTouchedAt = Math.max(enc.lastTouchedAt, at);
-    if (a.payload.action === "marked_confused") enc.everConfused = true;
+    if (gradeOf(a.payload.action) === 1) enc.everConfused = true;
   }
 
   const encountersByConcept = new Map<string, string[]>();

@@ -7,6 +7,8 @@ export * from "./state";
 export * from "./union-find";
 export * from "./replay-concepts";
 export * from "./replay";
+export * from "./grade";
+export * from "./check";
 export * from "./compact";
 export * from "./candidates";
 export * from "./matcher";
