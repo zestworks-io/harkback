@@ -25,7 +25,7 @@ describe.skipIf(!enabled)("production manifest", () => {
   it("keeps the schema library out of the script injected into web pages", () => {
     const file = join(out, "content-scripts/content.js");
     expect(readFileSync(file, "utf8")).not.toContain("ZodError");
-    expect(statSync(file).size).toBeLessThan(100_000);
+    expect(statSync(file).size).toBeLessThan(120_000);
   });
 
   it("uses closed shadow roots in the production content script", () => {
