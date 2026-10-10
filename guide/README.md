@@ -14,6 +14,6 @@
 
 The [README](../README.md) is the short version of all of this. [PRIVACY.md](../PRIVACY.md) is the privacy policy, and [SECURITY.md](../SECURITY.md) says how to report a vulnerability.
 
-Getting started is also available in [简体中文](zh/getting-started.md), [繁體中文](zh-tw/getting-started.md), [日本語](ja/getting-started.md), [한국어](ko/getting-started.md), [Español](es/getting-started.md), [Français](fr/getting-started.md), [Deutsch](de/getting-started.md) and [Português (Brasil)](pt-br/getting-started.md). The other pages are in English.
+Getting started is also available in [简体中文](zh/getting-started.md), [繁體中文](zh-tw/getting-started.md), [日本語](ja/getting-started.md), [한국어](ko/getting-started.md), [Español](es/getting-started.md), [Français](fr/getting-started.md), [Deutsch](de/getting-started.md) and [Português (Brasil)](pt-br/getting-started.md). The other pages are in English. The [README](../README.md) is also available in all nine languages: see the language links at its top.
 
 These pages describe the code in this repository. When the code and a page disagree, the code is right: please open an issue or a pull request.

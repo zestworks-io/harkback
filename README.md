@@ -24,7 +24,7 @@ Explain terms while you read. Remember what you understood.<br>Get it back when 
 | <a href="#quick-start"><b>Quick start</b></a> | <a href="#features"><b>Features</b></a> | <a href="guide/README.md"><b>Docs</b></a> | <a href="#privacy"><b>Privacy</b></a> | <a href="CHANGELOG.md"><b>Changelog</b></a> | <a href="CONTRIBUTING.md"><b>Contributing</b></a> |
 </p>
 
-<p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
 
 Harkback is a Chrome extension for people who read papers and technical documents. Select a term and it explains the term in context. Every explanation is kept in a local, append-only log. When the same term shows up on a later page, even under another spelling, Harkback underlines it and shows what you understood last time.
 
