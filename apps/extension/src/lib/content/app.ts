@@ -354,9 +354,11 @@ export class ContentApp {
 
   private onReunionAction(card: ReunionCard, action: ReunionAction, range: Range): void {
     // A term the reader has answered for is not shown again on the same video.
-    if (this.source?.live && (action === "recalled" || action === "mute")) this.answered.add(card.conceptId);
+    if (this.source?.live && (action === "recalled" || action === "mute" || action === "different")) this.answered.add(card.conceptId);
     if (action === "recalled") void this.rpc.request({ type: "action", encounterId: card.encounterId, action: "reunion_recalled" });
     else if (action === "mute") void this.rpc.request({ type: "mute", conceptId: card.conceptId });
+    else if (action === "different")
+      void this.rpc.request({ type: "dismiss-reunion", conceptId: card.conceptId, sourceId: this.detect().source_id });
     else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId, text: card.matched });
   }
 

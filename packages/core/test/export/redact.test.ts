@@ -68,6 +68,30 @@ describe("withoutSensitive", () => {
     expect(serializeJsonl(withoutSensitive(l.events))).not.toContain("Secret thing");
   });
 
+  it("drops a dismissed reunion on a sensitive source, under any id of the same paper, and keeps one on a normal source", () => {
+    const { f, events, source, concept, encounter } = log();
+    source("arxiv:1", "normal");
+    source("arxiv:2", "sensitive", true);
+    events.push(
+      f.make("source.seen", {
+        source_id: "doi:10.1/x",
+        ids: { arxiv: "2", doi: "10.1/x" },
+        title: "",
+        license: "unknown",
+        sensitivity: "normal",
+      }),
+    );
+    const c = concept("LoRA");
+    encounter(c, "arxiv:1");
+    events.push(f.make("reunion.dismissed", { concept_id: c, source_id: "arxiv:1" }));
+    events.push(f.make("reunion.dismissed", { concept_id: c, source_id: "arxiv:2" }));
+    events.push(f.make("reunion.dismissed", { concept_id: c, source_id: "doi:10.1/x" }));
+    const dismissed = withoutSensitive(events)
+      .filter((e) => e.type === "reunion.dismissed")
+      .map((e) => (e.payload as { source_id: string }).source_id);
+    expect(dismissed).toEqual(["arxiv:1"]);
+  });
+
   it("returns everything when nothing is sensitive, and the result is valid JSONL", () => {
     const l = log();
     l.source("pub", "normal");

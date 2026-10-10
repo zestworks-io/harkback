@@ -5,9 +5,9 @@ import type { Overlay } from "./overlay";
 import { quoteTitle } from "./languages";
 import { t, type Lang } from "./strings";
 
-export type ReunionAction = "recalled" | "reexplain" | "compare" | "mute";
+export type ReunionAction = "recalled" | "reexplain" | "compare" | "different" | "mute";
 
-const ACTIONS: readonly ReunionAction[] = ["recalled", "reexplain", "compare", "mute"];
+const ACTIONS: readonly ReunionAction[] = ["recalled", "reexplain", "compare", "different", "mute"];
 const HIDE_DELAY_MS = 300;
 
 export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionAction) => void): HTMLElement {
@@ -131,7 +131,7 @@ export class ReunionLayer {
     this.closeHover();
     const el = reunionCardView(item.card, this.lang, (action) => {
       if (action === "recalled") this.remove((x) => x === item);
-      if (action === "mute") this.remove((x) => x.card.conceptId === item.card.conceptId);
+      if (action === "mute" || action === "different") this.remove((x) => x.card.conceptId === item.card.conceptId);
       this.closeHover();
       this.onAction(item.card, action, item.range);
     });

@@ -28,6 +28,7 @@ export const ui_es: Readonly<Record<StringKey, string>> = {
   recalled: "Lo recuerdo",
   reexplain: "Explicar de nuevo",
   compare: "Comparar usos",
+  different: "Aquí significa otra cosa",
   mute: "No volver a mostrar",
   retry: "Reintentar",
   stop: "Detener",

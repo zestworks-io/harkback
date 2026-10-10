@@ -2,7 +2,7 @@ import type { HarkEvent } from "@harkback/spec";
 import { parseEdgeId } from "../events/ids";
 import { isSensitiveOnly } from "../llm/prompt";
 import { replay } from "../events/replay";
-import { sensitiveSourceIds, type SourceState } from "../events/state";
+import { isSensitiveSource, sensitiveSourceIds, type SourceState } from "../events/state";
 
 /**
  * The events without anything that came from a sensitive source: the source itself, its encounters and what was done to
@@ -44,6 +44,8 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
         return !e.payload || !sensitiveEncounters.has(e.payload.encounter_id);
       case "encounter.deleted":
         return !sensitiveEncounters.has(e.payload.encounter_id);
+      case "reunion.dismissed":
+        return !isSensitiveSource(state, e.payload.source_id) && !isHidden(e.payload.concept_id);
       case "concept.created":
       case "concept.alias_added":
       case "concept.muted":

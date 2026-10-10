@@ -117,6 +117,24 @@ describe("writes", () => {
     expect(written[2]!.payload).toMatchObject({ source_id: "arxiv:1", sensitivity: "sensitive" });
   });
 
+  it("records that a term means something else on a page, and refuses an empty page or a private window", async () => {
+    const { deps, written, conceptId } = setup();
+    expect(await handleRequest(deps, { type: "dismiss-reunion", conceptId, sourceId: "arxiv:9" }, page)).toEqual({ ok: true });
+    expect(written.map((e) => e.type)).toEqual(["reunion.dismissed"]);
+    expect(written[0]!.payload).toMatchObject({ concept_id: conceptId, source_id: "arxiv:9" });
+    expect(await handleRequest(deps, { type: "dismiss-reunion", conceptId, sourceId: "" }, page)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "dismiss-reunion", conceptId: "nope", sourceId: "arxiv:9" }, page)).toEqual({ ok: false });
+    expect(
+      await handleRequest(deps, { type: "dismiss-reunion", conceptId, sourceId: "arxiv:9" }, {
+        ...page,
+        tab: { incognito: true },
+      } as never),
+    ).toEqual({
+      ok: false,
+    });
+    expect(written).toHaveLength(1);
+  });
+
   it("lets the reader mark a sensitive source normal again, and says so in the event", async () => {
     const { deps, written, w } = setup();
     w.source("secret", "sensitive", "Secret doc");

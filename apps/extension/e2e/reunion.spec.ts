@@ -54,6 +54,23 @@ test("muting stops the reunion", async ({ context, sw, stub }) => {
   await expect(reopened.locator("[data-hb=mark]")).toHaveCount(0);
 });
 
+test("saying a term means something else stops the reunion on that paper only", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  await lookUpLoraOnFirstPaper(context);
+  const second = await openArxiv(context, "2305.14314");
+  await expect(second.locator("[data-hb=mark]")).toHaveCount(1);
+  await hover(second, "#t-lora");
+  await second.locator("[data-hb=reunion-card] [data-hb=different]").click();
+  await expect(second.locator("[data-hb=mark]")).toHaveCount(0);
+  await expect.poll(async () => (await readEvents(sw)).some((e) => e.type === "reunion.dismissed")).toBe(true);
+  expect((await readEvents(sw)).some((e) => e.type === "concept.muted")).toBe(false);
+  const reopened = await openArxiv(context, "2305.14314");
+  await reopened.waitForTimeout(1000);
+  await expect(reopened.locator("[data-hb=mark]")).toHaveCount(0);
+  const dismissed = (await readEvents(sw)).find((e) => e.type === "reunion.dismissed")!;
+  expect(dismissed.payload).toMatchObject({ source_id: "arxiv:2305.14314" });
+});
+
 test("compare from a reunion records a new explanation and marks the earlier one", async ({ context, sw, stub }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLoraOnFirstPaper(context);

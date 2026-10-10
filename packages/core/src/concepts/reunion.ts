@@ -53,9 +53,13 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
   const encountersOf = (conceptId: string) => (state.encountersByConcept.get(conceptId) ?? []).map((eid) => state.encounters.get(eid)!);
   const lastTouched = (conceptId: string) => Math.max(...encountersOf(conceptId).map((e) => e.lastTouchedAt));
 
+  // The reader said the term means something else on this page.
+  const dismissedHere = (conceptId: string): boolean =>
+    (state.dismissed.get(conceptId) ?? []).some((s) => sameSource(state, s, ctx.sourceId));
+
   const eligible = (conceptId: string): EncounterState | null => {
     const c = state.concepts.get(conceptId);
-    if (!c || c.muted || c.isPlaceholder) return null;
+    if (!c || c.muted || c.isPlaceholder || dismissedHere(conceptId)) return null;
     if (ctx.now - lastTouched(conceptId) < minGap) return null;
     const fromOther = encountersOf(conceptId).filter((e) => !sameSource(state, e.sourceId, ctx.sourceId));
     if (fromOther.length === 0) return null;
@@ -70,7 +74,7 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
 
   for (const [conceptId, hit] of conceptHits) {
     const c = state.concepts.get(conceptId)!;
-    if (c.muted || !c.isPlaceholder) continue;
+    if (c.muted || !c.isPlaceholder || dismissedHere(conceptId)) continue;
     for (const edge of state.edges.values()) {
       if (edge.from !== conceptId || edge.rel !== "variant_of" || edge.status === "rejected") continue;
       if (edge.status !== "confirmed" && edge.confidence < THRESHOLDS.relatedEdgeConfidence) continue;

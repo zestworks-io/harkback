@@ -76,6 +76,8 @@ export const encounterActionPayload = z.object({
     .optional(),
 });
 
+export const reunionDismissedPayload = z.object({ concept_id: ulidSchema, source_id: sourceIdSchema });
+
 export const encounterDeletedPayload = z.object({ encounter_id: ulidSchema });
 
 export const edgeProposedPayload = z.object({
@@ -117,6 +119,7 @@ export const eventSchema = z.discriminatedUnion("type", [
   ev("encounter.created", encounterCreatedPayload.nullable()),
   ev("encounter.action", encounterActionPayload.nullable()),
   ev("encounter.deleted", encounterDeletedPayload),
+  ev("reunion.dismissed", reunionDismissedPayload),
   ev("edge.proposed", edgeProposedPayload),
   ev("edge.confirmed", edgeStatusPayload),
   ev("edge.rejected", edgeStatusPayload),

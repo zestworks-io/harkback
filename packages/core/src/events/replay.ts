@@ -24,6 +24,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const deleted = new Set<string>();
   const actions: EventOf<"encounter.action">[] = [];
   const mutes: (EventOf<"concept.muted"> | EventOf<"concept.unmuted">)[] = [];
+  const dismissals: EventOf<"reunion.dismissed">[] = [];
   const proposals: EventOf<"edge.proposed">[] = [];
   const statuses: (EventOf<"edge.confirmed"> | EventOf<"edge.rejected">)[] = [];
 
@@ -59,6 +60,9 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
       case "concept.muted":
       case "concept.unmuted":
         mutes.push(e);
+        break;
+      case "reunion.dismissed":
+        dismissals.push(e);
         break;
       case "edge.proposed":
         proposals.push(e);
@@ -125,6 +129,15 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     if (c) c.muted = m.type === "concept.muted";
   }
 
+  const dismissed = new Map<string, string[]>();
+  for (const d of dismissals) {
+    const rep = representative.get(d.payload.concept_id);
+    if (!rep) continue;
+    const list = dismissed.get(rep);
+    if (!list) dismissed.set(rep, [d.payload.source_id]);
+    else if (!list.includes(d.payload.source_id)) list.push(d.payload.source_id);
+  }
+
   const edges = new Map<string, EdgeState>();
   for (const pe of proposals) {
     const p = pe.payload;
@@ -171,6 +184,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     sources,
     sourceIdentity: resolveSourceIdentity(sorted),
     edges,
+    dismissed,
     warnings,
   };
 }

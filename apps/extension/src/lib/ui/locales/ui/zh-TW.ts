@@ -28,6 +28,7 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   recalled: "想起來了",
   reexplain: "再解釋一次",
   compare: "比較兩處用法",
+  different: "這裡意思不同",
   mute: "不再提示",
   retry: "重試",
   stop: "停止",

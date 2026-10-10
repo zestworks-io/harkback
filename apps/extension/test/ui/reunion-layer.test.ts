@@ -21,13 +21,19 @@ const card: ReunionCard = {
 };
 
 describe("reunionCardView", () => {
-  it("shows when and where the concept was understood, with four actions", () => {
+  it("shows when and where the concept was understood, with five actions", () => {
     const act = vi.fn();
     const el = reunionCardView(card, "zh", act);
     expect(el.querySelector('[data-hb="reunion-title"]')!.textContent).toBe("LoRA · 12 天前 · 《QLoRA》 §3");
     expect(el.textContent).toContain("原文定义");
     expect(el.textContent).toContain("当时的解释：在冻结的权重旁加两个低秩矩阵……");
-    expect([...el.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["想起来了", "再解释一次", "对比两处用法", "不再提示"]);
+    expect([...el.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "想起来了",
+      "再解释一次",
+      "对比两处用法",
+      "这里意思不同",
+      "不再提示",
+    ]);
     el.querySelector<HTMLButtonElement>('[data-hb="compare"]')!.click();
     expect(act).toHaveBeenCalledWith("compare");
   });

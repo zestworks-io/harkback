@@ -28,6 +28,7 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   recalled: "기억남",
   reexplain: "다시 설명",
   compare: "용법 비교",
+  different: "여기서는 다른 뜻",
   mute: "다시 표시 안 함",
   retry: "다시 시도",
   stop: "중지",

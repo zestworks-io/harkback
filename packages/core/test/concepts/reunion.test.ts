@@ -145,3 +145,48 @@ describe("selectReunions: one paper under two ids", () => {
     expect(run([events[0]!, events[2]!], "LoRA", "arxiv:2106.09686")).toEqual([]);
   });
 });
+
+describe("selectReunions: a different meaning on this page", () => {
+  const known = [concept(1, "LoRA"), encounter(10, 1, "arxiv:1", "2026-09-10T00:00:00Z")];
+  const dismissed = (source: string, conceptN = 1) => ev("reunion.dismissed", { concept_id: id(conceptN), source_id: source });
+
+  it("stops offering the term on that page, and only there", () => {
+    expect(run([...known, dismissed("arxiv:2")], "We use LoRA.")).toEqual([]);
+    expect(run([...known, dismissed("arxiv:2")], "We use LoRA.", "arxiv:3")).toHaveLength(1);
+  });
+
+  it("holds under another id of the same paper, and after the concept is merged", () => {
+    const events = [
+      ...known,
+      concept(2, "Low-Rank Adaptation"),
+      ev("concept.merged", { from: id(2), into: id(1) }),
+      ev("source.seen", {
+        source_id: "arxiv:2",
+        ids: { arxiv: "2", doi: "10.1/x" },
+        title: "",
+        license: "unknown",
+        sensitivity: "normal",
+      }),
+      dismissed("doi:10.1/x", 2),
+    ];
+    expect(run(events, "We use LoRA.", "arxiv:2")).toEqual([]);
+  });
+
+  it("also silences a reminder through a related concept", () => {
+    const events = [
+      ...known,
+      concept(2, "QLoRA"),
+      ev("edge.proposed", {
+        from: id(2),
+        to: id(1),
+        rel: "variant_of",
+        source: "llm_explain",
+        confidence: 0.9,
+        evidence: {},
+      }),
+    ];
+    expect(run(events, "We use QLoRA.").map((x) => x.kind)).toEqual(["related"]);
+    expect(run([...events, dismissed("arxiv:2", 2)], "We use QLoRA.")).toEqual([]);
+    expect(run([...events, dismissed("arxiv:2", 1)], "We use QLoRA.")).toEqual([]);
+  });
+});

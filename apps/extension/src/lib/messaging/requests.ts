@@ -120,6 +120,12 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       await deps.append((f) => [f.make("concept.muted", { concept_id: rep })]);
       return { ok: true };
     }
+    case "dismiss-reunion": {
+      const rep = (await deps.getState()).representative.get(msg.conceptId);
+      if (incognito || !rep || typeof msg.sourceId !== "string" || msg.sourceId === "") return { ok: false };
+      await deps.append((f) => [f.make("reunion.dismissed", { concept_id: rep, source_id: msg.sourceId })]);
+      return { ok: true };
+    }
     case "mark-sensitive": {
       if (incognito) return { ok: false };
       await deps.append((f) => [f.make("source.seen", clampSource(msg.source, "sensitive", true))]);

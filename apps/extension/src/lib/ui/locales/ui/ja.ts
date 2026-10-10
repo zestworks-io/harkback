@@ -28,6 +28,7 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   recalled: "思い出した",
   reexplain: "もう一度解説",
   compare: "用法を比較",
+  different: "ここでは別の意味",
   mute: "今後表示しない",
   retry: "再試行",
   stop: "停止",

@@ -59,6 +59,8 @@ export type Request =
   | { type: "reunions"; sourceId: string; hits: Hit[] }
   | { type: "action"; encounterId: string; action: "marked_understood" | "marked_confused" | "reunion_recalled" }
   | { type: "mute"; conceptId: string }
+  /** The term on this page means something else than the concept that was offered. */
+  | { type: "dismiss-reunion"; conceptId: string; sourceId: string }
   | { type: "mark-sensitive"; source: DetectedSource }
   /** `source` is for a page that has no record yet but is sensitive through its repository. */
   | { type: "mark-normal"; sourceId: string; source?: DetectedSource }
@@ -87,6 +89,7 @@ export interface ResponseMap {
   reunions: { cards: ReunionCard[] };
   action: { ok: boolean };
   mute: { ok: boolean };
+  "dismiss-reunion": { ok: boolean };
   "mark-sensitive": { ok: boolean };
   "mark-normal": { ok: boolean };
   "choose-normal": { ok: boolean };
@@ -124,6 +127,7 @@ const REQUEST_TYPES = new Set<string>([
   "reunions",
   "action",
   "mute",
+  "dismiss-reunion",
   "mark-sensitive",
   "mark-normal",
   "choose-normal",
