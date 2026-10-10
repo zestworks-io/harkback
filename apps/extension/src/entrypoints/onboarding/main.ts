@@ -71,6 +71,8 @@ async function main(): Promise<void> {
     const show = (text: string, state: ResultState): void => {
       result.textContent = text;
       result.dataset.state = state;
+      // The ring turns only while something is running; a model that is offered for download is not running.
+      result.toggleAttribute("data-spin", state === "busy");
     };
 
     const consent = h("input", { type: "checkbox", "data-hb": "consent", checked: form.consent });
@@ -134,12 +136,13 @@ async function main(): Promise<void> {
         show(connectionMessage(lang, { kind: "insecure" }, location.origin), "error");
         return;
       }
-      await requestOrigins([pattern]);
-      show(L("正在连接…", "Connecting…"), "busy");
       test.disabled = true;
-      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, provider: form.templateId }).finally(
-        () => (test.disabled = false),
-      );
+      const r = await requestOrigins([pattern])
+        .then(() => {
+          show(L("正在连接…", "Connecting…"), "busy");
+          return testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, provider: form.templateId });
+        })
+        .finally(() => (test.disabled = false));
       show(connectionMessage(lang, r, location.origin), stateOf(r));
       if (r.kind === "ok") {
         form.models = r.models;
@@ -162,6 +165,7 @@ async function main(): Promise<void> {
       if (!state) return;
       builtInResult.textContent = builtInMessage(lang, state, percent);
       builtInResult.dataset.state = state === "available" ? "ok" : state === "downloading" || state === "downloadable" ? "busy" : "error";
+      builtInResult.toggleAttribute("data-spin", state === "downloading");
       download.hidden = state !== "downloadable";
       download.disabled = builtin.downloading;
     };

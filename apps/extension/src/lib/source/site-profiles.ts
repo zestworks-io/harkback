@@ -175,11 +175,20 @@ const googleDocs: Profile = {
       sourceId: () => `gdoc:${published ? "e/" : ""}${m[2]}`,
       // The editor draws its text on a canvas, so the page around it is menus and toolbars, not the document.
       root: (doc) => (m[3] === "edit" ? nothingToRead(doc) : firstMatch(doc, GDOC_ROOT)),
-      ...(m[3] === "edit"
+      ...(m[3] === "edit" && !published
         ? {
             readable: false as const,
-            // The mobile view of the same document, in the same account; the tab and heading of the editor address are dropped.
-            readableUrl: () => `https://docs.google.com${url.pathname.replace(/\/edit\/?$/, "/mobilebasic")}`,
+            // The mobile view of the same document. The account (`/u/N/` or `authuser`) and the key of a link-shared document are kept;
+            // the tab and heading of the editor address are dropped.
+            readableUrl: () => {
+              const keep = new URLSearchParams();
+              for (const name of ["authuser", "resourcekey"]) {
+                const value = url.searchParams.get(name);
+                if (value !== null) keep.set(name, value);
+              }
+              const query = keep.size > 0 ? `?${keep}` : "";
+              return `https://docs.google.com${url.pathname.replace(/\/edit\/?$/, "/mobilebasic")}${query}`;
+            },
           }
         : {}),
       // Publishing a document to the web is a deliberate act; opening one by its address says nothing either way.

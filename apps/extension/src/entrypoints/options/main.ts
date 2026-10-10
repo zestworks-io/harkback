@@ -183,7 +183,7 @@ async function main(): Promise<void> {
         render();
       });
       const preset = providerById(m.provider);
-      const result = h("div", { className: "result", "data-hb": "model-result" });
+      const result = h("div", { className: "result", role: "status", "aria-live": "polite", "data-hb": "model-result" });
       const test = h("button", { type: "button", className: "small", "data-hb": "model-test" }, L("测试连接", "Test connection"));
       const builtIn = preset.apiType === "builtin";
       const download = h(
@@ -208,15 +208,18 @@ async function main(): Promise<void> {
       if (builtIn) void showState();
       test.addEventListener("click", async () => {
         if (builtIn) return showState();
-        const pattern = originPattern(m.baseUrl.trim());
-        if (pattern) await requestOrigins([pattern]);
+        // Off before the permission question, so a second click cannot start a second test.
         test.disabled = true;
-        result.dataset.state = "busy";
-        result.textContent = L("正在连接…", "Connecting…");
         try {
+          const pattern = originPattern(m.baseUrl.trim());
+          if (pattern) await requestOrigins([pattern]);
+          result.toggleAttribute("data-spin", true);
+          result.textContent = L("正在连接…", "Connecting…");
           result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
+        } catch {
+          result.textContent = connectionMessage(draft.language, { kind: "unreachable" }, location.origin);
         } finally {
-          delete result.dataset.state;
+          result.toggleAttribute("data-spin", false);
           test.disabled = false;
         }
       });

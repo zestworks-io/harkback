@@ -138,10 +138,10 @@ test("options show that a connection is being tested, then the result", async ({
   const test = page.locator("[data-hb=model-test]").last();
   const result = page.locator("[data-hb=model-result]").last();
   await test.click();
-  await expect(result).toHaveAttribute("data-state", "busy");
+  await expect(result).toHaveAttribute("data-spin", "");
   await expect(result).toContainText("Connecting");
   await expect(test).toBeDisabled();
   await expect(result).toContainText("Connected");
-  await expect(result).not.toHaveAttribute("data-state", "busy");
+  await expect(result).not.toHaveAttribute("data-spin", "");
   await expect(test).toBeEnabled();
 });

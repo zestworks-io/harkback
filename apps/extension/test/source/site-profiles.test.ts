@@ -264,6 +264,10 @@ describe("Google Docs profile", () => {
     expect(readable(`https://docs.google.com/document/u/1/d/${DOC}/edit`)).toBe(
       `https://docs.google.com/document/u/1/d/${DOC}/mobilebasic`,
     );
+    expect(readable(`https://docs.google.com/document/d/${DOC}/edit?authuser=1&tab=t.0&resourcekey=0-abc#heading=h.1`)).toBe(
+      `https://docs.google.com/document/d/${DOC}/mobilebasic?authuser=1&resourcekey=0-abc`,
+    );
+    expect(profileFor(`https://docs.google.com/document/d/e/${PUB}/edit`)?.readableUrl).toBeUndefined();
     for (const view of ["preview", "mobilebasic"]) expect(readable(`https://docs.google.com/document/d/${DOC}/${view}`)).toBeUndefined();
     expect(readable(`https://docs.google.com/document/d/e/${PUB}/pub`)).toBeUndefined();
   });

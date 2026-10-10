@@ -342,7 +342,7 @@
       .result:empty {
         display: none;
       }
-      .result[data-state="busy"]::before {
+      .result[data-spin]::before {
         content: "";
         display: inline-block;
         width: 0.9em;
@@ -360,8 +360,8 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .result[data-state="busy"]::before {
-          animation-duration: 3s;
+        .result[data-spin]::before {
+          animation: none;
         }
       }
       .item .result {
