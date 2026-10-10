@@ -148,6 +148,10 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Sites: "網站",
   "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
     "notion.so 和 docs.google.com 上的頁面，除非已發布或上面的規則另有設定，否則在傳送任何內容之前都會先詢問。GitHub 頁面只有在看起來是私有的時候才會詢問。",
+  "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.":
+    "每個開關有三種狀態：橫線＝不設定（沿用範圍更大的規則，都沒有則為關）；勾選＝開；空白＝明確關閉。多條規則符合同一頁面時，每個開關取明確設定它的、最具體的那條規則。",
+  "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
+    "例：規則「example.com」勾選「敏感」，規則「https://example.com/public」把「敏感」清空——整個網站敏感，只有 /public 底下的頁面例外。若第二條規則維持橫線，它就沿用整站設定，/public 也是敏感。",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "預設只在 arxiv.org 自動掃描。其他網站可以在這裡允許，或標為敏感。",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':

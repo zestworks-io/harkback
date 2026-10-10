@@ -150,10 +150,19 @@ The file format is documented in [Data format](data-format.md).
 Under _Sites_ in settings, each rule has a pattern and three switches, plus an optional model:
 
 - **Pattern** – a domain (`example.com`, which covers subdomains) or a URL prefix (`https://example.com/docs`, which matches that path and below).
-- **Auto-scan**, **Sensitive**, **Disabled** – each can be inherited, on or off. Click a box to cycle: dash (inherit), ticked (on), empty (off).
+- **Auto-scan**, **Sensitive**, **Disabled** – each has three states. Click a box to cycle: dash (not set: follow a broader rule, or off when no rule sets it), ticked (on), empty (off for sure, even if a broader rule turns it on).
 - **Model** – use this model on matching pages instead of the default.
 
-When several rules match a page, each setting comes from the **most specific** rule that sets it: a URL prefix beats a domain, and a longer pattern beats a shorter one. So you can mark a whole site sensitive and switch that off for one public path, or the other way round. A rule that says a site is _not_ sensitive settles it for the pages of that site, except a page that says it is private (see [Pages that look private](#pages-that-look-private)): that one still asks you once.
+When several rules match a page, each setting comes from the **most specific** rule that sets it: a URL prefix beats a domain, and a longer pattern beats a shorter one. So you can mark a whole site sensitive and switch that off for one public path, or the other way round.
+
+For example, with these two rules:
+
+| Pattern                      | Sensitive              |
+| ---------------------------- | ---------------------- |
+| `example.com`                | ticked                 |
+| `https://example.com/public` | empty (explicitly off) |
+
+every page on `example.com` is sensitive except those under `/public`. If the second rule's box is left at a dash instead, it does not say anything about sensitivity, so `/public` follows the site and is sensitive too. A dash with no broader rule behind it means off, the same result as an empty box; the difference only shows when another rule also matches. A rule that says a site is _not_ sensitive settles it for the pages of that site, except a page that says it is private (see [Pages that look private](#pages-that-look-private)): that one still asks you once.
 
 **Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
 

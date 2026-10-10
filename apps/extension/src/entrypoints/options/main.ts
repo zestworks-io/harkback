@@ -616,6 +616,22 @@ async function main(): Promise<void> {
                   "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.",
                 ),
               ),
+              h(
+                "p",
+                { className: "note", "data-hb": "site-states-hint" },
+                L(
+                  "三个开关各有三种状态：横线＝不设置（沿用范围更大的规则，没有则为关）；勾选＝开；空＝明确关闭。多条规则匹配同一页面时，每个开关取明确设置了它的、最具体的那条规则。",
+                  "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.",
+                ),
+              ),
+              h(
+                "p",
+                { className: "note", "data-hb": "site-states-example" },
+                L(
+                  "例：规则「example.com」勾选「敏感」，规则「https://example.com/public」把「敏感」清空——整个网站敏感，只有 /public 下的页面例外。若 /public 那条规则保持横线，它就沿用整站的「敏感」。",
+                  "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.",
+                ),
+              ),
               ...siteRows,
               draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
               addSite,

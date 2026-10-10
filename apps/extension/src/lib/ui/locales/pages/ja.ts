@@ -150,6 +150,10 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Sites: "サイト",
   "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
     "notion.so と docs.google.com では、ページが公開されている場合や上のルールで指定した場合を除き、何かを送信する前に確認します。GitHub では、ページが非公開に見えるときだけ確認します。",
+  "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.":
+    "各スイッチには3つの状態があります。ダッシュ＝未設定（より広いルールに従い、どれも設定していなければオフ）、チェック＝オン、空＝明示的にオフ。複数のルールがページに一致する場合、各スイッチはそれを設定している最も具体的なルールの値になります。",
+  "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
+    "例：example.com のルールで「機密」にチェックを入れ、https://example.com/public のルールで「機密」を空にすると、/public 以下を除くサイト全体が機密になります。2つ目のルールをダッシュのままにするとサイトに従うので、/public も機密になります。",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "自動でスキャンするのは arxiv.org のみです。他のサイトはここで許可するか、機密に指定してください。",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':

@@ -150,6 +150,10 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Sites: "사이트",
   "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
     "notion.so와 docs.google.com에서는 페이지가 게시되었거나 위 규칙에서 달리 정하지 않은 한, 무언가를 보내기 전에 먼저 묻습니다. GitHub에서는 페이지가 비공개로 보일 때만 묻습니다.",
+  "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.":
+    "각 스위치에는 세 가지 상태가 있습니다. 대시 = 설정 안 함(더 넓은 규칙을 따르고, 설정한 규칙이 없으면 꺼짐), 체크 = 켜짐, 빈 칸 = 명시적으로 꺼짐. 여러 규칙이 한 페이지에 일치하면 각 스위치는 그 값을 정한 가장 구체적인 규칙을 따릅니다.",
+  "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
+    "예: example.com 규칙에서 '민감'을 체크하고 https://example.com/public 규칙에서 '민감'을 비우면, /public 아래 페이지를 제외한 사이트 전체가 민감합니다. 두 번째 규칙을 대시로 두면 사이트를 따르므로 /public도 민감합니다.",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "자동 스캔은 arxiv.org에서만 이루어집니다. 다른 사이트는 여기서 허용하거나 민감으로 지정하세요.",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
