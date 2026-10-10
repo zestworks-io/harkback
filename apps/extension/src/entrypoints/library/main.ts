@@ -31,6 +31,7 @@ import { renderMarkdown } from "../../lib/ui/markdown";
 import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/export/notes";
 import { dueText, daysText } from "../../lib/review/due";
+import { clozeHint } from "../../lib/review/cloze";
 import { dueAtOf, nextDueAt, reviewQueue } from "../../lib/review/review";
 import { routeCheck } from "../../lib/review/review-check";
 import { explainLanguageOf, withDefaults } from "../../lib/storage/settings";
@@ -498,6 +499,8 @@ async function main(): Promise<void> {
   const skipped = new Set<string>();
   let reviewed = 0;
   let revealed = false;
+  /** Whether the cloze hint of the current term is showing. */
+  let hintShown = false;
 
   const retention = settings.review.desiredRetention;
   const dueItems = () => reviewQueue(state, Date.now(), { retention }).filter((i) => !skipped.has(i.conceptId));
@@ -516,6 +519,7 @@ async function main(): Promise<void> {
   const resetCard = (): void => {
     cardSeq++;
     revealed = false;
+    hintShown = false;
     typed = "";
     check = null;
   };
@@ -618,6 +622,30 @@ async function main(): Promise<void> {
     );
   }
 
+  /** For a term answered "Again" again and again: more repetition will not help, so point to what might. */
+  const leechNote = (item: { conceptId: string; lapses: number; leech: boolean }): HTMLElement | null => {
+    if (!item.leech) return null;
+    return h(
+      "div",
+      { "data-hb": "review-leech" },
+      h(
+        "p",
+        { className: "leech note" },
+        L(
+          "最近几次复习中有 {n} 次没记住，再重复可能没有帮助。",
+          "You forgot this {n} times in your last few reviews; more repetition may not help.",
+          { n: item.lapses },
+        ),
+      ),
+      gapsNote(item.conceptId) ??
+        h(
+          "a",
+          { href: conceptHref(item.conceptId), "data-hb": "leech-page" },
+          L("看看它的页面，检查别名和关系。", "Open its page to check its aliases and relations."),
+        ),
+    );
+  };
+
   function reviewView(): HTMLElement {
     const [item] = dueItems();
     if (!item) {
@@ -657,6 +685,16 @@ async function main(): Promise<void> {
       if (checkButton) checkButton.disabled = typed.trim() === "";
     });
     const gradable = revealed || (check !== null && !check.busy && "result" in check);
+    const hintText = gradable ? null : clozeHint(item.explanation, [item.name, ...item.aliases]);
+    const hint =
+      hintText === null
+        ? null
+        : hintShown
+          ? h("p", { className: "cloze", "data-hb": "review-hint-text" }, hintText)
+          : button(L("提示：填空", "Show a fill-in-the-blank hint"), "review-hint-show", () => {
+              hintShown = true;
+              draw();
+            });
     const grades: Grade[] = [1, 2, 3, 4];
     return h(
       "section",
@@ -684,7 +722,9 @@ async function main(): Promise<void> {
         "div",
         { className: "actions" },
         h("p", { className: "prompt" }, L("你还记得这个概念吗？", "Do you still remember this?")),
+        revealed ? null : leechNote(item),
         revealed ? null : answerBox,
+        gradable ? null : hint,
         revealed ? null : show,
         revealed ? null : checkPanel(item),
       ),

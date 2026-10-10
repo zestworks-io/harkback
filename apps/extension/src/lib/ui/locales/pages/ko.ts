@@ -18,6 +18,10 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Understood: "이해함",
   Confused: "아직 헷갈림",
   Shaky: "불안정",
+  "You forgot this {n} times in your last few reviews; more repetition may not help.":
+    "최근 복습 중 {n}번 기억하지 못했습니다. 더 반복해도 도움이 되지 않을 수 있습니다.",
+  "Open its page to check its aliases and relations.": "용어 페이지를 열어 별칭과 관계를 확인해 보세요.",
+  "Show a fill-in-the-blank hint": "빈칸 힌트 보기",
   "It may help to start with:": "먼저 이것부터 보면 도움이 될 수 있습니다:",
   "Comes first: {names} build on it": "먼저 복습: {names}이(가) 이것을 바탕으로 합니다",
   New: "새 항목",

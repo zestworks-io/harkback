@@ -18,6 +18,10 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Understood: "理解した",
   Confused: "まだ分からない",
   Shaky: "あやふや",
+  "You forgot this {n} times in your last few reviews; more repetition may not help.":
+    "直近の復習のうち {n} 回で思い出せませんでした。繰り返しても効果は薄いかもしれません。",
+  "Open its page to check its aliases and relations.": "用語のページを開いて、別名と関係を確認してください。",
+  "Show a fill-in-the-blank hint": "穴埋めのヒントを表示",
   "It may help to start with:": "先にこちらを押さえると効果的かもしれません：",
   "Comes first: {names} build on it": "先に復習：{names} がこれを前提にしています",
   New: "新規",

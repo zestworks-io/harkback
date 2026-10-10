@@ -18,6 +18,10 @@ export const pages_es: Readonly<Record<string, string>> = {
   Understood: "Entendido",
   Confused: "Confuso",
   Shaky: "Poco firme",
+  "You forgot this {n} times in your last few reviews; more repetition may not help.":
+    "Lo olvidaste {n} veces en tus últimos repasos; repetir más quizá no ayude.",
+  "Open its page to check its aliases and relations.": "Abre su página para revisar sus alias y relaciones.",
+  "Show a fill-in-the-blank hint": "Mostrar una pista con huecos",
   "It may help to start with:": "Puede ayudar empezar por:",
   "Comes first: {names} build on it": "Va primero: {names} se apoyan en él",
   New: "Nuevo",

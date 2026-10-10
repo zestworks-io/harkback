@@ -18,6 +18,10 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Understood: "懂了",
   Confused: "還是不懂",
   Shaky: "不太牢",
+  "You forgot this {n} times in your last few reviews; more repetition may not help.":
+    "最近幾次複習中有 {n} 次沒記住，再重複可能沒有幫助。",
+  "Open its page to check its aliases and relations.": "開啟它的頁面，檢查別名與關係。",
+  "Show a fill-in-the-blank hint": "提示：填空",
   "It may help to start with:": "先補這些可能更有效：",
   "Comes first: {names} build on it": "先修概念：{names} 建立在它之上",
   New: "新",

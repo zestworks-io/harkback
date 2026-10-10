@@ -149,6 +149,21 @@ test("reviews a concept that is due and records the answer", async ({ context, s
   await expect(page.locator("[data-hb=review-link]")).toContainText("(0)");
 });
 
+test("offers a fill-in-the-blank hint before the explanation is shown", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.clock.setFixedTime(Date.now() + 2 * 86_400_000);
+  await page.goto(`chrome-extension://${extensionId}/library.html#review`);
+  await expect(page.locator("[data-hb=review-hint-text]")).toBeHidden();
+  await page.locator("[data-hb=review-hint-show]").click();
+  await expect(page.locator("[data-hb=review-hint-text]")).toHaveText("[…] 是一个测试解释。");
+  await expect(page.locator("[data-hb=review-hint-text]")).not.toContainText("LoRA");
+  await page.locator("[data-hb=review-show]").click();
+  await expect(page.locator("[data-hb=review-hint-text]")).toBeHidden();
+  await expect(page.locator("[data-hb=review-leech]")).toBeHidden();
+});
+
 test("checks a typed answer with the model, says where it goes, and still leaves the grade to the reader", async ({
   context,
   sw,

@@ -48,6 +48,36 @@ describe("reviewQueue", () => {
     expect(reviewQueue(w.state(), day(3))[0]).toMatchObject({ conceptId: c, understanding: "confused" });
   });
 
+  it("counts the Again answers among the latest ones", () => {
+    const { w, act } = setup();
+    const c = w.concept("LoRA");
+    const e = w.encounter(c, "s1");
+    expect(reviewQueue(w.state(), day(1))[0]!.lapses).toBe(0);
+    act(e, "review_again", day(2));
+    act(e, "review_again", day(4));
+    act(e, "review_hard", day(6));
+    act(e, "review_again", day(8));
+    expect(reviewQueue(w.state(), day(30))[0]!.lapses).toBe(3);
+    // Five good answers later, the earlier misses are out of the window.
+    for (let i = 0; i < 5; i++) act(e, "review_good", day(10 + i * 10));
+    expect(reviewQueue(w.state(), day(200))[0]!.lapses).toBe(0);
+  });
+
+  it("calls a term stuck after three Again answers, until it is answered better than Hard", () => {
+    const { w, act } = setup();
+    const c = w.concept("LoRA");
+    const e = w.encounter(c, "s1");
+    act(e, "review_again", day(2));
+    act(e, "review_again", day(4));
+    expect(reviewQueue(w.state(), day(30))[0]!.leech).toBe(false);
+    act(e, "review_again", day(6));
+    expect(reviewQueue(w.state(), day(30))[0]!.leech).toBe(true);
+    act(e, "review_hard", day(8));
+    expect(reviewQueue(w.state(), day(30))[0]!.leech).toBe(true);
+    act(e, "review_good", day(10));
+    expect(reviewQueue(w.state(), day(60))[0]).toMatchObject({ lapses: 3, leech: false });
+  });
+
   it("waits longer after better answers", () => {
     const due = (action: Action) => {
       const { w, act } = setup();

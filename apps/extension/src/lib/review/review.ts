@@ -9,6 +9,12 @@ import { firstMemory, nextMemory, previewDays, scheduledDays, type Memory } from
 export const DEFAULT_RETENTION = 0.9;
 /** A term that was looked up but never answered comes up again after this many days. */
 const UNANSWERED_DAYS = 1;
+/** A term answered "Again" this many times is stuck: more repetition is unlikely to help, so the review card says so. */
+export const LEECH_LAPSES = 3;
+const AGAIN: Grade = 1;
+const HARD: Grade = 2;
+/** Only the latest answers count, so a term that has since been remembered is no longer stuck. */
+const LEECH_WINDOW = 5;
 /** The marks on the explain card, which older versions also used as review answers (a day or more after the look-up). */
 const CARD_MARKS: ReadonlySet<Action> = new Set(["marked_understood", "marked_confused"]);
 
@@ -20,6 +26,10 @@ export interface ReviewItem {
   dueAt: number;
   /** How many times it has been answered; 0 for a term that was only looked up. */
   answers: number;
+  /** How many of the latest answers were "Again". */
+  lapses: number;
+  /** True for a stuck term: several recent "Again" answers and no answer since that was better than "Hard". */
+  leech: boolean;
   /** The wait in days each answer would give, for the buttons. */
   previews: Record<Grade, number>;
   /** Due terms that build on this one, which therefore come after it; empty when none do. */
@@ -38,6 +48,8 @@ interface Schedule {
   dueAt: number;
   memory: Memory | null;
   answers: number;
+  lapses: number;
+  leech: boolean;
   /** When the last answer was given; the look-up time for a term never answered. */
   lastAt: number;
 }
@@ -69,8 +81,26 @@ function scheduleOf(
     lastAt = at;
   }
   if (!memory)
-    return { dueAt: latest.createdAt + UNANSWERED_DAYS * DAY_MS, memory, answers: 0, lastAt: latest.createdAt, latestId: latest.id };
-  return { dueAt: lastAt + scheduledDays(memory, retention) * DAY_MS, memory, answers: answers.length, lastAt, latestId: latest.id };
+    return {
+      dueAt: latest.createdAt + UNANSWERED_DAYS * DAY_MS,
+      memory,
+      answers: 0,
+      lapses: 0,
+      leech: false,
+      lastAt: latest.createdAt,
+      latestId: latest.id,
+    };
+  const lapses = answers.slice(-LEECH_WINDOW).filter((a) => a.grade === AGAIN).length;
+  const leech = lapses >= LEECH_LAPSES && answers.at(-1)!.grade <= HARD;
+  return {
+    dueAt: lastAt + scheduledDays(memory, retention) * DAY_MS,
+    memory,
+    answers: answers.length,
+    lapses,
+    leech,
+    lastAt,
+    latestId: latest.id,
+  };
 }
 
 /** When one concept is due for review; null for muted concepts and ones that were never looked up. */
@@ -98,7 +128,7 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number; r
   for (const concept of state.concepts.values()) {
     const schedule = scheduleOf(state, concept, retention);
     if (!schedule || now < schedule.dueAt) continue;
-    const { dueAt, answers, memory, lastAt } = schedule;
+    const { dueAt, answers, lapses, leech, memory, lastAt } = schedule;
     const latest = state.encounters.get(schedule.latestId)!;
 
     due.push({
@@ -110,6 +140,8 @@ export function reviewQueue(state: State, now: number, opts: { limit?: number; r
         understanding: understandingOf(state, concept.id),
         dueAt,
         answers,
+        lapses,
+        leech,
         unlocks: [],
         previews: previewDays(memory, Math.max(0, now - lastAt) / DAY_MS, retention),
         encounterId: latest.id,
