@@ -12,6 +12,8 @@ export interface PreviewHandlers {
   /** The reader answered the question about a page that looks private. */
   onChoose(choice: Choice, remember: boolean): void;
   onClose(): void;
+  /** Open the readable view of a document whose editor cannot be read; absent when the page has none. */
+  onOpenReadable?(): void;
 }
 
 const GROUPS: { status: PreviewStatus; title: StringKey }[] = [
@@ -72,7 +74,17 @@ export class PreviewPanel {
     this.body.className = "hb-body";
     if (code === "needs_choice") return this.choose();
     this.body.replaceChildren(h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs)));
+    const open = code === "unreadable_page" ? this.handlers.onOpenReadable : undefined;
     this.footer.replaceChildren(
+      ...(open
+        ? [
+            h(
+              "button",
+              { type: "button", className: "hb-primary", "data-hb": "open-readable", onclick: () => open() },
+              t(this.lang, "openReadable"),
+            ),
+          ]
+        : []),
       h("button", { type: "button", className: "hb-quiet", onclick: () => this.handlers.onClose() }, t(this.lang, "close")),
     );
   }

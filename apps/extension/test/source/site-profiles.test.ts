@@ -256,6 +256,18 @@ describe("Google Docs profile", () => {
       expect(profileFor(url), url).toBeNull();
   });
 
+  it("points the editor, and only the editor, to the mobile view of the same document and account", () => {
+    const readable = (url: string) => profileFor(url)!.readableUrl?.();
+    expect(readable(`https://docs.google.com/document/d/${DOC}/edit?tab=t.0#heading=h.1`)).toBe(
+      `https://docs.google.com/document/d/${DOC}/mobilebasic`,
+    );
+    expect(readable(`https://docs.google.com/document/u/1/d/${DOC}/edit`)).toBe(
+      `https://docs.google.com/document/u/1/d/${DOC}/mobilebasic`,
+    );
+    for (const view of ["preview", "mobilebasic"]) expect(readable(`https://docs.google.com/document/d/${DOC}/${view}`)).toBeUndefined();
+    expect(readable(`https://docs.google.com/document/d/e/${PUB}/pub`)).toBeUndefined();
+  });
+
   it("names a document by its id, whichever view or account is open", () => {
     for (const url of [
       `https://docs.google.com/document/d/${DOC}/edit?tab=t.0`,

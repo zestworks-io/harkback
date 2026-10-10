@@ -186,7 +186,7 @@ Add the site under _Sites_ and press _Save changes_, as for any site; allow site
 | Notion      | A page, including a database row opened in a peek (the row is the source, not the database)      | `notion:<page id>`                             |
 | Google Docs | A document in its published (`/pub`) or mobile (`/mobilebasic`) view                             | `gdoc:<document id>`, `gdoc:e/<publishing id>` |
 
-- **Not covered.** Code files and other GitHub pages, Notion database views, and the Google Docs editor. The editor draws its text instead of writing it, so there is nothing to read: the toolbar button says so, and the published or mobile view of the same document works. The Docs _preview_ view has not been checked.
+- **Not covered.** Code files and other GitHub pages, Notion database views, and the Google Docs editor. The editor draws its text instead of writing it, so there is nothing to read: the toolbar button (or `Alt+Shift+E`) says so and offers **Open readable view**, which opens the mobile view (`/mobilebasic`) of the same document in a new tab, in the same Google account. Select text there. Both views are read-only, so to write you go back to the editor tab. The published (`/pub`) and mobile views also work if you open them yourself. The Docs _preview_ view has not been checked.
 - **Long Notion pages.** Notion only draws the blocks near the screen, so a very long page may be read in part.
 - **When a site changes.** Harkback finds the text by the site's current layout. If it no longer recognises the layout, the page is read as any other page would be until Harkback is updated.
 

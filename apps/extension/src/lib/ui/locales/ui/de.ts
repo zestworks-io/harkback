@@ -66,6 +66,7 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
     "Das in Chrome eingebaute Modell ist nicht bereit. Laden Sie es in den Einstellungen herunter oder prüfen Sie, ob dieser Computer und diese Chrome-Version es unterstützen.",
   previewTitle: "Diese Seite vorab ansehen",
   previewAsk: "Die Seite nach ihren Schlüsselbegriffen durchsuchen, um zu sehen, welche Sie kennen und welche Sie zuerst lesen sollten?",
+  openReadable: "Lesbare Ansicht öffnen",
   previewScan: "Scannen",
   previewScanning: "Scanne…",
   previewConfused: "Noch unklar",

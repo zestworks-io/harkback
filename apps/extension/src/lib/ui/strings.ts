@@ -64,6 +64,7 @@ const zh = {
   err_unavailable: "Chrome 内置模型还不能用：请在设置的模型页下载它，或确认这台电脑和 Chrome 版本支持它。",
   previewTitle: "预览本页概念",
   previewAsk: "Scan this page for its key concepts, to see which you know and which to read first?",
+  openReadable: "打开可读视图",
   previewScan: "扫描",
   previewScanning: "正在扫描…",
   previewConfused: "仍困惑",
@@ -144,6 +145,7 @@ const en: Record<StringKey, string> = {
   previewTitle: "Preview this page",
   previewAsk:
     "Scan this page for its key concepts, to see which you know and which to read first? The page text is sent to your configured model (sensitive sources only use a local model).",
+  openReadable: "Open readable view",
   previewScan: "Scan",
   previewScanning: "Scanning…",
   previewConfused: "Still confused",

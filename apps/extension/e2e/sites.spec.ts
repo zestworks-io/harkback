@@ -112,6 +112,7 @@ test.describe("Google Docs", () => {
     await sendToActiveTab(sw, { type: "preview" });
     await expect(page.locator("[data-hb=preview]")).toContainText("Google");
     await expect(page.locator("[data-hb=preview-scan]")).toHaveCount(0);
+    await expect(page.locator("[data-hb=open-readable]")).toBeVisible();
     expect(stub.requests).toHaveLength(0);
   });
 

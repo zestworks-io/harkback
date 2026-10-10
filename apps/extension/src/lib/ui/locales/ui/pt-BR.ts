@@ -63,6 +63,7 @@ export const ui_ptBR: Readonly<Record<StringKey, string>> = {
     "O modelo integrado do Chrome não está pronto. Baixe-o nas configurações ou verifique se este computador e esta versão do Chrome o suportam.",
   previewTitle: "Prévia desta página",
   previewAsk: "Procurar os conceitos-chave desta página para ver quais você já conhece e quais ler primeiro?",
+  openReadable: "Abrir a visualização legível",
   previewScan: "Escanear",
   previewScanning: "Escaneando…",
   previewConfused: "Ainda confuso",

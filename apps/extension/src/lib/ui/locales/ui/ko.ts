@@ -62,6 +62,7 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   err_unavailable: "Chrome 내장 모델을 사용할 수 없습니다. 설정에서 내려받거나, 이 컴퓨터와 Chrome 버전이 지원하는지 확인하세요.",
   previewTitle: "이 페이지 미리 보기",
   previewAsk: "이 페이지의 핵심 개념을 훑어서 이미 아는 것과 먼저 읽어야 할 것을 확인할까요?",
+  openReadable: "읽을 수 있는 보기 열기",
   previewScan: "스캔",
   previewScanning: "스캔 중…",
   previewConfused: "아직 헷갈림",

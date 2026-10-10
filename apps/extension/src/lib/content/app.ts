@@ -366,7 +366,9 @@ export class ContentApp {
     // A video's captions are only what has been shown so far, so there is no whole page to pick key terms from.
     if (!this.info.enabled || this.previewPanel || this.live()) return;
     const source = this.detect();
-    const unreadable = profileFor(this.source?.url ?? location.href)?.readable === false;
+    const profile = profileFor(this.source?.url ?? location.href);
+    const unreadable = profile?.readable === false;
+    const readableUrl = profile?.readableUrl?.();
     const panel: PreviewPanel = new PreviewPanel(this.lang, {
       onScan: () => {
         panel.scanning();
@@ -413,6 +415,7 @@ export class ContentApp {
         if (this.previewPanel === panel) this.planPreview(panel, source);
       },
       onClose: () => this.closePreview(),
+      ...(readableUrl ? { onOpenReadable: () => void window.open(readableUrl, "_blank", "noopener") } : {}),
     });
     this.previewPanel = panel;
     this.ensureOverlay().root.append(panel.el);
@@ -448,6 +451,8 @@ export class ContentApp {
   }
 
   async explainSelection(): Promise<void> {
+    // Nothing is selectable in a page that draws its text; say why, and where the document can be read, instead of staying silent.
+    if (profileFor(this.source?.url ?? location.href)?.readable === false) return this.offerPreview();
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0).cloneRange();

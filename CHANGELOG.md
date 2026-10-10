@@ -17,6 +17,9 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 - **A site-wide "not sensitive" rule no longer hides a page that says it is private.** On a private-looking page you are asked once, and the answer is kept for that source.
 - **The card does not offer to mark a source sensitive when it already is.**
 - **The three states of a site switch are explained on the Sites tab,** with an example of a site rule and a more specific rule that overrides it. The user guide has the same example.
+- **The Google Docs editor offers a way out.** Where the editor cannot be read, the toolbar button and `Alt+Shift+E` now say so and offer _Open readable view_, which opens the mobile view of the same document in a new tab. Selecting text in the editor itself still does nothing, because the editor's text is not on the page.
+- **Testing a connection shows that it is working.** A spinner and "Connecting…" appear in Settings and in setup while the test runs, and the button is off until it ends.
+- **The description under a Settings heading uses the full width of its card.** It used to wrap early.
 - **More abbreviations are treated as ambiguous.** Common medical and machine-learning abbreviations (MS, CAD, PE, RA, CT, AD, PD, ER, CI, GAN, RNN, SVM) and any short key shared by two concepts, even in the same field, now underline only when another term from that field is also on the page.
 - **A paper seen under its arXiv id and its DOI counts as one source.** A reunion no longer calls a term new to a paper when you met it in the same paper under its other id. Existing records are unchanged.
 
