@@ -1,4 +1,5 @@
 import { MATCH_RULES } from "../constants";
+import { inflectedForms } from "./inflect";
 import { foldAccents, normalizeName, stripDeterminers, type Script } from "./normalize";
 import type { State } from "../events/state";
 
@@ -109,10 +110,17 @@ export class Matcher {
       Array.from(prepared).length < (SYLLABIC.test(prepared) ? MATCH_RULES.syllabicMinMatchLength : MATCH_RULES.cjkMinMatchLength)
     )
       return;
-    const index = this.entries.push({ ...e, prepared }) - 1;
+    this.add({ ...e, prepared });
+    // Another form of a long name (a German plural, a Portuguese "-ões") underlines as the name does. Short names that are
+    // matched by case have none.
+    if (e.script === "latin" && !e.caseKey) for (const form of inflectedForms(prepared)) this.add({ ...e, prepared: form });
+  }
+
+  private add(e: Entry): void {
+    const index = this.entries.push(e) - 1;
     let s = 0;
-    for (let i = 0; i < prepared.length; i++) {
-      const ch = prepared[i]!;
+    for (let i = 0; i < e.prepared.length; i++) {
+      const ch = e.prepared[i]!;
       let n = this.nodes[s]!.next.get(ch);
       if (n === undefined) {
         n = this.nodes.push({ next: new Map(), fail: 0, out: [] }) - 1;
@@ -182,8 +190,12 @@ export class Matcher {
 function dropContained(hits: Hit[]): Hit[] {
   hits.sort((a, b) => a.start - b.start || b.end - a.end);
   const out: Hit[] = [];
+  const seen = new Set<string>();
   let cover: Hit | null = null;
   for (const h of hits) {
+    const id = `${h.start}:${h.end}:${h.key}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
     if (cover && h.end <= cover.end && h.end - h.start < cover.end - cover.start) continue;
     out.push(h);
     if (!cover || h.end > cover.end) cover = h;

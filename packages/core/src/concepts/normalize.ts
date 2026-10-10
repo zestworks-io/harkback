@@ -60,9 +60,18 @@ export function detectScript(s: string): Script {
   return CJK.test(s) ? "cjk" : "latin";
 }
 
+/**
+ * Plural endings, mostly English. The last few are the French, Spanish, Portuguese and German plurals that cannot be taken
+ * for English ones ("réseaux", "funciones", "funções", "neurais", "Funktionen"); words are already without accents here.
+ */
 function depluralize(word: string): string {
   if (word.length > 4 && word.endsWith("ies")) return `${word.slice(0, -3)}y`;
   if (word.length > 4 && word.endsWith("sses")) return word.slice(0, -2);
+  if (word.length > 6 && word.endsWith("ionen")) return word.slice(0, -2);
+  if (word.length > 6 && word.endsWith("iones")) return word.slice(0, -2);
+  if (word.length > 5 && /[cs]oes$/.test(word)) return `${word.slice(0, -3)}ao`;
+  if (word.length > 5 && word.endsWith("ais")) return `${word.slice(0, -3)}al`;
+  if (word.length > 5 && /[ey]aux$/.test(word)) return word.slice(0, -1);
   if (word.length > 3 && word.endsWith("s") && !/(ss|us|is)$/.test(word)) return word.slice(0, -1);
   return word;
 }
