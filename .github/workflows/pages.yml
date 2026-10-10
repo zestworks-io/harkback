@@ -3,7 +3,7 @@ name: Website
 on:
   push:
     branches: [main]
-    paths: [site/**, .github/workflows/pages.yml]
+    paths: [site/**, guide/**, tools/build-guide.mjs, .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Render the guide
+        run: |
+          npm install --no-save --no-package-lock --prefix tools marked@18.1.0
+          node tools/build-guide.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

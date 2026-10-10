@@ -7,3 +7,4 @@ docs/
 .wxt/
 test-results/
 playwright-report/
+site/guide/
