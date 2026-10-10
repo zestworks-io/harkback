@@ -30,7 +30,7 @@ Explain terms the user selects while reading, keep a private record of what they
 
 Tick only what the build actually handles, and explain it in the policy.
 
-- **Website content**: Yes. When the user asks for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service the user configured (for example Ollama on their computer, or a hosted API). Nothing is sent to the developer.
+- **Website content**: Yes. When the user asks for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service the user configured (for example Ollama on their computer, or a hosted API). When the user asks for a page preview, the first 16,000 characters of the page text are sent the same way; on a YouTube watch page, the captions the player is showing are used as context. A page that looks private (a private GitHub repository, an unpublished Notion or Google Docs page) is not sent until the user chooses _Local only_ or _Send anyway_, and a source marked sensitive is sent only to a local model. Nothing is sent to the developer.
 - **Authentication information**: Yes. A model API key entered by the user is stored in the extension's local storage and sent only to the model address they entered.
 - **Personally identifiable information, health, financial, location, web history, user activity**: No.
 

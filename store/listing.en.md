@@ -16,23 +16,26 @@ Harkback is for people who read papers and technical documents. Select a term an
 It does not try to be a better chatbot. It adds what a chat window lacks: memory.
 
 HOW IT WORKS
-• Select a term, then click Explain or press Alt+Shift+E. The explanation uses the paragraph and section around the term, and quotes the page when the page defines it.
-• Mark an explanation "Got it" or "Still confused". Harkback remembers, and schedules the terms you are unsure about for review.
+• Select a term, then click Explain, use the right-click menu, or press Alt+Shift+E. The explanation uses the paragraph and section around the term, and quotes the page when the page defines it.
+• Review the terms you are unsure about. Harkback schedules them with the FSRS-7 memory model: grade yourself Again, Hard, Good or Easy and each term comes back just before you would forget it. Terms that build on others are reviewed in the right order, and a confused term points to the prerequisites you may be missing.
+• Preview a page before you read it: see which of its key terms are new to you and which you already know.
 • On later pages, terms you have looked up are underlined. Hover to see the earlier explanation, where you met it, and how well you understood it. Abbreviations match their full names ("LLM" and "Large Language Model").
-• Ask follow-up questions on any card. The conversation is saved with the explanation.
-• Your records form a knowledge graph of concepts, aliases, prerequisites, variants and related terms. Search it, review it, export it as Markdown notes (with [[links]] for Obsidian) or as a JSONL backup.
+• Ask follow-up questions on any card. The conversation is saved with the explanation. Stop an answer midway, or retry with another model if one fails.
+• Your records form a knowledge graph of concepts, aliases, prerequisites, variants and related terms. Search it, review it, see it as a map, export it as Markdown notes (with [[links]] for Obsidian), as Anki cards, or as a JSONL backup that you can import again.
 
 PDFs AND PAPERS
-arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset; scanned PDFs are read with OCR on your computer. Other websites are scanned only when you click the toolbar button or allow the site.
+arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset. Scanned PDFs are read with OCR on your computer as you scroll, then behave like text. English is built in; other languages are downloaded once from a list. Other websites are scanned only when you click the toolbar button or allow the site. Under Settings → Sites you can also add GitHub (READMEs, issues and pull requests), Notion, Google Docs (published or mobile view) and YouTube captions, or add common research sites such as bioRxiv, PubMed and OpenReview with one button.
 
 YOU CHOOSE THE MODEL
-Harkback has no server and no account. You connect your own model: either one that runs on your computer, so your text never leaves it, or a hosted service that you use with your own API key.
+Harkback has no server and no account. You connect your own model: either one that runs on your computer, so your text never leaves it, or a hosted service that you use with your own API key. Models on your own network work too. Chrome's built-in model (Gemini Nano) runs on your computer with nothing to set up. It is a small model, so it is slower than a cloud model and best for short explanations.
 
 PRIVACY
 • Your records stay in your browser. The developer receives nothing.
-• Only the request you trigger is sent: the selected text, its paragraph, the section and the page title, to the model you configured.
-• Mark a source as sensitive and its content is sent only to a local model, never to a remote one.
+• Only what you trigger is sent to the model you configured: for an explanation, the selected text, its paragraph, the section and the page title; for a page preview, the page text; for "Check my answer", the term and your answer.
+• Mark a source as sensitive and its content is sent only to a local model, never to a remote one. A page that looks private (a private GitHub repository, an unpublished Notion or Google Docs page) is not sent to any model until you choose Local only or Send anyway.
 • Private windows explain but record nothing.
+• On YouTube, Harkback reads only the captions the player is showing, and only after you add the site.
+• Harkback itself downloads only optional OCR language data, once, checked against a checksum. If you choose Chrome's built-in model, Chrome downloads that model when you click Download.
 • No analytics, no ads, no tracking. Open source under Apache-2.0.
 • API keys are stored unencrypted in the extension's storage; use a key with a spending limit.
 
