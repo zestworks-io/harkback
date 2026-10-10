@@ -1,5 +1,6 @@
 import type { Block, ExtractedPage, Segment, SelectionContext } from "../source/extract";
 import { CaptionBuffer } from "./caption-buffer";
+import { allowCaptionSelection, setSelectable } from "./caption-select";
 import { isWatchPage, videoIdFromUrl } from "./youtube";
 
 /** Everything that depends on how YouTube builds its page is here. When the player changes, this is the file to update. */
@@ -31,6 +32,7 @@ export class CaptionTracker {
   private videoId: string | null = null;
   private container: Element | null = null;
   private observer: MutationObserver | null = null;
+  private releaseSelection: (() => void) | null = null;
   private video: HTMLVideoElement | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private firstChange: number | null = null;
@@ -81,6 +83,8 @@ export class CaptionTracker {
       clearTimeout(this.timer);
       this.observer?.disconnect();
       this.observer = null;
+      this.releaseSelection?.();
+      this.releaseSelection = null;
       this.container = null;
       this.detachVideo();
     };
@@ -201,13 +205,28 @@ export class CaptionTracker {
   private attach(container: Element | null): void {
     this.observer?.disconnect();
     this.observer = null;
+    this.releaseSelection?.();
+    this.releaseSelection = null;
     this.container = container;
+    if (container) {
+      this.releaseSelection = allowCaptionSelection(
+        this.doc,
+        container,
+        SELECTORS.captionWindow,
+        () => this.videoElement()?.paused === true,
+      );
+      setSelectable(container, this.videoElement()?.paused === true);
+    }
     if (!container || typeof MutationObserver === "undefined") return;
     this.observer = new MutationObserver(() => this.touch());
     this.observer.observe(container, { childList: true, subtree: true, characterData: true });
   }
 
-  private readonly onPause = (): void => this.flush();
+  private readonly onPause = (): void => {
+    setSelectable(this.container, true);
+    this.flush();
+  };
+  private readonly onPlay = (): void => setSelectable(this.container, false);
   private readonly onSeeked = (): void => this.touch();
 
   private attachVideo(): void {
@@ -216,11 +235,13 @@ export class CaptionTracker {
     this.detachVideo();
     this.video = video;
     video?.addEventListener("pause", this.onPause);
+    video?.addEventListener("play", this.onPlay);
     video?.addEventListener("seeked", this.onSeeked);
   }
 
   private detachVideo(): void {
     this.video?.removeEventListener("pause", this.onPause);
+    this.video?.removeEventListener("play", this.onPlay);
     this.video?.removeEventListener("seeked", this.onSeeked);
     this.video = null;
   }

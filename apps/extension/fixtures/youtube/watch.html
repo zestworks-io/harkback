@@ -11,8 +11,21 @@
         </div>
       </div>
     </div>
+    <style>
+      /* What the real player does to its captions: they cannot be selected, and dragging them moves them. */
+      .ytp-caption-window-container, .ytp-caption-window-container * { user-select: none; -webkit-user-select: none; }
+      .caption-window { cursor: grab; }
+    </style>
     <script>
       const video = document.querySelector("video");
+      window.dragStarts = 0;
+      window.playerClicks = 0;
+      document.querySelector(".caption-window").addEventListener("mousedown", (e) => {
+        window.dragStarts++;
+        e.preventDefault();
+      });
+      // A click on the player plays or pauses the video.
+      document.getElementById("movie_player").addEventListener("click", () => window.playerClicks++);
       // Set natively (a getter defined here would not be seen by the extension's isolated world).
       video.currentTime = 83.4;
       // The test drives the captions; each line is `[before, term, after]` so the term can be selected.

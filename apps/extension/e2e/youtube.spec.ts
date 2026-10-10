@@ -46,6 +46,23 @@ test("underlines a known term in the captions and records a lookup with its play
   expect(seen).toMatchObject({ ids: { url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" }, title: "Low-Rank Adaptation, explained" });
 });
 
+test("lets the reader select a caption with the mouse while the video is paused", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url, { sites: [{ pattern: "youtube.com", autoScan: true }] }));
+  const video = await context.newPage();
+  await expect(async () => {
+    await video.goto(WATCH);
+    await expect(video.locator(".term")).toHaveCount(1, { timeout: 4000 });
+  }).toPass({ timeout: 25_000 });
+  await video.evaluate(() => document.querySelector("video")!.dispatchEvent(new Event("pause")));
+
+  // The player makes captions unselectable and starts dragging them; a double click would otherwise also toggle fullscreen.
+  await video.locator(".term").dblclick();
+  expect(await video.evaluate(() => window.getSelection()?.toString())).toBe("LoRA");
+  const page = video as unknown as { evaluate<T>(f: () => T): Promise<T> };
+  expect(await page.evaluate(() => (window as unknown as { dragStarts: number }).dragStarts)).toBe(0);
+  expect(await page.evaluate(() => (window as unknown as { playerClicks: number }).playerClicks)).toBe(0);
+});
+
 test("does nothing on YouTube until the site is added", async ({ context, sw, stub }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await knowLora(context);

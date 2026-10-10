@@ -25,6 +25,7 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- **YouTube captions can be selected while the video is paused.** YouTube makes its captions unselectable and a drag moved the caption window instead, so a term could not be selected to explain it. Paused, the captions now select normally, and clicking them does not resume the video. While the video plays nothing changes.
 - "Check my answer", comparing with an earlier look-up, and backups and exports that leave out sensitive sources now treat a paper as sensitive under either of its ids, and an issue as sensitive when its repository is. They used to look only at the id a source was recorded under.
 - A term selected in another language no longer creates a second concept. When the model's card gives the English name of a concept you already have (as its name or one of its aliases, in the same field), the lookup joins that concept and adds the selected text as an alias, so the next page matches either language. Names shared by several concepts, or by concepts in another field, still stay separate.
 
