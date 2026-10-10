@@ -124,3 +124,24 @@ test("options switch the interface and the explanation language", async ({ conte
   const saved = (await storedSettings(sw)) as unknown as { language: string; explainLanguage: string };
   expect(saved).toMatchObject({ language: "ja", explainLanguage: "ko" });
 });
+
+test("options show that a connection is being tested, then the result", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  const page = await context.newPage();
+  await page.route("**/v1/models", async (route) => {
+    await new Promise((r) => setTimeout(r, 700));
+    await route.continue();
+  });
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.locator("[data-hb=add-model]").click();
+  await page.locator("[data-hb=model-base-url]").last().fill(`${stub.url}/v1`);
+  const test = page.locator("[data-hb=model-test]").last();
+  const result = page.locator("[data-hb=model-result]").last();
+  await test.click();
+  await expect(result).toHaveAttribute("data-state", "busy");
+  await expect(result).toContainText("Connecting");
+  await expect(test).toBeDisabled();
+  await expect(result).toContainText("Connected");
+  await expect(result).not.toHaveAttribute("data-state", "busy");
+  await expect(test).toBeEnabled();
+});

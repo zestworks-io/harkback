@@ -210,7 +210,15 @@ async function main(): Promise<void> {
         if (builtIn) return showState();
         const pattern = originPattern(m.baseUrl.trim());
         if (pattern) await requestOrigins([pattern]);
-        result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
+        test.disabled = true;
+        result.dataset.state = "busy";
+        result.textContent = L("正在连接…", "Connecting…");
+        try {
+          result.textContent = connectionMessage(draft.language, await testConnection(m), location.origin);
+        } finally {
+          delete result.dataset.state;
+          test.disabled = false;
+        }
       });
       const remove = h("button", { type: "button", className: "small ghost" }, L("删除", "Delete"));
       remove.addEventListener("click", () => {

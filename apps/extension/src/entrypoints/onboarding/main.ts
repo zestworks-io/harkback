@@ -136,7 +136,10 @@ async function main(): Promise<void> {
       }
       await requestOrigins([pattern]);
       show(L("正在连接…", "Connecting…"), "busy");
-      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, provider: form.templateId });
+      test.disabled = true;
+      const r = await testConnection({ baseUrl: baseUrl.value, apiKey: apiKey.value, provider: form.templateId }).finally(
+        () => (test.disabled = false),
+      );
       show(connectionMessage(lang, r, location.origin), stateOf(r));
       if (r.kind === "ok") {
         form.models = r.models;

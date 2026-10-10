@@ -23,7 +23,7 @@ Harkback has no server. It needs a model to write explanations, and you choose w
 
 1. **Welcome.** See an example reunion hint, and click the underlined term to see what an explanation looks like. No model is called.
 2. **Privacy.** Read where your text goes and tick the consent box. **Next** stays disabled until you do.
-3. **Model.** Pick a provider; the address fills in. Paste an API key if the provider needs one (Ollama and Chrome's built-in model do not). Press **Test connection**, and Chrome asks whether Harkback may reach that address; allow it. Then press **Finish**.
+3. **Model.** Pick a provider; the address fills in. Paste an API key if the provider needs one (Ollama and Chrome's built-in model do not). Press **Test connection**, and Chrome asks whether Harkback may reach that address; allow it. A spinner and "Connecting…" show while the test runs, and the button is off until it ends. Then press **Finish**.
 
 **Chrome built-in (Gemini Nano)** needs no address or key. Selecting it shows the model's status and a **Download model** button; **Finish** waits until the download is done. It is a small model that runs on your computer, so expect it to be slower than a cloud model, especially on the first request, with simpler answers. It suits short explanations.
 

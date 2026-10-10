@@ -114,7 +114,6 @@
       .card-head p {
         color: var(--muted);
         margin: 0;
-        max-width: 62ch;
       }
       .card-body {
         padding: 20px 24px 24px;
@@ -342,6 +341,28 @@
       }
       .result:empty {
         display: none;
+      }
+      .result[data-state="busy"]::before {
+        content: "";
+        display: inline-block;
+        width: 0.9em;
+        height: 0.9em;
+        margin-right: 0.6em;
+        vertical-align: -0.12em;
+        border: 2px solid var(--muted);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .result[data-state="busy"]::before {
+          animation-duration: 3s;
+        }
       }
       .item .result {
         padding: 10px 12px;
