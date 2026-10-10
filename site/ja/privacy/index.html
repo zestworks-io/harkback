@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>プライバシーポリシー · Harkback</title>
+<meta name="description" content="Harkback がデータをどう扱うか：記録はブラウザ内に保存され、あなたが操作したリクエストだけが選んだモデルに送られます。">
+<link rel="icon" href="../../favicon.png">
+<link rel="alternate" hreflang="en" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="alternate" hreflang="zh-CN" href="https://zestworks-io.github.io/harkback/zh/privacy/">
+<link rel="alternate" hreflang="zh-TW" href="https://zestworks-io.github.io/harkback/zh-tw/privacy/">
+<link rel="alternate" hreflang="ja" href="https://zestworks-io.github.io/harkback/ja/privacy/">
+<link rel="alternate" hreflang="ko" href="https://zestworks-io.github.io/harkback/ko/privacy/">
+<link rel="alternate" hreflang="es" href="https://zestworks-io.github.io/harkback/es/privacy/">
+<link rel="alternate" hreflang="fr" href="https://zestworks-io.github.io/harkback/fr/privacy/">
+<link rel="alternate" hreflang="de" href="https://zestworks-io.github.io/harkback/de/privacy/">
+<link rel="alternate" hreflang="pt-BR" href="https://zestworks-io.github.io/harkback/pt-br/privacy/">
+<link rel="alternate" hreflang="x-default" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../theme.js"></script>
+</head>
+<body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../ja/"><img src="../../icon.png" alt="" width="24" height="24">Harkback</a>
+<nav class="site"><a href="../../ja/">ホーム</a><a href="../../guide/ja/getting-started/">ドキュメント</a><a href="../../ja/privacy/" aria-current="page">プライバシー</a><a href="../../ja/terms/">利用規約</a></nav>
+</div></header>
+<main><div class="wrap">
+
+<h1>プライバシーポリシー</h1>
+<p class="meta">最終更新：2026 年 10 月 9 日</p>
+<p class="meta">これは翻訳です。英語版と異なる場合は、英語版が優先されます。</p>
+<p>Harkback は、読みながら用語を解説し、理解した内容を記録するブラウザ拡張機能です。独自のサーバーはなく、開発者があなたのデータを受信・保存・閲覧することはありません。</p>
+
+<h2>Harkback が保存するもの</h2>
+<ul>
+<li><strong>記録</strong>（解説、追加の質問、メモ、「わかった / まだわからない」の印、およびそれらの出典）は、ブラウザ内の拡張機能のローカルストレージに保存されます。開発者に送信されることはありません。</li>
+<li><strong>設定</strong>（入力したモデルの API キーを含む）は、ブラウザ内の拡張機能のストレージに保存されます。キーは<strong>暗号化されません</strong>。入力したモデルのアドレスにのみ送信されます。</li>
+<li><strong>バックアップ。</strong>Harkback は週に一度、記録を含む JSONL ファイルをコンピューターの <code>Downloads/harkback</code> に保存します。含まれるのは記録のみで、設定や API キーは含まれません。ライブラリページから自分でデータを書き出すこともできます。</li>
+</ul>
+
+<h2>ブラウザの外に出るもの</h2>
+<p>あなたが操作したリクエストだけです。解説を求めると、Harkback は選択したテキスト、その段落、セクション、ページのタイトルを、<strong>設定したモデルサービス</strong>（クラウドの API や Ollama などのローカルサーバー）に送信します。そのサービスは、独自の規約とプライバシーポリシーに従ってデータを扱います。機密としてマークした出典の内容が、ローカル以外のモデルに送られることはありません。復習の任意機能「回答をチェック」も同様で、ボタンを押したときだけ、用語、入力した回答、保存された解説がモデルに送られます。設定でオフにできます。ページのプレビューも同様で、「スキャン」を押したときだけ、ページのテキスト（先頭 16,000 文字）がモデルに送られ、機密としてマークしたページではローカルモデルだけが使われます。Chrome 内蔵モデルはお使いのコンピューター上で動作するため、何も送信されません。このモデルは「モデルをダウンロード」を押したときに Chrome 自身がダウンロードします。</p>
+<p>スキャンされた PDF はお使いのコンピューター上で読み取られ、ページ画像が外に出ることはありません。OCR が行いうる唯一のネットワークリクエストは、<code>cdn.jsdelivr.net</code> から言語パックをダウンロードすることです（英語は組み込み済み）。「言語」で言語をインストールしたときに一度だけ行われます。このリクエストに文書の内容は含まれず、言語パックは使用前に Harkback に同梱されたチェックサムで検証されます。</p>
+<p>Harkback には解析、広告、トラッキングは含まれておらず、データを販売・共有することもありません。</p>
+
+<h2>権限</h2>
+<ul>
+<li><strong>サイトへのアクセス（任意）。</strong>Harkback がウェブサイトへのアクセスを求めるのは、そのサイトのスキャンを選んだとき、または許可リストに追加したときだけです。また、リクエストを送るためにモデルのアドレスへのアクセスも求めます。arxiv.org では自動的に動作します。</li>
+<li><strong>ローカルファイル（任意）。</strong>コンピューター上の PDF を読むには、ローカルファイルへのアクセスを許可できます。ファイルはブラウザ内で読み取られ、アップロードされることはありません。</li>
+<li><strong>その他の権限。</strong><code>storage</code> は記録と設定の保存、<code>alarms</code> は週次バックアップの予約とツールバーアイコンの復習件数の更新、<code>downloads</code> はそのバックアップの書き込み、<code>offscreen</code> はバックアップファイルの作成、<code>scripting</code> と <code>activeTab</code> はツールバーのボタンとキーボードショートカットが今開いているページを読むため、<code>contextMenus</code> は選択したテキストの右クリックメニューに「Harkback で解説」を、ページの右クリックメニューに「Harkback: このページをプレビュー」を追加するために使います。</li>
+</ul>
+
+<h2>プライベートウィンドウ</h2>
+<p>プライベート（シークレット）ウィンドウはデフォルトでオフです。有効にすると、Harkback は解説のみ行い、記録、スキャン、リマインダーの表示は行いません。</p>
+
+<h2>データの削除</h2>
+<p>ライブラリページで記録を削除するか、拡張機能を削除すると、ブラウザ内に保存されたすべてが消去されます。すでにディスクに保存されたバックアップや書き出しファイルは、ご自身で削除してください。</p>
+
+<h2>本ポリシーの変更</h2>
+<p>Harkback のデータの扱いが変わる場合は、変更の公開前にこのページと上の日付を更新します。履歴は<a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">リポジトリ</a>で公開されています。</p>
+
+<h2>お問い合わせ</h2>
+<p>ご質問は <a href="https://github.com/zestworks-io/harkback/issues">github.com/zestworks-io/harkback/issues</a> で issue を作成してください。</p>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<span>© 2026 Zestworks · Apache-2.0</span>
+<span><a href="https://github.com/zestworks-io/harkback">GitHub</a> · <a href="https://github.com/zestworks-io/harkback/issues">Issues</a></span>
+<div class="langs"><a href="../../privacy/" lang="en">English</a><a href="../../zh/privacy/" lang="zh-CN">简体中文</a><a href="../../zh-tw/privacy/" lang="zh-TW">繁體中文</a><a href="../../ja/privacy/" lang="ja" aria-current="true">日本語</a><a href="../../ko/privacy/" lang="ko">한국어</a><a href="../../es/privacy/" lang="es">Español</a><a href="../../fr/privacy/" lang="fr">Français</a><a href="../../de/privacy/" lang="de">Deutsch</a><a href="../../pt-br/privacy/" lang="pt-BR">Português (Brasil)</a></div>
+</div></footer>
+</body>
+</html>

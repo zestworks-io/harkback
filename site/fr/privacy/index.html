@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Politique de confidentialité · Harkback</title>
+<meta name="description" content="Comment Harkback traite vos données : les enregistrements restent dans votre navigateur et seule la requête que vous déclenchez est envoyée au modèle de votre choix.">
+<link rel="icon" href="../../favicon.png">
+<link rel="alternate" hreflang="en" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="alternate" hreflang="zh-CN" href="https://zestworks-io.github.io/harkback/zh/privacy/">
+<link rel="alternate" hreflang="zh-TW" href="https://zestworks-io.github.io/harkback/zh-tw/privacy/">
+<link rel="alternate" hreflang="ja" href="https://zestworks-io.github.io/harkback/ja/privacy/">
+<link rel="alternate" hreflang="ko" href="https://zestworks-io.github.io/harkback/ko/privacy/">
+<link rel="alternate" hreflang="es" href="https://zestworks-io.github.io/harkback/es/privacy/">
+<link rel="alternate" hreflang="fr" href="https://zestworks-io.github.io/harkback/fr/privacy/">
+<link rel="alternate" hreflang="de" href="https://zestworks-io.github.io/harkback/de/privacy/">
+<link rel="alternate" hreflang="pt-BR" href="https://zestworks-io.github.io/harkback/pt-br/privacy/">
+<link rel="alternate" hreflang="x-default" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../theme.js"></script>
+</head>
+<body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../fr/"><img src="../../icon.png" alt="" width="24" height="24">Harkback</a>
+<nav class="site"><a href="../../fr/">Accueil</a><a href="../../guide/fr/getting-started/">Documentation</a><a href="../../fr/privacy/" aria-current="page">Confidentialité</a><a href="../../fr/terms/">Conditions</a></nav>
+</div></header>
+<main><div class="wrap">
+
+<h1>Politique de confidentialité</h1>
+<p class="meta">Dernière mise à jour : 9 octobre 2026</p>
+<p class="meta">Ceci est une traduction. En cas de différence avec la version anglaise, c'est la version anglaise qui prévaut.</p>
+<p>Harkback est une extension de navigateur qui explique les termes pendant que vous lisez et retient ce que vous avez compris. Elle n'a pas de serveur propre. Le développeur ne reçoit, ne stocke et ne voit aucune de vos données.</p>
+
+<h2>Ce que Harkback conserve</h2>
+<ul>
+<li><strong>Vos enregistrements</strong> (explications, questions complémentaires, notes, marques « compris / encore flou » et les sources dont ils proviennent) sont conservés dans votre navigateur, dans le stockage local de l'extension. Ils ne sont jamais envoyés au développeur.</li>
+<li><strong>Vos réglages</strong>, y compris toute clé d'API de modèle que vous saisissez, sont conservés dans le stockage de l'extension dans votre navigateur. Les clés ne sont <strong>pas chiffrées</strong>. Elles sont uniquement envoyées à l'adresse du modèle que vous avez saisie.</li>
+<li><strong>Sauvegardes.</strong> Une fois par semaine, Harkback enregistre un fichier JSONL contenant vos enregistrements dans <code>Downloads/harkback</code> sur votre ordinateur. Il ne contient que des enregistrements, jamais de réglages ni de clés d'API. Vous pouvez aussi exporter vos données vous-même depuis la page de la bibliothèque.</li>
+</ul>
+
+<h2>Ce qui quitte votre navigateur</h2>
+<p>Uniquement la requête que vous déclenchez. Lorsque vous demandez une explication, Harkback envoie le texte sélectionné, son paragraphe, la section et le titre de la page au <strong>service de modèle que vous avez configuré</strong> (par exemple une API hébergée ou un serveur local comme Ollama). Ce service traite les données selon ses propres conditions et sa propre politique de confidentialité. Le contenu des sources que vous marquez comme sensibles n'est jamais envoyé à un modèle non local. Il en va de même pour le bouton facultatif « Vérifier ma réponse » de la révision : uniquement lorsque vous l'appuyez, Harkback envoie le terme, la réponse que vous avez saisie et l'explication enregistrée à votre modèle. Vous pouvez le désactiver dans les réglages. Idem pour l'aperçu de page : uniquement lorsque vous appuyez sur Analyser, Harkback envoie le texte de la page (les 16 000 premiers caractères) à votre modèle, et une page que vous avez marquée comme sensible n'utilise qu'un modèle local. Le modèle intégré de Chrome s'exécute sur votre ordinateur, donc rien n'est envoyé ; c'est Chrome lui-même qui télécharge ce modèle lorsque vous appuyez sur Télécharger le modèle.</p>
+<p>Les PDF numérisés sont lus sur votre ordinateur : les images des pages ne le quittent jamais. La seule requête réseau que la reconnaissance de texte (OCR) puisse faire est le téléchargement d'un pack de langue (l'anglais est intégré) depuis <code>cdn.jsdelivr.net</code>, une seule fois, et uniquement lorsque vous installez une langue dans Langues. Cette requête ne contient aucun contenu de document, et le pack est vérifié avec une somme de contrôle livrée avec Harkback avant d'être utilisé.</p>
+<p>Harkback n'inclut ni analyse d'audience, ni publicité, ni suivi, et ne vend ni ne partage vos données.</p>
+
+<h2>Autorisations</h2>
+<ul>
+<li><strong>Accès aux sites (facultatif).</strong> Harkback ne demande l'accès à un site web que lorsque vous choisissez de l'analyser ou de l'ajouter à la liste autorisée, et il demande l'adresse de votre modèle afin d'envoyer vos requêtes. Sur arxiv.org, il s'exécute automatiquement.</li>
+<li><strong>Fichiers locaux (facultatif).</strong> Pour lire un PDF sur votre ordinateur, vous pouvez autoriser l'accès aux fichiers locaux. Le fichier est lu dans votre navigateur et n'est jamais téléversé.</li>
+<li><strong>Autres autorisations.</strong> <code>storage</code> conserve vos enregistrements et vos réglages ; <code>alarms</code> planifie la sauvegarde hebdomadaire et met à jour le nombre de révisions sur l'icône de la barre d'outils ; <code>downloads</code> écrit cette sauvegarde ; <code>offscreen</code> crée le fichier de sauvegarde ; <code>scripting</code> et <code>activeTab</code> permettent au bouton de la barre d'outils et aux raccourcis clavier de lire la page où vous vous trouvez ; <code>contextMenus</code> ajoute « Expliquer avec Harkback » au menu contextuel du texte sélectionné et « Harkback : Aperçu de cette page » au menu contextuel d'une page.</li>
+</ul>
+
+<h2>Fenêtres privées</h2>
+<p>Les fenêtres privées sont désactivées par défaut. Si vous les activez, Harkback explique mais n'enregistre pas, n'analyse pas et n'affiche pas de rappels.</p>
+
+<h2>Supprimer vos données</h2>
+<p>Supprimez des enregistrements depuis la page de la bibliothèque, ou retirez l'extension pour effacer tout ce qu'elle conserve dans votre navigateur. Les sauvegardes et exports déjà enregistrés sur votre disque vous appartiennent : à vous de les supprimer.</p>
+
+<h2>Modifications de cette politique</h2>
+<p>Si la façon dont Harkback traite les données change, cette page et la date ci-dessus sont mises à jour avant la mise en ligne du changement. L'historique est public dans le <a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">dépôt</a>.</p>
+
+<h2>Contact</h2>
+<p>Questions : ouvrez une issue sur <a href="https://github.com/zestworks-io/harkback/issues">github.com/zestworks-io/harkback/issues</a>.</p>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<span>© 2026 Zestworks · Apache-2.0</span>
+<span><a href="https://github.com/zestworks-io/harkback">GitHub</a> · <a href="https://github.com/zestworks-io/harkback/issues">Issues</a></span>
+<div class="langs"><a href="../../privacy/" lang="en">English</a><a href="../../zh/privacy/" lang="zh-CN">简体中文</a><a href="../../zh-tw/privacy/" lang="zh-TW">繁體中文</a><a href="../../ja/privacy/" lang="ja">日本語</a><a href="../../ko/privacy/" lang="ko">한국어</a><a href="../../es/privacy/" lang="es">Español</a><a href="../../fr/privacy/" lang="fr" aria-current="true">Français</a><a href="../../de/privacy/" lang="de">Deutsch</a><a href="../../pt-br/privacy/" lang="pt-BR">Português (Brasil)</a></div>
+</div></footer>
+</body>
+</html>

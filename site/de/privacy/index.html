@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datenschutzerklärung · Harkback</title>
+<meta name="description" content="Wie Harkback mit Ihren Daten umgeht: Aufzeichnungen bleiben in Ihrem Browser, und nur die von Ihnen ausgelöste Anfrage geht an das gewählte Modell.">
+<link rel="icon" href="../../favicon.png">
+<link rel="alternate" hreflang="en" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="alternate" hreflang="zh-CN" href="https://zestworks-io.github.io/harkback/zh/privacy/">
+<link rel="alternate" hreflang="zh-TW" href="https://zestworks-io.github.io/harkback/zh-tw/privacy/">
+<link rel="alternate" hreflang="ja" href="https://zestworks-io.github.io/harkback/ja/privacy/">
+<link rel="alternate" hreflang="ko" href="https://zestworks-io.github.io/harkback/ko/privacy/">
+<link rel="alternate" hreflang="es" href="https://zestworks-io.github.io/harkback/es/privacy/">
+<link rel="alternate" hreflang="fr" href="https://zestworks-io.github.io/harkback/fr/privacy/">
+<link rel="alternate" hreflang="de" href="https://zestworks-io.github.io/harkback/de/privacy/">
+<link rel="alternate" hreflang="pt-BR" href="https://zestworks-io.github.io/harkback/pt-br/privacy/">
+<link rel="alternate" hreflang="x-default" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../theme.js"></script>
+</head>
+<body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../de/"><img src="../../icon.png" alt="" width="24" height="24">Harkback</a>
+<nav class="site"><a href="../../de/">Start</a><a href="../../guide/de/getting-started/">Dokumentation</a><a href="../../de/privacy/" aria-current="page">Datenschutz</a><a href="../../de/terms/">Nutzungsbedingungen</a></nav>
+</div></header>
+<main><div class="wrap">
+
+<h1>Datenschutzerklärung</h1>
+<p class="meta">Zuletzt aktualisiert: 9. Oktober 2026</p>
+<p class="meta">Dies ist eine Übersetzung. Weicht sie von der englischen Fassung ab, gilt die englische Fassung.</p>
+<p>Harkback ist eine Browser-Erweiterung, die beim Lesen Begriffe erklärt und sich merkt, was Sie verstanden haben. Sie hat keinen eigenen Server. Der Entwickler erhält, speichert oder sieht keine Ihrer Daten.</p>
+
+<h2>Was Harkback speichert</h2>
+<ul>
+<li><strong>Ihre Aufzeichnungen</strong> (Erklärungen, Nachfragen, Notizen, „Verstanden / noch unklar“-Markierungen und die Quellen, aus denen sie stammen) werden in Ihrem Browser gespeichert, im lokalen Speicher der Erweiterung. Sie werden nie an den Entwickler gesendet.</li>
+<li><strong>Ihre Einstellungen</strong>, einschließlich eines von Ihnen eingegebenen API-Schlüssels für ein Modell, werden im Speicher der Erweiterung in Ihrem Browser abgelegt. Schlüssel sind <strong>nicht verschlüsselt</strong>. Sie werden nur an die von Ihnen eingegebene Modelladresse gesendet.</li>
+<li><strong>Sicherungen.</strong> Einmal pro Woche speichert Harkback eine JSONL-Datei mit Ihren Aufzeichnungen unter <code>Downloads/harkback</code> auf Ihrem Computer. Sie enthält nur Aufzeichnungen, nie Einstellungen oder API-Schlüssel. Sie können Ihre Daten auch selbst über die Bibliotheksseite exportieren.</li>
+</ul>
+
+<h2>Was Ihren Browser verlässt</h2>
+<p>Nur die Anfrage, die Sie auslösen. Wenn Sie eine Erklärung anfordern, sendet Harkback den ausgewählten Text, seinen Absatz, den Abschnitt und den Seitentitel an den <strong>von Ihnen konfigurierten Modelldienst</strong> (zum Beispiel eine gehostete API oder einen lokalen Server wie Ollama). Dieser Dienst verarbeitet die Daten nach seinen eigenen Bedingungen und seiner eigenen Datenschutzerklärung. Inhalte aus Quellen, die Sie als sensibel markieren, werden nie an ein nicht lokales Modell gesendet. Dasselbe gilt für die optionale Schaltfläche „Meine Antwort prüfen“ in der Wiederholung: Nur wenn Sie sie drücken, sendet Harkback den Begriff, Ihre eingegebene Antwort und die gespeicherte Erklärung an Ihr Modell. Sie können sie in den Einstellungen ausschalten. Ebenso bei der Seitenvorschau: Nur wenn Sie auf Scannen drücken, sendet Harkback den Seitentext (die ersten 16.000 Zeichen) an Ihr Modell, und eine Seite, die Sie als sensibel markiert haben, verwendet nur ein lokales Modell. Das in Chrome eingebaute Modell läuft auf Ihrem Computer, es wird also nichts gesendet; Chrome selbst lädt dieses Modell herunter, wenn Sie auf Modell herunterladen drücken.</p>
+<p>Gescannte PDFs werden auf Ihrem Computer gelesen: Die Seitenbilder verlassen ihn nie. Die einzige Netzwerkanfrage, die die Texterkennung (OCR) stellen kann, ist das Herunterladen eines Sprachpakets (Englisch ist eingebaut) von <code>cdn.jsdelivr.net</code>, einmalig und nur, wenn Sie unter Sprachen eine Sprache installieren. Diese Anfrage enthält keine Dokumentinhalte, und das Paket wird vor der Verwendung anhand einer mit Harkback ausgelieferten Prüfsumme geprüft.</p>
+<p>Harkback enthält weder Analyse noch Werbung noch Tracking und verkauft oder teilt Ihre Daten nicht.</p>
+
+<h2>Berechtigungen</h2>
+<ul>
+<li><strong>Zugriff auf Websites (optional).</strong> Harkback fragt nur dann nach Zugriff auf eine Website, wenn Sie sie scannen oder zur Liste der erlaubten Seiten hinzufügen, und es fragt nach der Adresse Ihres Modells, um Ihre Anfragen senden zu können. Auf arxiv.org läuft es automatisch.</li>
+<li><strong>Lokale Dateien (optional).</strong> Um ein PDF auf Ihrem Computer zu lesen, können Sie den Zugriff auf lokale Dateien erlauben. Die Datei wird in Ihrem Browser gelesen und nie hochgeladen.</li>
+<li><strong>Weitere Berechtigungen.</strong> <code>storage</code> speichert Ihre Aufzeichnungen und Einstellungen; <code>alarms</code> plant die wöchentliche Sicherung und aktualisiert die Anzahl fälliger Wiederholungen am Symbol in der Symbolleiste; <code>downloads</code> schreibt diese Sicherung; <code>offscreen</code> erstellt die Sicherungsdatei; <code>scripting</code> und <code>activeTab</code> lassen die Schaltfläche in der Symbolleiste und die Tastenkürzel die aktuelle Seite lesen; <code>contextMenus</code> fügt „Mit Harkback erklären“ zum Kontextmenü von ausgewähltem Text und „Harkback: Seitenvorschau“ zum Kontextmenü einer Seite hinzu.</li>
+</ul>
+
+<h2>Private Fenster</h2>
+<p>Private (Inkognito-)Fenster sind standardmäßig ausgeschaltet. Wenn Sie sie aktivieren, erklärt Harkback, zeichnet aber nichts auf, scannt nicht und zeigt keine Erinnerungen an.</p>
+
+<h2>Ihre Daten löschen</h2>
+<p>Löschen Sie Aufzeichnungen über die Bibliotheksseite, oder entfernen Sie die Erweiterung, um alles zu löschen, was sie in Ihrem Browser speichert. Bereits auf Ihrer Festplatte gespeicherte Sicherungen und Exporte gehören Ihnen und müssen von Ihnen gelöscht werden.</p>
+
+<h2>Änderungen dieser Erklärung</h2>
+<p>Ändert sich, wie Harkback mit Daten umgeht, werden diese Seite und das Datum oben aktualisiert, bevor die Änderung erscheint. Der Verlauf ist im <a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">Repository</a> öffentlich einsehbar.</p>
+
+<h2>Kontakt</h2>
+<p>Fragen: Eröffnen Sie ein Issue unter <a href="https://github.com/zestworks-io/harkback/issues">github.com/zestworks-io/harkback/issues</a>.</p>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<span>© 2026 Zestworks · Apache-2.0</span>
+<span><a href="https://github.com/zestworks-io/harkback">GitHub</a> · <a href="https://github.com/zestworks-io/harkback/issues">Issues</a></span>
+<div class="langs"><a href="../../privacy/" lang="en">English</a><a href="../../zh/privacy/" lang="zh-CN">简体中文</a><a href="../../zh-tw/privacy/" lang="zh-TW">繁體中文</a><a href="../../ja/privacy/" lang="ja">日本語</a><a href="../../ko/privacy/" lang="ko">한국어</a><a href="../../es/privacy/" lang="es">Español</a><a href="../../fr/privacy/" lang="fr">Français</a><a href="../../de/privacy/" lang="de" aria-current="true">Deutsch</a><a href="../../pt-br/privacy/" lang="pt-BR">Português (Brasil)</a></div>
+</div></footer>
+</body>
+</html>

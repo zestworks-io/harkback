@@ -299,6 +299,17 @@ footer.site .wrap {
 footer.site a {
   color: var(--muted);
 }
+footer.site .langs {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+footer.site .langs a[aria-current] {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;
