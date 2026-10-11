@@ -1,10 +1,22 @@
 import { MATCH_RULES } from "../constants";
+import { foldArabic, foldHan, isArabicMark } from "./fold";
 import { inflectedForms } from "./inflect";
 import { foldAccents, normalizeName, stripDeterminers, type Script } from "./normalize";
 import type { State } from "../events/state";
 
 /** Kana and Hangul. */
 const SYLLABIC = /[぀-ヿ가-힯]/u;
+/** A name of two characters that are both Han. */
+const TWO_HAN = /^[㐀-䶿一-鿿豈-﫿]{2}$/u;
+const CJK_CHAR = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/u;
+const KANA = /[぀-ヿ]/u;
+const ARABIC_CHAR = /\p{Script=Arabic}/u;
+/** What may stand in front of an Arabic name without being another word: and, with, to, like, the, or two of them. */
+const ARABIC_PREFIX = /^[وف]?(?:[بكل]?ال|لل|[بكل])?$/u;
+/** Plural, dual, pronoun and case endings. */
+const ARABIC_SUFFIX = /^(?:ات|ان|ين|ون|ها|هم|نا|ي|ك|ه|ا)$/u;
+/** How many characters of a Han run on each side of a name are looked at to find where its words end. */
+const SEGMENT_WINDOW = 40;
 const SEPARATOR = /[\s\-‐‑‒–—_]/;
 const SEPARATORS_G = /[\s\-‐‑‒–—_\u00AD]+/g;
 
@@ -29,11 +41,17 @@ const GREEK_LATIN: Record<string, string> = {
   ω: "omega",
 };
 
-/** Compatibility forms ("ﬁ" -> "fi", full-width letters), accents on Latin letters, Greek letter names, and lower case; may yield several characters. */
+/**
+ * Compatibility forms ("ﬁ" -> "fi", full-width letters), accents on Latin letters, Greek letter names, lower case, and the
+ * spellings of Arabic and Han that are one word; may yield several characters.
+ */
 function foldChar(ch: string): string {
   const lower = foldAccents(ch.normalize("NFKC").toLowerCase());
   let out = "";
   for (const c of lower) out += GREEK_LATIN[c] ?? c;
+  const code = out.codePointAt(0)!;
+  if (code >= 0x0600 && code <= 0x06ff) out = foldArabic(out);
+  else if (code >= 0x4e00 && code <= 0x9fff) out = foldHan(out);
   return out.length > 0 ? out : ch;
 }
 
@@ -45,7 +63,7 @@ export function prepareText(raw: string): PreparedText {
   for (let i = 0, width = 1; i < raw.length; i += width) {
     const ch = String.fromCodePoint(raw.codePointAt(i)!);
     width = ch.length;
-    if (ch === "\u00AD") continue;
+    if (ch === "\u00AD" || isArabicMark(ch)) continue;
     // An accent written as a separate mark after a Latin letter ("e" + U+0301) is dropped like a precomposed one.
     if (/\p{Mn}/u.test(ch) && /\p{Script=Latin}/u.test(raw[i - 1] ?? "")) continue;
     if (SEPARATOR.test(ch)) {
@@ -62,6 +80,39 @@ export function prepareText(raw: string): PreparedText {
     for (let k = 0; k < folded.length; k++) map.push(i);
   }
   return { text, map };
+}
+
+let segmenters: { zh: Intl.Segmenter; ja: Intl.Segmenter } | null | undefined;
+
+function segmenter(locale: "zh" | "ja"): Intl.Segmenter | null {
+  if (segmenters === undefined) {
+    try {
+      segmenters = { zh: new Intl.Segmenter("zh", { granularity: "word" }), ja: new Intl.Segmenter("ja", { granularity: "word" }) };
+    } catch {
+      segmenters = null;
+    }
+  }
+  return segmenters?.[locale] ?? null;
+}
+
+/**
+ * Whether raw[start, end) is made of whole words. Han has no spaces, so the words come from the browser's dictionary, looking
+ * at the run of Han, kana and Hangul around the name. Without a dictionary nothing counts as a whole word.
+ */
+function onWordBoundaries(raw: string, start: number, end: number): boolean {
+  let from = start;
+  while (from > 0 && start - from < SEGMENT_WINDOW && CJK_CHAR.test(raw[from - 1]!)) from--;
+  let to = end;
+  while (to < raw.length && to - end < SEGMENT_WINDOW && CJK_CHAR.test(raw[to]!)) to++;
+  const run = raw.slice(from, to);
+  const seg = segmenter(KANA.test(run) ? "ja" : "zh");
+  if (!seg) return false;
+  const edges = new Set<number>();
+  for (const part of seg.segment(run)) {
+    edges.add(part.index);
+    edges.add(part.index + part.segment.length);
+  }
+  return edges.has(start - from) && edges.has(end - from);
 }
 
 export interface MatcherEntry {
@@ -86,6 +137,8 @@ interface TrieNode {
 
 interface Entry extends MatcherEntry {
   prepared: string;
+  /** A two-character Han name, which is underlined only where the page's words begin and end around it. */
+  wholeWord?: boolean;
 }
 
 /** The index just past the character that starts at `index`. */
@@ -108,9 +161,13 @@ export class Matcher {
     if (
       e.script === "cjk" &&
       Array.from(prepared).length < (SYLLABIC.test(prepared) ? MATCH_RULES.syllabicMinMatchLength : MATCH_RULES.cjkMinMatchLength)
-    )
+    ) {
+      if (TWO_HAN.test(prepared)) this.add({ ...e, prepared, wholeWord: true });
       return;
+    }
     this.add({ ...e, prepared });
+    // "to the network" drops the alef of the article: "للشبكة" for "ل" + "الشبكة".
+    if (e.script === "arabic" && prepared.startsWith("ال") && prepared.length > 4) this.add({ ...e, prepared: `ل${prepared.slice(2)}` });
     // Another form of a long name (a German plural, a Portuguese "-ões") underlines as the name does. Short names that are
     // matched by case have none.
     if (e.script === "latin" && !e.caseKey) for (const form of inflectedForms(prepared)) this.add({ ...e, prepared: form });
@@ -161,7 +218,8 @@ export class Matcher {
         const endP = this.accept(e, text, startP, i, raw, map);
         if (endP < 0) continue;
         const start = map[startP]!;
-        const end = after(raw, map[endP]!);
+        let end = after(raw, map[endP]!);
+        if (e.script === "arabic") while (end < raw.length && isArabicMark(raw[end]!)) end++;
         hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
       }
     }
@@ -178,12 +236,28 @@ export class Matcher {
         else return -1;
       }
     }
+    if (e.script === "arabic") {
+      if (!arabicEdge(text, startP - 1, -1, ARABIC_PREFIX, 5) || !arabicEdge(text, end + 1, 1, ARABIC_SUFFIX, 3)) return -1;
+    }
+    if (e.wholeWord && !onWordBoundaries(raw, map[startP]!, after(raw, map[end]!))) return -1;
     if (e.caseKey) {
       const original = raw.slice(map[startP]!, after(raw, map[end]!)).replace(SEPARATORS_G, "");
       if (normalizeName(original).caseKey !== e.caseKey) return -1;
     }
     return end;
   }
+}
+
+/**
+ * Whether the Arabic letters next to a name, read from `index` in direction `step`, are nothing or one of the affixes `allowed`
+ * lists. At most `max` letters are looked at; a longer run is another word whatever it holds.
+ */
+function arabicEdge(text: string, index: number, step: 1 | -1, allowed: RegExp, max: number): boolean {
+  let letters = "";
+  for (let i = index; i >= 0 && i < text.length && ARABIC_CHAR.test(text[i]!) && letters.length < max; i += step) {
+    letters = step === 1 ? letters + text[i]! : text[i]! + letters;
+  }
+  return letters === "" || allowed.test(letters);
 }
 
 /** Removes hits lying inside a strictly longer hit ("attention" inside "self-attention"); sorts by start. */

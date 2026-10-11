@@ -2,6 +2,18 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Added
+
+- **Arabic names are matched as Arabic.** Vowel marks, the stretching line and the alef, ya and ta marbuta spellings are ignored, so one word written two ways is one term, and digits written in Arabic-Indic or Persian form match ASCII digits. A name is underlined with the one-letter and article prefixes (`و`, `ب`, `ل`, `ك`, `ف`, `ال`, `بال`, `وال`) and the common plural and pronoun endings, and not inside a longer word, which it used to be.
+- **Two-character Chinese and Japanese names can be underlined.** A name of two Han characters (`模型`, `梯度`, `損失`) is underlined where the browser's word dictionary sees it as a word of its own, and not across the boundary of two words (`合并` in `数据集合并`). Names of three or more characters are matched as before; a browser without `Intl.Segmenter` keeps the old rule.
+- **Simplified and Traditional spellings are one term** for the common technical characters (`神經網絡` and `神经网络`). What you see on a page and in your records is unchanged.
+
+### Changed
+
+- Names are compared in their folded form. The comparison is made when records are replayed, so your records are unchanged and nothing needs migrating.
+
 ## 1.0.2 - 2026-10-09
 
 ### Added

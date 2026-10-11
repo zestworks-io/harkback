@@ -25,8 +25,10 @@ describe("accents", () => {
 
 describe("two-character Korean and Japanese names", () => {
   const m = new Matcher(matcherEntriesFromState(replay([concept(1, "학습"), concept(2, "ネコ"), concept(3, "模型"), concept(4, "손실")])));
-  it("underlines names of two kana or Hangul but not two Han characters", () => {
-    expect(m.scan("모델의 학습과 손실, ネコ, 模型").map((h) => h.text)).toEqual(["학습", "손실", "ネコ"]);
+  it("underlines names of two kana or Hangul, and two Han characters when they are a word of their own", () => {
+    expect(m.scan("모델의 학습과 손실, ネコ, 模型").map((h) => h.text)).toEqual(["학습", "손실", "ネコ", "模型"]);
+    const split = new Matcher(matcherEntriesFromState(replay([concept(1, "合并")])));
+    expect(split.scan("数据集合并").map((h) => h.text)).toEqual([]);
   });
 });
 

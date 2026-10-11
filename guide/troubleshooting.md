@@ -21,7 +21,7 @@ After any failure the card offers **Try again**, and **Try with …** when you h
 - Pages other than arXiv are scanned only after you click the toolbar button, press `Alt+Shift+E`, or allow the site under _Sites_.
 - You must have looked up the term on a **different page** first, at least _reunion gap_ days ago (default 3). Lower the gap to 0 (settings → _Reunion hints_) to test.
 - The term may be muted (concept page → Unmute).
-- Short or ambiguous terms need help: an abbreviation like `SAM` or `GP` shows only when another term from the same field is on the page. Chinese names need three characters.
+- Short or ambiguous terms need help: an abbreviation like `SAM` or `GP` shows only when another term from the same field is on the page. A Chinese name of two characters is underlined only where it is a word of its own on the page, and a one-character name never is.
 - Private windows never scan.
 - The site may be **Disabled** in a site rule.
 

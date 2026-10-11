@@ -1,6 +1,7 @@
 import { MATCH_RULES } from "../constants";
+import { foldArabic, foldHan } from "./fold";
 
-export type Script = "latin" | "cjk";
+export type Script = "latin" | "cjk" | "arabic";
 
 export interface NormalizedName {
   norm: string;
@@ -9,7 +10,8 @@ export interface NormalizedName {
 }
 
 const CJK = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/u;
-const EDGE_CHARS = String.raw`\s"'` + "`" + String.raw`“”‘’«»()\[\]{}<>.,;:!?、。，；：！？《》「」『』（）【】`;
+const ARABIC = /\p{Script=Arabic}/u;
+const EDGE_CHARS = String.raw`\s"'` + "`" + String.raw`“”‘’«»()\[\]{}<>.,;:!?、。，；：！？《》「」『』（）【】،؛؟`;
 const EDGE_PUNCT = new RegExp(`^[${EDGE_CHARS}]+|[${EDGE_CHARS}]+$`, "gu");
 const LATIN_SEP = /[\s\-‐‑‒–—_/·.]+/u;
 const CJK_SEP = /[\s·・‧•\-_]+/gu;
@@ -57,7 +59,8 @@ export function foldAccents(s: string): string {
 }
 
 export function detectScript(s: string): Script {
-  return CJK.test(s) ? "cjk" : "latin";
+  if (CJK.test(s)) return "cjk";
+  return ARABIC.test(s) ? "arabic" : "latin";
 }
 
 /**
@@ -96,30 +99,34 @@ export function stripDeterminers(name: string): string {
 const ACRONYM_STOP = new Set(["of", "the", "for", "and", "in", "on", "to", "a", "an", "with", "via", "from", "by", "at", "as"]);
 const WORD_SEP = /[\s\-‐‑‒–—_/]+/u;
 
-/** "Large Language Model" -> "LLM". Null for single words, CJK names, and words that do not start with a letter. */
+/** "Large Language Model" -> "LLM". Null for single words, names that are not in Latin script, and words that do not start with a letter. */
 export function acronymOf(name: string): string | null {
   const cleaned = stripDeterminers(name);
-  if (detectScript(cleaned) === "cjk") return null;
+  if (detectScript(cleaned) !== "latin") return null;
   const words = cleaned.split(WORD_SEP).filter((w) => w && !ACRONYM_STOP.has(w.toLowerCase()));
   if (words.length < 2) return null;
   const letters = words.map((w) => w[0]!);
   return letters.every((l) => /\p{L}/u.test(l)) ? letters.join("").toUpperCase() : null;
 }
 
-/** Lower-cased, singular words of a Latin name; empty for CJK names. */
+/** Lower-cased, singular words of a Latin name; empty for names in other scripts. */
 export function wordsOf(name: string): string[] {
   const cleaned = stripDeterminers(name);
-  if (detectScript(cleaned) === "cjk") return [];
+  if (detectScript(cleaned) !== "latin") return [];
   return foldAccents(cleaned.toLowerCase()).split(LATIN_SEP).filter(Boolean).map(depluralize);
 }
 
 export function normalizeName(input: string): NormalizedName {
   const stripped = stripDeterminers(input);
   const script = detectScript(stripped);
-  const cleaned = script === "cjk" ? stripped : foldAccents(stripped);
   if (script === "cjk") {
-    return { norm: cleaned.toLowerCase().replace(CJK_SEP, ""), script, caseKey: null };
+    return { norm: foldHan(stripped).toLowerCase().replace(CJK_SEP, ""), script, caseKey: null };
   }
+  if (script === "arabic") {
+    const words = foldArabic(stripped).toLowerCase().split(LATIN_SEP).filter(Boolean);
+    return { norm: words.join(""), script, caseKey: null };
+  }
+  const cleaned = foldAccents(stripped);
   const words = transliterateGreek(cleaned.toLowerCase()).split(LATIN_SEP).filter(Boolean);
   const norm = words.map(depluralize).join("");
   let core = transliterateGreek(cleaned.split(LATIN_SEP).join(""));
