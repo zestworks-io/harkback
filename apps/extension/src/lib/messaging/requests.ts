@@ -267,6 +267,26 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       await deps.append((f) => [f.make("concept.alias_added", { concept_id: rep, alias })]);
       return { ok: true };
     }
+    case "resolve-alias": {
+      const state = await deps.getState();
+      const rep = state.representative.get(msg.conceptId);
+      const alias = typeof msg.alias === "string" ? msg.alias : "";
+      const key = identityKey(alias);
+      const concept = rep ? state.concepts.get(rep) : undefined;
+      const proposed = concept?.proposedAliases.find((n) => identityKey(n) === key);
+      if (!rep || !key || !proposed) return { ok: false };
+      if (msg.accept !== true) {
+        await deps.append((f) => concept!.members.map((m) => f.make("concept.alias_rejected", { concept_id: m, alias: proposed })));
+        return { ok: true };
+      }
+      // Confirming makes the name match, and replay merges concepts that share a name or an abbreviation.
+      const acronym = acronymOf(proposed);
+      const keys = [key, ...(acronym && acronym.length >= 3 ? [identityKey(acronym)] : [])];
+      if (keys.some((k) => state.aliases.get(k)?.conceptIds.some((id) => id !== rep))) return { ok: false, collides: true };
+      // Sent for every member: the proposal was made for one of them, and the other events are ignored.
+      await deps.append((f) => concept!.members.map((m) => f.make("concept.alias_confirmed", { concept_id: m, alias: proposed })));
+      return { ok: true };
+    }
     case "reject-edge": {
       if (!(await deps.getState()).edges.has(String(msg.edgeId))) return { ok: false };
       await deps.append((f) => [f.make("edge.rejected", { edge_id: msg.edgeId })]);

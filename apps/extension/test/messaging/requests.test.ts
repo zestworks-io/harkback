@@ -362,6 +362,55 @@ describe("page-only requests", () => {
       expect(written).toEqual([]);
     });
 
+    it("accepts or rejects a suggested name, and refuses one that was not suggested", async () => {
+      const { deps, written, conceptId, w } = setup();
+      const enc = w.encounter(conceptId, "arxiv:2");
+      const propose = (alias: string) =>
+        w.events.push(
+          w.f.make("concept.alias_proposed", {
+            concept_id: conceptId,
+            alias,
+            language: "zh",
+            source: "llm_explain",
+            evidence: { encounter_id: enc },
+          }),
+        );
+      propose("低秩适配");
+      propose("洛拉");
+      expect(await handleRequest(deps, { type: "resolve-alias", conceptId, alias: "低秩适配", accept: true }, extensionPage)).toEqual({
+        ok: true,
+      });
+      expect(written.map((e) => [e.type, e.payload])).toEqual([["concept.alias_confirmed", { concept_id: conceptId, alias: "低秩适配" }]]);
+      expect(await handleRequest(deps, { type: "resolve-alias", conceptId, alias: "洛拉", accept: false }, extensionPage)).toEqual({
+        ok: true,
+      });
+      expect(written.at(-1)?.type).toBe("concept.alias_rejected");
+      expect(await handleRequest(deps, { type: "resolve-alias", conceptId, alias: "never offered", accept: true }, extensionPage)).toEqual({
+        ok: false,
+      });
+    });
+
+    it("will not accept a suggested name that belongs to another concept", async () => {
+      const { deps, written, conceptId, w } = setup();
+      const other = w.concept("矩阵的秩");
+      w.encounter(other, "arxiv:1");
+      const enc = w.encounter(conceptId, "arxiv:2");
+      w.events.push(
+        w.f.make("concept.alias_proposed", {
+          concept_id: conceptId,
+          alias: "矩阵的秩",
+          language: "zh",
+          source: "llm_explain",
+          evidence: { encounter_id: enc },
+        }),
+      );
+      expect(await handleRequest(deps, { type: "resolve-alias", conceptId, alias: "矩阵的秩", accept: true }, extensionPage)).toEqual({
+        ok: false,
+        collides: true,
+      });
+      expect(written).toEqual([]);
+    });
+
     it("rejects a relation that exists and refuses one that does not", async () => {
       const { deps, written, conceptId, w } = setup();
       const other = w.concept("Matrix rank");

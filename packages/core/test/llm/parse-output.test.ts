@@ -65,6 +65,7 @@ describe("parseModelOutput", () => {
     );
     expect(r.card).toEqual({
       matchConceptId: null,
+      translations: [],
       canonical: "LoRA",
       aliases: Array.from({ length: 8 }, (_, i) => `alias${i}`),
       domain: "other",
@@ -97,5 +98,24 @@ describe("parseModelOutput: name content", () => {
     expect(r.card?.broader).toEqual([]);
     expect(r.card?.variants).toEqual(["QLoRA"]);
     expect(parseModelOutput(out(card({ canonical: "→" })), labels).card).toBeNull();
+  });
+});
+
+describe("card translations", () => {
+  const parse = (translations: unknown, language?: string, aliases: string[] = []) =>
+    parseModelOutput(out(card({ translations, aliases })), labels, language).card?.translations;
+
+  it("keeps names written in the explain language", () => {
+    expect(parse(["低秩适配", "低秩自适应", "third"], "zh")).toEqual(["低秩适配", "低秩自适应"]);
+  });
+  it("drops names in the wrong script, English names and names already listed", () => {
+    expect(parse(["Low-Rank Adaptation", "LoRA", "低秩适配"], "zh", ["低秩适配"])).toEqual([]);
+    expect(parse(["ローラ", "Rang faible"], "ja")).toEqual(["ローラ"]);
+    expect(parse(["Adaptación de rango bajo"], "es")).toEqual(["Adaptación de rango bajo"]);
+    expect(parse(["anything"], "en")).toEqual([]);
+  });
+  it("is empty when the field is missing or malformed", () => {
+    expect(parse(undefined, "zh")).toEqual([]);
+    expect(parse(42, "zh")).toEqual([]);
   });
 });

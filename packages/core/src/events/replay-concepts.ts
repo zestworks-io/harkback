@@ -20,6 +20,10 @@ export interface ConceptResolution {
   warnings: string[];
 }
 
+function proposalKey(conceptId: string, alias: string): string {
+  return `${conceptId}\u0000${identityKey(alias)}`;
+}
+
 function domainKey(domain: Domain, name: string): string | null {
   const key = identityKey(name);
   return key ? `${domain}\u0000${key}` : null;
@@ -33,9 +37,11 @@ export function resolveConcepts(
   const raw = new Map<string, RawConcept>();
   const extraAliases: [string, string][] = [];
   const merges: [string, string][] = [];
+  const proposals: [string, string, number][] = [];
+  const decided: [string, string, "confirmed" | "rejected", number][] = [];
   const warnings: string[] = [];
 
-  for (const e of sorted) {
+  for (const [position, e] of sorted.entries()) {
     if (e.type === "concept.created") {
       const p = e.payload;
       const prev = raw.get(p.concept_id);
@@ -47,6 +53,10 @@ export function resolveConcepts(
       });
     } else if (e.type === "concept.alias_added") {
       extraAliases.push([e.payload.concept_id, e.payload.alias]);
+    } else if (e.type === "concept.alias_proposed") {
+      proposals.push([e.payload.concept_id, e.payload.alias, position]);
+    } else if (e.type === "concept.alias_confirmed" || e.type === "concept.alias_rejected") {
+      decided.push([e.payload.concept_id, e.payload.alias, e.type === "concept.alias_confirmed" ? "confirmed" : "rejected", position]);
     } else if (e.type === "concept.merged") {
       merges.push([e.payload.from, e.payload.into]);
     }
@@ -56,6 +66,30 @@ export function resolveConcepts(
     const c = raw.get(conceptId);
     if (c) c.aliases.push(alias);
     else warnings.push(`alias for unknown concept ${conceptId}`);
+  }
+
+  // A proposed name matches nothing until confirmed; a rejected one is remembered so it is not proposed again.
+  // A decision made for one member of an explicit merge counts for the others, so it survives a merge made after the proposal.
+  const explicit = new MinUnionFind();
+  for (const cid of raw.keys()) explicit.add(cid);
+  for (const [from, into] of merges) if (raw.has(from) && raw.has(into)) explicit.union(from, into);
+  const decisions = new Map<string, { decision: "confirmed" | "rejected"; position: number }>();
+  for (const [conceptId, alias, decision, position] of decided)
+    decisions.set(proposalKey(explicit.find(conceptId), alias), { decision, position });
+  const pending: [string, string][] = [];
+  const rejected: [string, string][] = [];
+  for (const [conceptId, alias, position] of proposals) {
+    const c = raw.get(conceptId);
+    if (!c) {
+      warnings.push(`alias proposal for unknown concept ${conceptId}`);
+      continue;
+    }
+    // Only a decision made after the proposal counts, so a name rejected earlier can be proposed again.
+    const made = decisions.get(proposalKey(explicit.find(conceptId), alias));
+    const decision = made && made.position > position ? made.decision : undefined;
+    if (decision === "confirmed") c.aliases.push(alias);
+    else if (decision === "rejected") rejected.push([conceptId, alias]);
+    else pending.push([conceptId, alias]);
   }
 
   const ids = [...raw.keys()].sort();
@@ -143,11 +177,24 @@ export function resolveConcepts(
       canonicalName: root.canonicalName,
       domain: root.domain,
       names,
+      proposedAliases: [],
+      rejectedAliases: [],
       members: memberIds,
       muted: false,
       isPlaceholder: true,
     });
   }
+
+  const addTo = (list: "proposedAliases" | "rejectedAliases", conceptId: string, alias: string) => {
+    const c = concepts.get(representative.get(conceptId) ?? conceptId);
+    if (!c) return;
+    const key = identityKey(alias);
+    if (!key || c[list].some((n) => identityKey(n) === key)) return;
+    if (list === "proposedAliases" && c.names.some((n) => identityKey(n) === key)) return;
+    c[list].push(alias);
+  };
+  for (const [conceptId, alias] of pending) addTo("proposedAliases", conceptId, alias);
+  for (const [conceptId, alias] of rejected) addTo("rejectedAliases", conceptId, alias);
 
   const aliases = new Map<string, AliasInfo>();
   for (const c of concepts.values()) {

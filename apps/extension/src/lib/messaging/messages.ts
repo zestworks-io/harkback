@@ -79,6 +79,7 @@ export type Request =
   | ({ type: "preview-explain"; sourceId: string; title: string; term: string; conceptId: string | null; context: string } & PrivacyFields)
   | { type: "merge-concepts"; fromId: string; intoId: string }
   | { type: "add-alias"; conceptId: string; alias: string }
+  | { type: "resolve-alias"; conceptId: string; alias: string; accept: boolean }
   | { type: "reject-edge"; edgeId: string }
   | { type: "set-muted"; conceptId: string; muted: boolean }
   | { type: "backup-now" }
@@ -113,6 +114,8 @@ export interface ResponseMap {
   "merge-concepts": { ok: boolean };
   /** `collides`: the alias belongs to another concept, so adding it would merge the two. */
   "add-alias": { ok: boolean; collides?: boolean };
+  /** `collides`: accepting the name would merge this concept with another one that has it. */
+  "resolve-alias": { ok: boolean; collides?: boolean };
   "reject-edge": { ok: boolean };
   "set-muted": { ok: boolean };
   "backup-now": { ok: boolean; error?: string };
@@ -142,6 +145,7 @@ const REQUEST_TYPES = new Set<string>([
   "preview-explain",
   "merge-concepts",
   "add-alias",
+  "resolve-alias",
   "reject-edge",
   "set-muted",
   "backup-now",

@@ -1,4 +1,5 @@
 import type { HarkEvent } from "@harkback/spec";
+import { identityKey } from "../concepts/normalize";
 import { parseEdgeId } from "../events/ids";
 import { isSensitiveOnly } from "../llm/prompt";
 import { replay } from "../events/replay";
@@ -34,6 +35,13 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
     return rep === undefined || hidden.has(rep);
   };
 
+  // A decision about a name that was proposed from a sensitive page carries the same text, so it goes with the proposal.
+  const hiddenNames = new Set<string>();
+  for (const e of events) {
+    if (e.type === "concept.alias_proposed" && (isHidden(e.payload.concept_id) || sensitiveEncounters.has(e.payload.evidence.encounter_id)))
+      hiddenNames.add(identityKey(e.payload.alias));
+  }
+
   return events.filter((e) => {
     switch (e.type) {
       case "source.seen":
@@ -46,6 +54,10 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
         return !sensitiveEncounters.has(e.payload.encounter_id);
       case "reunion.dismissed":
         return !isSensitiveSource(state, e.payload.source_id) && !isHidden(e.payload.concept_id);
+      case "concept.alias_confirmed":
+      case "concept.alias_rejected":
+        if (hiddenNames.has(identityKey(e.payload.alias))) return false;
+        return !isHidden(e.payload.concept_id);
       case "concept.created":
       case "concept.alias_added":
       case "concept.muted":
@@ -53,6 +65,8 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
         return !isHidden(e.payload.concept_id);
       case "concept.merged":
         return !isHidden(e.payload.from) && !isHidden(e.payload.into);
+      case "concept.alias_proposed":
+        return !isHidden(e.payload.concept_id) && !sensitiveEncounters.has(e.payload.evidence.encounter_id);
       case "edge.proposed": {
         const p = e.payload;
         return !isHidden(p.from) && !isHidden(p.to) && !(p.evidence.encounter_id && sensitiveEncounters.has(p.evidence.encounter_id));

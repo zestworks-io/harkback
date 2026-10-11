@@ -62,6 +62,12 @@ describe("buildExplainPrompt", () => {
     expect(system("xx")).not.toContain("xx");
   });
 
+  it("asks for translations in the explain language, and not for English", () => {
+    const system = (language: string) => buildExplainPrompt({ ...req, language }).messages[0]!.content;
+    expect(system("zh")).toMatch(/"translations": \[<at most 2 names the term is commonly called in Simplified Chinese/);
+    expect(system("en")).toContain('"translations": []');
+  });
+
   it("states the language, the untrusted-content rule and the domain list in the system message", () => {
     const system = buildExplainPrompt(req).messages[0]!.content;
     expect(system).toContain("Simplified Chinese");

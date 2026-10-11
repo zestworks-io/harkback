@@ -256,6 +256,38 @@ test("corrects a concept: adds an alias, mutes and unmutes it", async ({ context
   expect(types).toBe(3);
 });
 
+test("suggests a translated name and uses it only once accepted", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  const card = {
+    match: null,
+    canonical: "LoRA",
+    aliases: [],
+    translations: ["低秩适配"],
+    domain: "ml",
+    broader: [],
+    variants: [],
+    prerequisites: [],
+    confidence: {},
+  };
+  stub.queue.push({
+    body: `<explanation>LoRA 是一个测试解释。</explanation>\n<evidence>NONE</evidence>\n<card>${JSON.stringify(card)}</card>`,
+  });
+  await lookUpLora(context);
+  expect(await eventsOf(sw, "concept.alias_proposed")).toHaveLength(1);
+
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html`);
+  await page.locator("[data-hb=concept] h2 a").click();
+  await expect(page.locator("[data-hb=suggested-alias]")).toHaveText(["低秩适配"]);
+  await expect(page.locator("[data-hb=concept-detail] .aliases")).toHaveCount(0);
+
+  await page.locator("[data-hb=alias-accept]").click();
+  await expect(page.locator("[data-hb=suggested-names]")).toHaveCount(0);
+  // The accepted name is now one of the concept's names, so it is shown in the reader's language.
+  await expect(page.locator("[data-hb=concept-detail] h2")).toHaveText("低秩适配");
+  expect(await eventsOf(sw, "concept.alias_confirmed")).toHaveLength(1);
+});
+
 test("backs up the event log on demand", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLora(context);

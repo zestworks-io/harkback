@@ -33,6 +33,13 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   Unmute: "Reativar",
   Mute: "Silenciar",
   "Add an alias": "Adicionar um apelido",
+  "Use this name": "Usar este nome",
+  Accept: "Aceitar",
+  "Stop suggesting this name": "Parar de sugerir este nome",
+  Reject: "Rejeitar",
+  "Suggested names": "Nomes sugeridos",
+  "A suggested name is only recognised on pages once you accept it.":
+    "Um nome sugerido só é reconhecido nas páginas depois que você o aceita.",
   Add: "Adicionar",
   "Merge into…": "Mesclar com…",
   Merge: "Mesclar",

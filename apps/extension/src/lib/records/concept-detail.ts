@@ -21,6 +21,8 @@ export interface ConceptDetail {
   conceptId: string;
   name: string;
   aliases: string[];
+  /** Names the model proposed (such as a translation) that match nothing until the reader accepts them. */
+  suggestedNames: string[];
   domain: Domain;
   understanding: Understanding;
   muted: boolean;
@@ -79,6 +81,7 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
     conceptId: id,
     name: concept.canonicalName,
     aliases: concept.names.filter((n) => n !== concept.canonicalName),
+    suggestedNames: [...concept.proposedAliases],
     domain: concept.domain,
     understanding: understandingOf(state, id),
     muted: concept.muted,

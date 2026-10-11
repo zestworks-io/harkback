@@ -43,6 +43,7 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "check-answer",
   "merge-concepts",
   "add-alias",
+  "resolve-alias",
   "reject-edge",
   "set-muted",
   "backup-now",

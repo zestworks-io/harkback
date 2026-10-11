@@ -8,6 +8,10 @@ export interface ConceptState {
   domain: Domain;
   /** Canonical name first, then aliases; unique by identityKey. */
   names: string[];
+  /** Names the model proposed that the user has not yet confirmed or rejected. They do not match anything. */
+  proposedAliases: string[];
+  /** Names the user rejected, so they are not proposed again. */
+  rejectedAliases: string[];
   /** All concept ids merged into this representative, sorted. */
   members: string[];
   muted: boolean;

@@ -68,6 +68,26 @@ describe("withoutSensitive", () => {
     expect(serializeJsonl(withoutSensitive(l.events))).not.toContain("Secret thing");
   });
 
+  it("drops a name proposed from a sensitive page together with the decision made about it", () => {
+    const { f, events, source, concept, encounter } = log();
+    source("pub", "normal");
+    source("secret", "sensitive");
+    const c = concept("LoRA");
+    encounter(c, "pub");
+    const eSecret = encounter(c, "secret");
+    const propose = (alias: string, encounter_id: string) =>
+      events.push(
+        f.make("concept.alias_proposed", { concept_id: c, alias, language: "zh", source: "llm_explain", evidence: { encounter_id } }),
+      );
+    propose("机密名称", eSecret);
+    events.push(f.make("concept.alias_confirmed", { concept_id: c, alias: "机密名称" }));
+    propose("公开名称", events.find((e) => e.type === "encounter.created")!.payload!.encounter_id);
+    events.push(f.make("concept.alias_confirmed", { concept_id: c, alias: "公开名称" }));
+    const out = serializeJsonl(withoutSensitive(events));
+    expect(out).not.toContain("机密名称");
+    expect(out).toContain("公开名称");
+  });
+
   it("drops a dismissed reunion on a sensitive source, under any id of the same paper, and keeps one on a normal source", () => {
     const { f, events, source, concept, encounter } = log();
     source("arxiv:1", "normal");

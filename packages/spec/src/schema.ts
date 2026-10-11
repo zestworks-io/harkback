@@ -39,6 +39,15 @@ export const conceptCreatedPayload = z.object({
 });
 
 export const conceptAliasAddedPayload = z.object({ concept_id: ulidSchema, alias: nameSchema });
+export const conceptAliasProposedPayload = z.object({
+  concept_id: ulidSchema,
+  alias: nameSchema,
+  /** The language the name is in (the explain language), a short tag such as "zh" or "ja". */
+  language: z.string().min(2).max(16),
+  source: z.literal("llm_explain"),
+  evidence: z.object({ encounter_id: ulidSchema }),
+});
+export const conceptAliasStatusPayload = z.object({ concept_id: ulidSchema, alias: nameSchema });
 export const conceptMergedPayload = z.object({ from: ulidSchema, into: ulidSchema });
 export const conceptMutePayload = z.object({ concept_id: ulidSchema });
 
@@ -113,6 +122,9 @@ export const eventSchema = z.discriminatedUnion("type", [
   ev("source.seen", sourceSeenPayload),
   ev("concept.created", conceptCreatedPayload),
   ev("concept.alias_added", conceptAliasAddedPayload),
+  ev("concept.alias_proposed", conceptAliasProposedPayload),
+  ev("concept.alias_confirmed", conceptAliasStatusPayload),
+  ev("concept.alias_rejected", conceptAliasStatusPayload),
   ev("concept.merged", conceptMergedPayload),
   ev("concept.muted", conceptMutePayload),
   ev("concept.unmuted", conceptMutePayload),

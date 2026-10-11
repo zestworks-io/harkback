@@ -33,3 +33,22 @@ export const isExplainLanguage = (code: unknown): code is string => EXPLAIN_LANG
 export function explainLanguageName(code: string): string {
   return EXPLAIN_LANGUAGES.find((l) => l.code === code)?.name ?? "English";
 }
+
+const SCRIPT_OF: Record<string, RegExp> = {
+  zh: /\p{Script=Han}/u,
+  "zh-TW": /\p{Script=Han}/u,
+  ja: /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u,
+  ko: /[\p{Script=Hangul}\p{Script=Han}]/u,
+  ru: /\p{Script=Cyrillic}/u,
+  hi: /\p{Script=Devanagari}/u,
+  ar: /\p{Script=Arabic}/u,
+};
+
+/**
+ * Whether a name could be written in the language: it contains a letter of the language's script. English never fits, since a
+ * card's canonical name is already English. A cheap guard against the model answering a translation in the wrong language.
+ */
+export function nameFitsLanguage(name: string, code: string): boolean {
+  if (code === "en") return false;
+  return (SCRIPT_OF[code] ?? /\p{Script=Latin}/u).test(name);
+}

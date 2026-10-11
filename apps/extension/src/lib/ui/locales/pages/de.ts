@@ -34,6 +34,13 @@ export const pages_de: Readonly<Record<string, string>> = {
   Unmute: "Stummschaltung aufheben",
   Mute: "Stummschalten",
   "Add an alias": "Alias hinzufügen",
+  "Use this name": "Diesen Namen verwenden",
+  Accept: "Übernehmen",
+  "Stop suggesting this name": "Diesen Namen nicht mehr vorschlagen",
+  Reject: "Ablehnen",
+  "Suggested names": "Vorgeschlagene Namen",
+  "A suggested name is only recognised on pages once you accept it.":
+    "Ein vorgeschlagener Name wird auf Seiten erst erkannt, wenn Sie ihn übernehmen.",
   Add: "Hinzufügen",
   "Merge into…": "Zusammenführen mit…",
   Merge: "Zusammenführen",

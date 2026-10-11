@@ -65,6 +65,8 @@ export interface RecordInput {
   model: string;
   /** Representative or member id of an existing concept; null creates a new concept. */
   conceptId: string | null;
+  /** The explain language the card's translations are written in; recorded on each proposed name. */
+  language?: string;
   newId?: () => string;
 }
 
@@ -130,6 +132,7 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
   };
 
   const known = new Set<string>();
+  const turnedDown = new Set<string>();
   let conceptId: string;
   let domain: Domain;
   const selectionName = selection.slice(0, CARD_LIMITS.maxNameLength);
@@ -141,6 +144,8 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
     conceptId = rep;
     domain = c.domain;
     for (const name of c.names) known.add(identityKey(name));
+    // A name already proposed or rejected for this concept is not proposed again.
+    for (const name of [...c.proposedAliases, ...c.rejectedAliases]) turnedDown.add(identityKey(name));
     const extra = uniqueNames([card?.canonical, ...(card?.aliases ?? []), selectionName], known).slice(0, CARD_LIMITS.maxAliases);
     for (const alias of extra) out.push(f.make("concept.alias_added", { concept_id: conceptId, alias }));
   } else {
@@ -171,6 +176,20 @@ export function buildRecordEvents(input: RecordInput): HarkEvent[] {
   );
 
   if (!card) return validated(out);
+
+  if (input.language) {
+    for (const alias of uniqueNames(card.translations, new Set([...known, ...turnedDown]))) {
+      out.push(
+        f.make("concept.alias_proposed", {
+          concept_id: conceptId,
+          alias,
+          language: input.language,
+          source: "llm_explain",
+          evidence: { encounter_id: encounterId },
+        }),
+      );
+    }
+  }
 
   const createdInBatch = new Map<string, string>();
   const lookup = (name: string): string => {

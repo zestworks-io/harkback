@@ -61,6 +61,7 @@ export interface ExplainPlan {
   remote: boolean;
   sensitive: boolean;
   prompt: BuiltPrompt;
+  language: string;
   /** All candidates, including ones withheld from a remote model; used for the local "same concept?" question. */
   candidates: Candidate[];
 }
@@ -151,19 +152,30 @@ export function planExplain(
     mode: req.mode,
     ...(earlier ? { earlier } : {}),
   });
-  return { kind: "ok", plan: { model: routed.model, remote: routed.remote, sensitive: routed.sensitive, prompt, candidates } };
+  return {
+    kind: "ok",
+    plan: {
+      model: routed.model,
+      remote: routed.remote,
+      sensitive: routed.sensitive,
+      prompt,
+      language: explainLanguageOf(settings),
+      candidates,
+    },
+  };
 }
 
 export interface ExplainOutcome {
   parsed: ParsedOutput;
   tier: Tier;
+  language: string;
   resolution: Resolution;
 }
 
 export function finishExplain(raw: string, plan: ExplainPlan, req: ExplainRequestMsg, state: State): ExplainOutcome {
-  const parsed = parseModelOutput(raw, plan.prompt.labels);
+  const parsed = parseModelOutput(raw, plan.prompt.labels, plan.language);
   const tier: Tier = verifyEvidence(parsed.evidence, req.pageText) ? "defined_in_source" : "external_knowledge";
-  return { parsed, tier, resolution: resolveConcept(parsed, plan.candidates, state) };
+  return { parsed, tier, language: plan.language, resolution: resolveConcept(parsed, plan.candidates, state) };
 }
 
 export interface RecordContext {
@@ -198,6 +210,7 @@ export function buildExplainRecord(
     tier: outcome.tier,
     model: rc.model.model,
     conceptId,
+    language: outcome.language,
   });
   const created = events.find((e) => e.type === "encounter.created");
   if (created?.type !== "encounter.created" || !created.payload) throw new Error("record without encounter");

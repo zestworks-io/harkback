@@ -86,4 +86,68 @@ describe("resolveConcepts", () => {
     expect(r.concepts.get(id(1))?.canonicalName).toBe("Self-Attention");
     expect(r.concepts.get(id(1))?.names).toEqual(["Self-Attention"]);
   });
+
+  describe("proposed aliases", () => {
+    const proposal = (alias: string, n = 1) =>
+      ev("concept.alias_proposed", { concept_id: id(n), alias, language: "zh", source: "llm_explain", evidence: { encounter_id: id(50) } });
+
+    it("keeps a proposed name out of matching until it is confirmed", () => {
+      const pending = resolve([concept(1, "LoRA"), proposal("低秩适配")]);
+      expect(pending.concepts.get(id(1))?.proposedAliases).toEqual(["低秩适配"]);
+      expect(pending.concepts.get(id(1))?.names).not.toContain("低秩适配");
+      expect(pending.aliases.has("低秩适配")).toBe(false);
+
+      const confirmed = resolve([
+        concept(1, "LoRA"),
+        proposal("低秩适配"),
+        ev("concept.alias_confirmed", { concept_id: id(1), alias: "低秩适配" }),
+      ]);
+      expect(confirmed.concepts.get(id(1))?.proposedAliases).toEqual([]);
+      expect(confirmed.concepts.get(id(1))?.names).toContain("低秩适配");
+      expect(confirmed.aliases.get("低秩适配")?.conceptIds).toEqual([id(1)]);
+    });
+
+    it("remembers a rejected name and never matches it", () => {
+      const r = resolve([concept(1, "LoRA"), proposal("洛拉"), ev("concept.alias_rejected", { concept_id: id(1), alias: "洛拉" })]);
+      expect(r.concepts.get(id(1))?.proposedAliases).toEqual([]);
+      expect(r.concepts.get(id(1))?.rejectedAliases).toEqual(["洛拉"]);
+      expect(r.aliases.has("洛拉")).toBe(false);
+    });
+
+    it("leaves a log from before suggested names unchanged", () => {
+      const r = resolve([
+        concept(1, "LoRA", "ml", ["低秩适配"]),
+        ev("concept.alias_added", { concept_id: id(1), alias: "Low-rank adapters" }),
+      ]);
+      expect(r.concepts.get(id(1))).toMatchObject({
+        names: ["LoRA", "低秩适配", "Low-rank adapters"],
+        proposedAliases: [],
+        rejectedAliases: [],
+      });
+      expect(r.aliases.get("低秩适配")?.conceptIds).toEqual([id(1)]);
+    });
+
+    it("counts only a decision made after the proposal", () => {
+      const early = resolve([concept(1, "LoRA"), ev("concept.alias_rejected", { concept_id: id(1), alias: "洛拉" }), proposal("洛拉")]);
+      expect(early.concepts.get(id(1))?.proposedAliases).toEqual(["洛拉"]);
+      const early2 = resolve([concept(1, "LoRA"), ev("concept.alias_confirmed", { concept_id: id(1), alias: "洛拉" }), proposal("洛拉")]);
+      expect(early2.concepts.get(id(1))?.names).toEqual(["LoRA"]);
+    });
+
+    it("ignores a confirmation that has no proposal, and warns about an unknown concept", () => {
+      const r = resolve([concept(1, "LoRA"), ev("concept.alias_confirmed", { concept_id: id(1), alias: "洛拉" }), proposal("x", 9)]);
+      expect(r.concepts.get(id(1))?.names).toEqual(["LoRA"]);
+      expect(r.warnings).toHaveLength(1);
+    });
+
+    it("moves a merged concept's proposals to the representative", () => {
+      const r = resolve([
+        concept(1, "LoRA"),
+        concept(2, "Low-Rank Adaptation"),
+        proposal("低秩适配", 2),
+        ev("concept.merged", { from: id(2), into: id(1) }),
+      ]);
+      expect(r.concepts.get(id(1))?.proposedAliases).toEqual(["低秩适配"]);
+    });
+  });
 });

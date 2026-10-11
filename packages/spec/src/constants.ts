@@ -38,6 +38,7 @@ export const LIMITS = {
 export const CARD_LIMITS = {
   maxNameLength: 80,
   maxAliases: 8,
+  maxTranslations: 2,
   maxBroader: 1,
   maxVariants: 3,
   maxPrerequisites: 3,

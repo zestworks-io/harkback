@@ -329,7 +329,7 @@ async function main(): Promise<void> {
 
   /** Sends a correction, then re-reads the records and draws again. */
   async function correct(
-    req: Extract<Request, { type: "merge-concepts" | "add-alias" | "reject-edge" | "set-muted" }>,
+    req: Extract<Request, { type: "merge-concepts" | "add-alias" | "resolve-alias" | "reject-edge" | "set-muted" }>,
     afterRefresh?: () => void,
   ): Promise<void> {
     const r = await request(req);
@@ -423,6 +423,52 @@ async function main(): Promise<void> {
     return h("div", { className: "edit-tools", "data-hb": "edit-tools" }, muteButton, alias, addAlias, target, datalist, merge);
   };
 
+  /** Names the model suggested, such as a translation. They match nothing on pages until accepted. */
+  const suggestedNames = (d: ConceptDetail): HTMLElement | null => {
+    if (d.suggestedNames.length === 0) return null;
+    const one = (alias: string): HTMLElement => {
+      const buttons: HTMLButtonElement[] = [];
+      // One decision per name: a second click while the first is being saved would find nothing left to decide.
+      const decide = (accept: boolean) => () => {
+        buttons.forEach((b) => (b.disabled = true));
+        void correct({ type: "resolve-alias", conceptId: d.conceptId, alias, accept }).then(() =>
+          buttons.forEach((b) => (b.disabled = false)),
+        );
+      };
+      const accept = h(
+        "button",
+        { type: "button", className: "small-btn", title: L("采用这个名字", "Use this name"), "data-hb": "alias-accept" },
+        L("采用", "Accept"),
+      );
+      const reject = h(
+        "button",
+        { type: "button", className: "small-btn", title: L("不再建议这个名字", "Stop suggesting this name"), "data-hb": "alias-reject" },
+        L("拒绝", "Reject"),
+      );
+      buttons.push(accept, reject);
+      accept.addEventListener("click", decide(true));
+      reject.addEventListener("click", decide(false));
+      return h(
+        "span",
+        { className: "chip", "data-hb": "suggested-name" },
+        h("span", { "data-hb": "suggested-alias" }, alias),
+        accept,
+        reject,
+      );
+    };
+    return h(
+      "div",
+      { className: "group", "data-hb": "suggested-names" },
+      h("h3", {}, L("建议的名称", "Suggested names")),
+      h(
+        "p",
+        { className: "note" },
+        L("采用后，页面上的这个名字才会被识别。", "A suggested name is only recognised on pages once you accept it."),
+      ),
+      h("div", { className: "chips" }, ...d.suggestedNames.map(one)),
+    );
+  };
+
   const relatedGroup = (title: string, items: RelatedConcept[]): HTMLElement | null =>
     items.length === 0 ? null : h("div", { className: "group" }, h("h3", {}, title), h("div", { className: "chips" }, ...items.map(chip)));
 
@@ -475,6 +521,7 @@ async function main(): Promise<void> {
         : null,
       gapsNote(d.conceptId),
       editTools(d),
+      suggestedNames(d),
       relatedGroup(L("前置概念", "Prerequisites"), d.prerequisites),
       relatedGroup(L("变体", "Variants"), d.variants),
       relatedGroup(L("相关", "Related"), d.related),

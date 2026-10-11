@@ -163,3 +163,30 @@ describe("conceptDetail", () => {
     expect(d.related).toHaveLength(0);
   });
 });
+
+describe("suggested names", () => {
+  it("lists proposed names until they are accepted or rejected", () => {
+    const { w } = setup();
+    const c = w.concept("LoRA");
+    const enc = w.encounter(c, "s1");
+    const propose = (alias: string) =>
+      w.events.push(
+        w.f.make("concept.alias_proposed", {
+          concept_id: c,
+          alias,
+          language: "zh",
+          source: "llm_explain",
+          evidence: { encounter_id: enc },
+        }),
+      );
+    propose("低秩适配");
+    propose("洛拉");
+    expect(conceptDetail(w.state(), c)?.suggestedNames).toEqual(["低秩适配", "洛拉"]);
+    w.events.push(w.f.make("concept.alias_confirmed", { concept_id: c, alias: "低秩适配" }));
+    w.events.push(w.f.make("concept.alias_rejected", { concept_id: c, alias: "洛拉" }));
+    const d = conceptDetail(w.state(), c);
+    expect(d?.suggestedNames).toEqual([]);
+    expect(d?.aliases).toContain("低秩适配");
+    expect(d?.aliases).not.toContain("洛拉");
+  });
+});

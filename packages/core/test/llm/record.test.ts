@@ -23,6 +23,7 @@ const card = (o: Partial<NonNullable<ParsedOutput["card"]>> = {}): NonNullable<P
   matchConceptId: null,
   canonical: "LoRA",
   aliases: ["Low-Rank Adaptation", "低秩适配"],
+  translations: [],
   domain: "ml",
   broader: ["PEFT"],
   variants: ["QLoRA"],
@@ -207,6 +208,66 @@ describe("buildRecordEvents: edge targets", () => {
     expect(edge?.type === "edge.proposed" && edge.payload.to).not.toBe(id(1));
     const placeholder = events.find((e) => e.type === "concept.created" && e.payload.canonical_name === "Transformer");
     expect(placeholder?.type === "concept.created" && placeholder.payload.domain).toBe("ml");
+  });
+});
+
+describe("proposed translations", () => {
+  const withTranslation = parsed(card({ aliases: ["Low-Rank Adaptation"], translations: ["低秩适配"] }));
+  const proposed = (events: HarkEvent[]) => events.filter((e) => e.type === "concept.alias_proposed");
+
+  it("proposes translations for a new concept instead of saving them", () => {
+    const events = buildRecordEvents(input({ parsed: withTranslation, language: "zh" }));
+    const created = events.find((e) => e.type === "concept.created");
+    expect(created?.type === "concept.created" && created.payload.aliases).not.toContain("低秩适配");
+    const p = proposed(events);
+    expect(p).toHaveLength(1);
+    expect(p[0]?.type === "concept.alias_proposed" && p[0].payload).toMatchObject({
+      alias: "低秩适配",
+      language: "zh",
+      source: "llm_explain",
+    });
+    const enc = events.find((e) => e.type === "encounter.created");
+    expect(p[0]?.type === "concept.alias_proposed" && enc?.type === "encounter.created" && enc.payload).toBeTruthy();
+    expect(events.every((e) => parseEvent(e).kind === "event")).toBe(true);
+  });
+
+  it("proposes nothing without a language", () => {
+    expect(proposed(buildRecordEvents(input({ parsed: withTranslation })))).toHaveLength(0);
+  });
+
+  it("does not propose a name the concept already has, has been offered, or was rejected", () => {
+    const prior = [
+      concept(1, "LoRA", "ml", ["低秩适配"]),
+      ev("concept.alias_proposed", {
+        concept_id: id(1),
+        alias: "低秩自适应",
+        language: "zh",
+        source: "llm_explain",
+        evidence: { encounter_id: id(7) },
+      }),
+      ev("concept.alias_proposed", {
+        concept_id: id(1),
+        alias: "洛拉",
+        language: "zh",
+        source: "llm_explain",
+        evidence: { encounter_id: id(7) },
+      }),
+      ev("concept.alias_rejected", { concept_id: id(1), alias: "洛拉" }),
+    ];
+    const events = buildRecordEvents(
+      input(
+        { conceptId: id(1), language: "zh", parsed: parsed(card({ translations: ["低秩适配", "低秩自适应", "洛拉", "低秩调整"] })) },
+        prior,
+      ),
+    );
+    expect(proposed(events).map((e) => e.type === "concept.alias_proposed" && e.payload.alias)).toEqual(["低秩调整"]);
+  });
+
+  it("still saves the selected text as an alias at once", () => {
+    const prior = [concept(1, "LoRA")];
+    const events = buildRecordEvents(input({ conceptId: id(1), selection: "低秩适配", language: "zh", parsed: withTranslation }, prior));
+    expect(events.some((e) => e.type === "concept.alias_added" && e.payload.alias === "低秩适配")).toBe(true);
+    expect(proposed(events)).toHaveLength(0);
   });
 });
 

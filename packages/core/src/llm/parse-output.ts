@@ -1,9 +1,13 @@
 import { CARD_LIMITS, DOMAINS, type Domain, type EncounterFlag } from "@harkback/spec";
+import { identityKey } from "../concepts/normalize";
+import { nameFitsLanguage } from "./languages";
 
 export interface ParsedCard {
   matchConceptId: string | null;
   canonical: string;
   aliases: string[];
+  /** The term's name in the explain language, to be confirmed by the user before it matches anything. */
+  translations: string[];
   domain: Domain;
   broader: string[];
   variants: string[];
@@ -63,7 +67,7 @@ function confidence(v: unknown): number {
   return Math.min(Math.max(v, 0), CARD_LIMITS.maxLlmConfidence);
 }
 
-function parseCard(text: string | null, labels: ReadonlyMap<string, string>): ParsedCard | null {
+function parseCard(text: string | null, labels: ReadonlyMap<string, string>, language: string): ParsedCard | null {
   if (!text) return null;
   const obj = jsonObject(text);
   if (typeof obj !== "object" || obj === null || Array.isArray(obj)) return null;
@@ -72,10 +76,16 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>): Pa
   if (!canonical) return null;
   const domain = typeof o.domain === "string" && (DOMAINS as readonly string[]).includes(o.domain) ? (o.domain as Domain) : "other";
   const conf = typeof o.confidence === "object" && o.confidence !== null ? (o.confidence as Record<string, unknown>) : {};
+  const aliases = names(o.aliases, CARD_LIMITS.maxAliases);
+  const taken = new Set([canonical, ...aliases].map(identityKey));
+  const translations = names(o.translations, CARD_LIMITS.maxTranslations).filter(
+    (n) => nameFitsLanguage(n, language) && !taken.has(identityKey(n)),
+  );
   return {
     matchConceptId: typeof o.match === "string" ? (labels.get(/c\d+/i.exec(o.match)?.[0]?.toLowerCase() ?? o.match) ?? null) : null,
     canonical,
-    aliases: names(o.aliases, CARD_LIMITS.maxAliases),
+    aliases,
+    translations,
     domain,
     broader: names(o.broader, CARD_LIMITS.maxBroader),
     variants: names(o.variants, CARD_LIMITS.maxVariants),
@@ -84,7 +94,8 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>): Pa
   };
 }
 
-export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string>): ParsedOutput {
+/** `language` is the explain language; a card's translations are kept only when they are written in it. */
+export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string>, language = "en"): ParsedOutput {
   const explanation = block(raw, "explanation");
   if (explanation === null) {
     const text = raw
@@ -95,7 +106,7 @@ export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string
   }
   const ev = block(raw, "evidence");
   const evidence = !ev || /^none$/i.test(ev) || ev.length > CARD_LIMITS.maxEvidenceLength ? null : ev;
-  const card = parseCard(block(raw, "card"), labels);
+  const card = parseCard(block(raw, "card"), labels, language);
   return {
     explanation: explanation.slice(0, CARD_LIMITS.maxExplanationLength),
     evidence,
