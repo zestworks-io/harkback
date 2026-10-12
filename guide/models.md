@@ -6,17 +6,22 @@ Harkback sends one request to the model you configure whenever you ask for an ex
 
 Picking a provider fills in its address; you can still edit it. The provider decides the wire format.
 
-| Provider      | Address                                            | Format            | Key      | Example model                 |
-| ------------- | -------------------------------------------------- | ----------------- | -------- | ----------------------------- |
-| Ollama        | `http://127.0.0.1:11434/v1`                        | OpenAI-compatible | no       | `qwen3`                       |
-| OpenAI        | `https://api.openai.com/v1`                        | OpenAI            | yes      | `gpt-4o-mini`                 |
-| Anthropic     | `https://api.anthropic.com/v1`                     | Anthropic native  | yes      | `claude-sonnet-5-5`           |
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta` | Gemini native     | yes      | `gemini-2.5-flash`            |
-| xAI Grok      | `https://api.x.ai/v1`                              | OpenAI-compatible | yes      | `grok-4`                      |
-| OpenRouter    | `https://openrouter.ai/api/v1`                     | OpenAI-compatible | yes      | `anthropic/claude-sonnet-5-5` |
-| Custom        | anything                                           | OpenAI-compatible | optional | –                             |
+| Provider             | Address                                             | Format            | Key      | Example model                 |
+| -------------------- | --------------------------------------------------- | ----------------- | -------- | ----------------------------- |
+| Ollama               | `http://127.0.0.1:11434/v1`                         | OpenAI-compatible | no       | `qwen3`                       |
+| OpenAI               | `https://api.openai.com/v1`                         | OpenAI            | yes      | `gpt-4o-mini`                 |
+| Anthropic            | `https://api.anthropic.com/v1`                      | Anthropic native  | yes      | `claude-sonnet-5-5`           |
+| Google Gemini        | `https://generativelanguage.googleapis.com/v1beta`  | Gemini native     | yes      | `gemini-2.5-flash`            |
+| xAI Grok             | `https://api.x.ai/v1`                               | OpenAI-compatible | yes      | `grok-4`                      |
+| DeepSeek             | `https://api.deepseek.com`                          | OpenAI-compatible | yes      | `deepseek-chat`               |
+| Qwen (Alibaba Cloud) | `https://dashscope.aliyuncs.com/compatible-mode/v1` | OpenAI-compatible | yes      | `qwen-plus`                   |
+| Moonshot (Kimi)      | `https://api.moonshot.ai/v1`                        | OpenAI-compatible | yes      | `kimi-k2.5`                   |
+| Zhipu GLM            | `https://open.bigmodel.cn/api/paas/v4`              | OpenAI-compatible | yes      | `glm-4.6`                     |
+| Mistral              | `https://api.mistral.ai/v1`                         | OpenAI-compatible | yes      | `mistral-small-latest`        |
+| OpenRouter           | `https://openrouter.ai/api/v1`                      | OpenAI-compatible | yes      | `anthropic/claude-sonnet-5-5` |
+| Custom               | anything                                            | OpenAI-compatible | optional | –                             |
 
-Choose **Custom** for LiteLLM, vLLM, LM Studio, llama.cpp's server, a company gateway, or any other service that speaks the OpenAI chat-completions format. You may paste an address that already ends in `/chat/completions` or `/messages`; Harkback trims it.
+An API key works only in the region where it was created: if a key from the other region of Qwen, Moonshot or Zhipu is refused, edit the address to that region's (`dashscope-intl.aliyuncs.com`, `api.moonshot.cn`, `api.z.ai`); Harkback still recognises it as the same provider. Choose **Custom** for LiteLLM, vLLM, LM Studio, llama.cpp's server, a company gateway, or any other service that speaks the OpenAI chat-completions format. You may paste an address that already ends in `/chat/completions` or `/messages`; Harkback trims it.
 
 The first time you test or save a model, Chrome asks whether Harkback may reach its address. If you decline, the explain card says so instead of failing with a network error.
 

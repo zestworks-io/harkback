@@ -11,6 +11,11 @@ describe("providers", () => {
       ["anthropic", "anthropic"],
       ["gemini", "gemini"],
       ["grok", "openai"],
+      ["deepseek", "openai"],
+      ["qwen", "openai"],
+      ["moonshot", "openai"],
+      ["zhipu", "openai"],
+      ["mistral", "openai"],
       ["openrouter", "openai"],
       ["custom", "openai"],
     ]);
@@ -23,6 +28,16 @@ describe("providers", () => {
 
   it("finds the provider of an address, or custom", () => {
     expect(providerForAddress("https://api.x.ai/v1").id).toBe("grok");
+    expect(providerForAddress("https://api.deepseek.com").id).toBe("deepseek");
+    expect(providerForAddress("https://dashscope.aliyuncs.com/compatible-mode/v1").id).toBe("qwen");
+    expect(providerForAddress("https://api.moonshot.ai/v1").id).toBe("moonshot");
+    expect(providerForAddress("https://open.bigmodel.cn/api/paas/v4").id).toBe("zhipu");
+    expect(providerForAddress("https://api.mistral.ai/v1").id).toBe("mistral");
+    expect(providerForAddress("https://dashscope-intl.aliyuncs.com/compatible-mode/v1").id).toBe("qwen");
+    expect(providerForAddress("https://api.moonshot.cn/v1").id).toBe("moonshot");
+    expect(providerForAddress("https://api.z.ai/api/paas/v4").id).toBe("zhipu");
+    expect(providerForAddress("https://api.deepseek.com/v1").id).toBe("deepseek");
+    expect(providerForAddress("https://api.deepseek.com/chat/completions").id).toBe("deepseek");
     expect(providerForAddress("https://api.anthropic.com/v1").id).toBe("anthropic");
     expect(providerForAddress("https://generativelanguage.googleapis.com/v1beta").id).toBe("gemini");
     expect(providerForAddress("https://generativelanguage.googleapis.com/v1beta/openai/").id).toBe("custom");

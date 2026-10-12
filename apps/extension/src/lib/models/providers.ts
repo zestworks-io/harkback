@@ -14,6 +14,8 @@ export interface Provider {
   /** Example model name, shown as a hint. */
   modelHint: string;
   local?: boolean;
+  /** Other hosts of the same service, such as its other region; an address on one is still recognised as this provider. */
+  otherHosts?: readonly string[];
 }
 
 export const PROVIDERS: readonly Provider[] = [
@@ -36,6 +38,32 @@ export const PROVIDERS: readonly Provider[] = [
     modelHint: "gemini-2.5-flash",
   },
   { id: "grok", label: "xAI Grok", apiType: "openai", baseUrl: "https://api.x.ai/v1", modelHint: "grok-4" },
+  { id: "deepseek", label: "DeepSeek", apiType: "openai", baseUrl: "https://api.deepseek.com", modelHint: "deepseek-chat" },
+  {
+    id: "qwen",
+    label: "Qwen (Alibaba Cloud)",
+    apiType: "openai",
+    baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    modelHint: "qwen-plus",
+    otherHosts: ["dashscope-intl.aliyuncs.com"],
+  },
+  {
+    id: "moonshot",
+    label: "Moonshot (Kimi)",
+    apiType: "openai",
+    baseUrl: "https://api.moonshot.ai/v1",
+    modelHint: "kimi-k2.5",
+    otherHosts: ["api.moonshot.cn"],
+  },
+  {
+    id: "zhipu",
+    label: "Zhipu GLM",
+    apiType: "openai",
+    baseUrl: "https://open.bigmodel.cn/api/paas/v4",
+    modelHint: "glm-4.6",
+    otherHosts: ["api.z.ai"],
+  },
+  { id: "mistral", label: "Mistral", apiType: "openai", baseUrl: "https://api.mistral.ai/v1", modelHint: "mistral-small-latest" },
   {
     id: "openrouter",
     label: "OpenRouter",
@@ -79,6 +107,11 @@ function detectApiType(baseUrl: string): ApiType {
 export function providerForAddress(baseUrl: string): Provider {
   if (isBuiltInUrl(baseUrl)) return providerById("chrome-ai");
   const host = parse(baseUrl)?.host.toLowerCase();
-  const found = PROVIDERS.find((p) => p.baseUrl && parse(p.baseUrl)?.host.toLowerCase() === host && detectApiType(baseUrl) === p.apiType);
+  const found = PROVIDERS.find(
+    (p) =>
+      p.baseUrl &&
+      (parse(p.baseUrl)?.host.toLowerCase() === host || p.otherHosts?.includes(host ?? "")) &&
+      detectApiType(baseUrl) === p.apiType,
+  );
   return found ?? CUSTOM;
 }

@@ -67,7 +67,21 @@ describe("connectionMessage", () => {
 
 describe("page content", () => {
   it("offers the model providers and privacy notes in both languages", () => {
-    expect(PROVIDERS.map((t) => t.id)).toEqual(["ollama", "chrome-ai", "openai", "anthropic", "gemini", "grok", "openrouter", "custom"]);
+    expect(PROVIDERS.map((t) => t.id)).toEqual([
+      "ollama",
+      "chrome-ai",
+      "openai",
+      "anthropic",
+      "gemini",
+      "grok",
+      "deepseek",
+      "qwen",
+      "moonshot",
+      "zhipu",
+      "mistral",
+      "openrouter",
+      "custom",
+    ]);
     expect(PRIVACY.zh.length).toBe(PRIVACY.en.length);
     expect(PRIVACY.zh.join("")).toContain("未加密");
   });

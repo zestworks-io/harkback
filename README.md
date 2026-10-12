@@ -54,7 +54,7 @@ Install [Ollama](https://ollama.com), pull a model, and in the onboarding page c
 <details>
 <summary><b>Hosted model (your own API key)</b></summary>
 
-Choose OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter or a custom OpenAI-compatible address and paste your key. The provider bills you directly; Harkback has no server in between.
+Choose OpenAI, Anthropic, Google Gemini, xAI Grok, DeepSeek, Qwen, Moonshot (Kimi), Zhipu GLM, Mistral, OpenRouter or a custom OpenAI-compatible address and paste your key. The provider bills you directly; Harkback has no server in between.
 
 </details>
 
@@ -116,7 +116,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **GitHub, Notion and Google Docs.** Add the site in settings and its pages are read by their own layout: a repository's README, the conversation of an issue or pull request, a Notion page, a Google document's published or mobile view. A document is one source however you reached it, and only its own text is read, not the menus around it.
 - **Asks before sending a private page.** A page that looks private, such as a private GitHub repository or a Notion or Google Docs page that is not published, is not sent to any model until you choose _Local only_ or _Send anyway_. A lock at the corner of the page shows and changes the state; your choice is recorded and can be remembered for the site.
 - **Several ways to start.** Select text and click _Explain_ (mouse, keyboard or touch selections), press `Alt+Shift+E`, or use _Explain_ in the right-click menu. Pages that load more text or move to another page without reloading are rescanned.
-- **Your choice of model.** Chrome's built-in Gemini Nano (on your computer, nothing to configure), Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
+- **Your choice of model.** Chrome's built-in Gemini Nano (on your computer, nothing to configure), Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, DeepSeek, Qwen, Moonshot (Kimi), Zhipu GLM, Mistral, OpenRouter, or any OpenAI-compatible server. Anthropic and Gemini use their native APIs.
 
 ## Your knowledge graph
 
@@ -167,18 +167,23 @@ Onboarding is three steps: **Welcome** (an example reunion hint and a built-in e
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
-| Provider                      | Base URL                                           | Notes                                                                                                                                            |
-| ----------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Ollama                        | `http://127.0.0.1:11434/v1`                        | Local, no key. See below.                                                                                                                        |
-| Chrome built-in (Gemini Nano) | none                                               | On this computer, no key. Download it in setup or settings. A small model: slower than a cloud model, and best in English, Spanish and Japanese. |
-| OpenAI                        | `https://api.openai.com/v1`                        | Needs an API key.                                                                                                                                |
-| Anthropic                     | `https://api.anthropic.com/v1`                     | Needs an API key.                                                                                                                                |
-| Google Gemini                 | `https://generativelanguage.googleapis.com/v1beta` | Needs an API key.                                                                                                                                |
-| xAI Grok                      | `https://api.x.ai/v1`                              | Needs an API key.                                                                                                                                |
-| OpenRouter                    | `https://openrouter.ai/api/v1`                     | Needs an API key.                                                                                                                                |
-| Custom                        | any address                                        | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale).                                         |
+| Provider                      | Base URL                                            | Notes                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ollama                        | `http://127.0.0.1:11434/v1`                         | Local, no key. See below.                                                                                                                        |
+| Chrome built-in (Gemini Nano) | none                                                | On this computer, no key. Download it in setup or settings. A small model: slower than a cloud model, and best in English, Spanish and Japanese. |
+| OpenAI                        | `https://api.openai.com/v1`                         | Needs an API key.                                                                                                                                |
+| Anthropic                     | `https://api.anthropic.com/v1`                      | Needs an API key.                                                                                                                                |
+| Google Gemini                 | `https://generativelanguage.googleapis.com/v1beta`  | Needs an API key.                                                                                                                                |
+| xAI Grok                      | `https://api.x.ai/v1`                               | Needs an API key.                                                                                                                                |
+| DeepSeek                      | `https://api.deepseek.com`                          | Needs an API key.                                                                                                                                |
+| Qwen (Alibaba Cloud)          | `https://dashscope.aliyuncs.com/compatible-mode/v1` | Needs an API key. A key works only in the region it was created in; edit the address for the other region.                                       |
+| Moonshot (Kimi)               | `https://api.moonshot.ai/v1`                        | Needs an API key. A key works only in the region it was created in; edit the address for the other region.                                       |
+| Zhipu GLM                     | `https://open.bigmodel.cn/api/paas/v4`              | Needs an API key.                                                                                                                                |
+| Mistral                       | `https://api.mistral.ai/v1`                         | Needs an API key.                                                                                                                                |
+| OpenRouter                    | `https://openrouter.ai/api/v1`                      | Needs an API key.                                                                                                                                |
+| Custom                        | any address                                         | `https`, except this computer and your own network (`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale).                                         |
 
-Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
+Each provider speaks its own format: Anthropic and Google Gemini use their native APIs, and everything else, including Ollama, Grok, DeepSeek, Qwen, Moonshot, Zhipu, Mistral, OpenRouter and any custom address such as a company proxy, uses the OpenAI-compatible format. Picking a provider fills in its address, which you can still edit. Choose **Custom** for any other OpenAI-compatible service.
 
 Chrome asks you to allow access to the model's address the first time you test or save it. If you decline, the explain card says so instead of failing with a network error.
 
