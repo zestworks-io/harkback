@@ -54,7 +54,7 @@ pnpm install && pnpm --filter @harkback/extension build
 <details>
 <summary><b>雲端模型（使用你自己的 API 金鑰）</b></summary>
 
-選擇 OpenAI、Anthropic、Google Gemini、xAI Grok、OpenRouter，或自訂的 OpenAI 相容位址，並貼上你的金鑰。費用由服務商直接向你收取；Harkback 中間沒有任何伺服器。
+選擇 OpenAI、Anthropic、Google Gemini、xAI Grok、DeepSeek、Qwen、Moonshot（Kimi）、Zhipu GLM、Mistral、OpenRouter，或自訂的 OpenAI 相容位址，並貼上你的金鑰。費用由服務商直接向你收取；Harkback 中間沒有任何伺服器。
 
 </details>
 
@@ -116,7 +116,7 @@ Harkback 免費且開源（Apache-2.0），沒有伺服器，也沒有訂閱。�
 - **GitHub、Notion 與 Google 文件。** 在設定中新增網站後，它的頁面會依各自的版面讀取：儲存庫的 README、issue 或 pull request 的對話、Notion 頁面、Google 文件的發布版或行動版檢視。無論你從哪裡進入，一份文件都只算一個來源，而且只讀取文件本身的文字，不讀周圍的選單。
 - **傳送私密頁面前先詢問。** 看起來是私密的頁面，例如私有的 GitHub 儲存庫，或未發布的 Notion、Google 文件頁面，在你選擇「僅用本機模型」或「照常傳送」之前，不會被傳給任何模型。頁面角落的鎖頭會顯示並更改這個狀態；你的選擇會被記錄，並可以記住在該網站上。
 - **多種開始方式。** 選取文字並點擊「解釋」（滑鼠、鍵盤或觸控選取皆可）、按 `Alt+Shift+E`，或使用右鍵選單中的「解釋」。載入更多文字、或不重新載入就跳到另一頁的頁面會被重新掃描。
-- **模型由你選。** Chrome 內建的 Gemini Nano（在你的電腦上，無需設定）、Ollama、OpenAI、Anthropic、Google Gemini、xAI Grok、OpenRouter，或任何 OpenAI 相容的伺服器。Anthropic 與 Gemini 使用它們的原生 API。
+- **模型由你選。** Chrome 內建的 Gemini Nano（在你的電腦上，無需設定）、Ollama、OpenAI、Anthropic、Google Gemini、xAI Grok、DeepSeek、Qwen、Moonshot（Kimi）、Zhipu GLM、Mistral、OpenRouter，或任何 OpenAI 相容的伺服器。Anthropic 與 Gemini 使用它們的原生 API。
 
 ## 你的知識圖譜
 
@@ -166,18 +166,23 @@ pnpm --filter @harkback/extension build
 
 ![設定頁，帶有一個模型：名稱、模型、位址、API 金鑰和「測試連線」按鈕](assets/settings.png)
 
-| 服務商                     | Base URL                                           | 備註                                                                                                   |
-| -------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Ollama                     | `http://127.0.0.1:11434/v1`                        | 本機，不需要金鑰。見下文。                                                                             |
-| Chrome 內建（Gemini Nano） | 無                                                 | 在這台電腦上，不需要金鑰。在引導或設定中下載。是個小模型：比雲端模型慢，在英語、西班牙語和日語上最好。 |
-| OpenAI                     | `https://api.openai.com/v1`                        | 需要 API 金鑰。                                                                                        |
-| Anthropic                  | `https://api.anthropic.com/v1`                     | 需要 API 金鑰。                                                                                        |
-| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta` | 需要 API 金鑰。                                                                                        |
-| xAI Grok                   | `https://api.x.ai/v1`                              | 需要 API 金鑰。                                                                                        |
-| OpenRouter                 | `https://openrouter.ai/api/v1`                     | 需要 API 金鑰。                                                                                        |
-| 自訂                       | 任何位址                                           | 必須是 `https`，本機與你自己的網路（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）除外。         |
+| 服務商                     | Base URL                                            | 備註                                                                                                   |
+| -------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Ollama                     | `http://127.0.0.1:11434/v1`                         | 本機，不需要金鑰。見下文。                                                                             |
+| Chrome 內建（Gemini Nano） | 無                                                  | 在這台電腦上，不需要金鑰。在引導或設定中下載。是個小模型：比雲端模型慢，在英語、西班牙語和日語上最好。 |
+| OpenAI                     | `https://api.openai.com/v1`                         | 需要 API 金鑰。                                                                                        |
+| Anthropic                  | `https://api.anthropic.com/v1`                      | 需要 API 金鑰。                                                                                        |
+| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta`  | 需要 API 金鑰。                                                                                        |
+| xAI Grok                   | `https://api.x.ai/v1`                               | 需要 API 金鑰。                                                                                        |
+| DeepSeek                   | `https://api.deepseek.com`                          | 需要 API 金鑰。                                                                                        |
+| Qwen (Alibaba Cloud)       | `https://dashscope.aliyuncs.com/compatible-mode/v1` | 需要 API 金鑰。                                                                                        |
+| Moonshot (Kimi)            | `https://api.moonshot.ai/v1`                        | 需要 API 金鑰。                                                                                        |
+| Zhipu GLM                  | `https://open.bigmodel.cn/api/paas/v4`              | 需要 API 金鑰。                                                                                        |
+| Mistral                    | `https://api.mistral.ai/v1`                         | 需要 API 金鑰。                                                                                        |
+| OpenRouter                 | `https://openrouter.ai/api/v1`                      | 需要 API 金鑰。                                                                                        |
+| 自訂                       | 任何位址                                            | 必須是 `https`，本機與你自己的網路（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）除外。         |
 
-每個服務商使用自己的格式：Anthropic 與 Google Gemini 使用原生 API，其餘（包括 Ollama、Grok、OpenRouter 和任何自訂位址，例如公司的代理）都使用 OpenAI 相容格式。選擇服務商會自動填入它的位址，你仍然可以修改。其他 OpenAI 相容的服務請選擇**自訂**。
+每個服務商使用自己的格式：Anthropic 與 Google Gemini 使用原生 API，其餘（包括 Ollama、Grok、DeepSeek、Qwen、Moonshot、Zhipu、Mistral、OpenRouter 和任何自訂位址，例如公司的代理）都使用 OpenAI 相容格式。選擇服務商會自動填入它的位址，你仍然可以修改。其他 OpenAI 相容的服務請選擇**自訂**。
 
 第一次測試或儲存模型時，Chrome 會請你允許存取該模型的位址。如果你拒絕，解釋卡片會直接說明，而不是以網路錯誤失敗。
 
@@ -243,7 +248,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<your-extension-id>"
 
 - Chrome 與 Microsoft Edge（Manifest V3）。不支援 Firefox 和 Safari。Chrome 的內建模型並非每個瀏覽器都有；Edge 需要另一個模型。
 - 解釋的品質取決於你選的模型；小型本機模型可能產生較弱的概念卡，這會降低重逢的品質，但不會影響記錄。
-- 瀏覽器內建 PDF 檢視器中的文字無法讀取，所以 Harkback 會在自己的閱讀器頁面中開啟 PDF（arXiv 論文則改為前往 HTML 版本）。掃描版 PDF 會在你的電腦上用 OCR 讀取（英語內建；其他語言各需從 `cdn.jsdelivr.net` 下載一次），這比真正的文字更慢也更不精確，無法還原手寫內容、公式或表格，在複雜版面（表格、帶文字的圖、三欄以上）上的段落偵測也只是近似。你電腦上的 PDF 需要兩次授權：在 `chrome://extensions` 中為 Harkback 打開「允許存取檔案網址」，然後第一次在閱讀器頁面上點擊「允許本機檔案」。
+- 瀏覽器內建 PDF 檢視器中的文字無法讀取，所以 Harkback 會在自己的閱讀器頁面中開啟 PDF（arXiv 論文則改為前往 HTML 版本）。掃描版 PDF 會在你的電腦上用 OCR 讀取（英語內建；其他語言各需從 `jsdelivr.net` 下載一次），這比真正的文字更慢也更不精確，無法還原手寫內容、公式或表格，在複雜版面（表格、帶文字的圖、三欄以上）上的段落偵測也只是近似。你電腦上的 PDF 需要兩次授權：在 `chrome://extensions` 中為 Harkback 打開「允許存取檔案網址」，然後第一次在閱讀器頁面上點擊「允許本機檔案」。
 - 自動縮寫比對要求全稱至少有三個單字（由 `Large Language Model` 得到 `LLM`）。同一領域中對應到不同全稱的兩個縮寫（例如兩個不同的 “GNN”）會被當作各自獨立的概念。
 - 為了避免誤判，中文名稱和只用漢字書寫的日文名稱必須至少三個字才會被加底線；含假名或韓文字母的名稱有兩個字就可以。
 - YouTube：只讀取已開啟字幕（CC）的 `www.youtube.com/watch` 頁面，而且只有播放器在頁面開啟後顯示過的字幕行可作為上下文。自動產生的字幕常把技術術語拼錯，拼錯的術語對不上你的記錄。不支援 Shorts、其他網站上的嵌入式播放器，以及全螢幕模式（播放器會隱藏 Harkback 的提示；請用劇院模式），YouTube 更動頁面可能讓字幕無法讀取，直到 Harkback 更新。

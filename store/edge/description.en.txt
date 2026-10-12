@@ -27,6 +27,6 @@ PRIVACY
 • API keys are stored unencrypted in the extension's storage; use a key with a spending limit.
 
 LANGUAGES
-The interface is available in nine languages, and explanations can be written in 16.
+The interface is available in ten languages, and explanations can be written in 16.
 
 Source code, privacy policy and support: see the links on this page.

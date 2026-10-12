@@ -54,7 +54,7 @@ pnpm install && pnpm --filter @harkback/extension build
 <details>
 <summary><b>クラウドモデル（自分の API キー）</b></summary>
 
-OpenAI、Anthropic、Google Gemini、xAI Grok、OpenRouter、または OpenAI 互換の独自アドレスを選び、キーを貼り付けます。料金はプロバイダーから直接請求されます。間に Harkback のサーバーはありません。
+OpenAI、Anthropic、Google Gemini、xAI Grok、DeepSeek、Qwen、Moonshot（Kimi）、Zhipu GLM、Mistral、OpenRouter、または OpenAI 互換の独自アドレスを選び、キーを貼り付けます。料金はプロバイダーから直接請求されます。間に Harkback のサーバーはありません。
 
 </details>
 
@@ -116,7 +116,7 @@ Harkback は無料のオープンソース（Apache-2.0）で、サーバーも�
 - **GitHub、Notion、Google ドキュメント。** 設定でサイトを追加すると、そのページは各サイト固有のレイアウトに沿って読まれます。リポジトリの README、issue や pull request のやり取り、Notion のページ、Google ドキュメントの公開ビューまたはモバイルビュー。どの経路で開いても、1 つのドキュメントは 1 つのソースとして扱われ、読まれるのはその本文だけで、周りのメニューは読まれません。
 - **非公開らしきページは送る前に確認。** 非公開に見えるページ（非公開の GitHub リポジトリ、公開されていない Notion や Google ドキュメントのページなど）は、「ローカルのみ」か「そのまま送信」を選ぶまで、どのモデルにも送られません。ページ隅の鍵アイコンで状態を確認・変更でき、選択は記録され、そのサイトについて記憶させることもできます。
 - **始め方はいくつも。** テキストを選択して「解説」をクリック（マウス、キーボード、タッチの選択に対応）、`Alt+Shift+E` を押す、または右クリックメニューの「解説」を使います。テキストが追加で読み込まれるページや、再読み込みなしで別のページに移るページは、再スキャンされます。
-- **モデルは自由に選べる。** Chrome 内蔵の Gemini Nano（コンピューター上で動作、設定不要）、Ollama、OpenAI、Anthropic、Google Gemini、xAI Grok、OpenRouter、または OpenAI 互換の任意のサーバー。Anthropic と Gemini はネイティブ API を使います。
+- **モデルは自由に選べる。** Chrome 内蔵の Gemini Nano（コンピューター上で動作、設定不要）、Ollama、OpenAI、Anthropic、Google Gemini、xAI Grok、DeepSeek、Qwen、Moonshot（Kimi）、Zhipu GLM、Mistral、OpenRouter、または OpenAI 互換の任意のサーバー。Anthropic と Gemini はネイティブ API を使います。
 
 ## あなたの知識グラフ
 
@@ -167,18 +167,23 @@ pnpm --filter @harkback/extension build
 
 ![モデルが 1 つある設定ページ：名前、モデル、アドレス、API キー、「接続をテスト」ボタン](assets/settings.png)
 
-| プロバイダー               | Base URL                                           | 備考                                                                                                                                                 |
-| -------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ollama                     | `http://127.0.0.1:11434/v1`                        | ローカル、キー不要。下記参照。                                                                                                                       |
-| Chrome 内蔵（Gemini Nano） | なし                                               | このコンピューター上で動作、キー不要。セットアップまたは設定でダウンロード。小さなモデルで、クラウドモデルより遅く、英語・スペイン語・日本語が得意。 |
-| OpenAI                     | `https://api.openai.com/v1`                        | API キーが必要。                                                                                                                                     |
-| Anthropic                  | `https://api.anthropic.com/v1`                     | API キーが必要。                                                                                                                                     |
-| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta` | API キーが必要。                                                                                                                                     |
-| xAI Grok                   | `https://api.x.ai/v1`                              | API キーが必要。                                                                                                                                     |
-| OpenRouter                 | `https://openrouter.ai/api/v1`                     | API キーが必要。                                                                                                                                     |
-| カスタム                   | 任意のアドレス                                     | `https`。ただしこのコンピューターと自分のネットワーク（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）は除く。                                  |
+| プロバイダー               | Base URL                                            | 備考                                                                                                                                                 |
+| -------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ollama                     | `http://127.0.0.1:11434/v1`                         | ローカル、キー不要。下記参照。                                                                                                                       |
+| Chrome 内蔵（Gemini Nano） | なし                                                | このコンピューター上で動作、キー不要。セットアップまたは設定でダウンロード。小さなモデルで、クラウドモデルより遅く、英語・スペイン語・日本語が得意。 |
+| OpenAI                     | `https://api.openai.com/v1`                         | API キーが必要。                                                                                                                                     |
+| Anthropic                  | `https://api.anthropic.com/v1`                      | API キーが必要。                                                                                                                                     |
+| Google Gemini              | `https://generativelanguage.googleapis.com/v1beta`  | API キーが必要。                                                                                                                                     |
+| xAI Grok                   | `https://api.x.ai/v1`                               | API キーが必要。                                                                                                                                     |
+| DeepSeek                   | `https://api.deepseek.com`                          | API キーが必要。                                                                                                                                     |
+| Qwen (Alibaba Cloud)       | `https://dashscope.aliyuncs.com/compatible-mode/v1` | API キーが必要。                                                                                                                                     |
+| Moonshot (Kimi)            | `https://api.moonshot.ai/v1`                        | API キーが必要。                                                                                                                                     |
+| Zhipu GLM                  | `https://open.bigmodel.cn/api/paas/v4`              | API キーが必要。                                                                                                                                     |
+| Mistral                    | `https://api.mistral.ai/v1`                         | API キーが必要。                                                                                                                                     |
+| OpenRouter                 | `https://openrouter.ai/api/v1`                      | API キーが必要。                                                                                                                                     |
+| カスタム                   | 任意のアドレス                                      | `https`。ただしこのコンピューターと自分のネットワーク（`192.168.x.x`、`10.x.x.x`、`name.local`、Tailscale）は除く。                                  |
 
-プロバイダーごとに独自の形式を使います。Anthropic と Google Gemini はネイティブ API、それ以外（Ollama、Grok、OpenRouter、社内プロキシなどの独自アドレスを含む）は OpenAI 互換形式です。プロバイダーを選ぶとそのアドレスが入力され、あとから編集もできます。そのほかの OpenAI 互換サービスには**カスタム**を選んでください。
+プロバイダーごとに独自の形式を使います。Anthropic と Google Gemini はネイティブ API、それ以外（Ollama、Grok、DeepSeek、Qwen、Moonshot、Zhipu、Mistral、OpenRouter、社内プロキシなどの独自アドレスを含む）は OpenAI 互換形式です。プロバイダーを選ぶとそのアドレスが入力され、あとから編集もできます。そのほかの OpenAI 互換サービスには**カスタム**を選んでください。
 
 モデルのアドレスへのアクセスは、初めてテストまたは保存するときに Chrome が許可を求めます。拒否した場合、解説カードはネットワークエラーで失敗する代わりに、そのことを伝えます。
 
@@ -244,7 +249,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<your-extension-id>"
 
 - Chrome と Microsoft Edge（Manifest V3）。Firefox と Safari は非対応です。Chrome 内蔵モデルはすべてのブラウザで使えるわけではなく、Edge では別のモデルが必要です。
 - 解説は選んだモデルに依存します。小さなローカルモデルは概念カードの質が下がることがあり、再会の質は下がりますが、記録が壊れることはありません。
-- ブラウザ内蔵の PDF ビューアのテキストは読めないため、Harkback は PDF を独自のリーダーページで開きます（arXiv の論文は代わりに HTML 版へ）。スキャンされた PDF は、コンピューター上で OCR により読み取ります（英語は内蔵、そのほかの言語は `cdn.jsdelivr.net` から 1 つずつダウンロード）。本物のテキストより遅くて不正確で、手書き・数式・表は復元できず、複雑なレイアウト（表、文字を含む図、3 段以上の組み）の段落検出は近似的です。コンピューター上の PDF には 2 つの承認が必要です。`chrome://extensions` で Harkback の「ファイルの URL へのアクセスを許可する」をオンにし、初回にリーダーページで「ローカルファイルを許可」をクリックします。
+- ブラウザ内蔵の PDF ビューアのテキストは読めないため、Harkback は PDF を独自のリーダーページで開きます（arXiv の論文は代わりに HTML 版へ）。スキャンされた PDF は、コンピューター上で OCR により読み取ります（英語は内蔵、そのほかの言語は `jsdelivr.net` から 1 つずつダウンロード）。本物のテキストより遅くて不正確で、手書き・数式・表は復元できず、複雑なレイアウト（表、文字を含む図、3 段以上の組み）の段落検出は近似的です。コンピューター上の PDF には 2 つの承認が必要です。`chrome://extensions` で Harkback の「ファイルの URL へのアクセスを許可する」をオンにし、初回にリーダーページで「ローカルファイルを許可」をクリックします。
 - 略語の自動照合には、正式名称に 3 語以上が必要です（`Large Language Model` から `LLM`）。同じ分野で異なる正式名称に対応する 2 つの略語（たとえば別々の「GNN」）は、別の概念として扱われます。
 - 誤検出を避けるため、中国語の名前と、漢字だけで書かれた日本語の名前は、3 文字以上でないと下線が引かれません。かなやハングルを含む名前は 2 文字で足ります。
 - YouTube：字幕（CC）をオンにした `www.youtube.com/watch` のページだけが読まれ、ページを開いてからプレーヤーが表示した字幕行だけが文脈として使えます。自動生成の字幕は専門用語を誤記しがちで、誤記された用語は記録と一致しません。ショート動画、他サイトの埋め込みプレーヤー、全画面モード（プレーヤーが Harkback のヒントを隠します。シアターモードをお使いください）は非対応で、YouTube のページ変更により、Harkback が更新されるまで字幕が読めなくなることがあります。

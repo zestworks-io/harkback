@@ -54,7 +54,7 @@ pnpm install && pnpm --filter @harkback/extension build
 <details>
 <summary><b>클라우드 모델 (본인의 API 키)</b></summary>
 
-OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter 또는 OpenAI 호환 사용자 지정 주소를 선택하고 키를 붙여 넣습니다. 요금은 제공업체가 직접 청구하며, 중간에 Harkback 서버는 없습니다.
+OpenAI, Anthropic, Google Gemini, xAI Grok, DeepSeek, Qwen, Moonshot (Kimi), Zhipu GLM, Mistral, OpenRouter 또는 OpenAI 호환 사용자 지정 주소를 선택하고 키를 붙여 넣습니다. 요금은 제공업체가 직접 청구하며, 중간에 Harkback 서버는 없습니다.
 
 </details>
 
@@ -116,7 +116,7 @@ Harkback은 무료 오픈소스(Apache-2.0)이며, 서버도 구독도 없습니
 - **GitHub, Notion, Google 문서.** 설정에서 사이트를 추가하면 그 페이지는 각 사이트의 고유한 레이아웃대로 읽힙니다. 저장소의 README, 이슈나 풀 리퀘스트의 대화, Notion 페이지, Google 문서의 게시된 보기 또는 모바일 보기. 어떤 경로로 열었든 문서 하나는 하나의 출처로 취급하고, 문서 본문만 읽으며 주변 메뉴는 읽지 않습니다.
 - **비공개 페이지는 보내기 전에 확인.** 비공개로 보이는 페이지(비공개 GitHub 저장소, 게시되지 않은 Notion이나 Google 문서 페이지 등)는 「로컬만」이나 「그대로 보내기」를 선택하기 전까지 어떤 모델에도 전송되지 않습니다. 페이지 모서리의 자물쇠가 상태를 보여 주고 바꿀 수 있으며, 선택은 기록되고 해당 사이트에 대해 기억하도록 할 수 있습니다.
 - **다양한 시작 방법.** 텍스트를 선택하고 「설명」을 클릭하거나(마우스, 키보드, 터치 선택 모두 가능), `Alt+Shift+E`를 누르거나, 오른쪽 클릭 메뉴의 「설명」을 사용합니다. 텍스트를 더 불러오거나 새로 고침 없이 다른 페이지로 이동하는 페이지는 다시 스캔됩니다.
-- **모델은 직접 선택.** Chrome 내장 Gemini Nano(내 컴퓨터에서 실행, 설정 불필요), Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, OpenRouter 또는 OpenAI 호환 서버. Anthropic과 Gemini는 고유 API를 사용합니다.
+- **모델은 직접 선택.** Chrome 내장 Gemini Nano(내 컴퓨터에서 실행, 설정 불필요), Ollama, OpenAI, Anthropic, Google Gemini, xAI Grok, DeepSeek, Qwen, Moonshot (Kimi), Zhipu GLM, Mistral, OpenRouter 또는 OpenAI 호환 서버. Anthropic과 Gemini는 고유 API를 사용합니다.
 
 ## 나만의 지식 그래프
 
@@ -167,18 +167,23 @@ pnpm --filter @harkback/extension build
 
 ![모델 하나가 있는 설정 페이지: 이름, 모델, 주소, API 키, 「연결 테스트」 버튼](assets/settings.png)
 
-| 제공업체                  | Base URL                                           | 비고                                                                                                                                                |
-| ------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ollama                    | `http://127.0.0.1:11434/v1`                        | 로컬, 키 불필요. 아래 참고.                                                                                                                         |
-| Chrome 내장 (Gemini Nano) | 없음                                               | 이 컴퓨터에서 실행, 키 불필요. 설정 과정이나 설정에서 내려받습니다. 작은 모델이라 클라우드 모델보다 느리고, 영어·스페인어·일본어에서 가장 좋습니다. |
-| OpenAI                    | `https://api.openai.com/v1`                        | API 키가 필요합니다.                                                                                                                                |
-| Anthropic                 | `https://api.anthropic.com/v1`                     | API 키가 필요합니다.                                                                                                                                |
-| Google Gemini             | `https://generativelanguage.googleapis.com/v1beta` | API 키가 필요합니다.                                                                                                                                |
-| xAI Grok                  | `https://api.x.ai/v1`                              | API 키가 필요합니다.                                                                                                                                |
-| OpenRouter                | `https://openrouter.ai/api/v1`                     | API 키가 필요합니다.                                                                                                                                |
-| 사용자 지정               | 임의의 주소                                        | `https`. 단, 이 컴퓨터와 내 네트워크(`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale)는 예외.                                                    |
+| 제공업체                  | Base URL                                            | 비고                                                                                                                                                |
+| ------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ollama                    | `http://127.0.0.1:11434/v1`                         | 로컬, 키 불필요. 아래 참고.                                                                                                                         |
+| Chrome 내장 (Gemini Nano) | 없음                                                | 이 컴퓨터에서 실행, 키 불필요. 설정 과정이나 설정에서 내려받습니다. 작은 모델이라 클라우드 모델보다 느리고, 영어·스페인어·일본어에서 가장 좋습니다. |
+| OpenAI                    | `https://api.openai.com/v1`                         | API 키가 필요합니다.                                                                                                                                |
+| Anthropic                 | `https://api.anthropic.com/v1`                      | API 키가 필요합니다.                                                                                                                                |
+| Google Gemini             | `https://generativelanguage.googleapis.com/v1beta`  | API 키가 필요합니다.                                                                                                                                |
+| xAI Grok                  | `https://api.x.ai/v1`                               | API 키가 필요합니다.                                                                                                                                |
+| DeepSeek                  | `https://api.deepseek.com`                          | API 키가 필요합니다.                                                                                                                                |
+| Qwen (Alibaba Cloud)      | `https://dashscope.aliyuncs.com/compatible-mode/v1` | API 키가 필요합니다.                                                                                                                                |
+| Moonshot (Kimi)           | `https://api.moonshot.ai/v1`                        | API 키가 필요합니다.                                                                                                                                |
+| Zhipu GLM                 | `https://open.bigmodel.cn/api/paas/v4`              | API 키가 필요합니다.                                                                                                                                |
+| Mistral                   | `https://api.mistral.ai/v1`                         | API 키가 필요합니다.                                                                                                                                |
+| OpenRouter                | `https://openrouter.ai/api/v1`                      | API 키가 필요합니다.                                                                                                                                |
+| 사용자 지정               | 임의의 주소                                         | `https`. 단, 이 컴퓨터와 내 네트워크(`192.168.x.x`, `10.x.x.x`, `name.local`, Tailscale)는 예외.                                                    |
 
-제공업체마다 고유한 형식을 씁니다. Anthropic과 Google Gemini는 고유 API를 사용하고, 그 밖의 모든 것(Ollama, Grok, OpenRouter, 회사 프록시 같은 사용자 지정 주소 포함)은 OpenAI 호환 형식을 사용합니다. 제공업체를 고르면 주소가 채워지며 이후에도 수정할 수 있습니다. 그 밖의 OpenAI 호환 서비스는 **사용자 지정**을 선택하세요.
+제공업체마다 고유한 형식을 씁니다. Anthropic과 Google Gemini는 고유 API를 사용하고, 그 밖의 모든 것(Ollama, Grok, DeepSeek, Qwen, Moonshot, Zhipu, Mistral, OpenRouter, 회사 프록시 같은 사용자 지정 주소 포함)은 OpenAI 호환 형식을 사용합니다. 제공업체를 고르면 주소가 채워지며 이후에도 수정할 수 있습니다. 그 밖의 OpenAI 호환 서비스는 **사용자 지정**을 선택하세요.
 
 모델 주소를 처음 테스트하거나 저장할 때 Chrome이 접근 허용을 요청합니다. 거부하면 설명 카드가 네트워크 오류로 실패하는 대신 그 사실을 알려 줍니다.
 
@@ -244,7 +249,7 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://<your-extension-id>"
 
 - Chrome과 Microsoft Edge(Manifest V3). Firefox와 Safari는 지원하지 않습니다. Chrome 내장 모델은 모든 브라우저에서 쓸 수 있는 것은 아니며, Edge는 다른 모델이 필요합니다.
 - 설명은 선택한 모델에 좌우됩니다. 작은 로컬 모델은 개념 카드가 약해질 수 있고, 이는 재회의 품질을 낮추지만 기록 자체를 망가뜨리지는 않습니다.
-- 브라우저 내장 PDF 뷰어의 텍스트는 읽을 수 없으므로 Harkback이 PDF를 자체 리더 페이지에서 엽니다(arXiv 논문은 대신 HTML 버전으로 이동). 스캔한 PDF는 컴퓨터에서 OCR로 읽습니다(영어는 내장, 다른 언어는 각각 `cdn.jsdelivr.net`에서 한 번씩 다운로드). 실제 텍스트보다 느리고 덜 정확하며, 손글씨·수식·표는 복원하지 못하고, 복잡한 레이아웃(표, 글자가 있는 그림, 3단 이상)의 문단 감지는 근사치입니다. 컴퓨터에 있는 PDF는 두 가지 승인이 필요합니다. `chrome://extensions`에서 Harkback의 「파일 URL에 대한 액세스 허용」을 켜고, 처음 한 번 리더 페이지에서 「로컬 파일 허용」을 클릭하세요.
+- 브라우저 내장 PDF 뷰어의 텍스트는 읽을 수 없으므로 Harkback이 PDF를 자체 리더 페이지에서 엽니다(arXiv 논문은 대신 HTML 버전으로 이동). 스캔한 PDF는 컴퓨터에서 OCR로 읽습니다(영어는 내장, 다른 언어는 각각 `jsdelivr.net`에서 한 번씩 다운로드). 실제 텍스트보다 느리고 덜 정확하며, 손글씨·수식·표는 복원하지 못하고, 복잡한 레이아웃(표, 글자가 있는 그림, 3단 이상)의 문단 감지는 근사치입니다. 컴퓨터에 있는 PDF는 두 가지 승인이 필요합니다. `chrome://extensions`에서 Harkback의 「파일 URL에 대한 액세스 허용」을 켜고, 처음 한 번 리더 페이지에서 「로컬 파일 허용」을 클릭하세요.
 - 약어 자동 매칭에는 정식 명칭이 최소 세 단어여야 합니다(`Large Language Model`에서 `LLM`). 같은 분야에서 서로 다른 정식 명칭에 대응하는 약어 둘(예: 서로 다른 두 “GNN”)은 별개의 개념으로 유지됩니다.
 - 오탐을 피하기 위해 중국어 이름과 한자로만 쓴 일본어 이름은 세 글자 이상이어야 밑줄이 그어집니다. 가나나 한글이 있는 이름은 두 글자면 됩니다.
 - YouTube: 자막(CC)을 켠 `www.youtube.com/watch` 페이지만 읽으며, 페이지를 연 뒤 플레이어가 표시한 자막 줄만 문맥으로 쓸 수 있습니다. 자동 생성 자막은 기술 용어를 자주 잘못 적으며, 잘못 적힌 용어는 내 기록과 일치하지 않습니다. Shorts, 다른 사이트에 삽입된 플레이어, 전체 화면 모드(플레이어가 Harkback의 힌트를 가립니다. 극장 모드를 사용하세요)는 지원하지 않으며, YouTube가 페이지를 바꾸면 Harkback이 업데이트될 때까지 자막을 읽지 못할 수 있습니다.
