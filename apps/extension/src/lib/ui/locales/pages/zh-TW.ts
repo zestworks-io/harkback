@@ -277,8 +277,8 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Read again with these": "用所選語言重新辨識",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "英文已內建。其他語言只需從 {host} 下載一次，不會傳送任何文件內容。",
-  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
-    "掃描版 PDF 在本機辨識文字，頁面影像不會離開你的電腦。只有當你安裝某種辨識語言時，才會從 cdn.jsdelivr.net 下載一次語言包，不會傳送任何文件內容。",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
+    "掃描版 PDF 在本機辨識文字，頁面影像不會離開你的電腦。只有當你安裝某種辨識語言時，才會從 jsdelivr.net 下載一次語言包，不會傳送任何文件內容。",
   Field: "領域",
   "All fields": "全部領域",
   Understanding: "理解程度",

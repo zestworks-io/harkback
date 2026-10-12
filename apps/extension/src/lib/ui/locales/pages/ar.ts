@@ -282,8 +282,8 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "Read again with these": "أعد القراءة بهذه اللغات",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "الإنجليزية مضمَّنة. تُنزَّل اللغات الأخرى مرة واحدة من {host}؛ ولا يُرسَل أي محتوى من المستندات.",
-  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
-    "تُقرأ ملفات PDF الممسوحة ضوئيًا على هذا الحاسوب ولا تغادره صور الصفحات. تُنزَّل حزمة اللغة مرة واحدة من cdn.jsdelivr.net فقط عندما تثبّت واحدة؛ ولا يُرسَل أي محتوى من المستندات.",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
+    "تُقرأ ملفات PDF الممسوحة ضوئيًا على هذا الحاسوب ولا تغادره صور الصفحات. تُنزَّل حزمة اللغة مرة واحدة من jsdelivr.net فقط عندما تثبّت واحدة؛ ولا يُرسَل أي محتوى من المستندات.",
   Field: "المجال",
   "All fields": "كل المجالات",
   Understanding: "مستوى الفهم",

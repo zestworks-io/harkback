@@ -154,7 +154,7 @@ test("reads a scanned PDF and explains a term in it", async ({ context, sw, stub
 
 test("discards a language pack that does not match its checksum", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
-  await context.route("https://cdn.jsdelivr.net/**", (route) =>
+  await context.route("https://*.jsdelivr.net/**", (route) =>
     route.fulfill({ status: 200, headers: { "access-control-allow-origin": "*" }, body: "not a language pack" }),
   );
   const page = await context.newPage();

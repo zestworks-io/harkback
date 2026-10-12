@@ -1,7 +1,7 @@
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it } from "vitest";
 import { installPack, PackError } from "../../src/lib/ocr/install";
-import { normalizeLanguages, OCR_LANGUAGES, packUrl, type OcrLanguage } from "../../src/lib/ocr/languages";
+import { normalizeLanguages, OCR_LANGUAGES, PACK_HOST_NAME, PACK_HOSTS, packUrls, type OcrLanguage } from "../../src/lib/ocr/languages";
 import { getChoice, getPack, getPage, installedPacks, putChoice, putPack, putPage, removePack } from "../../src/lib/ocr/store";
 
 const fresh = () => ({ factory: new IDBFactory() as unknown as IDBFactory });
@@ -12,10 +12,11 @@ describe("OCR language catalog", () => {
     expect(new Set(OCR_LANGUAGES.map((l) => l.code)).size).toBe(OCR_LANGUAGES.length);
     for (const l of OCR_LANGUAGES) {
       expect(l.sha256).toMatch(/^[0-9a-f]{64}$/);
-      expect(packUrl(l.code)).toBe(
+      expect(packUrls(l.code)[0]).toBe(
         `https://cdn.jsdelivr.net/npm/@tesseract.js-data/${l.code}@1.0.0/4.0.0_best_int/${l.code}.traineddata.gz`,
       );
     }
+    for (const host of PACK_HOSTS) expect(host.endsWith(PACK_HOST_NAME)).toBe(true);
     expect(OCR_LANGUAGES.slice(0, 2).map((l) => l.code)).toEqual(["chi_sim", "chi_tra"]);
   });
 
@@ -86,7 +87,7 @@ describe("installPack", () => {
       }) as unknown as typeof fetch,
       store: async (code, data) => void (stored[code] = data),
     });
-    expect(asked).toBe(packUrl("kor"));
+    expect(asked).toBe(packUrls("kor")[0]);
     expect([...stored.kor!]).toEqual([7, 7, 7, 7]);
   });
 
@@ -100,6 +101,46 @@ describe("installPack", () => {
       }),
     ).rejects.toMatchObject({ kind: "mismatch" });
     expect(stored).toEqual([]);
+  });
+
+  it("asks the next host when one cannot be reached or serves the wrong file", async () => {
+    const lang = await known();
+    const asked: string[] = [];
+    const stored: string[] = [];
+    await installPack("kor", {
+      lookup: () => lang,
+      fetch: (async (url: string) => {
+        asked.push(new URL(url).hostname);
+        if (asked.length === 1) throw new TypeError("blocked");
+        return asked.length === 2 ? new Response("wrong") : new Response(body);
+      }) as unknown as typeof fetch,
+      store: async (code) => void stored.push(code),
+    });
+    expect(asked).toEqual(["cdn.jsdelivr.net", "fastly.jsdelivr.net", "gcore.jsdelivr.net"]);
+    expect(stored).toEqual(["kor"]);
+  });
+
+  it("says the file was wrong when every host served a wrong one, and a failed download when none answered", async () => {
+    const lang = await known();
+    const wrong = { lookup: () => lang, fetch: serve(() => new Response("wrong")), store: async () => undefined };
+    await expect(installPack("kor", wrong)).rejects.toMatchObject({ kind: "mismatch" });
+    let calls = 0;
+    await expect(
+      installPack("kor", { ...wrong, fetch: (async () => (++calls, new Response("", { status: 503 }))) as unknown as typeof fetch }),
+    ).rejects.toMatchObject({ kind: "download" });
+    expect(calls).toBe(packUrls("kor").length);
+  });
+
+  it("reports a failed download when the last host answered nothing, even after a wrong file", async () => {
+    const lang = await known();
+    let n = 0;
+    await expect(
+      installPack("kor", {
+        lookup: () => lang,
+        fetch: (async () => (++n === 1 ? new Response("portal") : Promise.reject(new TypeError("blocked")))) as unknown as typeof fetch,
+        store: async () => undefined,
+      }),
+    ).rejects.toMatchObject({ kind: "download" });
   });
 
   it("reports a failed download, and a language it does not know", async () => {

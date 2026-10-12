@@ -282,8 +282,8 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Read again with these": "이 언어로 다시 읽기",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "영어는 내장되어 있습니다. 다른 언어는 {host}에서 한 번만 내려받으며 문서 내용은 전송되지 않습니다.",
-  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
-    "스캔한 PDF는 이 컴퓨터에서 읽으며 페이지 이미지는 밖으로 나가지 않습니다. 언어 팩은 설치할 때에만 cdn.jsdelivr.net에서 한 번 내려받으며 문서 내용은 전송되지 않습니다.",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
+    "스캔한 PDF는 이 컴퓨터에서 읽으며 페이지 이미지는 밖으로 나가지 않습니다. 언어 팩은 설치할 때에만 jsdelivr.net에서 한 번 내려받으며 문서 내용은 전송되지 않습니다.",
   Field: "분야",
   "All fields": "모든 분야",
   Understanding: "이해도",

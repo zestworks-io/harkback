@@ -284,8 +284,8 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Read again with these": "これらで読み直す",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "英語は内蔵されています。ほかの言語は {host} から一度だけダウンロードされ、文書の内容は送信されません。",
-  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from cdn.jsdelivr.net only when you install one; no document content is sent.":
-    "スキャンしたPDFはこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。言語パックは、インストールしたときだけ cdn.jsdelivr.net から一度ダウンロードされ、文書の内容は送信されません。",
+  "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
+    "スキャンしたPDFはこのコンピュータ上で読み取られ、ページ画像が外に出ることはありません。言語パックは、インストールしたときだけ jsdelivr.net から一度ダウンロードされ、文書の内容は送信されません。",
   Field: "分野",
   "All fields": "すべての分野",
   Understanding: "理解度",

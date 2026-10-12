@@ -2,8 +2,14 @@
 export const BUNDLED_LANGUAGE = "eng";
 export const DEFAULT_LANGUAGES: readonly string[] = [BUNDLED_LANGUAGE];
 
-/** Packs come from jsDelivr, which serves them with open CORS headers, so no host permission is needed to fetch them. */
-export const PACK_HOST_NAME = "cdn.jsdelivr.net";
+/**
+ * Packs come from jsDelivr, which serves them with open CORS headers, so no host permission is needed to fetch them.
+ * Its main host is slow or blocked in some countries, so the same files are also asked for from its other hosts; the
+ * checksum decides whether a download is the right file, whichever host it came from.
+ */
+export const PACK_HOSTS: readonly string[] = ["cdn.jsdelivr.net", "fastly.jsdelivr.net", "gcore.jsdelivr.net"];
+/** What the interface and the privacy notes call them. */
+export const PACK_HOST_NAME = "jsdelivr.net";
 const PACK_VERSION = "1.0.0";
 
 export interface OcrLanguage {
@@ -36,8 +42,8 @@ export const OCR_LANGUAGES: readonly OcrLanguage[] = [
 
 export const languageByCode = (code: string): OcrLanguage | undefined => OCR_LANGUAGES.find((l) => l.code === code);
 
-export const packUrl = (code: string): string =>
-  `https://cdn.jsdelivr.net/npm/@tesseract.js-data/${code}@${PACK_VERSION}/4.0.0_best_int/${code}.traineddata.gz`;
+export const packUrls = (code: string): string[] =>
+  PACK_HOSTS.map((host) => `https://${host}/npm/@tesseract.js-data/${code}@${PACK_VERSION}/4.0.0_best_int/${code}.traineddata.gz`);
 
 /** The label for a code in its own language; English is not in the download list. */
 export const languageName = (code: string): string => (code === BUNDLED_LANGUAGE ? "English" : (languageByCode(code)?.native ?? code));
