@@ -9,7 +9,8 @@ import type { Choice } from "../source/privacy-gate";
 import { profileFor, type Privacy } from "../source/site-profiles";
 import { detectSource, type DetectedSource } from "../source/source-id";
 import { ExplainCard } from "../ui/explain-card";
-import { createOverlay, placeNear, type Overlay } from "../ui/overlay";
+import { dirOf } from "../ui/languages";
+import { createOverlay, placeNear, runsRtl, type Overlay } from "../ui/overlay";
 import { LockChip } from "../ui/lock-chip";
 import { PreviewPanel } from "../ui/preview-panel";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
@@ -547,7 +548,7 @@ export class ContentApp {
       ),
     };
     this.session = session;
-    placeNear(session.card.el, lastRect(range));
+    placeNear(session.card.el, lastRect(range), 380, runsRtl(range));
     this.ensureOverlay().root.append(session.card.el);
     port.onMessage.addListener((m) => this.onPortMessage(session, m));
     port.onDisconnect.addListener(() => {
@@ -649,7 +650,11 @@ export class ContentApp {
     const rect = lastRect(range);
     if (!rect) return;
     this.hideTrigger();
-    const button = h("button", { className: "hb-trigger", type: "button", "data-hb": "explain-button" }, t(this.lang, "explain"));
+    const button = h(
+      "button",
+      { className: "hb-trigger", type: "button", "data-hb": "explain-button", dir: dirOf(this.lang) },
+      t(this.lang, "explain"),
+    );
     // Keep the page selection: pressing the button must not collapse it.
     button.addEventListener("mousedown", (e) => e.preventDefault());
     button.addEventListener("click", (e) => {
@@ -658,9 +663,19 @@ export class ContentApp {
       this.hideTrigger();
       if (r) this.explain(r, { mode: "explain" });
     });
-    button.style.left = `${rect.right + window.scrollX + 4}px`;
+    // The button sits after the end of the selection: to its right in left-to-right text, to its left in right-to-left text.
+    if (runsRtl(range)) {
+      button.style.left = `${rect.left + window.scrollX - 4}px`;
+      // `translate` composes with the entry animation, which sets `transform`.
+      button.style.translate = "-100% 0";
+    } else button.style.left = `${rect.right + window.scrollX + 4}px`;
     button.style.top = `${rect.bottom + window.scrollY + 4}px`;
     this.ensureOverlay().root.append(button);
+    // Too close to the left edge for the button to fit before the selection: put it after the other end.
+    if (button.style.translate && button.getBoundingClientRect().left < 8) {
+      button.style.translate = "";
+      button.style.left = `${rect.right + window.scrollX + 4}px`;
+    }
     this.trigger = button;
     this.triggerRange = range;
   }

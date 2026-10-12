@@ -37,7 +37,7 @@ import { routeCheck } from "../../lib/review/review-check";
 import { explainLanguageOf, withDefaults } from "../../lib/storage/settings";
 import { sensitiveBySiteRule } from "../../lib/source/site-rules";
 import { initTheme } from "../../lib/ui/theme";
-import { quoteTitle } from "../../lib/ui/languages";
+import { applyLanguage, quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 import { errorText, useStrings } from "../../lib/ui/strings";
 import { UI_STRINGS } from "../../lib/ui/locales/ui";
@@ -48,6 +48,7 @@ async function main(): Promise<void> {
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(settings.language, zh, en, vars);
   // Error messages (such as a model that could not be reached) come from the shared card text.
+  applyLanguage(document.documentElement, settings.language);
   useStrings(settings.language, UI_STRINGS[settings.language] ?? {});
   const store = await EventStore.open();
   let state: State = replay(await store.all());
@@ -203,7 +204,7 @@ async function main(): Promise<void> {
       }
     });
     const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
-    const body = h("div", { className: "explanation" });
+    const body = h("div", { className: "explanation", dir: "auto" });
     body.append(renderMarkdown(e.explanation));
     const chat =
       e.followUps.length === 0
@@ -213,7 +214,7 @@ async function main(): Promise<void> {
             { className: "chat", "data-hb": "chat" },
             h("div", { className: "chat-title" }, L("追问 · {n}", "Follow-up conversation · {n}", { n: e.followUps.length })),
             ...e.followUps.flatMap((f) => {
-              const answer = h("div", { className: "explanation chat-a", "data-hb": "chat-answer" });
+              const answer = h("div", { className: "explanation chat-a", dir: "auto", "data-hb": "chat-answer" });
               answer.append(renderMarkdown(f.answer));
               return [h("div", { className: "chat-q", "data-hb": "chat-question" }, f.question), answer];
             }),
@@ -244,7 +245,7 @@ async function main(): Promise<void> {
         e.sensitive ? sensitiveBadge(e.sourceId) : null,
         selecting ? null : del,
       ),
-      h("blockquote", { className: "quote" }, e.selection),
+      h("blockquote", { className: "quote", dir: "auto" }, e.selection),
       body,
       chat,
     );
@@ -318,11 +319,11 @@ async function main(): Promise<void> {
         "div",
         { className: "concept-head" },
         conceptPick(c.entries.map((e) => e.encounterId)),
-        h("h2", {}, h("a", { href: conceptHref(c.conceptId) }, n.name)),
+        h("h2", { dir: "auto" }, h("a", { href: conceptHref(c.conceptId) }, n.name)),
         badge(understandingOf(state, c.conceptId)),
         dueBadge(c.conceptId),
       ),
-      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
+      n.aliases.length > 0 ? h("div", { className: "aliases", dir: "auto" }, n.aliases.join(" · ")) : null,
       h("ul", { className: "entries" }, ...c.entries.map(entryView)),
     );
   };
@@ -504,14 +505,14 @@ async function main(): Promise<void> {
         "div",
         { className: "concept-head" },
         conceptPick(d.entries.map((e) => e.encounterId)),
-        h("h2", {}, n.name),
+        h("h2", { dir: "auto" }, n.name),
         badge(d.understanding),
         dueBadge(d.conceptId),
         h("span", { className: "domain" }, d.domain),
         h("span", { className: "spacer" }),
         selectToggle(),
       ),
-      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
+      n.aliases.length > 0 ? h("div", { className: "aliases", dir: "auto" }, n.aliases.join(" · ")) : null,
       d.muted
         ? h(
             "p",
@@ -715,7 +716,7 @@ async function main(): Promise<void> {
       b.addEventListener("click", onClick);
       return b;
     };
-    const explanation = h("div", { className: "explanation" });
+    const explanation = h("div", { className: "explanation", dir: "auto" });
     explanation.append(renderMarkdown(item.explanation));
     const n = names(item.name, item.aliases);
     const answerBox = h("textarea", {
@@ -746,8 +747,8 @@ async function main(): Promise<void> {
     return h(
       "section",
       { className: "concept review", "data-hb": "review-card" },
-      h("div", { className: "concept-head" }, h("h2", {}, n.name), badge(item.understanding)),
-      n.aliases.length > 0 ? h("div", { className: "aliases" }, n.aliases.join(" · ")) : null,
+      h("div", { className: "concept-head" }, h("h2", { dir: "auto" }, n.name), badge(item.understanding)),
+      n.aliases.length > 0 ? h("div", { className: "aliases", dir: "auto" }, n.aliases.join(" · ")) : null,
       h(
         "div",
         { className: "meta" },
@@ -775,7 +776,9 @@ async function main(): Promise<void> {
         revealed ? null : show,
         revealed ? null : checkPanel(item),
       ),
-      revealed ? h("div", {}, h("blockquote", { className: "quote" }, item.selection), explanation, gapsNote(item.conceptId)) : null,
+      revealed
+        ? h("div", {}, h("blockquote", { className: "quote", dir: "auto" }, item.selection), explanation, gapsNote(item.conceptId))
+        : null,
       gradable
         ? h(
             "div",
@@ -1225,7 +1228,7 @@ async function main(): Promise<void> {
           : L("已导出 {n} 个笔记，{failed} 个失败：{names}", "Exported {n} notes; {failed} failed: {names}", {
               n: written,
               failed: failed.length,
-              names: failed.slice(0, 3).join(settings.language === "zh" ? "、" : ", "),
+              names: failed.slice(0, 3).join(settings.language === "zh" ? "、" : settings.language === "ar" ? "، " : ", "),
             });
     } catch {
       status.textContent = L("导出失败。", "Export failed.");

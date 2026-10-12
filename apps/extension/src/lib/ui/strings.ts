@@ -1,5 +1,5 @@
 import type { ErrorCode } from "../messaging/messages";
-import type { Lang } from "./languages";
+import { fillVars, type Lang } from "./languages";
 
 export type { Lang };
 
@@ -179,7 +179,7 @@ const errorKeysExist: ErrorKey extends StringKey ? true : never = true;
 void errorKeysExist;
 
 export function t(lang: Lang, key: StringKey, vars: Record<string, string | number> = {}): string {
-  return (TABLE[lang]?.[key] ?? en[key]).replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
+  return fillVars(TABLE[lang]?.[key] ?? en[key], vars, lang);
 }
 
 export function errorText(lang: Lang, code: ErrorCode, retryAfterMs = 0): string {

@@ -12,7 +12,7 @@ import { withDefaults } from "../../lib/storage/settings";
 import { initTheme } from "../../lib/ui/theme";
 import { secretInput } from "../../lib/ui/secret-input";
 import { originPattern } from "../../lib/source/site-rules";
-import { isLang, UI_LANGUAGES, type Lang } from "../../lib/ui/languages";
+import { applyLanguage, isLang, UI_LANGUAGES, type Lang } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 
 type ResultState = "busy" | "ok" | "error" | "help";
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
   };
 
   const render = (): void => {
-    document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+    applyLanguage(document.documentElement, lang);
 
     const language = h(
       "select",

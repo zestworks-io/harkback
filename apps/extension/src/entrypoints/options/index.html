@@ -58,7 +58,7 @@
       }
       .head-tools a {
         white-space: nowrap;
-        margin-right: 4px;
+        margin-inline-end: 4px;
       }
       .head-tools select {
         width: auto;
@@ -167,7 +167,7 @@
         padding: 0 10px;
       }
       select {
-        padding-right: 6px;
+        padding-inline-end: 6px;
       }
       .secret {
         display: flex;
@@ -347,7 +347,7 @@
         display: inline-block;
         width: 0.9em;
         height: 0.9em;
-        margin-right: 0.6em;
+        margin-inline-end: 0.6em;
         vertical-align: -0.12em;
         border: 2px solid var(--muted);
         border-top-color: transparent;
@@ -376,7 +376,7 @@
       }
       .privacy {
         margin: 0;
-        padding-left: 18px;
+        padding-inline-start: 18px;
         color: var(--muted);
         font-size: 13px;
         display: grid;
@@ -385,8 +385,8 @@
 
       .savebar {
         position: fixed;
-        left: 0;
-        right: 0;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
         bottom: 0;
         background: color-mix(in srgb, var(--bg) 88%, transparent);
         backdrop-filter: blur(8px);
@@ -412,8 +412,8 @@
         .card-head,
         .card-body,
         .card-foot {
-          padding-left: 16px;
-          padding-right: 16px;
+          padding-inline-start: 16px;
+          padding-inline-end: 16px;
         }
         .grid,
         .grid.four {

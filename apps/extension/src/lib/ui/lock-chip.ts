@@ -1,5 +1,6 @@
 import { choiceBox } from "./choice";
 import { h } from "./dom";
+import { dirOf, htmlLang } from "./languages";
 import type { Choice, Gate } from "../source/privacy-gate";
 import { t, type Lang } from "./strings";
 
@@ -12,13 +13,15 @@ export interface LockChipHandlers {
 
 /** A small control on the page, shown only while the page is sensitive or would be asked about, so it can be settled before anything is selected. */
 export class LockChip {
-  readonly el = h("div", { className: "hb-lock", "data-hb": "lock-chip", hidden: true });
+  readonly el: HTMLElement;
   private status: Gate = "normal";
 
   constructor(
     private readonly lang: Lang,
     private readonly handlers: LockChipHandlers,
-  ) {}
+  ) {
+    this.el = h("div", { className: "hb-lock", "data-hb": "lock-chip", hidden: true, dir: dirOf(lang), lang: htmlLang(lang) });
+  }
 
   /** `byRule`: a site rule makes the page sensitive, which is not the lock's to change. */
   set(status: Gate, byRule = false): void {

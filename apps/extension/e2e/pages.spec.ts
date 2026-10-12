@@ -145,3 +145,18 @@ test("options show that a connection is being tested, then the result", async ({
   await expect(result).not.toHaveAttribute("data-spin", "");
   await expect(test).toBeEnabled();
 });
+
+test("options in Arabic read right to left", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#general`);
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+
+  await page.getByLabel("Interface language").selectOption("ar");
+  await expect(page.locator("h1")).toHaveText("إعدادات Harkback");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+  // Nothing sticks out past the right edge, which is where the page starts.
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});

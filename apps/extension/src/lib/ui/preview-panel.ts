@@ -1,5 +1,6 @@
 import { choiceBox } from "./choice";
 import { h } from "./dom";
+import { dirOf, htmlLang } from "./languages";
 import type { ErrorCode, ResponseMap } from "../messaging/messages";
 import type { PreviewStatus, PreviewTerm } from "../explain/preview";
 import type { Choice } from "../source/privacy-gate";
@@ -40,7 +41,7 @@ export class PreviewPanel {
     );
     this.el = h(
       "div",
-      { className: "hb-card hb-preview", "data-hb": "preview", role: "dialog" },
+      { className: "hb-card hb-preview", "data-hb": "preview", role: "dialog", dir: dirOf(lang), lang: htmlLang(lang) },
       close,
       h("div", { className: "hb-head" }, h("strong", {}, t(lang, "previewTitle"))),
       h("div", { className: "hb-scroll" }, this.body),
@@ -168,7 +169,7 @@ export class PreviewPanel {
     return h(
       "div",
       { className: "hb-term", "data-hb": "preview-term", "data-status": term.status },
-      h("div", { className: "hb-term-line" }, h("span", { className: "hb-term-name" }, term.name), button),
+      h("div", { className: "hb-term-line" }, h("span", { className: "hb-term-name", dir: "auto" }, term.name), button),
       detail,
     );
   }

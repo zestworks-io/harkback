@@ -1,6 +1,7 @@
 import type { Tier } from "@harkback/spec";
 import { choiceBox } from "./choice";
 import { h } from "./dom";
+import { dirOf, htmlLang } from "./languages";
 import { renderMarkdown } from "./markdown";
 import type { ErrorCode } from "../messaging/messages";
 import type { Choice } from "../source/privacy-gate";
@@ -48,7 +49,7 @@ const MODEL_SPECIFIC = new Set<ErrorCode>([
 export class ExplainCard {
   readonly el: HTMLElement;
   private readonly meta = h("div", { className: "hb-meta" });
-  private readonly body = h("div", { className: "hb-body", "data-hb": "explanation" });
+  private readonly body = h("div", { className: "hb-body", "data-hb": "explanation", dir: "auto" });
   private readonly note = h("div", { className: "hb-note", "data-hb": "note" });
   private readonly footer = h("div", { className: "hb-footer" });
   /** Earlier follow-up questions and their answers; scrolls with the card. */
@@ -76,7 +77,7 @@ export class ExplainCard {
     );
     this.el = h(
       "div",
-      { className: "hb-card", "data-hb": "card", role: "dialog" },
+      { className: "hb-card", "data-hb": "card", role: "dialog", dir: dirOf(lang), lang: htmlLang(lang) },
       close,
       // The tier and the Got it / Still confused buttons stay pinned above the explanation.
       h("div", { className: "hb-head" }, this.meta, this.footer),
@@ -244,7 +245,7 @@ export class ExplainCard {
       const question = input.value.trim();
       if (!question) return;
       input.value = "";
-      this.thread.append(h("div", { className: "hb-question", "data-hb": "followup-question" }, question));
+      this.thread.append(h("div", { className: "hb-question", "data-hb": "followup-question", dir: "auto" }, question));
       this.startAnswer().textContent = t(this.lang, "loading");
       this.setPending(true);
       this.scrollToEnd();
@@ -282,7 +283,7 @@ export class ExplainCard {
   /** A new answer block below its question; only the latest one carries the `followup-answer` hook. */
   private startAnswer(): HTMLElement {
     this.answer?.removeAttribute("data-hb");
-    this.answer = h("div", { className: "hb-body hb-answer", "data-hb": "followup-answer" });
+    this.answer = h("div", { className: "hb-body hb-answer", "data-hb": "followup-answer", dir: "auto" });
     this.thread.append(this.answer);
     return this.answer;
   }

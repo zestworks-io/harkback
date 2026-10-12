@@ -18,7 +18,7 @@ const locale = (lang: Lang): string => (lang === "zh" ? "zh-CN" : lang === "en" 
 
 /** "Oct 5 – Oct 11": the last day shown is the Sunday, not the Monday the range ends on. */
 export function rangeText(range: { start: number; end: number }, lang: Lang): string {
-  const fmt = (t: number) => new Date(t).toLocaleDateString(locale(lang), { month: "short", day: "numeric" });
+  const fmt = (t: number) => new Date(t).toLocaleDateString(locale(lang), { month: "short", day: "numeric", numberingSystem: "latn" });
   return `${fmt(range.start)} – ${fmt(range.end - 1)}`;
 }
 

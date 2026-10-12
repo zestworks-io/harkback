@@ -37,11 +37,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px 18px 14px; }
 .hb-close {
   z-index: 1;
-  position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px;
+  position: absolute; top: 10px; inset-inline-end: 10px; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 8px;
   background: none; color: var(--hb-muted); font-size: 18px; line-height: 1; cursor: pointer;
 }
 .hb-close:hover { background: var(--hb-subtle); color: var(--hb-fg); }
-.hb-meta { color: var(--hb-muted); font-size: 12.5px; margin: 0 28px 8px 0; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.hb-meta { color: var(--hb-muted); font-size: 12.5px; margin: 0 0 8px; margin-inline-end: 28px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 .hb-meta:empty { display: none; }
 .hb-tier { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 550; }
 .hb-tier::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -51,10 +51,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-body { font-size: 14.5px; line-height: 1.65; }
 .hb-body p { margin: 0 0 10px; }
 .hb-body p:last-child { margin-bottom: 0; }
-.hb-body ul, .hb-body ol { margin: 0 0 10px; padding-left: 20px; }
+.hb-body ul, .hb-body ol { margin: 0 0 10px; padding-inline-start: 20px; }
 .hb-body .hb-table { overflow-x: auto; margin: 0 0 10px; }
 .hb-body table { border-collapse: collapse; font-size: 13px; }
-.hb-body th, .hb-body td { border: 1px solid var(--hb-border); padding: 3px 8px; text-align: left; }
+.hb-body th, .hb-body td { border: 1px solid var(--hb-border); padding: 3px 8px; text-align: start; }
 .hb-body th { background: var(--hb-subtle); font-weight: 600; }
 .hb-body li > ul, .hb-body li > ol { margin: 2px 0 0; }
 .hb-body strong { font-weight: 650; }
@@ -80,7 +80,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 
 .hb-footer { display: flex; flex-wrap: wrap; gap: 6px; }
 .hb-footer:empty { display: none; }
-.hb-lock { position: fixed; right: 16px; bottom: 16px; max-width: 320px; background: var(--hb-bg); color: var(--hb-fg); border: 1px solid var(--hb-border); border-radius: 10px; padding: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); z-index: 2147483000; }
+.hb-lock { position: fixed; inset-inline-end: 16px; bottom: 16px; max-width: 320px; background: var(--hb-bg); color: var(--hb-fg); border: 1px solid var(--hb-border); border-radius: 10px; padding: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); z-index: 2147483000; }
 .hb-lock[hidden] { display: none; }
 .hb-lock .hb-choice { margin-top: 8px; padding: 4px; }
 .hb-choice p { margin: 0 0 8px; }
@@ -104,7 +104,7 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-thread { margin-top: 4px; }
 .hb-thread:empty { display: none; }
 .hb-question {
-  width: fit-content; max-width: 88%; margin: 14px 0 0 auto; padding: 6px 12px; border-radius: 12px 12px 4px 12px;
+  width: fit-content; max-width: 88%; margin: 14px 0 0; margin-inline-start: auto; padding: 6px 12px; border-radius: 12px; border-end-end-radius: 4px;
   background: var(--hb-accent-soft); color: var(--hb-fg); font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .hb-compose { flex: none; padding: 10px 18px 12px; border-top: 1px solid var(--hb-border); background: var(--hb-bg); }
@@ -119,7 +119,7 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-answer { margin-top: 8px; }
 .hb-answer:empty { display: none; }
 
-.hb-reunion { width: 360px; border-left: 3px solid var(--hb-accent); padding: 14px 18px 14px; }
+.hb-reunion { width: 360px; border-inline-start: 3px solid var(--hb-accent); padding: 14px 18px 14px; }
 .hb-reunion .hb-meta { margin: 0 0 10px; }
 .hb-reunion .hb-footer { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hb-border); }
 .hb-reunion [data-hb="reunion-title"] { color: var(--hb-fg); font-weight: 600; }
@@ -127,7 +127,7 @@ button.hb-quiet:hover:not(:disabled) { color: var(--hb-fg); }
 .hb-reunion .hb-why { color: var(--hb-muted); font-size: 12px; margin-top: 8px; font-style: italic; }
 
 .hb-compose:has(> .hb-footer:empty) { display: none; }
-.hb-preview { position: fixed; top: 16px; right: 16px; width: 360px; max-width: calc(100vw - 32px); }
+.hb-preview { position: fixed; top: 16px; inset-inline-end: 16px; width: 360px; max-width: calc(100vw - 32px); }
 .hb-group { margin: 0 0 14px; }
 .hb-group h3, .hb-group summary { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--hb-muted); letter-spacing: 0.02em; cursor: default; }
 .hb-group summary { cursor: pointer; }

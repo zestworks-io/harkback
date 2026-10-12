@@ -6,6 +6,7 @@ import { pages_es } from "./es";
 import { pages_fr } from "./fr";
 import { pages_de } from "./de";
 import { pages_ptBR } from "./pt-BR";
+import { pages_ar } from "./ar";
 
 /** Page text by language, keyed by the English text used in the page. */
 export const PAGE_STRINGS: Partial<Record<Lang, Readonly<Record<string, string>>>> = {
@@ -16,4 +17,5 @@ export const PAGE_STRINGS: Partial<Record<Lang, Readonly<Record<string, string>>
   fr: pages_fr,
   de: pages_de,
   "pt-BR": pages_ptBR,
+  ar: pages_ar,
 };

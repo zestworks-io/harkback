@@ -113,7 +113,7 @@
         margin-top: 12px;
         padding: 14px 18px;
         border: 1px solid var(--border, currentColor);
-        border-left: 3px solid var(--accent);
+        border-inline-start: 3px solid var(--accent);
         border-radius: 8px;
         font: 15px/1.6 var(--sans);
       }
@@ -146,7 +146,7 @@
         }
       }
       .margin-note {
-        border-left: 2px solid var(--accent);
+        border-inline-start: 2px solid var(--accent);
         padding: 2px 0 2px 12px;
         font-size: 13px;
         color: var(--muted);
@@ -261,7 +261,7 @@
       .notes li::before {
         content: "";
         position: absolute;
-        left: 4px;
+        inset-inline-start: 4px;
         top: 18px;
         width: 6px;
         height: 6px;
@@ -444,7 +444,7 @@
         margin: 4px 0 20px;
         padding: 10px 14px;
         border-radius: 8px;
-        border-left: 3px solid var(--muted);
+        border-inline-start: 3px solid var(--muted);
         background: var(--card);
       }
       .result[data-spin]::before {
@@ -452,7 +452,7 @@
         display: inline-block;
         width: 0.9em;
         height: 0.9em;
-        margin-right: 0.6em;
+        margin-inline-end: 0.6em;
         vertical-align: -0.12em;
         border: 2px solid var(--muted);
         border-top-color: transparent;
@@ -470,13 +470,13 @@
         }
       }
       .result[data-state="ok"] {
-        border-left-color: var(--ok);
+        border-inline-start-color: var(--ok);
       }
       .result[data-state="error"] {
-        border-left-color: var(--err);
+        border-inline-start-color: var(--err);
       }
       .result[data-state="help"] {
-        border-left-color: var(--err);
+        border-inline-start-color: var(--err);
         font-family: var(--mono);
         font-size: 12.5px;
         overflow-x: auto;
@@ -520,7 +520,7 @@
       .next li::before {
         content: counter(n);
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         top: 12px;
         font-weight: 600;
         color: var(--accent);

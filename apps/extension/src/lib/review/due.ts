@@ -9,6 +9,7 @@ export function dueText(dueAt: number, now: number, lang: Lang): string {
   const date = new Date(dueAt).toLocaleDateString(lang === "zh" ? "zh-CN" : lang === "en" ? "en-US" : lang, {
     month: "short",
     day: "numeric",
+    numberingSystem: "latn",
   });
   const diff = dueAt - now;
   if (diff <= 0) {

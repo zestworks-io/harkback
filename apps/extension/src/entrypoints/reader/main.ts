@@ -6,6 +6,7 @@ import { ContentApp } from "../../lib/content/app";
 import { browserRpc } from "../../lib/content/rpc";
 import { listenForTabMessages } from "../../lib/content/tab-messages";
 import { startEngine } from "../../lib/ocr/engine";
+import { applyLanguage } from "../../lib/ui/languages";
 import { DEFAULT_LANGUAGES, normalizeLanguages } from "../../lib/ocr/languages";
 import { languagePanel } from "../../lib/ocr/panel";
 import { getChoice, getPack, installedPacks, putChoice } from "../../lib/ocr/store";
@@ -71,6 +72,8 @@ async function main(): Promise<void> {
   const settings = withDefaults((await browser.storage.local.get("settings")).settings);
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(settings.language, zh, en, vars);
   const notice = document.getElementById("notice")!;
+  // Only the notices follow the interface direction; the pages of the document keep theirs.
+  applyLanguage(notice, settings.language);
   const host = document.getElementById("pages")!;
   const say = (title: string, ...lines: string[]) => {
     const h = Object.assign(document.createElement("h1"), { textContent: title });

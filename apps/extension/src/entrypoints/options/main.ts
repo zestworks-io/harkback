@@ -12,7 +12,7 @@ import { applyTheme } from "../../lib/ui/theme";
 import { PROVIDERS, providerById } from "../../lib/models/providers";
 import { addSuggestedSites, addVideoSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
-import { isLang, UI_LANGUAGES } from "../../lib/ui/languages";
+import { applyLanguage, isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 
 function input(value: string, onInput: (v: string) => void, attrs: Record<string, unknown> = {}): HTMLInputElement {
@@ -111,6 +111,7 @@ async function main(): Promise<void> {
   let suggestMessage = "";
 
   function render(): void {
+    applyLanguage(document.documentElement, draft.language);
     void languagePanel({ L }).then((panel) => ocrHost.replaceChildren(panel));
     const language = h(
       "select",

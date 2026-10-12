@@ -44,7 +44,8 @@ function englishTexts(): Set<string> {
   return found;
 }
 
-const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+/** The names filled into a text; a plural group `{n#one=…|other=…}` counts as its `n`. */
+const placeholders = (s: string) => [...new Set([...s.matchAll(/\{(\w+)(?:#[^}]*)?\}/g)].map((m) => m[1]))].sort();
 
 describe("interface languages", () => {
   it("are all available as explanation languages, and every extra one has both tables", () => {

@@ -90,3 +90,21 @@ test("a failed follow-up keeps the card's actions and records nothing more", asy
   expect(stub.requests).toHaveLength(2);
   expect((await readEvents(sw)).filter((e) => e.type === "encounter.created")).toHaveLength(1);
 });
+
+test("the card in Arabic is right to left and lines up with the end of the selection", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "ar" }));
+  const page = await openArxiv(context, "2106.09685");
+  await explainWord(page, "#t-lora");
+  const card = page.locator("[data-hb=card]");
+  await expect(card.locator("[data-hb=explanation]")).toBeVisible();
+  await expect(card).toHaveAttribute("dir", "rtl");
+  await expect(card.locator("[data-hb=close]")).toHaveAttribute("aria-label", "إغلاق");
+
+  // The close button is at the left corner in right-to-left, and the card stays inside the window.
+  const box = (await card.boundingBox())!;
+  const close = (await card.locator("[data-hb=close]").boundingBox())!;
+  expect(close.x - box.x).toBeLessThan(box.x + box.width - (close.x + close.width));
+  const width = page.viewportSize()!.width;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(width);
+});

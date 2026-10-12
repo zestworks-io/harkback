@@ -7,6 +7,7 @@ import { ui_es } from "./es";
 import { ui_fr } from "./fr";
 import { ui_de } from "./de";
 import { ui_ptBR } from "./pt-BR";
+import { ui_ar } from "./ar";
 
 /** Text of the explain card and reunion hints by language; keys missing here fall back to English. */
 export const UI_STRINGS: Partial<Record<Lang, Readonly<Partial<Record<StringKey, string>>>>> = {
@@ -17,4 +18,5 @@ export const UI_STRINGS: Partial<Record<Lang, Readonly<Partial<Record<StringKey,
   fr: ui_fr,
   de: ui_de,
   "pt-BR": ui_ptBR,
+  ar: ui_ar,
 };

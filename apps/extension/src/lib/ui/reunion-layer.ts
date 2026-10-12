@@ -2,7 +2,7 @@ import { formatTimestamp } from "@harkback/core";
 import { h } from "./dom";
 import type { ReunionCard } from "../records/reunion-cards";
 import type { Overlay } from "./overlay";
-import { quoteTitle } from "./languages";
+import { dirOf, htmlLang, quoteTitle } from "./languages";
 import { t, type Lang } from "./strings";
 
 export type ReunionAction = "recalled" | "reexplain" | "compare" | "different" | "mute";
@@ -18,7 +18,7 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
   const tier = t(lang, card.tier === "defined_in_source" ? "tierDefined" : "tierExternal");
   return h(
     "div",
-    { className: "hb-card hb-reunion", "data-hb": "reunion-card" },
+    { className: "hb-card hb-reunion", "data-hb": "reunion-card", dir: dirOf(lang), lang: htmlLang(lang) },
     h(
       "div",
       { className: "hb-meta" },
@@ -26,7 +26,7 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
       " ",
       h("span", { className: `hb-tier hb-${card.tier}` }, tier),
     ),
-    h("div", { className: "hb-body" }, t(lang, "thenExplained", { text: card.preview })),
+    h("div", { className: "hb-body", dir: "auto" }, t(lang, "thenExplained", { text: card.preview })),
     h(
       "div",
       { className: "hb-why", "data-hb": "reunion-why" },
