@@ -24,7 +24,7 @@
 | <a href="#快速開始"><b>快速開始</b></a> | <a href="#功能"><b>功能</b></a> | <a href="guide/README.md"><b>文件</b></a> | <a href="#隱私"><b>隱私</b></a> | <a href="CHANGELOG.md"><b>更新日誌</b></a> | <a href="CONTRIBUTING.md"><b>參與貢獻</b></a> |
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <b>繁體中文</b> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <b>繁體中文</b> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.ar.md">العربية</a></p>
 
 Harkback 是一個給論文與技術文件讀者使用的 Chrome 擴充功能。選取一個術語，它會結合上下文解釋這個術語；每一次解釋都會存進本機的只追加日誌。之後在別的頁面再遇到同一個術語（即使寫法不同），Harkback 會替它加上底線，並顯示你上次是怎麼理解的。
 

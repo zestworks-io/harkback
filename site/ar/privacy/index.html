@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سياسة الخصوصية · Harkback</title>
+<meta name="description" content="كيف يتعامل Harkback مع بياناتك: تبقى السجلات في متصفحك ولا يُرسَل إلى النموذج الذي اخترته إلا الطلب الذي تُطلقه.">
+<link rel="icon" href="../../favicon.png">
+<link rel="alternate" hreflang="en" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="alternate" hreflang="zh-CN" href="https://zestworks-io.github.io/harkback/zh/privacy/">
+<link rel="alternate" hreflang="zh-TW" href="https://zestworks-io.github.io/harkback/zh-tw/privacy/">
+<link rel="alternate" hreflang="ja" href="https://zestworks-io.github.io/harkback/ja/privacy/">
+<link rel="alternate" hreflang="ko" href="https://zestworks-io.github.io/harkback/ko/privacy/">
+<link rel="alternate" hreflang="es" href="https://zestworks-io.github.io/harkback/es/privacy/">
+<link rel="alternate" hreflang="fr" href="https://zestworks-io.github.io/harkback/fr/privacy/">
+<link rel="alternate" hreflang="de" href="https://zestworks-io.github.io/harkback/de/privacy/">
+<link rel="alternate" hreflang="pt-BR" href="https://zestworks-io.github.io/harkback/pt-br/privacy/">
+<link rel="alternate" hreflang="ar" href="https://zestworks-io.github.io/harkback/ar/privacy/">
+<link rel="alternate" hreflang="x-default" href="https://zestworks-io.github.io/harkback/privacy/">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../theme.js"></script>
+</head>
+<body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../ar/"><img src="../../icon.png" alt="" width="24" height="24">Harkback</a>
+<nav class="site"><a href="../../ar/">الرئيسية</a><a href="../../guide/ar/getting-started/">التوثيق</a><a href="../../ar/privacy/" aria-current="page">الخصوصية</a><a href="../../ar/terms/">الشروط</a></nav>
+</div></header>
+<main><div class="wrap">
+
+<h1>سياسة الخصوصية</h1>
+<p class="meta">آخر تحديث: 9 أكتوبر 2026</p>
+<p class="meta">هذه ترجمة آلية لم يراجعها متحدث أصلي. إذا اختلفت عن النسخة الإنجليزية فالنسخة الإنجليزية هي المعتمدة.</p>
+<p>Harkback إضافة للمتصفح تشرح المصطلحات وأنت تقرأ وتتذكر ما فهمتَه. ليس لها خادم خاص بها. ولا يتلقى المطوّر أيًّا من بياناتك ولا يخزّنها ولا يطّلع عليها.</p>
+
+<h2>ما الذي يخزّنه Harkback</h2>
+<ul>
+<li><strong>سجلاتك</strong> (الشروح وأسئلة المتابعة والملاحظات وعلامات «فهمت / ما زلت لا أفهم» والمصادر التي جاءت منها) تُخزَّن في متصفحك، في التخزين المحلي للإضافة. ولا تُرسَل إلى المطوّر أبدًا.</li>
+<li><strong>إعداداتك</strong>، ومنها أي مفتاح API لنموذج تُدخله، تُخزَّن في تخزين الإضافة داخل متصفحك. المفاتيح <strong>غير مشفّرة</strong>. ولا تُرسَل إلا إلى عنوان النموذج الذي أدخلته.</li>
+<li><strong>النسخ الاحتياطية.</strong> مرة كل أسبوع يحفظ Harkback ملف JSONL بسجلاتك في <code>Downloads/harkback</code> على حاسوبك. يحتوي على السجلات فقط، ولا يحتوي أبدًا على الإعدادات أو مفاتيح API. ويمكنك أيضًا تصدير بياناتك بنفسك من صفحة المكتبة.</li>
+</ul>
+
+<h2>ما الذي يغادر متصفحك</h2>
+<p>الطلب الذي تُطلقه أنت فقط. عندما تطلب شرحًا، يرسل Harkback النص المحدد وفقرته والقسم وعنوان الصفحة إلى <strong>خدمة النماذج التي ضبطتها</strong> (مثل واجهة مستضافة أو خادم محلي كـ Ollama). وتعالج تلك الخدمة البيانات وفق شروطها وسياسة خصوصيتها. ولا يُرسَل أبدًا محتوى المصادر التي تضع عليها علامة «حساس» إلى نموذج غير محلي. وينطبق الأمر نفسه على زر «تحقق من إجابتي» الاختياري في المراجعة: لا يرسل Harkback المصطلح والإجابة التي كتبتها والشرح المخزَّن إلى نموذجك إلا عند الضغط عليه، ويمكنك إيقافه من الإعدادات. وكذلك معاينة الصفحة: لا يرسل Harkback نص الصفحة (أول 16000 حرف) إلى نموذجك إلا عند الضغط على «افحص»، والصفحة التي وضعت عليها علامة «حساس» لا تستخدم سوى نموذج محلي. أما نموذج Chrome المضمَّن فيعمل على حاسوبك، فلا يُرسَل شيء إلى أي مكان؛ وChrome نفسه هو الذي ينزّل ذلك النموذج عند الضغط على «تنزيل النموذج».</p>
+<p>تُقرأ ملفات PDF الممسوحة ضوئيًا على حاسوبك: ولا تغادره صور الصفحات. الطلب الشبكي الوحيد الذي قد يجريه التعرف الضوئي (OCR) هو تنزيل حزمة لغة (الإنجليزية مضمَّنة) من <code>jsdelivr.net</code> (<code>cdn.jsdelivr.net</code>، أو <code>fastly.jsdelivr.net</code> و<code>gcore.jsdelivr.net</code> إن تعذّر الوصول إليه)، مرة واحدة، وفقط عندما تثبّت لغة ضمن «اللغات». ولا يحمل هذا الطلب أي محتوى من المستندات، وتُفحص الحزمة مقابل مجموع اختباري يأتي مع Harkback قبل استخدامها.</p>
+<p>لا يتضمن Harkback أي تحليلات أو إعلانات أو تتبّع، ولا يبيع بياناتك ولا يشاركها.</p>
+
+<h2>الأذونات</h2>
+<ul>
+<li><strong>الوصول إلى المواقع (اختياري).</strong> لا يطلب Harkback الوصول إلى موقع إلا عندما تختار فحصه أو إضافته إلى قائمة المسموح بها، ويطلب عنوان نموذجك ليتمكن من إرسال طلباتك. وفي arxiv.org يعمل تلقائيًا.</li>
+<li><strong>الملفات المحلية (اختياري).</strong> لقراءة ملف PDF على حاسوبك يمكنك السماح بالوصول إلى الملفات المحلية. يُقرأ الملف داخل متصفحك ولا يُرفَع أبدًا.</li>
+<li><strong>أذونات أخرى.</strong> <code>storage</code> يحفظ سجلاتك وإعداداتك؛ <code>alarms</code> يجدول النسخة الاحتياطية الأسبوعية ويحدّث عدد المراجعات على أيقونة شريط الأدوات؛ <code>downloads</code> يكتب تلك النسخة؛ <code>offscreen</code> ينشئ ملف النسخة الاحتياطية؛ <code>scripting</code> و<code>activeTab</code> يتيحان لزر شريط الأدوات واختصارات لوحة المفاتيح قراءة الصفحة التي أنت فيها؛ <code>contextMenus</code> يضيف «الشرح باستخدام Harkback» إلى قائمة النقر بزر الفأرة الأيمن للنص المحدد، و«Harkback: معاينة هذه الصفحة» إلى قائمة النقر الأيمن للصفحة.</li>
+</ul>
+
+<h2>النوافذ الخاصة</h2>
+<p>النوافذ الخاصة (التصفح المتخفي) معطّلة افتراضيًا. وعند تفعيلها يشرح Harkback دون أن يسجّل أو يفحص أو يعرض تذكيرات.</p>
+
+<h2>حذف بياناتك</h2>
+<p>احذف السجلات من صفحة المكتبة، أو أزل الإضافة لمسح كل ما تخزّنه في متصفحك. أما النسخ الاحتياطية والتصديرات المحفوظة بالفعل على قرصك فحذفها شأنك.</p>
+
+<h2>تغييرات هذه السياسة</h2>
+<p>إذا تغيّرت طريقة تعامل Harkback مع البيانات، تُحدَّث هذه الصفحة والتاريخ أعلاه قبل صدور التغيير. والسجل التاريخي علني في <a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">المستودع</a>.</p>
+
+<h2>التواصل</h2>
+<p>للأسئلة: افتح مسألة (issue) على <a href="https://github.com/zestworks-io/harkback/issues">github.com/zestworks-io/harkback/issues</a>.</p>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<span>© 2026 Zestworks · Apache-2.0</span>
+<span><a href="https://github.com/zestworks-io/harkback">GitHub</a> · <a href="https://github.com/zestworks-io/harkback/issues">Issues</a></span>
+<div class="langs"><a href="../../privacy/" lang="en">English</a><a href="../../zh/privacy/" lang="zh-CN">简体中文</a><a href="../../zh-tw/privacy/" lang="zh-TW">繁體中文</a><a href="../../ja/privacy/" lang="ja">日本語</a><a href="../../ko/privacy/" lang="ko">한국어</a><a href="../../es/privacy/" lang="es">Español</a><a href="../../fr/privacy/" lang="fr">Français</a><a href="../../de/privacy/" lang="de">Deutsch</a><a href="../../pt-br/privacy/" lang="pt-BR">Português (Brasil)</a><a href="../../ar/privacy/" lang="ar" aria-current="true">العربية</a></div>
+</div></footer>
+</body>
+</html>

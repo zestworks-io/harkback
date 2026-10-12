@@ -24,7 +24,7 @@
 | <a href="#빠른-시작"><b>빠른 시작</b></a> | <a href="#기능"><b>기능</b></a> | <a href="guide/README.md"><b>문서</b></a> | <a href="#개인정보-보호"><b>개인정보 보호</b></a> | <a href="CHANGELOG.md"><b>변경 이력</b></a> | <a href="CONTRIBUTING.md"><b>기여하기</b></a> |
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <b>한국어</b> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <b>한국어</b> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.ar.md">العربية</a></p>
 
 Harkback은 논문과 기술 문서를 읽는 사람을 위한 Chrome 확장 프로그램입니다. 용어를 선택하면 문맥에 맞게 그 용어를 설명해 줍니다. 모든 설명은 로컬의 추가 전용(append-only) 로그에 보관됩니다. 나중에 다른 페이지에서 같은 용어가 나오면, 표기가 달라도 Harkback이 밑줄을 긋고 지난번에 이해한 내용을 보여 줍니다.
 

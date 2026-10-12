@@ -147,6 +147,19 @@ const LANGUAGES = {
     suffix: "documentação do Harkback",
     describe: (t) => `Documentação do Harkback: ${t}.`,
   },
+  ar: {
+    label: "العربية",
+    html: "ar",
+    dir: "rtl",
+    home: "الرئيسية",
+    docs: "التوثيق",
+    privacy: "الخصوصية",
+    terms: "الشروط",
+    issues: "Issues",
+    all: "كل التوثيق",
+    suffix: "توثيق Harkback",
+    describe: (t) => `توثيق Harkback: ${t}.`,
+  },
 };
 /** The page every language has, which the switcher falls back to for a page that is not translated. */
 const ENTRY = "getting-started";
@@ -261,7 +274,7 @@ function shell({ title, body, route, page }) {
     if (english?.exact) alternates.push(`<link rel="alternate" hreflang="x-default" href="${SITE_URL}${dirOf(english.route)}/">`);
   }
   return `<!doctype html>
-<html lang="${L.html}">
+<html lang="${L.html}"${L.dir ? ` dir="${L.dir}"` : ""}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -293,7 +306,10 @@ rmSync(outDir, { recursive: true, force: true });
 for (const [route, page] of pages) {
   const html = page.html.replace(/href="([^"]*)"/g, (_, href) => `href="${rewrite(href.replace(/&amp;/g, "&"), route, page)}"`);
   const index = linkBetween(route, "");
-  const back = route === "" ? "" : `<p class="crumb"><a href="${index}">← ${LANGUAGES[page.lang].all}</a></p>\n`;
+  const back =
+    route === ""
+      ? ""
+      : `<p class="crumb"><a href="${index}">${LANGUAGES[page.lang].dir === "rtl" ? "→" : "←"} ${LANGUAGES[page.lang].all}</a></p>\n`;
   const dir = route === "" ? outDir : path.join(outDir, route);
   mkdirSync(dir, { recursive: true });
   writeFileSync(

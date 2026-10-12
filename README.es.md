@@ -24,7 +24,7 @@ Explica los términos mientras lees. Recuerda lo que entendiste.<br>Recupéralo 
 | <a href="#inicio-rápido"><b>Inicio rápido</b></a> | <a href="#funciones"><b>Funciones</b></a> | <a href="guide/README.md"><b>Documentación</b></a> | <a href="#privacidad"><b>Privacidad</b></a> | <a href="CHANGELOG.md"><b>Registro de cambios</b></a> | <a href="CONTRIBUTING.md"><b>Contribuir</b></a> |
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <b>Español</b> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <b>Español</b> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.ar.md">العربية</a></p>
 
 Harkback es una extensión de Chrome para quienes leen artículos científicos y documentos técnicos. Selecciona un término y lo explica en contexto. Cada explicación se guarda en un registro local de solo anexado. Cuando el mismo término aparece en una página posterior, incluso con otra grafía, Harkback lo subraya y muestra lo que entendiste la última vez.
 

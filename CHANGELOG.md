@@ -6,6 +6,7 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Arabic README, getting-started guide and website.** `README.ar.md`, `guide/ar/getting-started.md` and the home, privacy and terms pages under `site/ar/`, which read right to left. Every page links to the Arabic version in its language switcher. The Arabic text is machine-written and has not been reviewed by a native speaker; the privacy policy and terms say that the English version applies if they differ.
 - **Language packs for scanned PDFs download from jsDelivr's other hosts when its main one cannot be reached.** If `cdn.jsdelivr.net` is blocked or slow (as it can be in some countries), the same pack is asked for from `fastly.jsdelivr.net` and then `gcore.jsdelivr.net`. A pack is kept only when its checksum matches, whichever host served it. The privacy notes now name `jsdelivr.net`.
 - **Regional research sites.** Settings → Sites has a _Regional research sites_ button that adds auto-scan rules for CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, in the same way as the suggested sites: sites that already have a rule are skipped, and the browser asks for access once when you save. Articles at J-STAGE, SciELO, KCI, Redalyc and CiNii were opened in a real browser and can be explained and recorded.
 - **DeepSeek, Qwen, Moonshot (Kimi), Zhipu GLM and Mistral** are in the provider list. Picking one fills in its address and an example model; a model saved without a provider is recognised by its address, including the address of the service's other region.

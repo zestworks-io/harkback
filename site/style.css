@@ -52,7 +52,7 @@
 }
 .theme-toggle {
   display: inline-flex;
-  margin-left: 6px;
+  margin-inline-start: 6px;
   border: 1px solid var(--rule);
   border-radius: 9999px;
   padding: 2px;
@@ -175,7 +175,7 @@ li {
   max-width: 66ch;
 }
 ul {
-  padding-left: 1.2em;
+  padding-inline-start: 1.2em;
 }
 li {
   margin: 6px 0;
@@ -279,7 +279,7 @@ main:not(.home) .wrap {
   display: inline-block;
   width: 0.9em;
   height: 0.9em;
-  margin-right: 0.5em;
+  margin-inline-end: 0.5em;
   background: var(--mark);
   border-radius: 2px;
   vertical-align: -0.1em;
@@ -353,7 +353,7 @@ main.doc .wrap {
   margin: 22px 0 4px;
 }
 .prose ol {
-  padding-left: 1.4em;
+  padding-inline-start: 1.4em;
 }
 .prose a {
   color: var(--link);
@@ -380,7 +380,7 @@ main.doc .wrap {
 .prose td {
   border: 1px solid var(--rule);
   padding: 6px 10px;
-  text-align: left;
+  text-align: start;
   vertical-align: top;
 }
 .prose th {
@@ -389,10 +389,25 @@ main.doc .wrap {
 .prose blockquote {
   margin: 16px 0;
   padding: 2px 16px;
-  border-left: 3px solid var(--mark);
+  border-inline-start: 3px solid var(--mark);
   color: var(--muted);
 }
 .crumb {
   margin: 0 0 16px;
   font-size: 14px;
+}
+
+/* Arabic letters join, so they must not be spaced apart. */
+html[lang="ar"] * {
+  letter-spacing: normal;
+}
+
+/* Code, commands and addresses read left to right inside right-to-left pages. */
+html[dir="rtl"] pre,
+html[dir="rtl"] code {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+html[dir="rtl"] pre {
+  text-align: left;
 }

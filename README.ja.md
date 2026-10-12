@@ -24,7 +24,7 @@
 | <a href="#クイックスタート"><b>クイックスタート</b></a> | <a href="#機能"><b>機能</b></a> | <a href="guide/README.md"><b>ドキュメント</b></a> | <a href="#プライバシー"><b>プライバシー</b></a> | <a href="CHANGELOG.md"><b>変更履歴</b></a> | <a href="CONTRIBUTING.md"><b>コントリビュート</b></a> |
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <b>日本語</b> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <b>日本語</b> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <a href="README.de.md">Deutsch</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.ar.md">العربية</a></p>
 
 Harkback は、論文や技術文書を読む人のための Chrome 拡張機能です。用語を選択すると、文脈に沿ってその用語を解説します。解説はすべて、ローカルの追記専用ログに保存されます。のちに別のページで同じ用語に出会うと（表記が違っていても）、Harkback は下線を引き、前回どう理解したかを表示します。
 

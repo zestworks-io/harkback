@@ -24,7 +24,7 @@ Begriffe beim Lesen erklären lassen. Behalten, was du verstanden hast.<br>Es wi
 | <a href="#schnellstart"><b>Schnellstart</b></a> | <a href="#funktionen"><b>Funktionen</b></a> | <a href="guide/README.md"><b>Dokumentation</b></a> | <a href="#datenschutz"><b>Datenschutz</b></a> | <a href="CHANGELOG.md"><b>Änderungsprotokoll</b></a> | <a href="CONTRIBUTING.md"><b>Mitmachen</b></a> |
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <b>Deutsch</b> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a> · <a href="README.fr.md">Français</a> · <b>Deutsch</b> · <a href="README.pt-BR.md">Português (Brasil)</a> · <a href="README.ar.md">العربية</a></p>
 
 Harkback ist eine Chrome-Erweiterung für Menschen, die wissenschaftliche Arbeiten und technische Dokumente lesen. Markiere einen Begriff, und er wird im Kontext erklärt. Jede Erklärung wird in einem lokalen, nur anfügbaren Protokoll gespeichert. Taucht derselbe Begriff auf einer späteren Seite auf, auch in anderer Schreibweise, unterstreicht Harkback ihn und zeigt, was du beim letzten Mal verstanden hast.
 
