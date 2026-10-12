@@ -10,12 +10,15 @@ import {
   type SiteRule,
 } from "../../src/lib/storage/settings";
 import {
+  addRegionalSites,
   addSuggestedSites,
+  REGIONAL_RESEARCH_SITES,
   effectiveRule,
   hostPermissionPatterns,
   normalizePattern,
   originPattern,
   SUGGESTED_RESEARCH_SITES,
+  VIDEO_SITES,
 } from "../../src/lib/source/site-rules";
 
 const remote: ModelConfig = {
@@ -257,5 +260,29 @@ describe("suggested research sites", () => {
     expect(rules[0]).toEqual({ pattern: "BioRxiv.org", sensitive: true });
     expect(addSuggestedSites(rules)).toBe(0);
     expect(rules).toHaveLength(SUGGESTED_RESEARCH_SITES.length);
+  });
+});
+
+describe("regional research sites", () => {
+  const all = Object.values(REGIONAL_RESEARCH_SITES).flat();
+
+  it("are valid patterns, apart from the suggested sites and the video sites", () => {
+    for (const p of all) {
+      expect(normalizePattern(p)).toBe(p);
+      expect(hostPermissionPatterns(p)).toEqual([`*://${p}/*`, `*://*.${p}/*`]);
+      expect(SUGGESTED_RESEARCH_SITES).not.toContain(p);
+      expect(VIDEO_SITES).not.toContain(p);
+    }
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("get auto-scan rules once, and cover their subdomains", () => {
+    const rules: SiteRule[] = [{ pattern: "KCI.go.kr", sensitive: true }];
+    expect(addRegionalSites(rules)).toBe(all.length - 1);
+    expect(rules[0]).toEqual({ pattern: "KCI.go.kr", sensitive: true });
+    expect(addRegionalSites(rules)).toBe(0);
+    expect(effectiveRule(rules, "https://kns.cnki.net/kcms2/article/abstract?v=x").autoScan).toBe(true);
+    expect(effectiveRule(rules, "https://www.jstage.jst.go.jp/article/x/1/1/1_1/_article").autoScan).toBe(true);
+    expect(effectiveRule(rules, "https://hal.science/hal-01234567").autoScan).toBe(true);
   });
 });

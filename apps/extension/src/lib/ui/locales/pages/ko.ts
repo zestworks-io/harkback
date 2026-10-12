@@ -383,4 +383,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Next: "다음",
   "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
     "설정에는 추가 모델, 사이트별 규칙, 스캔한 PDF, 복습, 데이터 내보내기도 있습니다.",
+  "+ Regional research sites": "+ 지역별 연구 사이트",
+  "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
+    "지역별 연구 사이트: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc, HAL. 이 사이트들도 자동으로 스캔됩니다.",
 };

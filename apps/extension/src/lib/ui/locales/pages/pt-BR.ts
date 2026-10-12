@@ -388,4 +388,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   Next: "Avançar",
   "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
     "Em Configurações há mais: modelos extras, regras por site, PDFs digitalizados, revisão e exportação de dados.",
+  "+ Regional research sites": "+ Sites de pesquisa regionais",
+  "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
+    "Sites de pesquisa regionais: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc e HAL, também verificados automaticamente.",
 };

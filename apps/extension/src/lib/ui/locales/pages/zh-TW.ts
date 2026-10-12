@@ -375,4 +375,7 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Next: "下一步",
   "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
     "設定裡還可以新增更多模型、依網站調整、掃描版 PDF、複習和資料匯出。",
+  "+ Regional research sites": "+ 各地區的研究網站",
+  "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
+    "各地區的研究網站：中國知網（CNKI）、J-STAGE、CiNii、KCI、SciELO、Redalyc 與 HAL，同樣自動掃描。",
 };

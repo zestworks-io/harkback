@@ -166,6 +166,8 @@ every page on `example.com` is sensitive except those under `/public`. If the se
 
 **Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
 
+**Regional research sites.** The _Regional research sites_ button works the same way for CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL. It was tried on articles at J-STAGE, SciELO, KCI, Redalyc and CiNii, where terms can be selected and explained and the lookup is recorded; a page with a DOI is one source by that DOI, and the others by their address. CNKI articles are mostly behind a login and HAL asks the browser to pass a check first, so those pages work only once you are through them.
+
 ## YouTube captions
 
 Add YouTube under _Sites_ with the _+ YouTube captions_ button, press _Save changes_ and allow site access when the browser asks. Nothing runs on YouTube before that. Then open a video and turn on captions (CC).

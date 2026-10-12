@@ -107,6 +107,15 @@ export const SUGGESTED_RESEARCH_SITES: readonly string[] = [
   "aclanthology.org",
 ];
 
+/** Research sites of other regions, by region. The reader adds them on purpose, apart from the suggested sites above. */
+export const REGIONAL_RESEARCH_SITES: Readonly<Record<string, readonly string[]>> = {
+  china: ["cnki.net"],
+  japan: ["jstage.jst.go.jp", "cir.nii.ac.jp", "ci.nii.ac.jp"],
+  korea: ["kci.go.kr"],
+  "latin-america": ["scielo.org", "scielo.br", "redalyc.org"],
+  france: ["hal.science", "hal.archives-ouvertes.fr"],
+};
+
 /** Video sites whose captions are read. Never part of the research sites: the reader adds them on purpose. */
 export const VIDEO_SITES: readonly string[] = ["youtube.com"];
 
@@ -132,6 +141,11 @@ function addAutoScanRules(rules: SiteRule[], patterns: readonly string[]): numbe
 /** Adds an auto-scan rule for each suggested site that has no rule yet; a rule the reader already has is left as it is. Returns how many were added. */
 export function addSuggestedSites(rules: SiteRule[]): number {
   return addAutoScanRules(rules, SUGGESTED_RESEARCH_SITES);
+}
+
+/** Same for the regional research sites. */
+export function addRegionalSites(rules: SiteRule[]): number {
+  return addAutoScanRules(rules, Object.values(REGIONAL_RESEARCH_SITES).flat());
 }
 
 /** Same for the video sites. */

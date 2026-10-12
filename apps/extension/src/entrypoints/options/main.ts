@@ -10,7 +10,7 @@ import { BUILTIN_MODEL, builtInState, downloadBuiltIn } from "../../lib/models/b
 import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/storage/settings";
 import { applyTheme } from "../../lib/ui/theme";
 import { PROVIDERS, providerById } from "../../lib/models/providers";
-import { addSuggestedSites, addVideoSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
+import { addRegionalSites, addSuggestedSites, addVideoSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { applyLanguage, isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
@@ -386,6 +386,24 @@ async function main(): Promise<void> {
       render();
     });
 
+    const suggestRegional = h(
+      "button",
+      { type: "button", className: "add", "data-hb": "suggest-regional" },
+      L("+ 各地区的研究网站", "+ Regional research sites"),
+    );
+    suggestRegional.addEventListener("click", () => {
+      const added = addRegionalSites(draft.sites);
+      suggestMessage =
+        added > 0
+          ? L(
+              "已添加 {n} 个网站。点击保存后，浏览器会一次性询问网站访问权限。",
+              "Added {n} sites. Save to grant site access; the browser asks once.",
+              { n: added },
+            )
+          : L("这些网站都已有规则。", "These sites already have rules.");
+      render();
+    });
+
     const saveButton = h("button", { type: "button", className: "primary", "data-hb": "save" }, L("保存", "Save changes"));
     saveButton.addEventListener("click", () => void save());
     const backupButton = h("button", { type: "button", className: "small", "data-hb": "backup-now" }, L("立即备份", "Back up now"));
@@ -648,6 +666,7 @@ async function main(): Promise<void> {
               draft.sites.length === 0 ? h("p", { className: "empty" }, L("还没有网站规则。", "No site rules yet.")) : null,
               addSite,
               suggestSites,
+              suggestRegional,
               addYouTube,
               suggestNote,
               h(
@@ -656,6 +675,14 @@ async function main(): Promise<void> {
                 L(
                   "推荐网站：bioRxiv、medRxiv、PubMed（只有摘要）、SSRN、OpenReview 和 ACL Anthology，都会自动扫描。",
                   "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.",
+                ),
+              ),
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "各地区的研究网站：中国知网（CNKI）、J-STAGE、CiNii、KCI、SciELO、Redalyc 和 HAL，同样自动扫描。",
+                  "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.",
                 ),
               ),
               h(
