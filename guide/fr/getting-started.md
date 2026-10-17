@@ -6,7 +6,9 @@ Cinq minutes pour passer de rien à votre premier terme mémorisé.
 
 ## 1. Installer
 
-Harkback est une extension Chrome (Manifest V3). Il n'y a pas encore de fiche sur le store : on la charge donc depuis les sources. Il vous faut Node 22 ou plus récent et [pnpm](https://pnpm.io).
+Harkback est une extension Chrome (Manifest V3). Installez-la depuis le [Chrome Web Store](https://chromewebstore.google.com/detail/joancadfahbgmadnjldekohffbffmodo) ; la page d'accueil de configuration s'ouvre toute seule.
+
+Pour l'exécuter plutôt depuis les sources, il vous faut Node 22 ou plus récent et [pnpm](https://pnpm.io).
 
 ```sh
 git clone https://github.com/zestworks-io/harkback.git
@@ -29,7 +31,7 @@ Harkback n'a pas de serveur. Il lui faut un modèle pour écrire les explication
 
 **Le modèle intégré de Chrome (Gemini Nano)** n'a besoin ni d'adresse ni de clé. Le sélectionner affiche l'état du modèle et un bouton **Télécharger le modèle** ; **Terminer la configuration** attend la fin du téléchargement. C'est un petit modèle qui tourne sur votre ordinateur : attendez-vous à ce qu'il soit plus lent qu'un modèle dans le cloud, surtout à la première requête, avec des réponses plus simples. Il convient aux explications courtes.
 
-Vous pourrez ajouter d'autres modèles et changer des options plus tard dans les paramètres. Relancer la configuration met à jour le modèle que vous avez déjà ; elle n'en ajoute pas une deuxième copie.
+Vous pourrez ajouter d'autres modèles et changer des options plus tard dans les paramètres. Relancer la configuration met à jour le modèle que vous avez déjà ; elle n'en ajoute pas une deuxième copie. Si vous quittez la configuration avant **Terminer la configuration**, la page des paramètres indique que la configuration n'est pas terminée et propose un lien pour la reprendre. La carte Confidentialité des paramètres indique quand vous avez accepté les notes de confidentialité.
 
 L'option gratuite la plus simple est un modèle local [Ollama](https://ollama.com). Elle demande une étape de plus, car Ollama refuse les requêtes des extensions de navigateur tant que vous n'avez pas autorisé l'origine de l'extension. Le bouton de test affiche la commande exacte pour votre système. Voir [Modèles et fournisseurs](../models.md) pour tous les fournisseurs et pour exécuter un modèle sur un autre ordinateur de votre réseau domestique.
 
@@ -51,7 +53,7 @@ Ouvrez un autre article qui mentionne `LoRA`, `low-rank adaptation` ou `LoRAs`. 
 
 ## 5. Voir ce que vous avez
 
-Ouvrez la page **Historique** (liée depuis les paramètres et la configuration). Elle liste chaque terme par concept, avec une recherche, les conversations de suivi, une file de révision et un graphe des liens entre vos concepts. Vous pouvez aussi y exporter vos enregistrements et les restaurer depuis une sauvegarde.
+Ouvrez la page **Historique** (liée depuis les paramètres et la configuration ; vous pouvez aussi faire un clic droit sur l'icône de la barre d'outils et choisir **Historique**, et **Révision** dans ce même menu ouvre la file de révision). Elle liste chaque terme par concept, avec une recherche, les conversations de suivi, une file de révision et un graphe des liens entre vos concepts. Vous pouvez aussi y exporter vos enregistrements et les restaurer depuis une sauvegarde.
 
 ## Lire autre chose que arXiv
 

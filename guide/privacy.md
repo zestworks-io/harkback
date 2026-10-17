@@ -33,7 +33,7 @@ For sensitive material:
 - **Compare** refuses to send a sensitive earlier record to a remote model;
 - records are still kept in your browser, and the history shows a **Sensitive source** badge.
 
-Sensitivity is **sticky**. Once a source is sensitive, only your own choice (**Mark as normal** on its history entry) makes it normal again: an automatic record from elsewhere, such as a backup restored from a device that never knew, cannot undo it.
+Sensitivity is **sticky**. Once a source is sensitive, only your own choice (**Mark as normal** on its history entry, or the lock at the corner of the page) makes it normal again: an automatic record from elsewhere, such as a backup restored from a device that never knew, cannot undo it.
 
 A site rule that matches a source applies even to records made before the rule existed. Rules can be switched off for a more specific path; see [Site rules](user-guide.md#site-rules).
 
@@ -43,7 +43,7 @@ Most pages on GitHub, Notion and Google Docs are private, and a page looks the s
 
 - a GitHub page that says its repository is private, and a Notion or Google Docs page that is not published, are held back until you choose _Local only_ (the source becomes sensitive) or _Send anyway_ (the usual model);
 - a published page (`*.notion.site`, a Google document's published link) is not held back;
-- your choice is recorded as your own and can be remembered for the whole site as a rule; a rule for a site never silently hides a page that says it is private;
+- your choice is recorded as your own and can be remembered for the whole site as a rule; a rule for a site never silently hides a page that says it is private, and a page you answered with _Local only_ stays sensitive even when a rule calls its whole site fine;
 - in a private window the choice is not recorded and holds until you close or reload the page;
 - the check happens in the background worker, in the same place that picks the model, so the page cannot skip it. The toolbar's page preview shows the same question before it offers to scan; underlining terms you know uses no model and never asks.
 
@@ -67,7 +67,7 @@ Incognito windows must be allowed for the extension in Chrome. In them Harkback 
 
 **Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files. Such a backup does not record which sources were sensitive either, so mark them again after restoring it. Site rules are settings and are never in backups.
 
-**Contributing to the data commons** (History → Contribute) builds a file on your computer from openly licensed papers only, without quotes, explanations, addresses or exact times, and shows all of it before you save it. Harkback never uploads it.
+**Contributing to the data commons** (History → Contribute) builds a file on your computer from openly licensed papers only, without quotes, explanations, addresses or exact times, and shows all of it before you save it. A sensitive source, or one a site rule makes sensitive, is never included. Harkback never uploads it. The licence it relies on is read from the page you already opened (arXiv's licence link, or the page's licence metadata), with no extra request.
 
 ## Limits to know about
 

@@ -6,7 +6,9 @@ Fünf Minuten von Null bis zum ersten gemerkten Begriff.
 
 ## 1. Installieren
 
-Harkback ist eine Chrome-Erweiterung (Manifest V3). Es gibt noch keinen Eintrag im Store, daher wird sie aus dem Quellcode geladen. Sie benötigen Node 22 oder neuer und [pnpm](https://pnpm.io).
+Harkback ist eine Chrome-Erweiterung (Manifest V3). Installieren Sie sie aus dem [Chrome Web Store](https://chromewebstore.google.com/detail/joancadfahbgmadnjldekohffbffmodo); die Einrichtungsseite öffnet sich von selbst.
+
+Um sie stattdessen aus dem Quellcode zu laden, benötigen Sie Node 22 oder neuer und [pnpm](https://pnpm.io).
 
 ```sh
 git clone https://github.com/zestworks-io/harkback.git
@@ -29,7 +31,7 @@ Harkback hat keinen Server. Es braucht ein Modell, das die Erklärungen schreibt
 
 **Das in Chrome eingebaute Modell (Gemini Nano)** braucht weder Adresse noch Schlüssel. Wenn Sie es auswählen, sehen Sie den Status des Modells und eine Schaltfläche **Modell herunterladen**; **Einrichtung abschließen** wartet, bis der Download fertig ist. Es ist ein kleines Modell, das auf Ihrem Computer läuft, rechnen Sie also damit, dass es langsamer ist als ein Cloud-Modell, besonders bei der ersten Anfrage, und einfachere Antworten gibt. Es eignet sich für kurze Erklärungen.
 
-Weitere Modelle und Optionen können Sie später auf der Einstellungsseite hinzufügen. Wenn Sie die Einrichtung erneut ausführen, wird das vorhandene Modell aktualisiert; es wird keine zweite Kopie angelegt.
+Weitere Modelle und Optionen können Sie später auf der Einstellungsseite hinzufügen. Wenn Sie die Einrichtung erneut ausführen, wird das vorhandene Modell aktualisiert; es wird keine zweite Kopie angelegt. Verlassen Sie die Einrichtung vor **Einrichtung abschließen**, zeigt die Einstellungsseite an, dass die Einrichtung noch nicht abgeschlossen ist, und verlinkt zurück dorthin. Die Karte **Datenschutz** in den Einstellungen zeigt, wann Sie den Datenschutzhinweisen zugestimmt haben.
 
 Die einfachste kostenlose Möglichkeit ist ein lokales [Ollama](https://ollama.com)-Modell. Es braucht einen zusätzlichen Schritt, weil Ollama Anfragen von Browser-Erweiterungen ablehnt, bis Sie den Ursprung der Erweiterung erlauben. Die Test-Schaltfläche zeigt den genauen Befehl für Ihr System. Alle Anbieter und wie Sie ein Modell auf einem anderen Computer in Ihrem Heimnetz betreiben, steht unter [Modelle und Anbieter](../models.md).
 
@@ -51,7 +53,7 @@ Weitere Wege zum Start: das Kontextmenü auf ausgewähltem Text und eine Auswahl
 
 ## 5. Ansehen, was Sie haben
 
-Öffnen Sie die Seite **Verlauf** (verlinkt von den Einstellungen und der Einrichtung). Sie listet jeden Begriff nach Konzept auf, mit Suche, Nachfragen, einer Wiederholungswarteschlange und einem Graphen, wie Ihre Konzepte zusammenhängen. Dort können Sie auch Ihre Einträge exportieren und aus einer Sicherung wiederherstellen.
+Öffnen Sie die Seite **Verlauf** (verlinkt von den Einstellungen und der Einrichtung, oder klicken Sie mit der rechten Maustaste auf das Symbol in der Symbolleiste und wählen Sie **Verlauf**; **Wiederholung** öffnet dort die Wiederholungswarteschlange). Sie listet jeden Begriff nach Konzept auf, mit Suche, Nachfragen, einer Wiederholungswarteschlange und einem Graphen, wie Ihre Konzepte zusammenhängen. Dort können Sie auch Ihre Einträge exportieren und aus einer Sicherung wiederherstellen.
 
 ## Etwas lesen, das nicht auf arXiv steht
 

@@ -4,7 +4,9 @@ Five minutes from nothing to your first remembered term.
 
 ## 1. Install
 
-Harkback is a Chrome extension (Manifest V3). There is no store listing yet, so load it from source. You need Node 22 or newer and [pnpm](https://pnpm.io).
+Harkback is a Chrome extension (Manifest V3). Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/joancadfahbgmadnjldekohffbffmodo); the onboarding page opens by itself.
+
+To run it from source instead, you need Node 22 or newer and [pnpm](https://pnpm.io).
 
 ```sh
 git clone https://github.com/zestworks-io/harkback.git
@@ -27,7 +29,7 @@ Harkback has no server. It needs a model to write explanations, and you choose w
 
 **Chrome built-in (Gemini Nano)** needs no address or key. Selecting it shows the model's status and a **Download model** button; **Finish** waits until the download is done. It is a small model that runs on your computer, so expect it to be slower than a cloud model, especially on the first request, with simpler answers. It suits short explanations.
 
-You can add more models and change options later on the settings page. Running onboarding again updates the model you already have; it does not add a second copy.
+You can add more models and change options later on the settings page. Running onboarding again updates the model you already have; it does not add a second copy. If you leave setup before **Finish**, the settings page says that setup is not finished and links back to it. The Privacy card in settings shows when you agreed to the privacy notes.
 
 The easiest free option is a local [Ollama](https://ollama.com) model. It needs one extra step, because Ollama refuses requests from browser extensions until you allow the extension's origin. The Test button shows the exact command for your system. See [Models and providers](models.md) for every provider and for running a model on another computer in your home network.
 
@@ -49,7 +51,7 @@ Open a different paper that mentions `LoRA`, `low-rank adaptation` or `LoRAs`. T
 
 ## 5. Look at what you have
 
-Open the **History** page (linked from settings and onboarding). It lists every term by concept, with search, follow-up conversations, a review queue and a graph of how your concepts connect. From there you can also export your records and restore them from a backup.
+Open the **History** page (linked from settings and onboarding, or right-click the toolbar icon and choose **History**; **Review** there opens the review queue). It lists every term by concept, with search, follow-up conversations, a review queue and a graph of how your concepts connect. From there you can also export your records and restore them from a backup.
 
 ## Reading something that is not on arXiv
 

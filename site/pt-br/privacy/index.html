@@ -28,34 +28,35 @@
 <main><div class="wrap">
 
 <h1>Política de privacidade</h1>
-<p class="meta">Última atualização: 9 de outubro de 2026</p>
+<p class="meta">Última atualização: 17 de outubro de 2026</p>
 <p class="meta">Esta é uma tradução. Se divergir da versão em inglês, prevalece a versão em inglês.</p>
 <p>O Harkback é uma extensão de navegador que explica termos enquanto você lê e guarda o que você entendeu. Ela não tem servidor próprio. O desenvolvedor não recebe, armazena nem vê nenhum dos seus dados.</p>
 
 <h2>O que o Harkback armazena</h2>
 <ul>
-<li><strong>Seus registros</strong> (explicações, perguntas de acompanhamento, anotações, marcas de “entendi / ainda confuso” e as fontes de onde vieram) ficam no seu navegador, no armazenamento local da extensão. Nunca são enviados ao desenvolvedor.</li>
+<li><strong>Seus registros</strong> (explicações, perguntas de acompanhamento, anotações, marcas de “entendi / ainda confuso” e as fontes de onde vieram, com a licença da fonte quando a página a informa) ficam no seu navegador, no armazenamento local da extensão. Nunca são enviados ao desenvolvedor.</li>
 <li><strong>Suas configurações</strong>, incluindo qualquer chave de API de modelo que você informar, ficam no armazenamento da extensão no seu navegador. As chaves <strong>não são criptografadas</strong>. Elas só são enviadas ao endereço do modelo que você informou.</li>
 <li><strong>Backups.</strong> Uma vez por semana, o Harkback salva um arquivo JSONL com seus registros em <code>Downloads/harkback</code> no seu computador. Ele contém apenas registros, nunca configurações nem chaves de API. Você também pode exportar seus dados pela página da biblioteca.</li>
+<li><strong>Arquivo de contribuição (opcional).</strong> Se você escolher <em>Contribuir</em> na página da biblioteca, o Harkback monta um arquivo anônimo a partir das suas consultas em artigos do arXiv e com DOI que têm licença aberta: o identificador do artigo, a licença, o termo, a área e a seção, o quanto você o entendeu e o mês, além das relações que você confirmou. Ele não tem citações, explicações, endereços nem horários exatos, e nunca inclui uma fonte sensível. Você vê o arquivo inteiro antes de salvá-lo no seu computador. Nada é enviado; se e onde você o submete é decisão sua. Ao salvar, fica uma anotação nos seus registros do que você aceitou contribuir.</li>
 </ul>
 
 <h2>O que sai do seu navegador</h2>
 <p>Somente o pedido que você aciona. Quando você pede uma explicação, o Harkback envia o texto selecionado, o parágrafo, a seção e o título da página ao <strong>serviço de modelo que você configurou</strong> (por exemplo, uma API hospedada ou um servidor local como o Ollama). Esse serviço trata os dados conforme os próprios termos e a própria política de privacidade. O conteúdo de fontes que você marca como sensíveis nunca é enviado a um modelo que não seja local. O mesmo vale para o botão opcional “Verificar minha resposta” na revisão: somente quando você o pressiona, o Harkback envia o termo, a resposta que você digitou e a explicação guardada ao seu modelo. Você pode desativá-lo nas configurações. O mesmo vale para a prévia da página: somente quando você pressiona Escanear, o Harkback envia o texto da página (os primeiros 16.000 caracteres) ao seu modelo, e uma página que você marcou como sensível usa apenas um modelo local. O modelo integrado do Chrome roda no seu computador, então nada é enviado; é o próprio Chrome que baixa esse modelo quando você pressiona Baixar modelo.</p>
-<p>PDFs escaneados são lidos no seu computador: as imagens das páginas nunca saem dele. O único pedido de rede que o OCR pode fazer é baixar um pacote de idioma (o inglês já vem incluído) de <code>jsdelivr.net</code>, uma vez, e somente quando você instala um idioma em Idiomas. Esse pedido não leva nenhum conteúdo de documento, e o pacote é verificado com uma soma de verificação distribuída com o Harkback antes de ser usado.</p>
+<p>PDFs escaneados são lidos no seu computador: as imagens das páginas nunca saem dele. O único pedido de rede que o OCR pode fazer é baixar um pacote de idioma (o inglês já vem incluído) de <code>jsdelivr.net</code> (<code>cdn.jsdelivr.net</code> ou, se ele não estiver acessível, <code>fastly.jsdelivr.net</code> e <code>gcore.jsdelivr.net</code>), uma vez, e somente quando você instala um idioma em Idiomas. Esse pedido não leva nenhum conteúdo de documento, e o pacote é verificado com uma soma de verificação distribuída com o Harkback antes de ser usado.</p>
 <p>O Harkback não inclui análise de uso, publicidade nem rastreamento, e não vende nem compartilha seus dados.</p>
 
 <h2>Permissões</h2>
 <ul>
 <li><strong>Acesso a sites (opcional).</strong> O Harkback só pede acesso a um site quando você escolhe escaneá-lo ou adicioná-lo à lista de permitidos, e pede o endereço do seu modelo para poder enviar seus pedidos. Em arxiv.org ele funciona automaticamente.</li>
 <li><strong>Arquivos locais (opcional).</strong> Para ler um PDF no seu computador, você pode permitir o acesso a arquivos locais. O arquivo é lido no seu navegador e nunca é enviado.</li>
-<li><strong>Outras permissões.</strong> <code>storage</code> guarda seus registros e configurações; <code>alarms</code> agenda o backup semanal e atualiza a contagem de revisões no ícone da barra de ferramentas; <code>downloads</code> grava esse backup; <code>offscreen</code> cria o arquivo de backup; <code>scripting</code> e <code>activeTab</code> permitem que o botão da barra de ferramentas e os atalhos de teclado leiam a página em que você está; <code>contextMenus</code> adiciona “Explicar com o Harkback” ao menu de contexto do texto selecionado e “Harkback: Prévia desta página” ao menu de contexto de uma página.</li>
+<li><strong>Outras permissões.</strong> <code>storage</code> guarda seus registros e configurações; <code>alarms</code> agenda o backup semanal e atualiza a contagem de revisões no ícone da barra de ferramentas; <code>downloads</code> grava esse backup; <code>offscreen</code> cria o arquivo de backup; <code>scripting</code> e <code>activeTab</code> permitem que o botão da barra de ferramentas e os atalhos de teclado leiam a página em que você está; <code>contextMenus</code> adiciona “Harkback: Explicar” ao menu de contexto do texto selecionado, “Harkback: Prévia desta página” ao menu de contexto de uma página, e Revisão e Histórico ao menu de contexto do ícone da barra de ferramentas.</li>
 </ul>
 
 <h2>Janelas privadas</h2>
 <p>As janelas privadas (anônimas) vêm desativadas por padrão. Se você as ativar, o Harkback explica, mas não registra, não escaneia nem mostra lembretes.</p>
 
 <h2>Excluir seus dados</h2>
-<p>Exclua registros pela página da biblioteca ou remova a extensão para apagar tudo o que ela guarda no seu navegador. Backups e exportações já salvos no seu disco são seus, e cabe a você excluí-los.</p>
+<p>Exclua registros pela página da biblioteca ou remova a extensão para apagar tudo o que ela guarda no seu navegador. Excluir uma entrada apaga o texto dela (a citação, a explicação e qualquer pergunta de acompanhamento); o nome do termo e o título e o endereço da fonte continuam nos seus registros, porque outras entradas podem se referir a eles. Backups e exportações já salvos no seu disco são seus, e cabe a você excluí-los.</p>
 
 <h2>Mudanças nesta política</h2>
 <p>Se a forma como o Harkback trata dados mudar, esta página e a data acima serão atualizadas antes da mudança ser publicada. O histórico é público no <a href="https://github.com/zestworks-io/harkback/commits/main/PRIVACY.md">repositório</a>.</p>

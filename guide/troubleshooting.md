@@ -24,6 +24,7 @@ After any failure the card offers **Try again**, and **Try with …** when you h
 - Short or ambiguous terms need help: an abbreviation like `SAM` or `GP` shows only when another term from the same field is on the page. A Chinese name of two characters is underlined only where it is a word of its own on the page, and a one-character name never is.
 - Private windows never scan.
 - The site may be **Disabled** in a site rule.
+- In YouTube's automatic captions, a term misheard as something quite different (`lower` for LoRA) is not matched, and a common word written in lower case (`set`) never counts as an acronym. The hint names the text it matched, so you can tell a loose match from an exact one.
 
 ## The Explain button does not appear
 
@@ -47,6 +48,14 @@ A PDF that is only pictures of pages is read with OCR on your computer, page by 
 - OCR works best on clean, upright pages. Handwriting, formulas and tables are not recovered, and pages that are rotated in the file may not line up with their text.
 
 Complicated layouts (tables, three or more columns) may split paragraphs imperfectly.
+
+## Settings says setup is not finished
+
+You left onboarding before **Finish**. Follow _Continue setup_ on the settings page to finish it.
+
+## Contribute says no paper can be contributed
+
+Only arXiv or DOI papers whose page states an open licence (Creative Commons or public domain) can be contributed, and never a sensitive source. Harkback records the licence that the page you look a term up on states, for example the licence link on an arXiv abstract page. A PDF never states one in a way Harkback reads, so a paper you only read as a PDF, or on pages that state no licence, counts as unknown. A licence seen once is kept, even when a later look-up is made in the PDF.
 
 ## The shortcut does nothing
 

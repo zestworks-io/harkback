@@ -32,7 +32,7 @@ pnpm lint
 pnpm test
 pnpm format:check
 pnpm e2e            # when you touch anything under apps/extension
-pnpm check:build    # when you touch permissions, the manifest, or imports of the content script
+pnpm check:build    # when you touch permissions, the manifest, or imports of the content script (the built content script must stay under 130 KB)
 ```
 
 The ESLint setup lives in `tools/lint` with its own TypeScript 6, because typescript-eslint does not support TypeScript 7 yet; the rest of the repo compiles with TypeScript 7.
@@ -65,7 +65,9 @@ New English text in a page is written as `L("中文", "English")` or `pick(lang,
 
 ### Adding an event type or field
 
-Change `packages/spec/src/schema.ts`, regenerate the schema with `pnpm --filter @harkback/spec gen:schema`, handle it in `packages/core/src/events/replay.ts` and add a replay test. New optional fields keep old logs valid. A change that old versions cannot read needs a new envelope version `v`.
+Change `packages/spec/src/schema.ts`, regenerate the schema with `pnpm --filter @harkback/spec gen:schema`, handle it in `packages/core/src/events/replay.ts` and add a replay test. New optional fields keep old logs valid, and an older version skips event types it does not know. A change that old versions cannot read needs a new envelope version `v`.
+
+A correction to the user's records is a new event that replay applies on top; recorded events are only rewritten by compaction after a deletion. A merge is `concept.merged` and undoing it is `concept.unmerged`; a split (`packages/core/src/concepts/split.ts`) is `concept.created`, `concept.alias_removed`, `encounter.moved` and, for a merged concept moved out, `concept.unmerged` and `concept.merged` into the new concept. A new event that moves something must also move what was recorded from it (relations, proposed names and the decisions about them), and must be handled in `export/redact.ts` so a backup without sensitive sources leaves it out when it names one.
 
 ### Adding a setting
 

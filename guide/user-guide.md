@@ -14,6 +14,7 @@
 - [Export, backup and restore](#export-backup-and-restore)
 - [Contributing to the data commons](#contributing-to-the-data-commons)
 - [Site rules](#site-rules)
+- [YouTube captions](#youtube-captions)
 - [GitHub, Notion and Google Docs](#github-notion-and-google-docs)
 - [Pages that look private](#pages-that-look-private)
 - [Keyboard and shortcuts](#keyboard-and-shortcuts)
@@ -80,7 +81,8 @@ Pages that load more text, or a single-page app that moves to another page witho
 
 - Accents on Latin letters are ignored; there is no stemming except for English plurals.
 - An abbreviation matches its full name when the name has at least three words. Two different full names for the same abbreviation in one field stay separate concepts.
-- Chinese names, and Japanese names written only in kanji, of three or more characters are underlined wherever they appear. A two-character name is underlined only where it is a word of its own on the page; a one-character name never is. Names with kana or Hangul need two characters.
+- Chinese names, and Japanese names written only in kanji, of three or more characters are underlined wherever they appear. A two-character name is underlined only where it is a word of its own on the page; a one-character name never is. Names with kana or Hangul need two characters. Simplified and Traditional spellings of the common technical characters are one term (`神經網絡` and `神经网络`).
+- In Arabic, vowel marks, the stretching line and the alef, ya and ta marbuta spellings are ignored, and Arabic-Indic and Persian digits match ASCII digits. A name is underlined with the one-letter and article prefixes (`و`, `ب`, `ل`, `ك`, `ف`, `ال`, `بال`, `وال`) and the common plural and pronoun endings, but not inside a longer word.
 
 A term you select in another language joins the concept you already have when the model's card names it, so "注意力机制" and "attention mechanism" end up as one concept. When the model knows the term's name in your explanation language, it appears under **Suggested names** on the concept page. It is only recognised on pages once you **Accept** it, and a name you **Reject** is not suggested again. On a concept page you can also **add an alias**, **merge** two concepts that are the same, **remove** a wrong relation, or **mute** the concept. Relations the model was unsure about are listed apart under **Possible relations**: they are not used until you confirm one with ✓, and × removes it. Adding an alias that already belongs to another concept is refused; merge instead. **Split…** fixes a look-up that joined the wrong concept: tick the look-ups and names that belong elsewhere and name the new concept, and they move there, with the relations and suggested names found while explaining them. A merge is undone the same way, by moving the merged concept's own name. If the two would still share a name the split is refused, because they would join again at once; if the new name already belongs to another concept, they join that one.
 
@@ -142,7 +144,7 @@ Deleting an entry removes it from the app and clears its text (the quote, the ex
 | Back up JSONL now   | The full event log, written to `Downloads/harkback/`. A backup also runs weekly; the last four are kept. Older ones are removed only after the new file is safely written.                                                                                        |
 | Import JSONL        | Restores events from a backup. Events you already have are skipped, so importing twice changes nothing.                                                                                                                                                           |
 
-Backups and exports never contain settings or API keys. In settings, **Leave sensitive sources out of backups and exports** removes everything that came from sensitive sources, and concepts known only from them.
+Backups and exports never contain settings or API keys, so site rules are not in them either. In settings, **Leave sensitive sources out of backups and exports** removes everything that came from sensitive sources, and concepts known only from them. Such a backup does not remember which sources were sensitive either, so mark them again after restoring it.
 
 The file format is documented in [Data format](data-format.md).
 
@@ -172,7 +174,9 @@ For example, with these two rules:
 | `example.com`                | ticked                 |
 | `https://example.com/public` | empty (explicitly off) |
 
-every page on `example.com` is sensitive except those under `/public`. If the second rule's box is left at a dash instead, it does not say anything about sensitivity, so `/public` follows the site and is sensitive too. A dash with no broader rule behind it means off, the same result as an empty box; the difference only shows when another rule also matches. A rule that says a site is _not_ sensitive settles it for the pages of that site, except a page that says it is private (see [Pages that look private](#pages-that-look-private)): that one still asks you once.
+every page on `example.com` is sensitive except those under `/public`. If the second rule's box is left at a dash instead, it does not say anything about sensitivity, so `/public` follows the site and is sensitive too. A dash with no broader rule behind it means off, the same result as an empty box; the difference only shows when another rule also matches. A rule that says a site is _not_ sensitive settles it for the pages of that site, except a page that says it is private (see [Pages that look private](#pages-that-look-private)): that one still asks you once. A page you answered with _Local only_ stays sensitive under such a rule.
+
+A rule saved with _Remember for this site_ while the settings page is open appears in the list at once, and _Save changes_ keeps it along with your edits.
 
 **Suggested research sites.** The _Suggested research sites_ button under the rules adds auto-scan rules for bioRxiv, medRxiv, PubMed, SSRN, OpenReview and ACL Anthology. It skips sites you already have a rule for and leaves those rules unchanged. Press _Save changes_ and the browser asks for site access once for all of them. PubMed pages hold abstracts, not full text, so there is little to scan there beyond the abstract. If you deny the access prompt, the rules are still saved but automatic scanning does not run.
 

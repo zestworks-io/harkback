@@ -6,7 +6,9 @@ Cinco minutos do zero até o seu primeiro termo guardado.
 
 ## 1. Instalar
 
-O Harkback é uma extensão do Chrome (Manifest V3). Ainda não há uma página na loja, então ela é carregada a partir do código-fonte. Você precisa do Node 22 ou mais recente e do [pnpm](https://pnpm.io).
+O Harkback é uma extensão do Chrome (Manifest V3). Instale-o pela [Chrome Web Store](https://chromewebstore.google.com/detail/joancadfahbgmadnjldekohffbffmodo); a página de boas-vindas abre sozinha.
+
+Para rodá-lo a partir do código-fonte, você precisa do Node 22 ou mais recente e do [pnpm](https://pnpm.io).
 
 ```sh
 git clone https://github.com/zestworks-io/harkback.git
@@ -29,7 +31,7 @@ O Harkback não tem servidor. Ele precisa de um modelo para escrever as explica�
 
 **O modelo integrado do Chrome (Gemini Nano)** não precisa de endereço nem de chave. Ao selecioná-lo, aparecem o status do modelo e um botão **Baixar modelo**; **Concluir configuração** espera o download terminar. É um modelo pequeno que roda no seu computador, então espere que seja mais lento que um modelo na nuvem, especialmente na primeira solicitação, com respostas mais simples. Serve para explicações curtas.
 
-Você pode adicionar mais modelos e mudar opções depois, na página de configurações. Executar a configuração de novo atualiza o modelo que você já tem; não adiciona uma segunda cópia.
+Você pode adicionar mais modelos e mudar opções depois, na página de configurações. Executar a configuração de novo atualiza o modelo que você já tem; não adiciona uma segunda cópia. Se você sair da configuração antes de **Concluir configuração**, a página de configurações avisa que a configuração ainda não foi concluída e traz um link para voltar a ela. O cartão **Privacidade** nas configurações mostra quando você concordou com as notas de privacidade.
 
 A opção gratuita mais fácil é um modelo local com o [Ollama](https://ollama.com). Ela exige uma etapa extra, porque o Ollama recusa solicitações de extensões do navegador até você permitir a origem da extensão. O botão de teste mostra o comando exato para o seu sistema. Veja [Modelos e provedores](../models.md) para todos os provedores e para rodar um modelo em outro computador da sua rede doméstica.
 
@@ -51,7 +53,7 @@ Abra outro artigo que mencione `LoRA`, `low-rank adaptation` ou `LoRAs`. O termo
 
 ## 5. Ver o que você tem
 
-Abra a página **Histórico** (com link nas configurações e nas boas-vindas). Ela lista cada termo por conceito, com busca, perguntas adicionais, uma fila de revisão e um grafo de como seus conceitos se conectam. De lá você também pode exportar seus registros e restaurá-los a partir de um backup.
+Abra a página **Histórico** (com link nas configurações e nas boas-vindas, ou clique com o botão direito no ícone da barra de ferramentas e escolha **Histórico**; ali, **Revisão** abre a fila de revisão). Ela lista cada termo por conceito, com busca, perguntas adicionais, uma fila de revisão e um grafo de como seus conceitos se conectam. De lá você também pode exportar seus registros e restaurá-los a partir de um backup.
 
 ## Ler algo que não está no arXiv
 

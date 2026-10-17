@@ -8,39 +8,42 @@ Everything the user does is an **event** in an append-only log. **Concepts, alia
 
 ## Repository layout
 
-| Path             | Role                                                                                                                                                                      |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/spec`  | The event format: constants, [zod](https://zod.dev) schemas, parsing, and the generated JSON schema.                                                                      |
-| `packages/core`  | Pure logic with no DOM or extension APIs: replay, name normalization, concept matching, reunion selection, prompts, output parsing, JSONL and Markdown export, redaction. |
-| `apps/extension` | The extension: entrypoints in `src/entrypoints`, everything testable in `src/lib`, tests in `test/` and `e2e/`.                                                           |
-| `tools/lint`     | ESLint, with its own TypeScript version.                                                                                                                                  |
-| `site`, `store`  | The public website and the Chrome Web Store text.                                                                                                                         |
-| `guide`          | This documentation.                                                                                                                                                       |
+| Path             | Role                                                                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/spec`  | The event format: constants, [zod](https://zod.dev) schemas, parsing, and the generated JSON schema.                                                                                     |
+| `packages/core`  | Pure logic with no DOM or extension APIs: replay, name normalization, concept matching, reunion selection, prompts, output parsing, JSONL and Markdown export, redaction.                |
+| `apps/extension` | The extension: entrypoints in `src/entrypoints`, everything testable in `src/lib`, tests in `test/` and `e2e/`.                                                                          |
+| `tools/lint`     | ESLint, with its own TypeScript version.                                                                                                                                                 |
+| `tools/eval`     | `pnpm eval`: runs the explanation pipeline against a labelled set with a real model and checks the release gates (see [CONTRIBUTING](../CONTRIBUTING.md#measuring-explanation-quality)). |
+| `site`, `store`  | The public website and the Chrome Web Store text.                                                                                                                                        |
+| `guide`          | This documentation.                                                                                                                                                                      |
 
 Inside `packages/core/src`, a folder holds one kind of logic, and `index.ts` re-exports all of it:
 
-| Folder      | Holds                                                                                                 |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
-| `events/`   | The log and what it replays into: ids, ordering, the event factory, state, replay, compaction.        |
-| `concepts/` | Names and matching: normalization, candidates, the page matcher, reunion selection.                   |
-| `llm/`      | What is said to a model and what comes back: prompts, output parsing, evidence, recording, languages. |
-| `review/`   | Review grades.                                                                                        |
-| `export/`   | JSONL and Markdown export, redaction.                                                                 |
+| Folder      | Holds                                                                                                                                                          |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `events/`   | The log and what it replays into: ids, ordering, the event factory, state, replay, compaction.                                                                 |
+| `concepts/` | Names and matching: normalization, candidates, the page matcher, looser matching for captions (`speech.ts`), reunion selection, planning a split (`split.ts`). |
+| `llm/`      | What is said to a model and what comes back: prompts, output parsing, evidence, recording, languages.                                                          |
+| `review/`   | Review grades.                                                                                                                                                 |
+| `export/`   | JSONL and Markdown export, redaction.                                                                                                                          |
+| `commons/`  | Licence codes and the anonymous contribution file for the data commons.                                                                                        |
+| `eval/`     | Scoring for `pnpm eval`: metrics against gold labels, and the release gates.                                                                                   |
 
 Inside `apps/extension/src/lib`, the same idea, by what the code is about. The tests under `apps/extension/test` have the same folders.
 
-| Folder                                      | Holds                                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `models/`                                   | Talking to a model: providers, the HTTP client and adapters, Chrome's built-in model, routing, rate limit.   |
-| `review/`                                   | The review schedule: FSRS, due dates, order, prerequisite gaps, the toolbar badge, "check my answer".        |
-| `records/`                                  | Views of what was recorded: concept pages, names, graph, history, digest, reunion cards.                     |
-| `explain/`                                  | Turning a selection or a page into a request for a model: the plan, the page preview.                        |
-| `source/`                                   | Where the text comes from: page extraction, source ids, site rules, per-site profiles and the privacy gate.  |
-| `storage/`                                  | The event store, its cache, backups and settings.                                                            |
-| `messaging/`                                | The messages between content script, background and pages, and who may send which.                           |
-| `export/`                                   | Anki and note-folder export.                                                                                 |
-| `content/`, `ui/`, `pages/`, `pdf/`, `ocr/` | The content script, its shadow-DOM interface, the logic of the extension pages, the PDF reader, OCR.         |
-| `video/`                                    | YouTube captions: the caption tracker, the rolling buffer of lines shown, the `PageSource` for a watch page. |
+| Folder                                      | Holds                                                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `models/`                                   | Talking to a model: providers, the HTTP client and adapters, Chrome's built-in model, routing, rate limit.                      |
+| `review/`                                   | The review schedule: FSRS, due dates, order, prerequisite gaps, the toolbar badge, "check my answer".                           |
+| `records/`                                  | Views of what was recorded: concept pages, names, graph, history, digest, reunion cards.                                        |
+| `explain/`                                  | Turning a selection or a page into a request for a model: the plan, the page preview.                                           |
+| `source/`                                   | Where the text comes from: page extraction, source ids, the page's licence, site rules, per-site profiles and the privacy gate. |
+| `storage/`                                  | The event store, its cache, backups and settings.                                                                               |
+| `messaging/`                                | The messages between content script, background and pages, and who may send which.                                              |
+| `export/`                                   | Anki and note-folder export.                                                                                                    |
+| `content/`, `ui/`, `pages/`, `pdf/`, `ocr/` | The content script, its shadow-DOM interface, the logic of the extension pages, the PDF reader, OCR.                            |
+| `video/`                                    | YouTube captions: the caption tracker, the rolling buffer of lines shown, the `PageSource` for a watch page.                    |
 
 Keep `packages/core` and `packages/spec` free of browser APIs. They run in plain Node tests and must stay portable.
 
@@ -64,11 +67,11 @@ Keep `packages/core` and `packages/spec` free of browser APIs. They run in plain
 - **Content script** (`entrypoints/content.ts`, `lib/content/app.ts`). Declared only for `https://arxiv.org/*`; other pages get it by programmatic injection after a click, the shortcut, the context menu, or when the user allows the site. It extracts the readable text (LaTeXML structure on arXiv, Readability elsewhere) with a map from text offsets back to DOM nodes (`lib/source/extract.ts`), tracks the selection, draws the explain card and the reunion underlines inside a **closed shadow root**, and watches the page for changes. It never talks to a model.
 - **Background service worker** (`entrypoints/background.ts`). The only place that calls models, writes the log, runs backups and registers content scripts. One long-lived **port** per card carries the explanation (`start`, `answer`, `followup`, `cancel`, `ping` in; `delta`, `explained`, `ask`, `done`, `followup_*`, `error` out). The content script pings every 20 seconds to keep the worker alive during a stream. The built-in model is a provider whose address is `chrome-ai://prompt-api`: `isLocalUrl` treats it as this computer, and `streamChat` hands it to `lib/models/builtin-ai.ts`, which calls Chrome's Prompt API (`LanguageModel`) directly, with no HTTP and no offscreen page. One-shot requests (`lib/messaging/messages.ts`) cover everything else, including the page preview: `preview-plan` says which model a scan would use, so the panel can name it before anything is sent; `preview-terms` asks one model call for the page's key terms (`buildTermsPrompt`, `parseTerms` in `packages/core`) and `lib/explain/preview.ts` sorts them against the records locally; `preview-explain` returns a stored explanation or a model-written one. Neither writes events, and the model never receives the concept list.
 - **Offscreen document** (`entrypoints/offscreen`). Builds the blob URL for a backup download, which a service worker cannot do.
-- **Extension pages**: `library` (History, Review, Graph), `options`, `onboarding`, `reader` (PDF). They read IndexedDB directly and send writes to the background as requests, so every write goes through one path.
+- **Extension pages**: `library` (History, Review, Graph, Digest, Contribute), `options`, `onboarding`, `reader` (PDF). The toolbar icon's right-click menu opens `library` at History or at Review. They read IndexedDB directly and send writes to the background as requests, so every write goes through one path.
 
 ### Who may ask for what
 
-`lib/messaging/sender-auth.ts` classifies each sender as `content` (a content script, identified by its tab), `page` (an extension page, identified by its URL) or `reader` (the reader page, which acts for the PDF it shows). Destructive and bulk requests (`delete-encounter`, `merge-concepts`, `import-events`, `mark-normal`, `backup-now`, …) are accepted from `page` only. A web page cannot reach any of this: the extension exposes no web-accessible resources and no external messaging.
+`lib/messaging/sender-auth.ts` classifies each sender as `content` (a content script, identified by its tab), `page` (an extension page, identified by its URL) or `reader` (the reader page, which acts for the PDF it shows). Destructive and bulk requests (`delete-encounter`, `merge-concepts`, `split-concept`, `confirm-edge`, `record-consent`, `import-events`, `backup-now`, …) are accepted from `page` only. `mark-normal` is the exception: the lock on a page may send it too. A web page cannot reach any of this: the extension exposes no web-accessible resources and no external messaging.
 
 ## An explanation, step by step
 
@@ -86,10 +89,10 @@ Keep `packages/core` and `packages/spec` free of browser APIs. They run in plain
 `replay(events)` (`packages/core/src/events/replay.ts`):
 
 1. Puts events in a canonical order (timestamp, device, sequence, id) and drops duplicates by id.
-2. `resolveConcepts` unions concepts that are the same: explicit merges, equal canonical names in a domain, aliases that equal another concept's name, and an abbreviation with its single full name. Union-find keeps the smallest id as representative.
+2. `resolveConcepts` unions concepts that are the same: explicit merges (minus those a later `concept.unmerged` cancels), equal canonical names in a domain, aliases that equal another concept's name (minus names taken off with `concept.alias_removed`), and an abbreviation with its single full name. Union-find keeps the smallest id as representative. An encounter moved by a split (`encounter.moved`) counts for its new concept, and the names and relations proposed from it go with it.
 3. Folds sources (sensitive is sticky unless an event carries `by_user`), encounters (minus deleted ones), actions, mutes and edges into a `State`.
 
-Matching on a page (`matcher.ts`) is Aho-Corasick over every alias, after folding compatibility forms, accents, separators and Greek letter names. `reunion.ts` then applies the rules that keep reunions useful; they are listed in the [user guide](user-guide.md#reunions).
+Matching on a page (`matcher.ts`) is Aho-Corasick over every alias, after folding compatibility forms, accents, separators and Greek letter names. YouTube captions are scanned with `speech` on (`speech.ts`): letters spelled out are joined, a longer name may differ by a letter or two, a short one may sound alike, and on a line with no capitals an acronym matches in lower case. `reunion.ts` then applies the rules that keep reunions useful; they are listed in the [user guide](user-guide.md#reunions).
 
 Because replay is a pure function of the log, it is easy to test, including with property tests (`packages/core/test/replay.property.test.ts`).
 
@@ -97,7 +100,7 @@ Because replay is a pure function of the log, it is easy to test, including with
 
 - **IndexedDB `harkback`**: object store `events` (key `id`, unique index on `[device, seq]`) and `meta` (device identity and sequence counter). If the counter is behind the log, a new device id is generated, so an `[device, seq]` clash is impossible.
 - **`chrome.storage.local`**: settings and backup bookkeeping. **`chrome.storage.session`**: the rate limiter's timestamps.
-- **IndexedDB `harkback-pdf`**: a short-lived hand-off of a downloaded PDF to the reader page.
+- **IndexedDB `harkback-pdf`**: a short-lived hand-off of a downloaded PDF to the reader page. One the reader never takes is removed once it is 10 minutes old.
 - **IndexedDB `harkback-ocr`**: downloaded OCR language packs, the text read from scanned pages (keyed by source, page and languages) and the languages chosen per document. All of it can be fetched or computed again, so it is not backed up. The OCR engine's own cache (`keyval-store`) only holds copies of the packs for the worker to load.
 
 Deleting an encounter appends `encounter.deleted`, then `compact()` rewrites the deleted encounter's payloads to `null` in place. Ids, order and tombstones stay, so the log remains valid.
@@ -115,15 +118,17 @@ Report vulnerabilities as described in [SECURITY.md](../SECURITY.md).
 
 ## Where to change things
 
-| You want to…                        | Look at                                                                                                                                            |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Add a model provider                | `lib/models/providers.ts` (and an adapter in `lib/models/model-client.ts` if its format is new)                                                    |
-| Change how names are matched        | `packages/core/src/concepts/normalize.ts`, `matcher.ts`, and `events/replay-concepts.ts`                                                           |
-| Change reunion rules                | `packages/core/src/concepts/reunion.ts`, `packages/core/src/constants.ts`                                                                          |
-| Change the prompt or reply format   | `packages/core/src/llm/prompt.ts`, `parse-output.ts`                                                                                               |
-| Change the review schedule          | `lib/review/review.ts` (replay), `lib/review/fsrs.ts` (the memory model), `lib/review/prerequisites.ts` (order), `lib/review/foundation.ts` (gaps) |
-| Add an event type or field          | `packages/spec/src/schema.ts`, then `packages/core/src/events/replay.ts`; regenerate the schema                                                    |
-| Support another site's pages        | `lib/source/site-profiles.ts`: a profile gives a page's source id, where its text is, and a privacy hint; the generic path is the fallback         |
-| Change what is asked before sending | `lib/source/privacy-gate.ts` (the order of the checks), `lib/source/site-rules.ts` (private-by-default sites)                                      |
-| Add a page setting                  | `lib/storage/settings.ts` (type, default, `withDefaults`, `validateSettings`), then `entrypoints/options`                                          |
-| Add a language                      | see [CONTRIBUTING](../CONTRIBUTING.md#adding-a-language)                                                                                           |
+| You want to…                        | Look at                                                                                                                                                    |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add a model provider                | `lib/models/providers.ts` (and an adapter in `lib/models/model-client.ts` if its format is new)                                                            |
+| Change how names are matched        | `packages/core/src/concepts/normalize.ts`, `matcher.ts`, and `events/replay-concepts.ts`                                                                   |
+| Change reunion rules                | `packages/core/src/concepts/reunion.ts`, `packages/core/src/constants.ts`                                                                                  |
+| Change the prompt or reply format   | `packages/core/src/llm/prompt.ts`, `parse-output.ts`                                                                                                       |
+| Change the review schedule          | `lib/review/review.ts` (replay), `lib/review/fsrs.ts` (the memory model), `lib/review/prerequisites.ts` (order), `lib/review/foundation.ts` (gaps)         |
+| Change caption matching             | `packages/core/src/concepts/speech.ts` (the rules), `matcher.ts` (where they apply)                                                                        |
+| Change what a contribution holds    | `packages/core/src/commons/contribution.ts`, `commons/license.ts`; the page is `lib/pages/commons-view.ts`, the licence is read in `lib/source/license.ts` |
+| Add an event type or field          | `packages/spec/src/schema.ts`, then `packages/core/src/events/replay.ts`; regenerate the schema                                                            |
+| Support another site's pages        | `lib/source/site-profiles.ts`: a profile gives a page's source id, where its text is, and a privacy hint; the generic path is the fallback                 |
+| Change what is asked before sending | `lib/source/privacy-gate.ts` (the order of the checks), `lib/source/site-rules.ts` (private-by-default sites)                                              |
+| Add a page setting                  | `lib/storage/settings.ts` (type, default, `withDefaults`, `validateSettings`), then `entrypoints/options`                                                  |
+| Add a language                      | see [CONTRIBUTING](../CONTRIBUTING.md#adding-a-language)                                                                                                   |

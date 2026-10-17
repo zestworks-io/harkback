@@ -17,14 +17,15 @@ It does not try to be a better chatbot. It adds what a chat window lacks: memory
 
 HOW IT WORKS
 • Select a term, then click Explain, use the right-click menu, or press Alt+Shift+E. The explanation uses the paragraph and section around the term, and quotes the page when the page defines it.
-• Review the terms you are unsure about. Harkback schedules them with the FSRS-7 memory model: grade yourself Again, Hard, Good or Easy and each term comes back just before you would forget it. Terms that build on others are reviewed in the right order, and a confused term points to the prerequisites you may be missing.
+• Review the terms you are unsure about. Harkback schedules them with the FSRS-7 memory model: grade yourself Again, Hard, Good or Easy and each term comes back just before you would forget it. Terms that build on others are reviewed in the right order, and a confused term points to the prerequisites you may be missing. Right-click the toolbar icon to open Review or History.
 • Preview a page before you read it: see which of its key terms are new to you and which you already know.
 • On later pages, terms you have looked up are underlined. Hover to see the earlier explanation, where you met it, and how well you understood it. Abbreviations match their full names ("LLM" and "Large Language Model").
 • Ask follow-up questions on any card. The conversation is saved with the explanation. Stop an answer midway, or retry with another model if one fails.
-• Your records form a knowledge graph of concepts, aliases, prerequisites, variants and related terms. Search it, review it, see it as a map, export it as Markdown notes (with [[links]] for Obsidian), as Anki cards, or as a JSONL backup that you can import again.
+• Your records form a knowledge graph of concepts, aliases, prerequisites, variants and related terms. Confirm a relation the model was unsure about, and split a concept that joined two different terms (this also undoes a merge). Search it, review it, see it as a map, export it as Markdown notes (with [[links]] for Obsidian), as Anki cards, or as a JSONL backup that you can import again.
+• Contribute to the data commons: Harkback builds an anonymous file from your look-ups in openly licensed arXiv and DOI papers (paper id, term, field, how well you understood it, the month), shows you all of it, and saves it on your computer.
 
 PDFs AND PAPERS
-arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset. Scanned PDFs are read with OCR on your computer as you scroll, then behave like text. English is built in; other languages are downloaded once from a list. Other websites are scanned only when you click the toolbar button or allow the site. Under Settings → Sites you can also add GitHub (READMEs, issues and pull requests), Notion, Google Docs (published or mobile view) and YouTube captions, or add common research sites such as bioRxiv, PubMed and OpenReview with one button.
+arXiv papers work automatically. Other PDFs open in Harkback's own reader, with formulas typeset. Scanned PDFs are read with OCR on your computer as you scroll, then behave like text. English is built in; other languages are downloaded once from a list. Other websites are scanned only when you click the toolbar button or allow the site. Under Settings → Sites you can also add GitHub (READMEs, issues and pull requests), Notion, Google Docs (published or mobile view) and YouTube captions, or add common research sites such as bioRxiv, PubMed and OpenReview with one button. In YouTube's automatic captions, terms are recognised even when speech recognition writes them in lower case, spells them out letter by letter, or mishears them slightly.
 
 YOU CHOOSE THE MODEL
 Harkback has no server and no account. You connect your own model: either one that runs on your computer, so your text never leaves it, or a hosted service that you use with your own API key. Models on your own network work too. Chrome's built-in model (Gemini Nano) runs on your computer with nothing to set up. It is a small model, so it is slower than a cloud model and best for short explanations.
@@ -35,6 +36,7 @@ PRIVACY
 • Mark a source as sensitive and its content is sent only to a local model, never to a remote one. A page that looks private (a private GitHub repository, an unpublished Notion or Google Docs page) is not sent to any model until you choose Local only or Send anyway.
 • Private windows explain but record nothing.
 • On YouTube, Harkback reads only the captions the player is showing, and only after you add the site.
+• The data commons file has no quotes, explanations, addresses or exact times, and never includes a sensitive source. Nothing is uploaded: you decide whether to submit it anywhere.
 • Harkback itself downloads only optional OCR language data, once, checked against a checksum. If you choose Chrome's built-in model, Chrome downloads that model when you click Download.
 • No analytics, no ads, no tracking. Open source under Apache-2.0.
 • API keys are stored unencrypted in the extension's storage; use a key with a spending limit.

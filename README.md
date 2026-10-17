@@ -104,15 +104,16 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 - **Reunions.** On later pages, terms you have looked up are underlined. Hover to see when and where you met the term and what you understood, and a line saying which text on the page matched, then mark it remembered, explain it again, compare the two usages, or mute it.
 - **One concept, many spellings.** `LLM`, `LLMs`, `the LLM`, `large language model` and `Large-Language Models` are the same concept. So are `β-VAE` and `beta-VAE`, and `fine-tuning` and `ﬁne-tuning` with a ligature. Near matches are put to you as "is this the term you looked up 3 days ago?".
 - **Related terms.** If a model says `QLoRA` is a variant of `LoRA`, a page that only mentions `QLoRA` reminds you of what you understood about `LoRA`.
-- **Concept pages.** Open any term in History to see how well you understood it, the names the model suggests in your language (which you accept or reject), what it builds on (prerequisites), its variants and related terms, and every time you met it. You can add an alias, merge two concepts that are the same, remove a wrong relation, or mute a term.
-- **Review.** History shows a _Review_ button with the number of terms due. Each term is scheduled with [FSRS-7](https://github.com/open-spaced-repetition/fsrs4anki), a memory model: grade an answer _Again_, _Hard_, _Good_ or _Easy_ and the term comes back just before you would forget it, so easy terms space out quickly and hard ones return soon. Every button shows when the term will come back. You can type what you remember before revealing the explanation, and an optional **Check my answer** button asks your model how close you were (it only suggests a grade; you choose, and you can turn it off in settings). The whole review works from the keyboard: `Space` shows the explanation, `1`–`4` grade, `S` skips. Terms that build on others come after their prerequisites when both are due, and a term you are struggling with points to the prerequisites that may be missing. Remembering a term on a reunion hint counts as a light review. A setting chooses how likely you want to be to remember a term when it comes due (90% by default). The toolbar icon shows the number due.
+- **Concept pages.** Open any term in History to see how well you understood it, the names the model suggests in your language (which you accept or reject), what it builds on (prerequisites), its variants and related terms, and every time you met it. Relations the model was unsure about wait under _Possible relations_ until you confirm or remove them. You can add an alias, merge two concepts that are the same, split one that joined two different terms (which also undoes a merge), remove a wrong relation, or mute a term.
+- **Review.** History shows a _Review_ button with the number of terms due. Each term is scheduled with [FSRS-7](https://github.com/open-spaced-repetition/fsrs4anki), a memory model: grade an answer _Again_, _Hard_, _Good_ or _Easy_ and the term comes back just before you would forget it, so easy terms space out quickly and hard ones return soon. Every button shows when the term will come back. You can type what you remember before revealing the explanation, and an optional **Check my answer** button asks your model how close you were (it only suggests a grade; you choose, and you can turn it off in settings). The whole review works from the keyboard: `Space` shows the explanation, `1`–`4` grade, `S` skips. Terms that build on others come after their prerequisites when both are due, and a term you are struggling with points to the prerequisites that may be missing. Remembering a term on a reunion hint counts as a light review. A setting chooses how likely you want to be to remember a term when it comes due (90% by default). The toolbar icon shows the number due; right-click it for _Review_ or _History_.
 - **Weekly digest.** History → _Digest_ shows what you met in a week: new and revisited terms, answers, the terms you are still confused about, where you read, and new connections between concepts. It is built on your computer from your records and calls no model.
 - **Builds on what you know.** When a term you look up is close to one you already understand, the model is told so and can explain the difference instead of starting over.
 - **Private by design.** Automatic scanning is limited to arxiv.org until you add sites; one button in settings adds the common research sites. Sensitive sites can be forced onto a local model, and private windows never record or scan.
 - **Portable records.** Export everything as Markdown, as Anki cards, as a folder of linked notes (one file per concept with `[[links]]`, ready for Obsidian; what you write below the marker line survives the next export), or as a versioned JSONL event log with a published JSON schema. A weekly JSONL backup is written to `Downloads/harkback`, and **Import JSONL** in History restores it (records you already have are skipped). A setting can leave sensitive sources out of backups and exports.
+- **Contribute to the data commons.** History → _Contribute_ builds an anonymous file from your look-ups in openly licensed arXiv and DOI papers: the paper id, licence, term, field, section, how well you understood it and the month, plus the relations you confirmed. No quotes, explanations, addresses or exact times, and never a sensitive source. You see the whole file before you save it, and nothing is uploaded.
 - **Stop, retry, switch models.** A _Stop_ button ends an answer while it is written. After a failure the card offers _Try again_ and, with several models configured, _Try with…_ for each of the others.
 - **Preview a page before you read it.** Click the toolbar button, press `Alt+Shift+P` or use the right-click menu, and Harkback offers to scan the page, naming the model and whether it is remote; nothing is sent until you agree. One model call picks out the page's key terms, and your own records sort them into _still confused_, _rusty_, _new to you_ and _known_. _Preview_ shows your earlier explanation for a term you know, or a short model-written one for a new term, and records nothing. The model sees only the page text, never your concept list, and a sensitive page only uses a local model. A scan reads the first 16,000 characters of a page and tells you when a longer page was cut.
-- **YouTube captions.** Add YouTube in settings and, with captions on, terms you have looked up before are underlined in the caption line. Pause and select a term to explain it from the captions you have watched. The lookup is recorded with its playback position (`12:34`), and History, Review and exports link back to that moment. Off until you add the site; nothing is downloaded, only the caption line on screen is read.
+- **YouTube captions.** Add YouTube in settings and, with captions on, terms you have looked up before are underlined in the caption line. Pause and select a term to explain it from the captions you have watched. Automatic captions written by speech recognition are matched more loosely: `lora` for LoRA, `r l h f` for RLHF, a name off by a letter or two, or heard as a word that sounds the same. The lookup is recorded with its playback position (`12:34`), and History, Review and exports link back to that moment. Off until you add the site; nothing is downloaded, only the caption line on screen is read.
 - **GitHub, Notion and Google Docs.** Add the site in settings and its pages are read by their own layout: a repository's README, the conversation of an issue or pull request, a Notion page, a Google document's published or mobile view. A document is one source however you reached it, and only its own text is read, not the menus around it.
 - **Asks before sending a private page.** A page that looks private, such as a private GitHub repository or a Notion or Google Docs page that is not published, is not sent to any model until you choose _Local only_ or _Send anyway_. A lock at the corner of the page shows and changes the state; your choice is recorded and can be remembered for the site.
 - **Several ways to start.** Select text and click _Explain_ (mouse, keyboard or touch selections), press `Alt+Shift+E`, or use _Explain_ in the right-click menu. Pages that load more text or move to another page without reloading are rescanned.
@@ -123,7 +124,7 @@ Harkback is free and open source (Apache-2.0), has no server and no subscription
 Each look-up adds to a graph of what you have read, built from your own reading rather than from a general-purpose model's memory.
 
 - **Concepts are the nodes.** `LoRA` is one node, whatever spelling a page uses (`LoRA`, `low-rank adaptation`), and whatever language you met it in. It keeps its aliases, its field and how well you understood it.
-- **Relations are the edges.** A model proposes `variant_of`, `prerequisite` and `related` links when you look a term up, for example `QLoRA` is a variant of `LoRA`. You can remove a wrong one, merge two concepts that are the same, or add an alias.
+- **Relations are the edges.** A model proposes `variant_of`, `prerequisite` and `related` links when you look a term up, for example `QLoRA` is a variant of `LoRA`. A link the model was unsure about is listed under _Possible relations_ and used only once you confirm it. You can remove a wrong one, merge two concepts that are the same, split a concept that joined two different terms, or add an alias.
 - **Everything points back to evidence.** A concept lists every encounter: the page, the quote, the date, your explanation and the follow-up conversation.
 - **The graph does work.** A page that only mentions `QLoRA` reminds you of `LoRA`, the model is told what you already know so it can explain the difference, and review is scheduled per concept.
 - **It is yours.** Export a folder of linked notes (`[[links]]`, one file per concept) and open it in Obsidian to see the graph there, or export the full event log as JSONL.
@@ -149,7 +150,9 @@ Open **Graph** in History to see it as a map: concepts coloured by how well you 
 
 ## Install
 
-Requires Node 22 or newer and [pnpm](https://pnpm.io). There is no store listing yet, so load the extension from source:
+Install Harkback from the [Chrome Web Store](https://chromewebstore.google.com/detail/joancadfahbgmadnjldekohffbffmodo). The onboarding page opens on install.
+
+To run it from source instead, you need Node 22 or newer and [pnpm](https://pnpm.io):
 
 ```sh
 # from the repository root
@@ -163,7 +166,7 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 
 ## Connect a model
 
-Onboarding is three steps: **Welcome** (an example reunion hint and a built-in example explanation you can try without calling any model), **Privacy** (where your text goes; you must tick the consent box before _Next_ is enabled) and **Model** (pick a provider, then _Finish_). Running onboarding again updates the model you already have instead of adding a copy. You can add more models and change options later on the settings page, which also sets rate limits, reunion hints and how long a model may stay quiet before a request is given up.
+Onboarding is three steps: **Welcome** (an example reunion hint and a built-in example explanation you can try without calling any model), **Privacy** (where your text goes; you must tick the consent box before _Next_ is enabled) and **Model** (pick a provider, then _Finish_). Running onboarding again updates the model you already have instead of adding a copy. If you leave setup before the end, the settings page says so and links back to it. You can add more models and change options later on the settings page, which also sets rate limits, reunion hints and how long a model may stay quiet before a request is given up.
 
 ![The settings page with one model: name, model, address, API key and a Test connection button](assets/settings.png)
 
@@ -197,19 +200,22 @@ then restart Ollama.
 
 ## Using Harkback
 
-| You want to                       | Do this                                                                                                                                                  |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Explain a term                    | Select it and click **Explain**, or press `Alt+Shift+E`.                                                                                                 |
-| Ask more                          | Use **Ask more** on the card. The question and answer are saved with the explanation.                                                                    |
-| Scan a page that is not on arXiv  | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.                                                               |
-| Read a PDF                        | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader.                                                           |
-| See what you have looked up       | Open the history page from the settings page or the onboarding page. It updates live, and each entry's source title links back to the page it came from. |
-| Keep your records                 | History page → **Export Markdown**, **Export Anki cards** or **Back up JSONL now**.                                                                      |
-| Restore from a backup             | History page → **Import JSONL**.                                                                                                                         |
-| See how concepts connect          | History page → **Graph**.                                                                                                                                |
-| Stop a term from being underlined | Hover the underline → **Don't show again**.                                                                                                              |
-| Keep a source off remote models   | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.                                                                   |
-| Settle a page that looks private  | The lock at the corner of the page, or the question on your first explanation: **Local only** or **Send anyway**.                                        |
+| You want to                            | Do this                                                                                                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Explain a term                         | Select it and click **Explain**, or press `Alt+Shift+E`.                                                                                                                                                |
+| Ask more                               | Use **Ask more** on the card. The question and answer are saved with the explanation.                                                                                                                   |
+| Scan a page that is not on arXiv       | Click the toolbar button, or allow the site under _Sites_ in settings for automatic scans.                                                                                                              |
+| Read a PDF                             | Click the toolbar button on the PDF: arXiv papers open as HTML, other PDFs open in the reader.                                                                                                          |
+| See what you have looked up            | Open the history page from the settings page or the onboarding page, or right-click the toolbar icon → **History**. It updates live, and each entry's source title links back to the page it came from. |
+| Review the terms that are due          | History page → **Review**, or right-click the toolbar icon → **Review**.                                                                                                                                |
+| Fix a term joined to the wrong concept | Concept page → **Split…**: tick the look-ups and names that belong elsewhere and name the new concept.                                                                                                  |
+| Contribute to the data commons         | History page → **Contribute**: check the file, then **Save contribution file**. Nothing is uploaded.                                                                                                    |
+| Keep your records                      | History page → **Export Markdown**, **Export Anki cards** or **Back up JSONL now**.                                                                                                                     |
+| Restore from a backup                  | History page → **Import JSONL**.                                                                                                                                                                        |
+| See how concepts connect               | History page → **Graph**.                                                                                                                                                                               |
+| Stop a term from being underlined      | Hover the underline → **Don't show again**.                                                                                                                                                             |
+| Keep a source off remote models        | Card → **Mark source as sensitive**, or add a sensitive rule for the site in settings.                                                                                                                  |
+| Settle a page that looks private       | The lock at the corner of the page, or the question on your first explanation: **Local only** or **Send anyway**.                                                                                       |
 
 ## Documentation
 
@@ -228,10 +234,11 @@ The [`guide/`](guide/README.md) folder has the details:
 - Pages are scanned automatically only on arxiv.org. Anywhere else you must click the button, press `Alt+Shift+E`, or allow the site.
 - Content from a sensitive source is never sent to a non-local model, including as context for later comparisons. A server on your own network counts as non-local. A source stays sensitive until you mark it normal on its History entry.
 - A page that looks private (a private GitHub repository; a Notion or Google Docs page that is not published) is not sent to any model until you choose. Pages the site does not mark either way are asked about on Notion and Google Docs, and not on GitHub. What a page suggests about itself is only a hint, so mark a site sensitive when it matters.
-- A setting leaves sensitive sources out of backups and exports.
+- A setting leaves sensitive sources out of backups and exports. Such a backup does not remember which sources were sensitive, and site rules are never in backups.
+- **Contribute** in History saves an anonymous file on your computer, from openly licensed papers only and never from a sensitive source. Nothing is uploaded; whether you submit it anywhere is up to you.
 - Private windows explain but never record, scan or show reunions.
 - Reunion underlines live in the page, so the page's own scripts may infer which terms you have records for.
-- Deleting an explanation removes it in the app; traces may remain on disk and exported backups cannot be recalled.
+- Deleting an explanation removes it in the app and clears its text from the log; the term's name and the source's title and address stay. Traces may remain on disk and exported backups cannot be recalled.
 - API keys are stored **unencrypted** in the extension's storage.
 
 The notes shown in the extension are the source of truth: [`apps/extension/src/lib/pages/privacy.ts`](apps/extension/src/lib/pages/privacy.ts).
@@ -252,9 +259,9 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 - Text in a browser's built-in PDF viewer cannot be read, so Harkback opens the PDF in its own reader page (arXiv papers go to the HTML version instead). Scanned PDFs are read with OCR on your computer (English is built in; other languages are one download each from `jsdelivr.net`), which is slower and less exact than real text and does not recover handwriting, formulas or tables, and paragraph detection on complicated layouts (tables, figures with text, three or more columns) is approximate. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in `chrome://extensions`, then click "Allow local files" on the reader page the first time.
 - Automatic abbreviation matching needs at least three words in the full name (`LLM` from `Large Language Model`). Two abbreviations that map to different full names in the same field (for example two different "GNN"s) are kept as separate concepts.
 - Chinese names, and Japanese names written only in kanji, of three or more characters are underlined wherever they appear. A name of two Han characters is underlined only where the browser's dictionary sees it as a word of its own on the page, which needs a browser with `Intl.Segmenter`; a one-character name never is. Names with kana or Hangul need two characters. Simplified and Traditional spellings of the common technical characters count as one term. Half-width katakana with a separate voicing mark is not matched.
-- YouTube: only `www.youtube.com/watch` pages with captions (CC) turned on are read, and only the caption lines the player has shown since the page opened are available as context. Auto-generated captions often misspell technical terms, and a misspelt term does not match your records. Shorts, embedded players on other sites and full-screen mode (the player hides Harkback's hints; use theater mode) are not supported, and YouTube changing its page can stop captions being read until Harkback is updated.
+- YouTube: only `www.youtube.com/watch` pages with captions (CC) turned on are read, and only the caption lines the player has shown since the page opened are available as context. Automatic captions are matched more loosely than pages, but a term misheard as something quite different (`lower` for LoRA) does not match your records. Shorts, embedded players on other sites and full-screen mode (the player hides Harkback's hints; use theater mode) are not supported, and YouTube changing its page can stop captions being read until Harkback is updated.
 - GitHub, Notion and Google Docs: only repository home pages, issues and pull requests (not code files), Notion pages, and Google documents in their published or mobile view are read. Notion shows only the blocks it has drawn, so a long page may be read in part. The Google Docs editor draws its text and cannot be read, and the preview view has not been checked. These sites change their layout without notice; when Harkback no longer recognises one, it reads the page as it would any other until it is updated.
-- Accents are ignored when matching ("résumé" and "resume" are one term), but there is no stemming for languages other than English, so inflected forms such as German plurals are separate terms. In Arabic, vowel marks, the stretching line and the alef, ya and ta marbuta spellings are ignored, and a name is also underlined with the one-letter and article prefixes (`و`, `ب`, `ل`, `ال`, `بال`) and the common plural and pronoun endings; other inflection is not recognised.
+- Accents are ignored when matching ("résumé" and "resume" are one term), but there is no stemming for languages other than English, so inflected forms such as German plurals are separate terms. In Arabic, vowel marks, the stretching line and the alef, ya and ta marbuta spellings are ignored, and a name is also underlined with the one-letter and article prefixes (`و`, `ب`, `ل`, `ك`, `ف`, `ال`, `بال`, `وال`) and the common plural and pronoun endings; other inflection is not recognised.
 - The interface is in English by default and is also available in Simplified and Traditional Chinese, Japanese, Korean, Spanish, French, German, Brazilian Portuguese and Arabic (right to left; machine-written, not yet reviewed by a native speaker). Explanations can be written in 16 languages, chosen separately in settings. Exported notes and Markdown use English or Chinese labels only.
 
 ## Repository layout
@@ -265,6 +272,7 @@ Because concepts and aliases are derived from the log, your JSONL backup is a co
 | `packages/core`  | Pure logic: replay, name normalization, concept matching, reunion selection, prompts, output parsing, JSONL and Markdown export. |
 | `apps/extension` | The Chrome extension, built with [WXT](https://wxt.dev): content script, background worker, history, settings and onboarding.    |
 | `tools/lint`     | ESLint setup.                                                                                                                    |
+| `tools/eval`     | `pnpm eval`: measures explanation quality against a labelled set of passages, with a real model.                                 |
 | `guide`          | The documentation: user guide, models, privacy, architecture, data format.                                                       |
 
 ## Development
@@ -280,7 +288,7 @@ Before opening a pull request:
 pnpm typecheck     # all packages
 pnpm lint          # ESLint
 pnpm test          # unit tests
-pnpm check:build   # production build: manifest permissions and content-script size
+pnpm check:build   # production build: manifest permissions and content-script size (under 130 KB)
 pnpm e2e           # end-to-end tests in Chromium (run `pnpm exec playwright install chromium` once)
 pnpm format:check  # formatting
 ```
@@ -288,6 +296,8 @@ pnpm format:check  # formatting
 To package a release for Microsoft Edge Add-ons, run `pnpm zip:edge` (see `store/edge/README.md`). To package a release for the Chrome Web Store, bump `version` in `apps/extension/package.json`, then run `pnpm release`. It runs the checks, builds the production extension, verifies the package and writes `apps/extension/.output/harkback-<version>-chrome.zip`. Use `tools/package.sh --skip-checks` to only build the zip.
 
 The end-to-end tests load the built extension into Chromium, serve arXiv pages from `apps/extension/fixtures`, and talk to a local stub model server. They cover the whole loop: reading a paper, explaining, recording, the history page, and reunions on other papers. See `apps/extension/e2e`.
+
+When you change the prompt, the reply parser or the matcher, `pnpm eval` measures explanation quality with a real model and checks the release gates. See [CONTRIBUTING.md](CONTRIBUTING.md#measuring-explanation-quality).
 
 ## Contributing
 
