@@ -408,4 +408,21 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "Die Einrichtung ist noch nicht abgeschlossen.",
   "Continue setup": "Einrichtung fortsetzen",
   "You agreed to these notes during setup on {date}.": "Sie haben diesen Hinweisen bei der Einrichtung am {date} zugestimmt.",
+  "What to contribute": "Was beigetragen wird",
+  "Every openly licensed paper": "Alle offen lizenzierten Artikel",
+  "Save contribution file": "Beitragsdatei speichern",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} Nachschlagen aus {p} Artikeln; {r} von Ihnen bestätigte Beziehungen.",
+  "Contribute to the data commons": "Zur Datenallmende beitragen",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "Die Datenallmende sammelt die Begriffe, an denen Leser in Artikeln hängen bleiben, für Autoren, Lehrende und andere Leser. Nur arXiv- oder DOI-Artikel mit offener Lizenz (Creative Commons oder gemeinfrei) können beigetragen werden, sensible Quellen nie.",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "Die Datei enthält die Kennung des Artikels, seine Lizenz, den Begriff, sein Fachgebiet und den Abschnitt, wie gut Sie ihn verstanden haben und den Monat sowie die von Ihnen bestätigten Beziehungen. Sie enthält keine Zitate, Erklärungen, Adressen, Geräte oder genauen Zeiten.",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "Harkback lädt nichts hoch: Sie speichern die Datei und entscheiden selbst, ob und wo Sie sie einreichen. Beim Speichern wird festgehalten, was Sie beizutragen zugestimmt haben.",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "Noch kann kein Artikel beigetragen werden. Harkback kennt eine Lizenz nur, wenn die Seite sie angibt, etwa über den Lizenzlink auf einer arXiv-Abstract-Seite.",
+  "Last saved: {date}": "Zuletzt gespeichert: {date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "Macht aus Ihren Nachschlagen in offen lizenzierten Artikeln eine anonyme Datei für die Datenallmende.",
+  Contribute: "Beitragen",
 };

@@ -403,4 +403,21 @@ export const pages_es: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "La configuración inicial aún no está terminada.",
   "Continue setup": "Continuar la configuración",
   "You agreed to these notes during setup on {date}.": "Aceptaste estas notas durante la configuración el {date}.",
+  "What to contribute": "Qué aportar",
+  "Every openly licensed paper": "Todos los artículos con licencia abierta",
+  "Save contribution file": "Guardar el archivo de aportación",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} consultas de {p} artículos; {r} relaciones que confirmaste.",
+  "Contribute to the data commons": "Aportar al bien común de datos",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "El bien común de datos reúne los términos en los que los lectores se atascan en los artículos, para autores, docentes y otros lectores. Solo se pueden aportar artículos de arXiv o con DOI que tengan licencia abierta (Creative Commons o dominio público), y nunca las fuentes sensibles.",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "El archivo contiene el identificador del artículo, su licencia, el término, su campo y sección, cuánto lo entendiste y el mes, y las relaciones que confirmaste. No contiene citas, explicaciones, direcciones, dispositivo ni horas exactas.",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "Harkback no sube nada: guardas el archivo y decides tú si lo envías y adónde. Al guardar se registra lo que aceptaste aportar.",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "Todavía no se puede aportar ningún artículo. Harkback solo conoce una licencia cuando la página la indica, como el enlace de licencia de una página de resumen de arXiv.",
+  "Last saved: {date}": "Último guardado: {date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "Convierte tus consultas en artículos con licencia abierta en un archivo anónimo para el bien común de datos.",
+  Contribute: "Aportar",
 };

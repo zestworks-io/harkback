@@ -1,6 +1,7 @@
 import {
   acronymOf,
   clampSource,
+  isContributable,
   identityKey,
   matcherEntriesFromState,
   MAX_PREVIEW_PAGE_CHARS,
@@ -10,13 +11,13 @@ import {
   type Hit,
   type State,
 } from "@harkback/core";
-import { CARD_LIMITS, parseEvent, type HarkEvent } from "@harkback/spec";
+import { CARD_LIMITS, CONSENT_SCOPES, parseEvent, type HarkEvent } from "@harkback/spec";
 import type { PageInfo, PrivacyFields, Request, ResponseMap } from "./messages";
 import { reunionCards } from "../records/reunion-cards";
 import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "../storage/settings";
 import { gateSource, isChoice, isPrivacy } from "../source/privacy-gate";
-import { effectiveRule, normalizePattern, sensitiveStated, siteHost } from "../source/site-rules";
+import { effectiveRule, normalizePattern, sensitiveBySiteRule, sensitiveStated, siteHost } from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
 
@@ -306,6 +307,22 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
     case "confirm-edge": {
       if (!(await deps.getState()).edges.has(String(msg.edgeId))) return { ok: false };
       await deps.append((f) => [f.make("edge.confirmed", { edge_id: msg.edgeId })]);
+      return { ok: true };
+    }
+    case "record-consent": {
+      const state = await deps.getState();
+      const settings = await deps.loadSettings();
+      const target = typeof msg.target === "string" ? msg.target : null;
+      const contributable = (sourceId: string | undefined) =>
+        sourceId !== undefined && isContributable(state, sourceId, (s) => sensitiveBySiteRule(settings.sites, s));
+      const known =
+        msg.scope === "all_public_sources"
+          ? target === null
+          : msg.scope === "this_source"
+            ? target !== null && contributable(target)
+            : msg.scope === "this_record" && target !== null && contributable(state.encounters.get(target)?.sourceId);
+      if (!CONSENT_SCOPES.includes(msg.scope) || !known) return { ok: false };
+      await deps.append((f) => [f.make("contribution.consent", { scope: msg.scope, target })]);
       return { ok: true };
     }
     case "set-muted": {

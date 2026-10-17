@@ -607,3 +607,26 @@ describe("marking a paper normal under its other id", () => {
     expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(false);
   });
 });
+
+describe("agreeing to contribute to the data commons", () => {
+  it("records the scope for every paper, or for one openly licensed paper", async () => {
+    const { deps, w, written } = setup();
+    w.events.push(
+      w.f.make("source.seen", { source_id: "arxiv:9", ids: { arxiv: "9" }, title: "Open", license: "cc-by-4.0", sensitivity: "normal" }),
+    );
+    expect(await handleRequest(deps, { type: "record-consent", scope: "all_public_sources", target: null }, page)).toEqual({ ok: true });
+    expect(await handleRequest(deps, { type: "record-consent", scope: "this_source", target: "arxiv:9" }, page)).toEqual({ ok: true });
+    expect(written.map((e) => e.payload)).toEqual([
+      { scope: "all_public_sources", target: null },
+      { scope: "this_source", target: "arxiv:9" },
+    ]);
+  });
+
+  it("refuses a paper that may not be contributed, or a scope it does not know", async () => {
+    const { deps, written } = setup();
+    expect(await handleRequest(deps, { type: "record-consent", scope: "this_source", target: "arxiv:1" }, page)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "record-consent", scope: "everything" as never, target: null }, page)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "record-consent", scope: "all_public_sources", target: "x" }, page)).toEqual({ ok: false });
+    expect(written).toEqual([]);
+  });
+});

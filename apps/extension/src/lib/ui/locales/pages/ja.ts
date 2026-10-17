@@ -400,4 +400,21 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "初期設定がまだ終わっていません。",
   "Continue setup": "設定を続ける",
   "You agreed to these notes during setup on {date}.": "{date} の設定時にこれらの説明に同意しました。",
+  "What to contribute": "貢献する範囲",
+  "Every openly licensed paper": "オープンライセンスのすべての論文",
+  "Save contribution file": "貢献ファイルを保存",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{p} 本の論文から {n} 件の調べもの、確定した関係 {r} 件。",
+  "Contribute to the data commons": "データコモンズに貢献",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "データコモンズは、読者が論文でつまずいた用語を集め、著者、教師、ほかの読者が使えるようにします。貢献できるのはオープンライセンス（クリエイティブ・コモンズまたはパブリックドメイン）の arXiv または DOI の論文だけで、機密ソースは決して含まれません。",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "ファイルには、論文の ID、ライセンス、用語、分野と節、理解度と月、確定した関係が入ります。引用、説明、アドレス、デバイス、正確な時刻は入りません。",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "Harkback は何もアップロードしません。ファイルを保存し、提出するかどうか、どこに提出するかはあなたが決めます。保存すると、貢献に同意した範囲が記録されます。",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "まだ貢献できる論文はありません。Harkback がライセンスを知るのは、arXiv の要旨ページのライセンスリンクのように、ページに明記されているときだけです。",
+  "Last saved: {date}": "前回の保存：{date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "オープンライセンスの論文での調べものを、データコモンズ向けの匿名ファイルにまとめます。",
+  Contribute: "貢献",
 };

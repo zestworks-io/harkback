@@ -390,4 +390,21 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "還沒有完成初始設定。",
   "Continue setup": "繼續設定",
   "You agreed to these notes during setup on {date}.": "你在 {date} 設定時同意了這些說明。",
+  "What to contribute": "貢獻範圍",
+  "Every openly licensed paper": "所有開放授權的論文",
+  "Save contribution file": "儲存貢獻檔案",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} 次查詞，來自 {p} 篇論文；{r} 個你確認過的關係。",
+  "Contribute to the data commons": "貢獻給資料公地",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "資料公地收集讀者在論文裡卡住的概念，供作者、教師和其他讀者使用。只有開放授權（CC 或公有領域）的 arXiv 或 DOI 論文可以貢獻，敏感來源永遠不會包含在內。",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "檔案裡有：論文編號、授權、術語、領域、章節、你的理解程度和月份，以及你確認過的關係。沒有原文、解釋、網址、裝置或確切時間。",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "Harkback 不會上傳任何東西：你儲存檔案，自己決定是否提交以及提交到哪裡。儲存時會記下你同意貢獻的範圍。",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "還沒有可以貢獻的論文。Harkback 只在頁面寫明開放授權時記下它，例如 arXiv 摘要頁上的授權連結。",
+  "Last saved: {date}": "上次儲存：{date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "把開放授權論文裡的查詞整理成匿名檔案，貢獻給資料公地。",
+  Contribute: "貢獻",
 };

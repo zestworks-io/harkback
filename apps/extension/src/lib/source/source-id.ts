@@ -1,4 +1,5 @@
 import type { SourceIds } from "@harkback/spec";
+import { licenseFromDocument } from "./license";
 import { profileFor } from "./site-profiles";
 
 const TRACKING = /^(utm_[a-z_]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|si|spm|ref|ref_src|_hsenc|_hsmi|mkt_tok)$/i;
@@ -73,7 +74,7 @@ export function detectSource(url: string, doc: Document): DetectedSource {
     source_id,
     ids: { url: cleaned, ...(arxiv ? { arxiv } : {}), ...(doi ? { doi } : {}) },
     title: title.replace(/\s+/g, " ").trim(),
-    license: "unknown",
+    license: licenseFromDocument(doc),
   };
 }
 

@@ -50,7 +50,15 @@ describe("allowed", () => {
     expect(allowed("check-answer", "page")).toBe(true);
     expect(allowed("check-answer", "content")).toBe(false);
     expect(allowed("check-answer", "reader")).toBe(false);
-    for (const type of ["merge-concepts", "add-alias", "reject-edge", "confirm-edge", "set-muted", "import-events"] as const) {
+    for (const type of [
+      "merge-concepts",
+      "add-alias",
+      "reject-edge",
+      "confirm-edge",
+      "record-consent",
+      "set-muted",
+      "import-events",
+    ] as const) {
       expect(allowed(type, "page")).toBe(true);
       expect(allowed(type, "content")).toBe(false);
       expect(allowed(type, "reader")).toBe(false);

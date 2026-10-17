@@ -45,6 +45,7 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "resolve-alias",
   "reject-edge",
   "confirm-edge",
+  "record-consent",
   "set-muted",
   "backup-now",
   "settings-changed",

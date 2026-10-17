@@ -8,6 +8,8 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 - **Confirm a relation the model was unsure about.** A concept page lists weak relations under _Possible relations_, with ✓ to confirm and × to remove. A confirmed relation is used for the review order, reunion hints, the digest and the graph, like a strong one.
 - **Review and History from the toolbar.** Right-click the toolbar icon for _Review_ (the queue the badge counts) and _History_.
+- **Contribute to the data commons.** History → _Contribute_ builds an anonymous file from your look-ups in openly licensed arXiv and DOI papers: the paper id, licence, term, field, section, how well you understood it and the month, plus the relations you confirmed. It has no quotes, explanations, addresses or exact times, sensitive sources are never included, and the whole file is shown before you save it. Nothing is uploaded. Saving records a `contribution.consent` event, which a backup without sensitive sources leaves out when it names one.
+- **The licence of a page is recorded.** A source's `license` is read from arXiv's licence link, a `rel="license"` link, or Dublin Core and citation metadata, as a short code such as `cc-by-4.0`. A later record that cannot see the licence (the PDF of the same paper) keeps the one seen before.
 - **Settings says when setup was not finished**, with a link back to it, and the Privacy card shows when you agreed to the privacy notes.
 
 ### Fixed

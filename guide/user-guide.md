@@ -12,6 +12,7 @@
 - [Graph](#graph)
 - [History](#history)
 - [Export, backup and restore](#export-backup-and-restore)
+- [Contributing to the data commons](#contributing-to-the-data-commons)
 - [Site rules](#site-rules)
 - [GitHub, Notion and Google Docs](#github-notion-and-google-docs)
 - [Pages that look private](#pages-that-look-private)
@@ -144,6 +145,15 @@ Deleting an entry removes it from the app and clears its text (the quote, the ex
 Backups and exports never contain settings or API keys. In settings, **Leave sensitive sources out of backups and exports** removes everything that came from sensitive sources, and concepts known only from them.
 
 The file format is documented in [Data format](data-format.md).
+
+## Contributing to the data commons
+
+The data commons is a shared, openly licensed dataset of the terms readers get stuck on in papers. **Contribute** on the History page prepares your part of it as a file, on your computer.
+
+- **What can be contributed.** Only papers with an arXiv id or a DOI whose page states an open licence: Creative Commons or public domain. Harkback reads the licence from the page (on arXiv, the licence link on the abstract page) and records it with the source; a page that states none counts as unknown. Sensitive sources, and sources a site rule makes sensitive, are never included.
+- **What the file holds.** For each look-up: the paper's id, its licence, the term, its field and section, how well you understood it (confused, shaky, understood or not rated) and the month. Relations between those terms are included only when you confirmed them on a concept page. There are no quotes, explanations, addresses, device ids or exact times.
+- **You see every line.** Pick every paper or one paper, and the page shows the whole file before you save it.
+- **Nothing is uploaded.** _Save contribution file_ downloads `harkback-commons-YYYY-MM.json`; whether and where you submit it is up to you. Saving records what you agreed to contribute (a `contribution.consent` event), so the History page can say when you last did.
 
 ## Site rules
 

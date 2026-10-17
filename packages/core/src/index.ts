@@ -22,3 +22,5 @@ export * from "./llm/record";
 export * from "./export/export";
 export * from "./export/redact";
 export * from "./export/timestamp";
+export * from "./commons/license";
+export * from "./commons/contribution";

@@ -396,4 +396,21 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "لم يكتمل الإعداد بعد.",
   "Continue setup": "متابعة الإعداد",
   "You agreed to these notes during setup on {date}.": "وافقت على هذه الملاحظات أثناء الإعداد في {date}.",
+  "What to contribute": "ما الذي تساهم به",
+  "Every openly licensed paper": "كل الأوراق ذات الترخيص المفتوح",
+  "Save contribution file": "حفظ ملف المساهمة",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} من عمليات البحث في {p} من الأوراق؛ {r} من العلاقات التي أكدتها.",
+  "Contribute to the data commons": "المساهمة في مشاع البيانات",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "يجمع مشاع البيانات المصطلحات التي يتعثر فيها القراء في الأوراق، ليستفيد منها المؤلفون والمعلمون والقراء الآخرون. لا يمكن المساهمة إلا بأوراق arXiv أو DOI ذات الترخيص المفتوح (المشاع الإبداعي أو الملكية العامة)، ولا تُضمَّن المصادر الحساسة أبدًا.",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "يحتوي الملف على معرّف الورقة وترخيصها والمصطلح ومجاله والقسم ومدى فهمك له والشهر، والعلاقات التي أكدتها. لا يحتوي على اقتباسات أو شروح أو عناوين أو جهاز أو أوقات دقيقة.",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "لا يرفع Harkback أي شيء: تحفظ الملف وتقرر بنفسك ما إذا كنت ستقدمه وأين. يسجّل الحفظ ما وافقت على المساهمة به.",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "لا توجد بعد ورقة يمكن المساهمة بها. لا يعرف Harkback الترخيص إلا إذا ذكرته الصفحة، مثل رابط الترخيص في صفحة ملخص arXiv.",
+  "Last saved: {date}": "آخر حفظ: {date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "حوّل عمليات بحثك في الأوراق ذات الترخيص المفتوح إلى ملف مجهول الهوية لمشاع البيانات.",
+  Contribute: "ساهم",
 };

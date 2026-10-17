@@ -1,4 +1,15 @@
-import type { Action, Domain, EdgeSource, EncounterFlag, Explanation, Locator, Rel, Sensitivity, SourceIds } from "@harkback/spec";
+import type {
+  Action,
+  ConsentScope,
+  Domain,
+  EdgeSource,
+  EncounterFlag,
+  Explanation,
+  Locator,
+  Rel,
+  Sensitivity,
+  SourceIds,
+} from "@harkback/spec";
 import { normalizeSourceId, parentSourceId } from "./source-identity";
 import type { Script } from "../concepts/normalize";
 
@@ -94,6 +105,8 @@ export interface State {
   edges: Map<string, EdgeState>;
   /** Representative concept id -> ids of the sources where the reader said the term means something else. */
   dismissed: Map<string, string[]>;
+  /** What the reader agreed to contribute to the data commons, oldest first. */
+  consents: { scope: ConsentScope; target: string | null; at: number }[];
   warnings: string[];
 }
 

@@ -25,6 +25,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const actions: EventOf<"encounter.action">[] = [];
   const mutes: (EventOf<"concept.muted"> | EventOf<"concept.unmuted">)[] = [];
   const dismissals: EventOf<"reunion.dismissed">[] = [];
+  const consents: State["consents"] = [];
   const proposals: EventOf<"edge.proposed">[] = [];
   const statuses: (EventOf<"edge.confirmed"> | EventOf<"edge.rejected">)[] = [];
 
@@ -40,7 +41,8 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
           id: p.source_id,
           ids: { ...prev?.ids, ...definedOnly(p.ids) },
           title: p.title || prev?.title || "",
-          license: p.license,
+          // A record that could not see the licence (the PDF of a paper) does not forget one seen before.
+          license: p.license === "unknown" && prev ? prev.license : p.license,
           // Sensitive is sticky: only the reader's own choice makes a source normal again, so a later, automatic record
           // (another device that never knew the source was sensitive) cannot expose it.
           sensitivity: keptSensitive ? "sensitive" : p.sensitivity,
@@ -76,6 +78,9 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
       case "edge.confirmed":
       case "edge.rejected":
         statuses.push(e);
+        break;
+      case "contribution.consent":
+        consents.push({ scope: e.payload.scope, target: e.payload.target, at: Date.parse(e.ts) });
         break;
       default:
         break;
@@ -191,6 +196,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     sourceIdentity: resolveSourceIdentity(sorted),
     edges,
     dismissed,
+    consents,
     warnings,
   };
 }

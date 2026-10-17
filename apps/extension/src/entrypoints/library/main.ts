@@ -16,6 +16,7 @@ import { h } from "../../lib/ui/dom";
 import { buildDigest, weekOf } from "../../lib/records/digest";
 import { buildGraph } from "../../lib/records/graph";
 import { digestView } from "../../lib/pages/digest-view";
+import { commonsView } from "../../lib/pages/commons-view";
 import type { Request, ResponseMap } from "../../lib/messaging/messages";
 import { foundationGaps } from "../../lib/review/foundation";
 import {
@@ -581,8 +582,9 @@ async function main(): Promise<void> {
     }
   }
 
-  const onList = (): boolean =>
-    currentConceptId() === null && location.hash !== "#review" && location.hash !== "#graph" && location.hash !== "#digest";
+  /** Pages of their own, apart from the list and the concept pages. */
+  const VIEWS: readonly string[] = ["#review", "#graph", "#digest", "#commons"];
+  const onList = (): boolean => currentConceptId() === null && !VIEWS.includes(location.hash);
   const skipped = new Set<string>();
   let reviewed = 0;
   let revealed = false;
@@ -896,6 +898,27 @@ async function main(): Promise<void> {
       },
     });
 
+  const commonsPage = (): HTMLElement =>
+    commonsView({
+      state,
+      lang: settings.language,
+      alsoSensitive: (s) => sensitiveBySiteRule(settings.sites, s),
+      save: async (scope, contribution) => {
+        const r = await request({ type: "record-consent", scope: scope.scope, target: scope.target }).catch(() => ({ ok: false }));
+        if (!r.ok) {
+          status.textContent = L("保存失败。", "Could not save.");
+          return;
+        }
+        download(
+          `${JSON.stringify(contribution, null, 2)}\n`,
+          "application/json",
+          `harkback-commons-${new Date().toISOString().slice(0, 7)}.json`,
+        );
+        state = replay(await store.all());
+        draw();
+      },
+    });
+
   const graphFilter: { domain: "" | Domain; understanding: "" | Understanding; days: number } = { domain: "", understanding: "", days: 0 };
 
   /** A drop-down that redraws the map when it changes and keeps the keyboard where it was. */
@@ -1091,7 +1114,7 @@ async function main(): Promise<void> {
 
   function draw(): void {
     const id = currentConceptId();
-    if (location.hash === "#review" || location.hash === "#graph" || location.hash === "#digest") selecting = false;
+    if (VIEWS.includes(location.hash)) selecting = false;
     // Entries that no longer exist cannot stay selected.
     const alive = new Set(historyModel(state).flatMap((c) => c.entries.map((e) => e.encounterId)));
     for (const s of [...selected]) if (!alive.has(s)) selected.delete(s);
@@ -1113,6 +1136,10 @@ async function main(): Promise<void> {
     }
     if (location.hash === "#digest") {
       list.replaceChildren(backLink, digestPage());
+      return;
+    }
+    if (location.hash === "#commons") {
+      list.replaceChildren(backLink, commonsPage());
       return;
     }
     if (id !== null) {
@@ -1310,6 +1337,19 @@ async function main(): Promise<void> {
     },
     L("周报", "Digest"),
   );
+  const commonsLink = h(
+    "a",
+    {
+      className: "button",
+      href: "#commons",
+      "data-hb": "commons-link",
+      title: L(
+        "把开放许可论文里的查词整理成匿名文件，贡献给数据公地。",
+        "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.",
+      ),
+    },
+    L("贡献", "Contribute"),
+  );
   const toolbar = h(
     "div",
     { className: "toolbar" },
@@ -1317,6 +1357,7 @@ async function main(): Promise<void> {
     reviewLink,
     graphLink,
     digestLink,
+    commonsLink,
     ...[selectToggle(), exportMd, exportAnki, exportNotes, backupButton, importButton].map(
       (b) => (b.setAttribute("data-list-only", ""), b),
     ),

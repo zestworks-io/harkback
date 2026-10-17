@@ -1,5 +1,5 @@
 import type { Grade, Hit, MatcherEntry, ReviewAction, Verdict } from "@harkback/core";
-import type { HarkEvent, Tier } from "@harkback/spec";
+import type { ConsentScope, HarkEvent, Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "../explain/explain";
 import type { ModelErrorCode } from "../models/model-client";
 import type { PreviewTerm } from "../explain/preview";
@@ -82,6 +82,7 @@ export type Request =
   | { type: "resolve-alias"; conceptId: string; alias: string; accept: boolean }
   | { type: "reject-edge"; edgeId: string }
   | { type: "confirm-edge"; edgeId: string }
+  | { type: "record-consent"; scope: ConsentScope; target: string | null }
   | { type: "set-muted"; conceptId: string; muted: boolean }
   | { type: "backup-now" }
   | { type: "settings-changed" };
@@ -119,6 +120,7 @@ export interface ResponseMap {
   "resolve-alias": { ok: boolean; collides?: boolean };
   "reject-edge": { ok: boolean };
   "confirm-edge": { ok: boolean };
+  "record-consent": { ok: boolean };
   "set-muted": { ok: boolean };
   "backup-now": { ok: boolean; error?: string };
   "settings-changed": { ok: boolean };
@@ -150,6 +152,7 @@ const REQUEST_TYPES = new Set<string>([
   "resolve-alias",
   "reject-edge",
   "confirm-edge",
+  "record-consent",
   "set-muted",
   "backup-now",
   "settings-changed",

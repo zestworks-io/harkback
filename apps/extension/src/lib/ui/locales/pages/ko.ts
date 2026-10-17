@@ -398,4 +398,21 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Setup is not finished yet.": "초기 설정이 아직 끝나지 않았습니다.",
   "Continue setup": "설정 계속하기",
   "You agreed to these notes during setup on {date}.": "{date}에 설정하면서 이 안내에 동의했습니다.",
+  "What to contribute": "기여할 범위",
+  "Every openly licensed paper": "공개 라이선스가 있는 모든 논문",
+  "Save contribution file": "기여 파일 저장",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.": "논문 {p}편에서 찾아본 {n}건, 확인한 관계 {r}개.",
+  "Contribute to the data commons": "데이터 공유지에 기여",
+  "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
+    "데이터 공유지는 독자가 논문에서 막힌 용어를 모아 저자, 교사, 다른 독자가 쓸 수 있게 합니다. 공개 라이선스(크리에이티브 커먼즈 또는 퍼블릭 도메인)가 있는 arXiv나 DOI 논문만 기여할 수 있고, 민감한 출처는 절대 포함되지 않습니다.",
+  "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
+    "파일에는 논문 ID, 라이선스, 용어, 분야와 절, 이해 정도와 월, 확인한 관계가 들어 있습니다. 인용문, 설명, 주소, 기기, 정확한 시각은 없습니다.",
+  "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
+    "Harkback은 아무것도 업로드하지 않습니다. 파일을 저장한 뒤 제출할지, 어디에 제출할지는 직접 정합니다. 저장하면 기여에 동의한 범위가 기록됩니다.",
+  "No paper can be contributed yet. Harkback only knows a licence when the page states it, such as the licence link on an arXiv abstract page.":
+    "아직 기여할 수 있는 논문이 없습니다. Harkback은 arXiv 초록 페이지의 라이선스 링크처럼 페이지에 적혀 있을 때만 라이선스를 압니다.",
+  "Last saved: {date}": "마지막 저장: {date}",
+  "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
+    "공개 라이선스 논문에서 찾아본 기록을 데이터 공유지용 익명 파일로 만듭니다.",
+  Contribute: "기여",
 };

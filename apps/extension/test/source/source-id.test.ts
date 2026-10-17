@@ -118,3 +118,37 @@ describe("detectPdfSource", () => {
     expect(detectPdfSource(facts({ url: "file:///x/notes.pdf", contentHash: "1" })).title).toBe("notes");
   });
 });
+
+describe("the licence of a page", () => {
+  const body = (markup: string) => new DOMParser().parseFromString(`<html><body>${markup}</body></html>`, "text/html");
+
+  it("is read from arXiv's licence link", () => {
+    const doc = body(
+      '<div class="abs-license"><a href="http://creativecommons.org/licenses/by/4.0/" title="Rights to this article">view license</a></div>',
+    );
+    expect(detectSource("https://arxiv.org/abs/2106.09685", doc).license).toBe("cc-by-4.0");
+    expect(
+      detectSource(
+        "https://arxiv.org/abs/2106.09685",
+        body('<a title="Rights to this article" href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/">x</a>'),
+      ).license,
+    ).toBe("arxiv-nonexclusive");
+  });
+
+  it("is read from a licence link or metadata", () => {
+    expect(
+      detectSource("https://example.com/a", html('<link rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">')).license,
+    ).toBe("cc-by-sa-4.0");
+    expect(detectSource("https://example.com/a", html('<meta name="DC.rights" content="CC BY 4.0">')).license).toBe("cc-by-4.0");
+    expect(
+      detectSource(
+        "https://example.com/a",
+        body('<a rel="license noopener" href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>'),
+      ).license,
+    ).toBe("cc0-1.0");
+  });
+
+  it("is unknown when the page does not say", () => {
+    expect(detectSource("https://example.com/a", html('<meta name="description" content="CC BY 4.0">')).license).toBe("unknown");
+  });
+});

@@ -67,6 +67,8 @@ Incognito windows must be allowed for the extension in Chrome. In them Harkback 
 
 **Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files. Such a backup does not record which sources were sensitive either, so mark them again after restoring it. Site rules are settings and are never in backups.
 
+**Contributing to the data commons** (History → Contribute) builds a file on your computer from openly licensed papers only, without quotes, explanations, addresses or exact times, and shows all of it before you save it. Harkback never uploads it.
+
 ## Limits to know about
 
 - **Reunion underlines live in the page**, so the page's own scripts may infer which terms you have records for.

@@ -71,6 +71,9 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
         const p = e.payload;
         return !isHidden(p.from) && !isHidden(p.to) && !(p.evidence.encounter_id && sensitiveEncounters.has(p.evidence.encounter_id));
       }
+      case "contribution.consent":
+        // Agreeing to contribute one look-up or one source names it.
+        return !(e.payload.target && (isSensitiveSource(state, e.payload.target) || sensitiveEncounters.has(e.payload.target)));
       case "edge.confirmed":
       case "edge.rejected": {
         const parsed = parseEdgeId(e.payload.edge_id);

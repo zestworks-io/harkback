@@ -493,6 +493,26 @@
         background: var(--subtle);
         color: var(--err);
       }
+      .commons p {
+        max-width: 70ch;
+      }
+      .commons-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .commons-preview {
+        max-height: 50vh;
+        overflow: auto;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--subtle);
+        font-size: 12px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
       .chip-ok:hover {
         color: var(--ok, var(--accent));
       }
