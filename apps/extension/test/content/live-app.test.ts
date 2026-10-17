@@ -114,6 +114,15 @@ describe("ContentApp on a video", () => {
     expect(reunionCalls()).toHaveLength(1);
   });
 
+  it("underlines a term in automatic captions, written in lower case or misheard", async () => {
+    showLines("so we fine tune it with laura adapters");
+    await settle();
+    expect(marks()).toBe(1);
+    showLines("and lora is cheap");
+    await settle();
+    expect(marks()).toBe(1);
+  });
+
   it("removes the underline when the caption goes away", async () => {
     showLines();
     await settle();

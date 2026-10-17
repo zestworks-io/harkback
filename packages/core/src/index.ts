@@ -25,3 +25,4 @@ export * from "./export/timestamp";
 export * from "./commons/license";
 export * from "./commons/contribution";
 export * from "./concepts/split";
+export * from "./concepts/speech";

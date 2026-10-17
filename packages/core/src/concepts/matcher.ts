@@ -3,6 +3,7 @@ import { foldArabic, foldHan, isArabicMark } from "./fold";
 import { inflectedForms } from "./inflect";
 import { foldAccents, normalizeName, stripDeterminers, type Script } from "./normalize";
 import type { State } from "../events/state";
+import { allowedEdits, boundedDistance, caselessOk, hasNoCase, joinSpelledLetters, soundex } from "./speech";
 
 /** Kana and Hangul. */
 const SYLLABIC = /[぀-ヿ가-힯]/u;
@@ -204,8 +205,21 @@ export class Matcher {
     }
   }
 
-  scan(raw: string): Hit[] {
-    const { text, map } = prepareText(raw);
+  /**
+   * Finds the names in `raw`. With `speech` (automatic captions), letters spelled out one by one are read as one word, case is
+   * ignored on a line that has none, and a name heard slightly wrong is matched too (see `heard`).
+   */
+  scan(raw: string, opts: { speech?: boolean } = {}): Hit[] {
+    const prepared = prepareText(raw);
+    if (!opts.speech) return dropContained(this.exact(raw, prepared.text, prepared.map, false));
+    const joined = joinSpelledLetters(prepared.text);
+    const map = joined.map.map((i) => prepared.map[i]!);
+    const caseless = hasNoCase(raw);
+    const exact = this.exact(raw, joined.text, map, caseless);
+    return dropContained([...exact, ...this.heard(raw, joined.text, map, caseless, exact)]);
+  }
+
+  private exact(raw: string, text: string, map: readonly number[], caseless: boolean): Hit[] {
     const hits: Hit[] = [];
     let s = 0;
     for (let i = 0; i < text.length; i++) {
@@ -215,7 +229,7 @@ export class Matcher {
       for (const index of this.nodes[s]!.out) {
         const e = this.entries[index]!;
         const startP = i - e.prepared.length + 1;
-        const endP = this.accept(e, text, startP, i, raw, map);
+        const endP = this.accept(e, text, startP, i, raw, map, caseless);
         if (endP < 0) continue;
         const start = map[startP]!;
         let end = after(raw, map[endP]!);
@@ -223,11 +237,51 @@ export class Matcher {
         hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
       }
     }
-    return dropContained(hits);
+    return hits;
+  }
+
+  /**
+   * Latin names heard slightly wrong, word by word: within a few edits for a long name, or sounding the same (Soundex) and at
+   * most two edits away for a short name matched by case, on a line without case. Words already matched exactly are skipped.
+   */
+  private heard(raw: string, text: string, map: readonly number[], caseless: boolean, exact: readonly Hit[]): Hit[] {
+    const words = [...text.matchAll(/[\p{L}\p{N}]+/gu)].map((m) => ({ word: m[0], start: m.index, end: m.index + m[0].length }));
+    const taken = (start: number, end: number) => exact.some((h) => h.start < end && start < h.end);
+    const hits: Hit[] = [];
+    const seen = new Set<string>();
+    for (const e of this.entries) {
+      // The first entry of a name is the name as written; its other forms add nothing a few edits do not.
+      if (e.script !== "latin" || seen.has(e.key)) continue;
+      seen.add(e.key);
+      const compact = e.prepared.replace(/ /g, "");
+      const count = e.prepared.split(" ").length;
+      const edits = allowedEdits(compact.length);
+      const soundsLike = caseless && e.caseKey !== null && count === 1 && compact.length >= 4 && caselessOk(compact);
+      if (edits === 0 && !soundsLike) continue;
+      const code = soundsLike ? soundex(compact) : "";
+      // The same number of words, or one more or fewer: speech splits and joins words ("fine tune", "finetune").
+      for (const n of [count - 1, count, count + 1]) {
+        if (n < 1) continue;
+        for (let w = 0; w + n <= words.length; w++) {
+          const heardAs = words
+            .slice(w, w + n)
+            .map((x) => x.word)
+            .join("");
+          let ok = edits > 0 && boundedDistance(heardAs, compact, edits) <= edits;
+          if (!ok && soundsLike && n === 1 && heardAs[0] === compact[0] && soundex(heardAs) === code)
+            ok = boundedDistance(heardAs, compact, 2) <= 2;
+          if (!ok) continue;
+          const start = map[words[w]!.start]!;
+          const end = after(raw, map[words[w + n - 1]!.end - 1]!);
+          if (!taken(start, end)) hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
+        }
+      }
+    }
+    return hits;
   }
 
   /** Returns the accepted end index in prepared text (possibly extended by a plural "s"), or -1. */
-  private accept(e: Entry, text: string, startP: number, endP: number, raw: string, map: readonly number[]): number {
+  private accept(e: Entry, text: string, startP: number, endP: number, raw: string, map: readonly number[], caseless: boolean): number {
     let end = endP;
     if (e.script === "latin") {
       if (isLatinWordChar(text[startP - 1])) return -1;
@@ -242,7 +296,9 @@ export class Matcher {
     if (e.wholeWord && !onWordBoundaries(raw, map[startP]!, after(raw, map[end]!))) return -1;
     if (e.caseKey) {
       const original = raw.slice(map[startP]!, after(raw, map[end]!)).replace(SEPARATORS_G, "");
-      if (normalizeName(original).caseKey !== e.caseKey) return -1;
+      // A line without case says nothing about case, so a name matched by case is taken as written unless it is a common word.
+      const ignored = caseless && caselessOk(e.caseKey) && original.toLowerCase().replace(/\./g, "") === e.caseKey.toLowerCase();
+      if (!ignored && normalizeName(original).caseKey !== e.caseKey) return -1;
     }
     return end;
   }

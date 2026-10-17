@@ -241,7 +241,9 @@ export class ContentApp {
     this.page = page;
     const firstPerKey = new Map<string, Hit>();
     if (this.matcher?.entries !== info.entries) this.matcher = { entries: info.entries, value: new Matcher(info.entries) };
-    for (const hit of this.matcher.value.scan(page.text)) if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
+    // Live text is captions, often written by speech recognition: lower case, letters spelled out, names misheard.
+    for (const hit of this.matcher.value.scan(page.text, { speech: this.live() !== null }))
+      if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
     if (firstPerKey.size === 0) {
       this.layer?.clear();
       return;
