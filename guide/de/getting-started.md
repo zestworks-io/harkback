@@ -23,9 +23,9 @@ Nachdem Sie neuen Code geholt haben, bauen Sie erneut und klicken Sie auf der Ka
 
 Harkback hat keinen Server. Es braucht ein Modell, das die Erklärungen schreibt, und Sie wählen, welches. Die Einrichtungsseite hat drei Schritte; ein abgeschlossener Schritt zeigt ein ✓ und lässt sich anklicken, um dorthin zurückzukehren.
 
-1. **Willkommen.** Sehen Sie sich einen Beispiel-Hinweis zum Wiedersehen an und klicken Sie auf den unterstrichenen Begriff, um zu sehen, wie eine Erklärung aussieht. Es wird kein Modell aufgerufen.
+1. **Willkommen.** Sehen Sie sich ein Beispiel für einen Wiedersehens-Hinweis an und klicken Sie auf den unterstrichenen Begriff, um zu sehen, wie eine Erklärung aussieht. Es wird kein Modell aufgerufen.
 2. **Datenschutz.** Lesen Sie, wohin Ihr Text geht, und setzen Sie das Häkchen bei der Zustimmung. **Weiter** bleibt deaktiviert, bis Sie das getan haben.
-3. **Modell.** Wählen Sie einen Anbieter; die Adresse wird eingetragen. Fügen Sie einen API-Schlüssel ein, wenn der Anbieter einen braucht (Ollama und das in Chrome eingebaute Modell brauchen keinen). Drücken Sie **Verbindung testen**, und Chrome fragt, ob Harkback diese Adresse erreichen darf; erlauben Sie es. Während des Tests werden ein Ladesymbol und „Verbinde…“ angezeigt, und die Schaltfläche ist bis zum Ende deaktiviert. Drücken Sie dann **Einrichtung abschließen**.
+3. **Modell.** Wählen Sie einen Anbieter; die Adresse wird eingetragen. Fügen Sie einen API-Schlüssel ein, wenn der Anbieter einen braucht (Ollama und das in Chrome eingebaute Modell brauchen keinen). Drücken Sie **Verbindung testen**, und Chrome fragt, ob Harkback diese Adresse erreichen darf; erlauben Sie es. Während des Tests werden ein Ladesymbol und „Verbindung wird hergestellt…“ angezeigt, und die Schaltfläche ist bis zum Ende deaktiviert. Drücken Sie dann **Einrichtung abschließen**.
 
 **Das in Chrome eingebaute Modell (Gemini Nano)** braucht weder Adresse noch Schlüssel. Wenn Sie es auswählen, sehen Sie den Status des Modells und eine Schaltfläche **Modell herunterladen**; **Einrichtung abschließen** wartet, bis der Download fertig ist. Es ist ein kleines Modell, das auf Ihrem Computer läuft, rechnen Sie also damit, dass es langsamer ist als ein Cloud-Modell, besonders bei der ersten Anfrage, und einfachere Antworten gibt. Es eignet sich für kurze Erklärungen.
 
@@ -37,7 +37,7 @@ Die Oberfläche startet auf Englisch. Ihre Sprache und die Sprache der Erklärun
 
 ## 3. Einen Begriff erklären
 
-1. Öffnen Sie ein Paper auf [arxiv.org](https://arxiv.org). arXiv-Seiten werden automatisch gescannt.
+1. Öffnen Sie einen Artikel auf [arxiv.org](https://arxiv.org). arXiv-Seiten werden automatisch gescannt.
 2. Wählen Sie einen Begriff aus, zum Beispiel `LoRA`.
 3. Klicken Sie neben der Auswahl auf **Erklären** oder drücken Sie `Alt+Shift+E`.
 4. Lesen Sie die Antwort, während sie eintrifft. Ein grünes Label sagt, dass die Seite den Begriff selbst definiert; ein gelbes, dass die Antwort aus dem eigenen Wissen des Modells stammt.
@@ -47,11 +47,11 @@ Weitere Wege zum Start: das Kontextmenü auf ausgewähltem Text und eine Auswahl
 
 ## 4. Dem Begriff wieder begegnen
 
-Öffnen Sie ein anderes Paper, das `LoRA`, `low-rank adaptation` oder `LoRAs` erwähnt. Der Begriff ist unterstrichen. Fahren Sie mit dem Zeiger darüber, um zu sehen, wann und wo Sie ihn nachgeschlagen haben und was Sie damals verstanden haben. Sie können ihn als gemerkt markieren, noch einmal erklären lassen, die beiden Verwendungen vergleichen oder ihn stummschalten.
+Öffnen Sie einen anderen Artikel, der `LoRA`, `low-rank adaptation` oder `LoRAs` erwähnt. Der Begriff ist unterstrichen. Fahren Sie mit dem Zeiger darüber, um zu sehen, wann und wo Sie ihn nachgeschlagen haben und was Sie damals verstanden haben. Sie können ihn als gemerkt markieren, noch einmal erklären lassen, die beiden Verwendungen vergleichen oder ihn stummschalten.
 
 ## 5. Ansehen, was Sie haben
 
-Öffnen Sie die Seite **Verlauf** (verlinkt von den Einstellungen und der Einrichtung). Sie listet jeden Begriff nach Konzept auf, mit Suche, Folgeunterhaltungen, einer Wiederholungswarteschlange und einem Graphen, wie Ihre Konzepte zusammenhängen. Dort können Sie auch Ihre Aufzeichnungen exportieren und aus einer Sicherung wiederherstellen.
+Öffnen Sie die Seite **Verlauf** (verlinkt von den Einstellungen und der Einrichtung). Sie listet jeden Begriff nach Konzept auf, mit Suche, Nachfragen, einer Wiederholungswarteschlange und einem Graphen, wie Ihre Konzepte zusammenhängen. Dort können Sie auch Ihre Einträge exportieren und aus einer Sicherung wiederherstellen.
 
 ## Etwas lesen, das nicht auf arXiv steht
 

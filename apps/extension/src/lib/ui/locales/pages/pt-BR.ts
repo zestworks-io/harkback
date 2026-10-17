@@ -13,14 +13,14 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Delete failed.": "Falha ao excluir.",
   "Defined in source": "Definido na fonte",
   "External knowledge": "Conhecimento externo",
-  "Follow-up conversation · {n}": "Conversa de acompanhamento · {n}",
+  "Follow-up conversation · {n}": "Perguntas adicionais · {n}",
   "Select this entry": "Selecionar esta entrada",
-  Understood: "Entendi",
+  Understood: "Entendido",
   Confused: "Confuso",
-  Shaky: "Instável",
+  Shaky: "Incerto",
   "You forgot this {n} times in your last few reviews; more repetition may not help.":
     "Você esqueceu isto {n} vezes nas últimas revisões; repetir mais talvez não ajude.",
-  "Open its page to check its aliases and relations.": "Abra a página do termo para conferir apelidos e relações.",
+  "Open its page to check its aliases and relations.": "Abra a página do conceito para conferir os nomes alternativos e as relações.",
   "Show a fill-in-the-blank hint": "Mostrar uma dica com lacunas",
   "It may help to start with:": "Pode ajudar começar por:",
   "Comes first: {names} build on it": "Vem primeiro: {names} dependem dele",
@@ -32,7 +32,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Remove this relation": "Remover esta relação",
   Unmute: "Reativar",
   Mute: "Silenciar",
-  "Add an alias": "Adicionar um apelido",
+  "Add an alias": "Adicionar um nome alternativo",
   "Use this name": "Usar este nome",
   Accept: "Aceitar",
   "Stop suggesting this name": "Parar de sugerir este nome",
@@ -50,14 +50,14 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "← All concepts": "← Todos os conceitos",
   "Could not save.": "Não foi possível salvar.",
   "Next review: ": "Próxima revisão: ",
-  "All done for now: {n} reviewed.": "Tudo pronto por ora: {n} revisados.",
+  "All done for now: {n} reviewed.": "Tudo certo por enquanto: {n} revisados.",
   "Nothing to review right now.": "Nada para revisar agora.",
   "Show explanation": "Mostrar explicação",
   "{n} left": "Faltam {n}",
-  Remembered: "Lembrei",
-  "Still confused": "Ainda confuso",
+  Remembered: "Lembrados",
+  "Still confused": "Ainda não entendi",
   Skip: "Pular",
-  "Do you still remember this?": "Você ainda se lembra deste termo?",
+  "Do you still remember this?": "Você ainda se lembra disto?",
   "Review ({n})": "Revisar ({n})",
   "Concept not found.": "Conceito não encontrado.",
   "No records found. Explain a term and it will show up here.": "Nenhum registro encontrado. Explique um termo e ele aparecerá aqui.",
@@ -65,7 +65,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Backing up…": "Fazendo backup…",
   "Export Markdown": "Exportar Markdown",
   "Export notes folder": "Exportar pasta de notas",
-  "This browser cannot pick a folder.": "Este navegador não consegue escolher uma pasta.",
+  "This browser cannot pick a folder.": "Este navegador não permite escolher uma pasta.",
   "Exported {n} notes.": "{n} notas exportadas.",
   "Exported {n} notes; {failed} failed: {names}": "{n} notas exportadas; {failed} falharam: {names}",
   "Export failed.": "Falha ao exportar.",
@@ -77,7 +77,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Interface language": "Idioma da interface",
   "Model service": "Serviço de modelo",
   "Test the connection, then pick from the list": "Teste a conexão e escolha na lista",
-  "Runs locally": "Executa localmente",
+  "Runs locally": "Executado localmente",
   "Any address": "Qualquer endereço",
   "Cloud service": "Serviço em nuvem",
   "Test connection": "Testar conexão",
@@ -100,17 +100,17 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Example of a reunion hint": "Exemplo de aviso de reencontro",
   "You've met this term": "Você já encontrou este termo",
   "You read about it in 2106.09685 three weeks ago. Harkback marks it in new papers and brings back what you understood then.":
-    "Você o leu em 2106.09685 há três semanas. O Harkback o marca em artigos novos e traz de volta o que você entendeu na época.",
+    "Você leu sobre ele em 2106.09685 há três semanas. O Harkback o marca em artigos novos e traz de volta o que você entendeu na época.",
   "You're set up": "Tudo pronto",
-  "Try it once:": "Experimente uma vez:",
+  "Try it once:": "Faça um teste:",
   "Open an arXiv paper in Chrome, for example ": "Abra um artigo do arXiv no Chrome, por exemplo ",
-  "Drag to select a word or phrase you want explained.": "Arraste para selecionar uma palavra ou frase que você quer que seja explicada.",
-  "Click the Explain button next to your selection, or press ": "Clique no botão «Explicar» ao lado da sua seleção ou pressione ",
+  "Drag to select a word or phrase you want explained.": "Arraste para selecionar uma palavra ou frase que você quer entender.",
+  "Click the Explain button next to your selection, or press ": "Clique no botão Explicar ao lado da sua seleção ou pressione ",
   ".": ".",
   "History and search": "Histórico e busca",
   "Open settings": "Abrir configurações",
   'PDFs work too: click the toolbar button on a PDF. An arXiv paper opens its HTML version; any other PDF opens in Harkback\'s reader. A PDF on your computer needs two approvals: turn on "Allow access to file URLs" for Harkback in chrome://extensions, then click "Allow local files" on the reader page.':
-    "PDFs também funcionam: clique no botão da barra de ferramentas em um PDF. Um artigo do arXiv abre na versão HTML; qualquer outro PDF abre no leitor do Harkback. Um PDF no seu computador precisa de duas aprovações: ative «Permitir acesso a URLs de arquivo» para o Harkback em chrome://extensions e clique em «Permitir arquivos locais» na página do leitor.",
+    "PDFs também funcionam: clique no botão da barra de ferramentas em um PDF. Um artigo do arXiv abre na versão HTML; qualquer outro PDF abre no leitor do Harkback. Um PDF no seu computador precisa de duas aprovações: ative “Permitir acesso a URLs de arquivo” para o Harkback em chrome://extensions e clique em “Permitir arquivos locais” na página do leitor.",
   "Please check: ": "Verifique: ",
   "Saved.": "Salvo.",
   "Explanation language": "Idioma das explicações",
@@ -127,55 +127,55 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Sensitive provider": "Provedor sensível",
   "+ Add model": "+ Adicionar modelo",
   "(default model)": "(modelo padrão)",
-  "Auto-scan": "Varredura automática",
+  "Auto-scan": "Análise automática",
   Sensitive: "Sensível",
   Disabled: "Desativado",
   "+ Add site": "+ Adicionar site",
   "+ YouTube captions": "+ Legendas do YouTube",
   "Added YouTube. Save to grant site access; the browser asks once. Turn on captions (CC) while you watch.":
-    "YouTube adicionado. Salve para conceder o acesso; o navegador pergunta uma vez. Ative as legendas (CC) enquanto assiste.",
+    "YouTube adicionado. Salve para conceder acesso ao site; o navegador pergunta uma vez. Ative as legendas (CC) enquanto assiste.",
   "YouTube already has a rule.": "O YouTube já tem uma regra.",
   "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
     "O YouTube não está entre os sites sugeridos; adicione-o quando quiser. O Harkback lê apenas as legendas que o player está mostrando, não baixa arquivos de legenda, e os sublinhados não fazem parte da página do YouTube.",
   "+ Suggested research sites": "+ Sites de pesquisa sugeridos",
   "Added {n} sites. Save to grant site access; the browser asks once.":
-    "{n} sites adicionados. Salve para conceder acesso; o navegador pergunta uma só vez.",
+    "{n} sites adicionados. Salve para conceder acesso aos sites; o navegador pergunta uma só vez.",
   "These sites already have rules.": "Estes sites já têm regras.",
   "Saved, but site access was not granted, so automatic scanning will not run.":
-    "Salvo, mas o acesso aos sites não foi concedido, então o escaneamento automático não vai funcionar.",
+    "Salvo, mas o acesso aos sites não foi concedido, então a análise automática não vai funcionar.",
   "Suggested sites: bioRxiv, medRxiv, PubMed (abstracts only), SSRN, OpenReview and ACL Anthology, all scanned automatically.":
-    "Sites sugeridos: bioRxiv, medRxiv, PubMed (só resumos), SSRN, OpenReview e ACL Anthology, todos escaneados automaticamente.",
+    "Sites sugeridos: bioRxiv, medRxiv, PubMed (só resumos), SSRN, OpenReview e ACL Anthology, todos analisados automaticamente.",
   "Save changes": "Salvar alterações",
   "Back up now": "Fazer backup agora",
   "Harkback settings": "Configurações do Harkback",
-  "Models, sites, scanning and privacy.": "Modelos, sites, digitalização e privacidade.",
+  "Models, sites, scanning and privacy.": "Modelos, sites, análise e privacidade.",
   General: "Geral",
   "Scanned PDFs": "PDFs digitalizados",
   "Data and privacy": "Dados e privacidade",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
-    "As explicações e as respostas de acompanhamento são escritas neste idioma; os termos técnicos permanecem na forma original. A qualidade varia conforme o idioma e o modelo.",
+    "As explicações e as respostas às perguntas adicionais são escritas neste idioma; os termos técnicos permanecem na forma original. A qualidade varia conforme o idioma e o modelo.",
   Models: "Modelos",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "As chaves de API são armazenadas sem criptografia no armazenamento da extensão: outros sites e extensões não conseguem lê-las, mas qualquer pessoa com acesso ao disco deste computador consegue. Uma chave só é enviada ao endereço de modelo que você informa e nunca entra em backups nem em logs. Prefira uma chave com limite de gastos ou um modelo local (sem chave).",
   Sites: "Sites",
   "Pages on notion.so and docs.google.com ask before anything is sent, unless the page is published or a rule above says otherwise. A GitHub page asks only when it looks private.":
-    "Em notion.so e docs.google.com, pergunta-se antes de enviar qualquer coisa, a menos que a página esteja publicada ou uma regra acima diga outra coisa. No GitHub, só se pergunta quando a página parece privada.",
+    "Em notion.so e docs.google.com, o Harkback pergunta antes de enviar qualquer coisa, a menos que a página esteja publicada ou uma regra acima diga o contrário. No GitHub, ele só pergunta quando a página parece privada.",
   "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.":
-    "Cada chave tem três estados: traço = não definido (segue uma regra mais ampla, ou desligado se nenhuma definir), marcado = ligado, vazio = desligado de forma explícita. Quando várias regras correspondem a uma página, cada chave vem da regra mais específica que a define.",
+    "Cada opção tem três estados: traço = não definida (segue uma regra mais ampla, ou fica desligada se nenhuma a definir), marcada = ligada, vazia = desligada com certeza. Quando várias regras correspondem a uma página, cada opção vem da regra mais específica que a define.",
   "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
-    "Exemplo: uma regra para example.com com “Sensitive” marcado e uma regra para https://example.com/public com “Sensitive” vazio. O site inteiro é sensível, exceto as páginas em /public. Se a segunda regra ficar no traço, ela segue o site e /public também é sensível.",
+    "Exemplo: uma regra para example.com com “Sensível” marcado e uma regra para https://example.com/public com “Sensível” vazio. O site inteiro é sensível, exceto as páginas em /public. Se a segunda regra ficar no traço, ela segue o site e /public também é sensível.",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
-    "Somente o arxiv.org é verificado automaticamente. Permita outros sites aqui ou marque-os como sensíveis.",
+    "Somente o arxiv.org é analisado automaticamente. Permita outros sites aqui ou marque-os como sensíveis.",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
-    "«Sensível» é para sites cujo conteúdo não pode sair deste computador (artigos confidenciais, documentos internos). Neles, o texto selecionado, seu parágrafo, a seção e o título da página são enviados apenas a um modelo local, como o Ollama, nunca a um serviço remoto. Sem um modelo local disponível, a explicação falha em vez de recorrer a um modelo remoto. Os registros continuam sendo guardados neste navegador. Adicione antes um modelo local acima e marque «Provedor sensível».",
+    "“Sensível” é para sites cujo conteúdo não pode sair deste computador (artigos confidenciais, documentos internos). Neles, o texto selecionado, seu parágrafo, a seção e o título da página são enviados apenas a um modelo local, como o Ollama, nunca a um serviço remoto. Sem um modelo local disponível, a explicação falha em vez de recorrer a um modelo remoto. Os registros continuam sendo guardados neste navegador. Adicione antes um modelo local acima e marque “Provedor sensível”.",
   "No site rules yet.": "Ainda não há regras de site.",
   "Rate limits": "Limites de uso",
-  "Reunion hints": "Dicas de reencontro",
+  "Reunion hints": "Avisos de reencontro",
   "Model timeouts": "Tempos limite do modelo",
   "Caps how many times Harkback may ask your model to explain something, so a paid API key cannot run up a surprise bill. Once a cap is reached, new requests are refused with a note saying how many seconds to wait.":
     "Limita quantas vezes o Harkback pode pedir uma explicação ao seu modelo, para que uma chave de API paga não gere uma conta inesperada. Ao atingir um limite, novas solicitações são recusadas com um aviso de quantos segundos esperar.",
   "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
-    "Uma dica de reencontro sublinha, em uma página nova, um termo que você já viu. O intervalo é quantos dias precisam passar desde a última vez que você viu um termo para ele ser marcado de novo (0 marca na hora); o limite por página evita que uma página fique coberta de sublinhados.",
+    "Um aviso de reencontro sublinha, em uma página nova, um termo que você já viu. O intervalo é quantos dias precisam passar desde a última vez que você viu um termo para ele ser marcado de novo (0 marca na hora); o limite por página evita que uma página fique coberta de sublinhados.",
   "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
     "Este é um modelo pequeno que roda no seu computador: espere que seja mais lento que um modelo em nuvem, principalmente na primeira solicitação, e que suas respostas sejam mais simples. Serve para explicações curtas; para as longas, use um modelo em nuvem ou do Ollama.",
   "Explanations per minute": "Explicações por minuto",
@@ -188,7 +188,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "No PDF was given to open.": "Nenhum PDF foi indicado para abrir.",
   "Cannot read this local file": "Não é possível ler este arquivo local",
   'Open Harkback\'s details in chrome://extensions, turn on "Allow access to file URLs", then click the toolbar button again.':
-    "Abra os detalhes do Harkback em chrome://extensions, ative «Permitir acesso a URLs de arquivo» e clique novamente no botão da barra de ferramentas.",
+    "Abra os detalhes do Harkback em chrome://extensions, ative “Permitir acesso a URLs de arquivo” e clique novamente no botão da barra de ferramentas.",
   "Harkback needs access to local files": "O Harkback precisa de acesso a arquivos locais",
   "This PDF is on your computer. Allow access so Harkback can read it and mark terms. The file is never uploaded.":
     "Este PDF está no seu computador. Permita o acesso para que o Harkback possa lê-lo e marcar termos. O arquivo nunca é enviado.",
@@ -219,14 +219,14 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "The service returned an error (HTTP {status}).": "O serviço retornou um erro (HTTP {status}).",
   "Cannot reach this address. For Ollama, make sure it is running.":
     "Não foi possível acessar este endereço. No caso do Ollama, confirme que ele está em execução.",
-  "Harkback: scan this page": "Harkback: verificar esta página",
+  "Harkback: scan this page": "Harkback: analisar esta página",
   "{n} to review": "{n} para revisar",
   "When you ask for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service you choose, under that provider's terms.":
     "Quando você pede uma explicação, o texto selecionado, seu parágrafo, a seção e o título da página são enviados ao serviço de modelo que você escolheu, de acordo com os termos desse provedor.",
   "Records stay in this browser. A JSONL backup is saved to Downloads/harkback every week; it contains records only, never settings or API keys.":
     "Os registros ficam neste navegador. Toda semana um backup JSONL é salvo em Downloads/harkback; ele contém apenas registros, nunca configurações nem chaves de API.",
   "Pages are scanned automatically only on arxiv.org. Elsewhere, click the toolbar button, press Alt+Shift+E, or allow the site in settings.":
-    "As páginas são verificadas automaticamente apenas no arxiv.org. Em outros lugares, clique no botão da barra de ferramentas, pressione Alt+Shift+E ou permita o site nas configurações.",
+    "As páginas são analisadas automaticamente apenas no arxiv.org. Em outros lugares, clique no botão da barra de ferramentas, pressione Alt+Shift+E ou permita o site nas configurações.",
   "Reunion hints are shown on the page, so the page's own scripts may infer which terms you have records for.":
     "Os avisos de reencontro aparecem na página, então os próprios scripts da página podem deduzir de quais termos você tem registros.",
   "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.":
@@ -238,7 +238,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "As chaves de API são armazenadas sem criptografia no armazenamento da extensão; só são enviadas ao endereço de modelo que você informa e nunca entram em backups nem em logs. Prefira uma chave com limite de gastos.",
   "Mark as normal": "Marcar como normal",
-  "Confirm: may go to remote models": "Confirmar: poderá ir para modelos remotos",
+  "Confirm: may go to remote models": "Confirmar: pode ir para modelos remotos",
   "Content from this source only goes to a local model.": "O conteúdo desta fonte só vai para um modelo local.",
   "Sensitive source": "Fonte sensível",
   "No concepts to show yet.": "Ainda não há conceitos para mostrar.",
@@ -246,10 +246,10 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
     "Seta azul: pré-requisito · Seta roxa: variante · Tracejada: relacionado",
   "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Verde: entendido · Amarelo-claro: instável · Amarelo: ainda confuso · Azul: novo · Círculo tracejado: ainda não explicado",
+    "Verde: entendido · Amarelo-claro: incerto · Amarelo: confuso · Azul: novo · Círculo tracejado: ainda não explicado",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Um cartão por conceito em texto separado por tabulações; abra no Anki com Arquivo → Importar.",
-  "Export Anki cards": "Exportar cartões do Anki",
+  "Export Anki cards": "Exportar cartões para o Anki",
   "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
     "Restaura registros de um backup JSONL. Os registros que você já tem são ignorados, então nada é duplicado.",
   "Import JSONL": "Importar JSONL",
@@ -258,10 +258,10 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
     "{added} eventos novos importados; {skipped} ignorados (já existiam ou não puderam ser lidos).",
   "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
-    "Um arquivo Markdown por conceito com [[links]], gravado em {folder}/ na pasta escolhida. Exportar de novo atualiza as notas e mantém o que você escreveu abaixo da linha marcada.",
-  "Draw your concepts and their relations as a map.": "Desenha seus conceitos e as relações entre eles como um mapa.",
+    "Um arquivo Markdown por conceito com [[links]], gravado em {folder}/ na pasta escolhida. Exportar de novo atualiza as notas e mantém o que você escreveu abaixo da linha marcadora.",
+  "Draw your concepts and their relations as a map.": "Seus conceitos e as relações entre eles, desenhados como um mapa.",
   Graph: "Grafo",
-  "Dash: inherit; ticked: on; empty: off": "—: herdar; marcado: ativado; vazio: desativado",
+  "Dash: inherit; ticked: on; empty: off": "Traço: herdar; marcada: ligada; vazia: desligada",
   "Leave sensitive sources out of backups and exports": "Deixar as fontes sensíveis fora dos backups e das exportações",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
     "O http simples só é permitido para este computador (127.0.0.1 / localhost) e para servidores da sua própria rede (192.168.x.x, 10.x.x.x, name.local, Tailscale); qualquer outro endereço deve usar https. Um servidor da sua própria rede ainda conta como remoto. O modelo local (127.0.0.1 / localhost) marcado em “Provedor sensível” é o usado para fontes sensíveis; elas nunca usam outro modelo.",
@@ -280,9 +280,9 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "The download of {name} did not match its checksum and was discarded.":
     "O download de {name} não correspondeu à sua soma de verificação e foi descartado.",
   "Could not download {name}. Check your connection and try again.":
-    "Não foi possível baixar {name}. Verifique sua conexão e tente de novo.",
+    "Não foi possível baixar {name}. Verifique sua conexão e tente novamente.",
   "Built in": "Incluído",
-  "Read again with these": "Ler de novo com estes",
+  "Read again with these": "Ler novamente com estes",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "O inglês já vem incluído. Os outros idiomas são baixados uma vez de {host}; nenhum conteúdo do documento é enviado.",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
@@ -327,7 +327,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "New terms": "Termos novos",
   Revisited: "Revisitados",
   "Active days": "Dias ativos",
-  "Terms you met": "Termos da semana",
+  "Terms you met": "Termos que você encontrou",
   "Where you read": "Onde você leu",
   "{n} look-ups": "{n} consultas",
   "New connections": "Novas conexões",
@@ -357,14 +357,14 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   Review: "Revisão",
   "Target recall (%)": "Retenção desejada (%)",
   "How likely you want to be to remember a term when it comes due. Higher means more reviews; the default is 90.":
-    "A chance de lembrar um termo quando ele vence. Mais alto significa mais revisões; o padrão é 90.",
-  "Offer “Check my answer” in review": "Oferecer «Verificar minha resposta» na revisão",
+    "A chance que você quer ter de lembrar um termo quando chega a hora de revisá-lo. Mais alto significa mais revisões; o padrão é 90.",
+  "Offer “Check my answer” in review": "Oferecer “Verificar minha resposta” na revisão",
   "When you press it, Harkback sends the term, your typed answer and its stored explanation to your model. It uses your normal model choice, so sensitive sources only go to a local model, and each check counts against your per-minute and per-hour limits. Turn this off and the button never appears and nothing is sent.":
-    "Ao clicar, o Harkback envia o termo, sua resposta digitada e a explicação guardada para o seu modelo. Ele usa sua escolha de modelo habitual: fontes sensíveis só vão para um modelo local, e cada verificação conta nos seus limites por minuto e por hora. Se desativar, o botão nunca aparece e nada é enviado.",
+    "Quando você clica no botão, o Harkback envia o termo, sua resposta digitada e a explicação guardada para o seu modelo. Ele usa sua escolha de modelo habitual: fontes sensíveis só vão para um modelo local, e cada verificação conta nos seus limites por minuto e por hora. Se desativar, o botão nunca aparece e nada é enviado.",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
-    "Na revisão, o botão opcional «Verificar minha resposta» envia o termo, sua resposta digitada e a explicação guardada para o seu modelo somente quando você o aciona; pode ser desativado nas configurações.",
+    "Na revisão, o botão opcional “Verificar minha resposta” envia o termo, sua resposta digitada e a explicação guardada para o seu modelo somente quando você clica nele; pode ser desativado nas configurações.",
   "Ready. Chrome's model runs on this computer.": "Pronto. O modelo do Chrome é executado neste computador.",
-  "Not downloaded yet. Press Download model.": "Ainda não baixado. Pressione Baixar modelo.",
+  "Not downloaded yet. Press Download model.": "Ainda não baixado. Clique em Baixar modelo.",
   "Downloading… {percent}%": "Baixando… {percent}%",
   "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
     "Indisponível neste dispositivo. O Chrome precisa de espaço em disco e memória suficientes e de uma versão recente.",
@@ -389,26 +389,26 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
     "Em Configurações há mais: modelos extras, regras por site, PDFs digitalizados, revisão e exportação de dados.",
   "+ Regional research sites": "+ Sites de pesquisa regionais",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
-    "Sites de pesquisa regionais: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc e HAL, também verificados automaticamente.",
+    "Sites de pesquisa regionais: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc e HAL, também analisados automaticamente.",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "Um backup assim também não lembra quais fontes eram sensíveis: marque-as de novo depois de restaurar. As regras de sites não ficam nos backups.",
   "Confirm this relation": "Confirmar esta relação",
   "Prerequisite:": "Pré-requisito:",
   "Variant:": "Variante:",
   "Related:": "Relacionado:",
-  "Possible relations": "Possíveis relações",
+  "Possible relations": "Relações possíveis",
   "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
-    "O modelo não tinha certeza sobre estas. Depois de confirmadas, são usadas na ordem de revisão, nas dicas de reencontro e no grafo.",
-  "Setup is not finished yet.": "A configuração inicial ainda não foi concluída.",
+    "O modelo não tinha certeza sobre estas. Depois de confirmadas, são usadas na ordem de revisão, nos avisos de reencontro e no grafo.",
+  "Setup is not finished yet.": "A configuração ainda não foi concluída.",
   "Continue setup": "Continuar a configuração",
-  "You agreed to these notes during setup on {date}.": "Você concordou com estas notas durante a configuração em {date}.",
+  "You agreed to these notes during setup on {date}.": "Você concordou com estas notas na configuração, em {date}.",
   "What to contribute": "O que contribuir",
   "Every openly licensed paper": "Todos os artigos com licença aberta",
-  "Save contribution file": "Salvar o arquivo de contribuição",
+  "Save contribution file": "Salvar arquivo de contribuição",
   "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} consultas de {p} artigos; {r} relações que você confirmou.",
-  "Contribute to the data commons": "Contribuir para os dados comuns",
+  "Contribute to the data commons": "Contribuir para o acervo comum de dados",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
-    "Os dados comuns reúnem os termos em que os leitores travam nos artigos, para autores, professores e outros leitores. Só artigos do arXiv ou com DOI e licença aberta (Creative Commons ou domínio público) podem ser contribuídos, e fontes sensíveis nunca são.",
+    "O acervo comum de dados reúne os termos em que os leitores travam nos artigos, para autores, professores e outros leitores. Só artigos do arXiv ou com DOI e licença aberta (Creative Commons ou domínio público) podem ser contribuídos, e fontes sensíveis nunca são.",
   "The file holds the paper's id, its licence, the term, its field and section, how well you understood it and the month, and the relations you confirmed. It has no quotes, explanations, addresses, device or exact times.":
     "O arquivo tem o identificador do artigo, a licença, o termo, a área e a seção, quanto você o entendeu e o mês, e as relações que você confirmou. Não tem citações, explicações, endereços, dispositivo nem horários exatos.",
   "Harkback uploads nothing: you save the file and decide yourself whether and where to submit it. Saving records what you agreed to contribute.":
@@ -417,7 +417,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
     "Ainda não há artigo que possa ser contribuído. O Harkback só conhece uma licença quando a página a informa, como o link de licença na página de resumo do arXiv.",
   "Last saved: {date}": "Último salvamento: {date}",
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
-    "Transforme suas consultas em artigos com licença aberta em um arquivo anônimo para os dados comuns.",
+    "Transforme suas consultas em artigos com licença aberta em um arquivo anônimo para o acervo comum de dados.",
   Contribute: "Contribuir",
   "Confirm merge": "Confirmar mesclagem",
   "Split…": "Dividir…",

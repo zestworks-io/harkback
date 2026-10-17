@@ -17,21 +17,21 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Select this entry": "이 기록 선택",
   Understood: "이해함",
   Confused: "아직 헷갈림",
-  Shaky: "불안정",
+  Shaky: "가물가물",
   "You forgot this {n} times in your last few reviews; more repetition may not help.":
     "최근 복습 중 {n}번 기억하지 못했습니다. 더 반복해도 도움이 되지 않을 수 있습니다.",
-  "Open its page to check its aliases and relations.": "용어 페이지를 열어 별칭과 관계를 확인해 보세요.",
+  "Open its page to check its aliases and relations.": "개념 페이지를 열어 별칭과 관계를 확인해 보세요.",
   "Show a fill-in-the-blank hint": "빈칸 힌트 보기",
   "It may help to start with:": "먼저 이것부터 보면 도움이 될 수 있습니다:",
-  "Comes first: {names} build on it": "먼저 복습: {names}이(가) 이것을 바탕으로 합니다",
-  New: "새 항목",
+  "Comes first: {names} build on it": "먼저 복습: {names}이(가) 이 개념을 바탕으로 합니다",
+  New: "처음 접함",
   "Select all entries of this concept": "이 개념의 모든 기록 선택",
-  "That name belongs to another concept; use Merge instead.": "그 이름은 다른 개념의 것입니다. 대신 '병합'을 사용하세요.",
-  "That did not work.": "작업이 실패했습니다.",
-  "Not explained yet": "아직 설명이 없습니다",
+  "That name belongs to another concept; use Merge instead.": "이 이름은 이미 다른 개념에 속해 있습니다. 대신 '병합'을 사용하세요.",
+  "That did not work.": "작업에 실패했습니다.",
+  "Not explained yet": "아직 설명 없음",
   "Remove this relation": "이 관계 삭제",
-  Unmute: "음소거 해제",
-  Mute: "음소거",
+  Unmute: "알림 켜기",
+  Mute: "알림 끄기",
   "Add an alias": "별칭 추가",
   "Use this name": "이 이름 사용",
   Accept: "수락",
@@ -42,7 +42,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Add: "추가",
   "Merge into…": "병합할 개념 선택…",
   Merge: "병합",
-  "Muted: no reunion hints and no review.": "음소거됨: 재회 힌트와 복습이 표시되지 않습니다.",
+  "Muted: no reunion hints and no review.": "알림 꺼짐: 재회 힌트와 복습이 표시되지 않습니다.",
   Prerequisites: "선행 개념",
   Variants: "변형",
   Related: "관련",
@@ -56,28 +56,28 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Remembered: "기억남",
   "Still confused": "아직 헷갈림",
   Skip: "건너뛰기",
-  "Do you still remember this?": "이 용어를 아직 기억하시나요?",
+  "Do you still remember this?": "이 용어를 아직 기억하나요?",
   "Review ({n})": "복습 ({n})",
   "Concept not found.": "개념을 찾을 수 없습니다.",
   "No records found. Explain a term and it will show up here.": "기록이 없습니다. 용어를 설명하면 여기에 표시됩니다.",
   "Back up JSONL now": "지금 JSONL 백업",
   "Backing up…": "백업 중…",
   "Export Markdown": "Markdown 내보내기",
-  "Export notes folder": "노트 폴더 내보내기",
+  "Export notes folder": "노트 폴더로 내보내기",
   "This browser cannot pick a folder.": "이 브라우저에서는 폴더를 선택할 수 없습니다.",
   "Exported {n} notes.": "노트 {n}개를 내보냈습니다.",
   "Exported {n} notes; {failed} failed: {names}": "노트 {n}개를 내보냈고 {failed}개는 실패했습니다: {names}",
   "Export failed.": "내보내지 못했습니다.",
   History: "기록",
-  "Every term you have looked up, grouped by concept.": "지금까지 찾아본 모든 용어를 개념별로 묶어 보여줍니다.",
+  "Every term you have looked up, grouped by concept.": "지금까지 찾아본 모든 용어를 개념별로 묶어 보여 줍니다.",
   Settings: "설정",
   "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.":
     "삭제는 앱 안에서만 적용됩니다. 디스크에 흔적이 남을 수 있으며, 이미 내보낸 백업은 회수할 수 없습니다.",
   "Interface language": "인터페이스 언어",
   "Model service": "모델 서비스",
   "Test the connection, then pick from the list": "연결을 테스트한 다음 목록에서 선택하세요",
-  "Runs locally": "내 컴퓨터에서 실행",
-  "Any address": "모든 주소",
+  "Runs locally": "이 컴퓨터에서 실행",
+  "Any address": "다른 주소 직접 입력",
   "Cloud service": "클라우드 서비스",
   "Test connection": "연결 테스트",
   "Connecting…": "연결 중…",
@@ -91,13 +91,13 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "I have read and agree": "읽고 동의합니다",
   "Connect a model": "모델 연결",
   Address: "주소",
-  Show: "표시",
+  Show: "보기",
   Hide: "숨기기",
   "Stored unencrypted in this browser's extension storage and only sent to the address above; prefer a key with a spending limit. Leave empty for local models.":
     "이 브라우저의 확장 프로그램 저장소에 암호화되지 않은 채 저장되며 위의 주소로만 전송됩니다. 사용 한도가 있는 키를 권장합니다. 로컬 모델은 비워 두세요.",
   "Model name": "모델 이름",
   "Example of a reunion hint": "재회 힌트 예시",
-  "You've met this term": "이 용어를 만났습니다",
+  "You've met this term": "전에 만난 용어입니다",
   "You read about it in 2106.09685 three weeks ago. Harkback marks it in new papers and brings back what you understood then.":
     "3주 전에 2106.09685에서 이 용어를 읽었습니다. Harkback은 새 논문에서도 이 용어를 표시하고 그때 이해한 내용을 다시 보여줍니다.",
   "You're set up": "설정이 완료되었습니다",
@@ -123,7 +123,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Name: "이름",
   Model: "모델",
   Default: "기본",
-  "Sensitive provider": "민감 출처용 제공자",
+  "Sensitive provider": "민감한 출처용 모델",
   "+ Add model": "+ 모델 추가",
   "(default model)": "(기본 모델)",
   "Auto-scan": "자동 스캔",
@@ -138,7 +138,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "YouTube는 추천 사이트에 포함되어 있지 않으니 필요할 때 추가하세요. Harkback은 플레이어가 표시하는 자막만 읽고 자막 파일은 내려받지 않으며, 밑줄은 YouTube 페이지의 일부가 아닙니다.",
   "+ Suggested research sites": "+ 추천 연구 사이트",
   "Added {n} sites. Save to grant site access; the browser asks once.":
-    "사이트 {n}개를 추가했습니다. 저장하면 접근 권한을 한 번만 묻습니다.",
+    "사이트 {n}개를 추가했습니다. 저장하면 브라우저가 사이트 접근 권한을 한 번 묻습니다.",
   "These sites already have rules.": "이 사이트들에는 이미 규칙이 있습니다.",
   "Saved, but site access was not granted, so automatic scanning will not run.":
     "저장했지만 사이트 접근 권한이 허용되지 않아 자동 스캔이 동작하지 않습니다.",
@@ -149,7 +149,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Harkback settings": "Harkback 설정",
   "Models, sites, scanning and privacy.": "모델, 사이트, 스캔, 개인정보 보호.",
   General: "일반",
-  "Scanned PDFs": "스캔 PDF",
+  "Scanned PDFs": "스캔한 PDF",
   "Data and privacy": "데이터 및 개인정보 보호",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
     "설명과 추가 질문의 답변은 이 언어로 작성됩니다. 전문 용어는 원문 그대로 둡니다. 품질은 언어와 모델에 따라 다릅니다.",
@@ -164,9 +164,9 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
     "예: example.com 규칙에서 '민감'을 체크하고 https://example.com/public 규칙에서 '민감'을 비우면, /public 아래 페이지를 제외한 사이트 전체가 민감합니다. 두 번째 규칙을 대시로 두면 사이트를 따르므로 /public도 민감합니다.",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
-    "자동 스캔은 arxiv.org에서만 이루어집니다. 다른 사이트는 여기서 허용하거나 민감으로 지정하세요.",
+    "자동 스캔은 arxiv.org에서만 이루어집니다. 다른 사이트는 여기서 허용하거나 민감한 출처로 지정하세요.",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
-    "'민감'은 내용이 이 컴퓨터 밖으로 나가면 안 되는 사이트(기밀 논문, 내부 문서 등)를 위한 설정입니다. 이런 사이트에서는 선택한 텍스트, 해당 단락, 섹션, 페이지 제목이 Ollama 같은 로컬 모델로만 전송되고 원격 서비스로는 전송되지 않습니다. 사용할 수 있는 로컬 모델이 없으면 원격 모델로 대체하지 않고 설명이 실패합니다. 기록은 이 브라우저에 계속 저장됩니다. 먼저 위에서 로컬 모델을 추가하고 '민감 출처용 제공자'에 체크하세요.",
+    "'민감'은 내용이 이 컴퓨터 밖으로 나가면 안 되는 사이트(기밀 논문, 내부 문서 등)를 위한 설정입니다. 이런 사이트에서는 선택한 텍스트, 해당 단락, 섹션, 페이지 제목이 Ollama 같은 로컬 모델로만 전송되고 원격 서비스로는 전송되지 않습니다. 사용할 수 있는 로컬 모델이 없으면 원격 모델로 대체하지 않고 설명이 실패합니다. 기록은 이 브라우저에 계속 저장됩니다. 먼저 위에서 로컬 모델을 추가하고 '민감한 출처용 모델'에 체크하세요.",
   "No site rules yet.": "아직 사이트 규칙이 없습니다.",
   "Rate limits": "요청 제한",
   "Reunion hints": "재회 힌트",
@@ -176,7 +176,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "A reunion hint underlines a term on a new page that you have met before. The gap is how many days must pass since you last looked at a term before it is marked again (0 marks it straight away); the per-page limit keeps a page from being covered in underlines.":
     "재회 힌트는 이전에 본 적 있는 용어를 새 페이지에서 밑줄로 표시합니다. 간격은 해당 용어를 마지막으로 본 뒤 다시 표시되기까지 지나야 하는 일수입니다(0이면 바로 표시). 페이지당 한도는 한 페이지가 밑줄로 뒤덮이는 것을 막아 줍니다.",
   "This is a small model running on your computer: expect it to be slower than a cloud model, especially on the first request, and its answers to be simpler. It suits short explanations; use a cloud or Ollama model for longer ones.":
-    "내 컴퓨터에서 실행되는 작은 모델입니다. 클라우드 모델보다 느리고(특히 첫 요청), 답변도 더 단순합니다. 짧은 설명에 적합하며, 긴 내용에는 클라우드나 Ollama 모델을 사용하세요.",
+    "이 컴퓨터에서 실행되는 작은 모델입니다. 클라우드 모델보다 느리고(특히 첫 요청), 답변도 더 단순합니다. 짧은 설명에 적합하며, 긴 내용에는 클라우드나 Ollama 모델을 사용하세요.",
   "Explanations per minute": "분당 설명 횟수",
   "Explanations per hour": "시간당 설명 횟수",
   "Reunion gap (days)": "재회 간격(일)",
@@ -198,9 +198,9 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "This PDF file could not be opened.": "이 PDF 파일을 열 수 없습니다.",
   "This PDF has no selectable text, so it may be a scan; Harkback cannot explain what is in it.":
     "이 PDF에는 선택할 수 있는 텍스트가 없어 스캔본일 수 있습니다. Harkback은 그 안의 내용을 설명할 수 없습니다.",
-  "Due now": "지금 복습할 시간입니다",
-  "Overdue by 1 day ({date})": "1일 지남 ({date})",
-  "Overdue by {n} days ({date})": "{n}일 지남 ({date})",
+  "Due now": "지금 복습",
+  "Overdue by 1 day ({date})": "복습 1일 지남 ({date})",
+  "Overdue by {n} days ({date})": "복습 {n}일 지남 ({date})",
   "Due in 1 hour": "1시간 후 복습",
   "Due in {n} hours": "{n}시간 후 복습",
   "Due in 1 day ({date})": "1일 후 복습 ({date})",
@@ -215,8 +215,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "Ollama가 확장 프로그램의 출처를 거부했습니다. OLLAMA_ORIGINS를 설정한 다음 Ollama를 다시 시작하세요:\nmacOS: {mac}\nLinux: {linux}\nWindows: {windows}",
   "Invalid address: non-local addresses must use https.": "잘못된 주소입니다. 로컬이 아닌 주소는 https를 사용해야 합니다.",
   "The service returned an error (HTTP {status}).": "서비스가 오류를 반환했습니다(HTTP {status}).",
-  "Cannot reach this address. For Ollama, make sure it is running.":
-    "이 주소에 연결할 수 없습니다. Ollama를 사용 중이라면 실행 중인지 확인하세요.",
+  "Cannot reach this address. For Ollama, make sure it is running.": "이 주소에 연결할 수 없습니다. Ollama라면 실행 중인지 확인하세요.",
   "Harkback: scan this page": "Harkback: 이 페이지 스캔",
   "{n} to review": "복습 대기 {n}개",
   "When you ask for an explanation, the selected text, its paragraph, the section and the page title are sent to the model service you choose, under that provider's terms.":
@@ -228,7 +227,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Reunion hints are shown on the page, so the page's own scripts may infer which terms you have records for.":
     "재회 힌트는 페이지에 표시되므로, 페이지 자체의 스크립트가 어떤 용어의 기록이 있는지 추측할 수 있습니다.",
   "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.":
-    "기밀 자료는 사이트를 민감으로 지정하고 Ollama 같은 로컬 모델을 사용하세요. 민감한 출처의 내용은 로컬이 아닌 모델로 전송되지 않습니다.",
+    "기밀 자료는 사이트를 민감한 출처로 지정하고 Ollama 같은 로컬 모델을 사용하세요. 민감한 출처의 내용은 로컬이 아닌 모델로 전송되지 않습니다.",
   "Private windows are off by default; when enabled, the extension explains but records nothing and shows no reunions.":
     "시크릿 창은 기본적으로 꺼져 있습니다. 켜면 확장 프로그램은 설명만 하고 아무것도 기록하지 않으며 재회도 표시하지 않습니다.",
   "Deletion takes effect in the app; traces may remain on disk and exported backups cannot be recalled. Full-disk encryption is recommended.":
@@ -236,16 +235,16 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API 키는 확장 프로그램 저장소에 암호화되지 않은 채 저장되며, 입력한 모델 주소로만 전송되고 백업이나 로그에는 포함되지 않습니다. 사용 한도가 있는 키를 권장합니다.",
   "Mark as normal": "일반 출처로 변경",
-  "Confirm: may go to remote models": "확인: 이후 원격 모델로 전송될 수 있습니다",
+  "Confirm: may go to remote models": "확인: 원격 모델로 전송될 수 있음",
   "Content from this source only goes to a local model.": "이 출처의 내용은 로컬 모델로만 전송됩니다.",
   "Sensitive source": "민감한 출처",
   "No concepts to show yet.": "표시할 개념이 아직 없습니다.",
   "Concept graph": "개념 그래프",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "파란 화살표: 선행 개념 · 보라 화살표: 변형 · 점선: 관련",
   "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "녹색: 이해함 · 연노랑: 불안정 · 노랑: 아직 헷갈림 · 파랑: 새 개념 · 점선 원: 아직 설명하지 않음",
+    "녹색: 이해함 · 연노랑: 가물가물 · 노랑: 아직 헷갈림 · 파랑: 처음 접함 · 점선 원: 아직 설명 없음",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
-    "개념마다 카드 한 장(탭으로 구분된 텍스트). Anki에서 파일 → 가져오기로 열 수 있습니다.",
+    "개념마다 카드 한 장을 탭으로 구분된 텍스트로 만듭니다. Anki에서 파일 → 가져오기로 여세요.",
   "Export Anki cards": "Anki 카드 내보내기",
   "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
     "JSONL 백업에서 기록을 복원합니다. 이미 있는 기록은 건너뛰므로 중복되지 않습니다.",
@@ -255,22 +254,22 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
     "새 이벤트 {added}개를 가져왔고, 이미 있거나 읽을 수 없는 {skipped}개는 건너뛰었습니다.",
   "One Markdown file per concept with [[links]], written to {folder}/ in the folder you pick. Exporting again updates the notes and keeps anything you wrote below the marker line.":
-    "개념마다 Markdown 파일 하나(`[[링크]]` 포함)를 선택한 폴더의 {folder}/ 에 씁니다. 다시 내보내면 노트가 갱신되고, 표시 줄 아래에 쓴 내용은 유지됩니다.",
+    "개념마다 [[링크]]가 포함된 Markdown 파일 하나를 선택한 폴더의 {folder}/에 씁니다. 다시 내보내면 노트가 갱신되고, 표시 줄 아래에 쓴 내용은 유지됩니다.",
   "Draw your concepts and their relations as a map.": "개념과 그 관계를 지도로 그립니다.",
   Graph: "그래프",
-  "Dash: inherit; ticked: on; empty: off": "—: 상속, 체크: 켬, 비움: 끔",
+  "Dash: inherit; ticked: on; empty: off": "대시: 상속 · 체크: 켜짐 · 빈 칸: 꺼짐",
   "Leave sensitive sources out of backups and exports": "백업과 내보내기에 민감한 출처 제외",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
-    '일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 써야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. "민감 출처용 제공자"에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 쓰지 않습니다.',
-  "Languages for scanned PDFs": "스캔 PDF 언어",
+    "일반 http는 이 컴퓨터(127.0.0.1 / localhost)와 내 네트워크의 서버(192.168.x.x, 10.x.x.x, name.local, Tailscale)에만 허용되며, 그 외 주소는 https를 사용해야 합니다. 내 네트워크의 서버도 원격으로 취급됩니다. '민감한 출처용 모델'에 체크한 로컬 모델(127.0.0.1 / localhost)이 민감한 출처에 사용되며, 민감한 출처는 다른 모델을 사용하지 않습니다.",
+  "Languages for scanned PDFs": "스캔한 PDF의 언어",
   "Text in scanned PDFs is read on this computer; page images never leave it.":
     "스캔한 PDF의 글자는 이 컴퓨터에서 읽으며, 페이지 이미지는 밖으로 나가지 않습니다.",
   Languages: "언어",
-  "Reading scanned page {done} of {found}…": "스캔 페이지 읽는 중 {done}/{found}…",
-  "Scanned pages could not be read.": "스캔한 페이지를 읽을 수 없었습니다.",
+  "Reading scanned page {done} of {found}…": "스캔한 페이지 읽는 중… ({done}/{found})",
+  "Scanned pages could not be read.": "스캔한 페이지를 읽지 못했습니다.",
   "The reading is uncertain; the document may be in another language. Choose it under Languages.":
     "인식 결과가 불확실합니다. 문서가 다른 언어일 수 있으니 '언어'에서 선택하세요.",
-  "Read {done} scanned pages.": "스캔 페이지 {done}개를 읽었습니다.",
+  "Read {done} scanned pages.": "스캔한 페이지 {done}개를 읽었습니다.",
   Remove: "제거",
   Install: "설치",
   "Installing…": "설치 중…",
@@ -288,12 +287,12 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Understanding: "이해도",
   "All levels": "모든 수준",
   "Looked up": "찾아본 시기",
-  "Any time": "언제든지",
+  "Any time": "전체 기간",
   "Last 7 days": "최근 7일",
   "Last 30 days": "최근 30일",
   "Last 90 days": "최근 90일",
   "No concepts match these filters.": "이 필터에 맞는 개념이 없습니다.",
-  "Example only: no model was called": "예시일 뿐입니다. 모델을 호출하지 않았습니다",
+  "Example only: no model was called": "예시입니다. 모델을 호출하지 않았습니다",
   "A low-rank adapter (LoRA) freezes the pretrained weights and trains two small matrices beside them, so only a tiny fraction of the parameters changes.":
     "저순위 어댑터(LoRA)는 사전 학습된 가중치를 고정하고 그 옆에 작은 행렬 두 개만 학습하므로, 바뀌는 매개변수는 아주 일부입니다.",
   "Connect a model below to get explanations like this for anything you read.":
@@ -306,7 +305,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "답변이 시작된 뒤 모델이 유휴 제한 시간보다 오래 멈춰 있으면 포기합니다. 추론 모델은 첫 단어 전에 오래 생각할 수 있으므로 그 대기 시간은 따로 설정합니다.",
   "What you met this week, built on this computer from your records; no model is called.":
     "이번 주에 만난 내용을 기록을 바탕으로 이 컴퓨터에서 만듭니다. 모델을 호출하지 않습니다.",
-  Digest: "요약",
+  Digest: "주간 요약",
   "Same as the week before": "지난주와 같음",
   "{n} more than the week before": "지난주보다 {n}개 많음",
   "{n} fewer than the week before": "지난주보다 {n}개 적음",
@@ -317,7 +316,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "This week": "이번 주",
   "Next week →": "다음 주 →",
   "This digest is built on this computer from your records; no model is called.":
-    "이 요약은 기록을 바탕으로 이 컴퓨터에서 만들어지며 모델을 호출하지 않습니다.",
+    "이 주간 요약은 기록을 바탕으로 이 컴퓨터에서 만들어지며 모델을 호출하지 않습니다.",
   "Nothing was recorded this week.": "이번 주에는 기록된 내용이 없습니다.",
   "Terms met": "만난 용어",
   "New terms": "새 용어",
@@ -342,8 +341,8 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Turn off in settings": "설정에서 끄기",
   "Looks right": "맞는 것 같음",
   "Partly right": "부분적으로 맞음",
-  "Not quite": "아쉽게 틀림",
-  "Suggested: {grade} (you decide)": "추천: {grade} (결정은 직접)",
+  "Not quite": "정확하지 않음",
+  "Suggested: {grade} (you decide)": "추천 평가: {grade}(최종 선택은 직접)",
   "Type what you remember (optional)": "기억나는 내용을 적어 보세요(선택)",
   "Your answer": "내 답변",
   "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.":
@@ -368,7 +367,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Download model": "모델 내려받기",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "이 컴퓨터에서 실행되며 주소나 API 키가 필요 없습니다. 영어, 스페인어, 일본어에서 가장 잘 작동합니다.",
-  "Ships with Chrome, nothing to set up": "Chrome에 포함되어 있어 따로 설정할 것이 없습니다",
+  "Ships with Chrome, nothing to set up": "Chrome에 포함, 설정 불필요",
   "Get Chrome's built-in model ready first, or pick another service.":
     "먼저 Chrome 내장 모델을 사용할 수 있게 하거나 다른 서비스를 고르세요.",
   Welcome: "시작",
@@ -391,7 +390,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Prerequisite:": "선행 개념:",
   "Variant:": "변형:",
   "Related:": "관련:",
-  "Possible relations": "가능한 관계",
+  "Possible relations": "관계 후보",
   "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
     "모델이 이 관계들을 확신하지 못했습니다. 확인하면 복습 순서, 재회 힌트, 그래프에 쓰입니다.",
   "Setup is not finished yet.": "초기 설정이 아직 끝나지 않았습니다.",
@@ -415,12 +414,12 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "공개 라이선스 논문에서 찾아본 기록을 데이터 공유지용 익명 파일로 만듭니다.",
   Contribute: "기여",
   "Confirm merge": "병합 확인",
-  "Split…": "분할…",
+  "Split…": "분리…",
   "Name of the new concept": "새 개념의 이름",
   "Split off": "분리하기",
   "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
-    "양쪽에 같은 이름이 남아 있어 곧바로 다시 병합됩니다. 그 이름도 옮기거나 다른 이름을 고르세요.",
-  "Split this concept": "이 개념 분할",
+    "두 개념에 같은 이름이 남아 있어 곧바로 다시 합쳐집니다. 그 이름도 옮기거나 다른 이름을 고르세요.",
+  "Split this concept": "이 개념 분리",
   "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
     "다른 개념에 속하는 찾아본 기록과 이름을 고르면 새 개념으로 옮겨집니다. 새 이름이 이미 다른 개념의 이름이면 그 개념에 합쳐집니다.",
   "Look-ups": "찾아본 기록",

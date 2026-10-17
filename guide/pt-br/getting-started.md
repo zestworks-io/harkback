@@ -37,11 +37,11 @@ A interface começa em inglês. Você pode mudar o idioma dela, e o das explica�
 
 ## 3. Explicar um termo
 
-1. Abra um artigo em [arxiv.org](https://arxiv.org). As páginas do arXiv são escaneadas automaticamente.
+1. Abra um artigo em [arxiv.org](https://arxiv.org). As páginas do arXiv são analisadas automaticamente.
 2. Selecione um termo, por exemplo `LoRA`.
 3. Clique em **Explicar** ao lado da seleção, ou pressione `Alt+Shift+E`.
 4. Leia a resposta enquanto ela chega. Uma etiqueta verde diz que a própria página define o termo; uma amarela diz que a resposta vem do conhecimento do modelo.
-5. Pressione **Entendi** ou **Ainda confuso**. Essa resposta é a primeira nota do termo e decide quando o Harkback o traz de volta para revisão.
+5. Pressione **Entendi** ou **Ainda não entendi**. Essa resposta é a primeira nota do termo e decide quando o Harkback o traz de volta para revisão.
 
 Outras formas de começar: o menu de contexto do texto selecionado e uma seleção feita pelo teclado ou por toque.
 
@@ -51,11 +51,11 @@ Abra outro artigo que mencione `LoRA`, `low-rank adaptation` ou `LoRAs`. O termo
 
 ## 5. Ver o que você tem
 
-Abra a página **Histórico** (com link nas configurações e nas boas-vindas). Ela lista cada termo por conceito, com busca, conversas de acompanhamento, uma fila de revisão e um grafo de como seus conceitos se conectam. De lá você também pode exportar seus registros e restaurá-los a partir de um backup.
+Abra a página **Histórico** (com link nas configurações e nas boas-vindas). Ela lista cada termo por conceito, com busca, perguntas adicionais, uma fila de revisão e um grafo de como seus conceitos se conectam. De lá você também pode exportar seus registros e restaurá-los a partir de um backup.
 
 ## Ler algo que não está no arXiv
 
-- **Uma página da web:** clique uma vez no botão da barra de ferramentas. Para escanear um site automaticamente daí em diante, adicione-o em _Sites_ nas configurações.
+- **Uma página da web:** clique uma vez no botão da barra de ferramentas. Para analisar um site automaticamente daí em diante, adicione-o em _Sites_ nas configurações.
 - **Um PDF:** clique no botão da barra de ferramentas no PDF. PDFs do arXiv abrem na versão HTML; os outros PDFs abrem no leitor próprio do Harkback. Um PDF no seu computador precisa de duas aprovações na primeira vez; veja [Solução de problemas](../troubleshooting.md#a-pdf-on-my-computer-will-not-open).
 - **Algo confidencial:** marque antes o site ou a fonte como sensível. Veja [Privacidade e fontes sensíveis](../privacy.md).
 

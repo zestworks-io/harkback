@@ -23,17 +23,17 @@ Après avoir récupéré du nouveau code, relancez la compilation et cliquez sur
 
 Harkback n'a pas de serveur. Il lui faut un modèle pour écrire les explications, et c'est vous qui choisissez lequel. La page de configuration comporte trois étapes ; une étape terminée affiche ✓ et on peut cliquer dessus pour y revenir.
 
-1. **Bienvenue.** Voyez un exemple de rappel et cliquez sur le terme souligné pour découvrir à quoi ressemble une explication. Aucun modèle n'est appelé.
+1. **Bienvenue.** Voyez un exemple d'indice de retrouvailles et cliquez sur le terme souligné pour découvrir à quoi ressemble une explication. Aucun modèle n'est appelé.
 2. **Confidentialité.** Lisez où va votre texte et cochez la case de consentement. **Suivant** reste désactivé tant que vous ne l'avez pas fait.
-3. **Modèle.** Choisissez un fournisseur ; l'adresse se remplit. Collez une clé d'API si le fournisseur en demande une (Ollama et le modèle intégré de Chrome n'en ont pas besoin). Appuyez sur **Tester la connexion** : Chrome demande si Harkback peut joindre cette adresse ; autorisez-le. Une roue et « Connexion… » s'affichent pendant le test, et le bouton est désactivé jusqu'à sa fin. Appuyez ensuite sur **Terminer la configuration**.
+3. **Modèle.** Choisissez un fournisseur ; l'adresse se remplit. Collez une clé API si le fournisseur en demande une (Ollama et le modèle intégré de Chrome n'en ont pas besoin). Appuyez sur **Tester la connexion** : Chrome demande si Harkback peut joindre cette adresse ; autorisez-le. Un indicateur de chargement et « Connexion en cours… » s'affichent pendant le test, et le bouton est désactivé jusqu'à sa fin. Appuyez ensuite sur **Terminer la configuration**.
 
 **Le modèle intégré de Chrome (Gemini Nano)** n'a besoin ni d'adresse ni de clé. Le sélectionner affiche l'état du modèle et un bouton **Télécharger le modèle** ; **Terminer la configuration** attend la fin du téléchargement. C'est un petit modèle qui tourne sur votre ordinateur : attendez-vous à ce qu'il soit plus lent qu'un modèle dans le cloud, surtout à la première requête, avec des réponses plus simples. Il convient aux explications courtes.
 
-Vous pourrez ajouter d'autres modèles et changer des options plus tard dans les réglages. Relancer la configuration met à jour le modèle que vous avez déjà ; elle n'en ajoute pas une deuxième copie.
+Vous pourrez ajouter d'autres modèles et changer des options plus tard dans les paramètres. Relancer la configuration met à jour le modèle que vous avez déjà ; elle n'en ajoute pas une deuxième copie.
 
 L'option gratuite la plus simple est un modèle local [Ollama](https://ollama.com). Elle demande une étape de plus, car Ollama refuse les requêtes des extensions de navigateur tant que vous n'avez pas autorisé l'origine de l'extension. Le bouton de test affiche la commande exacte pour votre système. Voir [Modèles et fournisseurs](../models.md) pour tous les fournisseurs et pour exécuter un modèle sur un autre ordinateur de votre réseau domestique.
 
-L'interface démarre en anglais. Vous pouvez changer sa langue, ainsi que celle des explications, dans la page de configuration ou les réglages.
+L'interface démarre en anglais. Vous pouvez changer sa langue, ainsi que celle des explications, dans la page de configuration ou les paramètres.
 
 ## 3. Expliquer un terme
 
@@ -47,15 +47,15 @@ Autres façons de commencer : le menu contextuel du texte sélectionné, et une 
 
 ## 4. Retrouver le terme
 
-Ouvrez un autre article qui mentionne `LoRA`, `low-rank adaptation` ou `LoRAs`. Le terme est souligné. Survolez-le pour voir quand et où vous l'avez consulté, et ce que vous aviez compris alors. Vous pouvez le marquer comme retenu, l'expliquer de nouveau, comparer les deux usages ou le rendre muet.
+Ouvrez un autre article qui mentionne `LoRA`, `low-rank adaptation` ou `LoRAs`. Le terme est souligné. Survolez-le pour voir quand et où vous l'avez recherché, et ce que vous aviez compris alors. Vous pouvez le marquer comme mémorisé, l'expliquer de nouveau, comparer les deux usages ou le mettre en sourdine.
 
 ## 5. Voir ce que vous avez
 
-Ouvrez la page **Historique** (liée depuis les réglages et la configuration). Elle liste chaque terme par concept, avec une recherche, les conversations de suivi, une file de révision et un graphe des liens entre vos concepts. Vous pouvez aussi y exporter vos enregistrements et les restaurer depuis une sauvegarde.
+Ouvrez la page **Historique** (liée depuis les paramètres et la configuration). Elle liste chaque terme par concept, avec une recherche, les conversations de suivi, une file de révision et un graphe des liens entre vos concepts. Vous pouvez aussi y exporter vos enregistrements et les restaurer depuis une sauvegarde.
 
 ## Lire autre chose que arXiv
 
-- **Une page web :** cliquez une fois sur le bouton de la barre d'outils. Pour analyser un site automatiquement ensuite, ajoutez-le dans _Sites_ dans les réglages.
+- **Une page web :** cliquez une fois sur le bouton de la barre d'outils. Pour analyser un site automatiquement ensuite, ajoutez-le dans _Sites_ dans les paramètres.
 - **Un PDF :** cliquez sur le bouton de la barre d'outils sur le PDF. Les PDF d'arXiv s'ouvrent dans leur version HTML ; les autres s'ouvrent dans le lecteur de Harkback. Un PDF sur votre ordinateur demande deux autorisations la première fois ; voir [Dépannage](../troubleshooting.md#a-pdf-on-my-computer-will-not-open).
 - **Quelque chose de confidentiel :** marquez d'abord le site ou la source comme sensible. Voir [Confidentialité et sources sensibles](../privacy.md).
 

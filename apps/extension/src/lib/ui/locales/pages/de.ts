@@ -13,17 +13,17 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Delete failed.": "Löschen fehlgeschlagen.",
   "Defined in source": "In der Quelle definiert",
   "External knowledge": "Externes Wissen",
-  "Follow-up conversation · {n}": "Folgeunterhaltung · {n}",
+  "Follow-up conversation · {n}": "Nachfragen · {n}",
   "Select this entry": "Diesen Eintrag auswählen",
   Understood: "Verstanden",
   Confused: "Unklar",
-  Shaky: "Wackelig",
+  Shaky: "Unsicher",
   "You forgot this {n} times in your last few reviews; more repetition may not help.":
     "Sie haben das in den letzten Wiederholungen {n}-mal vergessen; weiteres Wiederholen hilft vermutlich nicht.",
   "Open its page to check its aliases and relations.": "Öffnen Sie die Seite des Begriffs und prüfen Sie Aliase und Beziehungen.",
   "Show a fill-in-the-blank hint": "Hinweis mit Lücke anzeigen",
   "It may help to start with:": "Es kann helfen, zuerst damit zu beginnen:",
-  "Comes first: {names} build on it": "Zuerst dran: {names} bauen darauf auf",
+  "Comes first: {names} build on it": "Zuerst lernen: {names} bauen darauf auf",
   New: "Neu",
   "Select all entries of this concept": "Alle Einträge dieses Konzepts auswählen",
   "That name belongs to another concept; use Merge instead.":
@@ -55,7 +55,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Nothing to review right now.": "Im Moment gibt es nichts zu wiederholen.",
   "Show explanation": "Erklärung anzeigen",
   "{n} left": "Noch {n}",
-  Remembered: "Erinnert",
+  Remembered: "Gewusst",
   "Still confused": "Noch unklar",
   Skip: "Überspringen",
   "Do you still remember this?": "Erinnern Sie sich noch an diesen Begriff?",
@@ -72,7 +72,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Exported {n} notes; {failed} failed: {names}": "{n} Notizen exportiert; {failed} fehlgeschlagen: {names}",
   "Export failed.": "Export fehlgeschlagen.",
   History: "Verlauf",
-  "Every term you have looked up, grouped by concept.": "Jeder nachgeschlagene Begriff, nach Konzept gruppiert.",
+  "Every term you have looked up, grouped by concept.": "Alle Begriffe, die Sie nachgeschlagen haben, nach Konzept gruppiert.",
   Settings: "Einstellungen",
   "Deletion takes effect in the app; traces may remain on disk, and exported backups cannot be recalled.":
     "Das Löschen wirkt in der App; auf dem Datenträger können Spuren bleiben, und bereits exportierte Sicherungen lassen sich nicht zurückrufen.",
@@ -83,14 +83,14 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Any address": "Beliebige Adresse",
   "Cloud service": "Cloud-Dienst",
   "Test connection": "Verbindung testen",
-  "Connecting…": "Verbinde…",
+  "Connecting…": "Verbindung wird hergestellt…",
   "Finish setup": "Einrichtung abschließen",
   "Please read and accept the notes above.": "Bitte lesen und akzeptieren Sie die Hinweise oben.",
   "Enter a valid model address and model name.": "Geben Sie eine gültige Modelladresse und einen Modellnamen ein.",
   "Access to the model address is required.": "Zugriff auf die Modelladresse ist erforderlich.",
   "Set up Harkback": "Harkback einrichten",
   "Where your text goes": "Wohin Ihr Text geht",
-  "Read these before you continue.": "Bitte lesen, bevor Sie fortfahren.",
+  "Read these before you continue.": "Bitte lesen Sie dies, bevor Sie fortfahren.",
   "I have read and agree": "Ich habe gelesen und stimme zu",
   "Connect a model": "Modell verbinden",
   Address: "Adresse",
@@ -139,8 +139,8 @@ export const pages_de: Readonly<Record<string, string>> = {
     "YouTube hinzugefügt. Speichern Sie, um den Zugriff zu erlauben; der Browser fragt einmal. Schalten Sie beim Ansehen die Untertitel (CC) ein.",
   "YouTube already has a rule.": "Für YouTube gibt es bereits eine Regel.",
   "YouTube is not among the suggested sites; add it when you want it. Harkback reads only the captions the player is showing and does not download caption files, and the underlines are not part of YouTube's page.":
-    "YouTube gehört nicht zu den empfohlenen Seiten; fügen Sie es hinzu, wenn Sie es möchten. Harkback liest nur die Untertitel, die der Player gerade zeigt, lädt keine Untertiteldateien herunter, und die Unterstreichungen sind nicht Teil der YouTube-Seite.",
-  "+ Suggested research sites": "+ Empfohlene Forschungsseiten",
+    "YouTube gehört nicht zu den empfohlenen Websites; fügen Sie es hinzu, wenn Sie es möchten. Harkback liest nur die Untertitel, die der Player gerade zeigt, lädt keine Untertiteldateien herunter, und die Unterstreichungen sind nicht Teil der YouTube-Seite.",
+  "+ Suggested research sites": "+ Empfohlene Forschungs-Websites",
   "Added {n} sites. Save to grant site access; the browser asks once.":
     "{n} Websites hinzugefügt. Speichern Sie, um den Zugriff zu erlauben; der Browser fragt einmal.",
   "These sites already have rules.": "Diese Websites haben bereits Regeln.",
@@ -156,7 +156,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Scanned PDFs": "Gescannte PDFs",
   "Data and privacy": "Daten und Datenschutz",
   "Explanations and follow-up answers are written in this language; technical terms stay in their original form. Quality varies by language and model.":
-    "Erklärungen und Antworten auf Folgefragen werden in dieser Sprache verfasst; Fachbegriffe bleiben in ihrer ursprünglichen Form. Die Qualität hängt von Sprache und Modell ab.",
+    "Erklärungen und Antworten auf Nachfragen werden in dieser Sprache verfasst; Fachbegriffe bleiben in ihrer ursprünglichen Form. Die Qualität hängt von Sprache und Modell ab.",
   Models: "Modelle",
   "API keys are stored unencrypted in the extension's storage: other sites and extensions cannot read them, but anyone with access to this computer's disk can. A key is only sent to the model address you enter, and never goes into backups or logs. Prefer a key with a spending limit, or a local model (no key needed).":
     "API-Schlüssel werden unverschlüsselt im Speicher der Erweiterung abgelegt: Andere Websites und Erweiterungen können sie nicht lesen, wohl aber jeder mit Zugriff auf den Datenträger dieses Computers. Ein Schlüssel wird nur an die von Ihnen eingegebene Modelladresse gesendet und gelangt nie in Sicherungen oder Protokolle. Bevorzugen Sie einen Schlüssel mit Ausgabenlimit oder ein lokales Modell (ohne Schlüssel).",
@@ -166,7 +166,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Each switch has three states: dash = not set (follow a broader rule, or off when none sets it), ticked = on, empty = off for sure. When several rules match a page, each switch comes from the most specific rule that sets it.":
     "Jeder Schalter hat drei Zustände: Strich = nicht gesetzt (folgt einer allgemeineren Regel, sonst aus), Haken = an, leer = ausdrücklich aus. Passen mehrere Regeln auf eine Seite, gilt für jeden Schalter die spezifischste Regel, die ihn setzt.",
   "Example: a rule for example.com with Sensitive ticked, and a rule for https://example.com/public with Sensitive empty. The whole site is sensitive except pages under /public. Leave that second rule at a dash and it follows the site, so /public is sensitive too.":
-    "Beispiel: Eine Regel für example.com mit gesetztem Haken bei „Sensitive“ und eine Regel für https://example.com/public mit leerem „Sensitive“. Die ganze Website ist sensibel, außer den Seiten unter /public. Bleibt die zweite Regel beim Strich, folgt sie der Website, und /public ist ebenfalls sensibel.",
+    "Beispiel: Eine Regel für example.com mit gesetztem Haken bei „Sensibel“ und eine Regel für https://example.com/public mit leerem „Sensibel“. Die ganze Website ist sensibel, außer den Seiten unter /public. Bleibt die zweite Regel beim Strich, folgt sie der Website, und /public ist ebenfalls sensibel.",
   "Only arxiv.org is scanned automatically. Allow other sites here, or mark them sensitive.":
     "Nur arxiv.org wird automatisch gescannt. Erlauben Sie hier weitere Websites oder markieren Sie sie als sensibel.",
   '"Sensitive" is for sites whose content must not leave this computer (confidential papers, internal documents). On them, the selected text, its paragraph, the section and the page title are sent only to a local model such as Ollama, never to a remote service. With no local model available, the explanation fails instead of falling back to a remote one. Records are still kept in this browser. Add a local model above and tick "Sensitive provider" first.':
@@ -183,8 +183,8 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Das ist ein kleines Modell, das auf Ihrem Computer läuft: Rechnen Sie damit, dass es langsamer ist als ein Cloud-Modell, besonders bei der ersten Anfrage, und dass seine Antworten einfacher sind. Es eignet sich für kurze Erklärungen; für längere nutzen Sie ein Cloud- oder Ollama-Modell.",
   "Explanations per minute": "Erklärungen pro Minute",
   "Explanations per hour": "Erklärungen pro Stunde",
-  "Reunion gap (days)": "Abstand zwischen Wiedersehen (Tage)",
-  "Reunions per page": "Wiedersehen pro Seite",
+  "Reunion gap (days)": "Mindestabstand für Wiedersehens-Hinweise (Tage)",
+  "Reunions per page": "Wiedersehens-Hinweise pro Seite",
   Backup: "Sicherung",
   "Export JSONL to Downloads/harkback every week": "Jede Woche JSONL nach Downloads/harkback exportieren",
   Privacy: "Datenschutz",
@@ -204,13 +204,13 @@ export const pages_de: Readonly<Record<string, string>> = {
   "This PDF file could not be opened.": "Diese PDF-Datei konnte nicht geöffnet werden.",
   "This PDF has no selectable text, so it may be a scan; Harkback cannot explain what is in it.":
     "Dieses PDF enthält keinen auswählbaren Text und ist möglicherweise ein Scan; Harkback kann seinen Inhalt nicht erklären.",
-  "Due now": "Jetzt zur Wiederholung fällig",
+  "Due now": "Jetzt fällig",
   "Overdue by 1 day ({date})": "1 Tag überfällig ({date})",
   "Overdue by {n} days ({date})": "{n} Tage überfällig ({date})",
-  "Due in 1 hour": "In 1 Stunde zu wiederholen",
-  "Due in {n} hours": "In {n} Stunden zu wiederholen",
-  "Due in 1 day ({date})": "In 1 Tag zu wiederholen ({date})",
-  "Due in {n} days ({date})": "In {n} Tagen zu wiederholen ({date})",
+  "Due in 1 hour": "Fällig in 1 Stunde",
+  "Due in {n} hours": "Fällig in {n} Stunden",
+  "Due in 1 day ({date})": "Fällig in 1 Tag ({date})",
+  "Due in {n} days ({date})": "Fällig in {n} Tagen ({date})",
   "1 day": "1 Tag",
   "{n} days": "{n} Tage",
   "Backed up.": "Gesichert.",
@@ -236,28 +236,28 @@ export const pages_de: Readonly<Record<string, string>> = {
   "For confidential material, mark the site as sensitive and use a local model such as Ollama; content from sensitive sources is never sent to non-local models.":
     "Markieren Sie bei vertraulichem Material die Website als sensibel und verwenden Sie ein lokales Modell wie Ollama; Inhalte sensibler Quellen werden nie an nicht lokale Modelle gesendet.",
   "Private windows are off by default; when enabled, the extension explains but records nothing and shows no reunions.":
-    "Private Fenster sind standardmäßig deaktiviert; wenn aktiviert, erklärt die Erweiterung, zeichnet aber nichts auf und zeigt keine Wiedersehen an.",
+    "Private Fenster sind standardmäßig deaktiviert; wenn aktiviert, erklärt die Erweiterung, zeichnet aber nichts auf und zeigt keine Wiedersehens-Hinweise an.",
   "Deletion takes effect in the app; traces may remain on disk and exported backups cannot be recalled. Full-disk encryption is recommended.":
     "Das Löschen wirkt in der App; auf dem Datenträger können Spuren bleiben, und bereits exportierte Sicherungen lassen sich nicht zurückrufen. Vollständige Datenträgerverschlüsselung wird empfohlen.",
   "API keys are stored unencrypted in the extension's storage; they are only sent to the model address you enter and never go into backups or logs. Prefer a key with a spending limit.":
     "API-Schlüssel werden unverschlüsselt im Speicher der Erweiterung abgelegt; sie werden nur an die von Ihnen eingegebene Modelladresse gesendet und gelangen nie in Sicherungen oder Protokolle. Bevorzugen Sie einen Schlüssel mit Ausgabenlimit.",
   "Mark as normal": "Als normal markieren",
-  "Confirm: may go to remote models": "Bestätigen: darf an Remote-Modelle gehen",
-  "Content from this source only goes to a local model.": "Der Inhalt dieser Quelle geht nur an ein lokales Modell.",
+  "Confirm: may go to remote models": "Bestätigen: darf an Remote-Modelle gesendet werden",
+  "Content from this source only goes to a local model.": "Inhalte dieser Quelle werden nur an ein lokales Modell gesendet.",
   "Sensitive source": "Sensible Quelle",
   "No concepts to show yet.": "Noch keine Konzepte vorhanden.",
   "Concept graph": "Konzeptgraph",
   "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
     "Blauer Pfeil: Voraussetzung · Lila Pfeil: Variante · Gestrichelt: verwandt",
   "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Grün: verstanden · Hellgelb: wackelig · Gelb: noch unklar · Blau: neu · Gestrichelter Kreis: noch nicht erklärt",
+    "Grün: verstanden · Hellgelb: unsicher · Gelb: unklar · Blau: neu · Gestrichelter Kreis: noch nicht erklärt",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Eine Karte pro Konzept als tabulatorgetrennter Text; in Anki über Datei → Importieren öffnen.",
   "Export Anki cards": "Anki-Karten exportieren",
   "Restore records from a JSONL backup. Records you already have are skipped, so nothing is duplicated.":
-    "Stellt Einträge aus einem JSONL-Backup wieder her. Vorhandene Einträge werden übersprungen, nichts wird doppelt angelegt.",
+    "Stellt Einträge aus einer JSONL-Sicherung wieder her. Vorhandene Einträge werden übersprungen, nichts wird doppelt angelegt.",
   "Import JSONL": "JSONL importieren",
-  "Importing…": "Importiere…",
+  "Importing…": "Wird importiert…",
   "Import failed.": "Import fehlgeschlagen.",
   "Imported {added} new events; skipped {skipped} that were already here or could not be read.":
     "{added} neue Ereignisse importiert; {skipped} übersprungen (bereits vorhanden oder nicht lesbar).",
@@ -265,10 +265,10 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Eine Markdown-Datei pro Konzept mit [[Links]], geschrieben nach {folder}/ im gewählten Ordner. Ein erneuter Export aktualisiert die Notizen und behält, was Sie unter der Markierungszeile geschrieben haben.",
   "Draw your concepts and their relations as a map.": "Zeichnet Ihre Konzepte und ihre Beziehungen als Karte.",
   Graph: "Graph",
-  "Dash: inherit; ticked: on; empty: off": "—: erben; angehakt: an; leer: aus",
-  "Leave sensitive sources out of backups and exports": "Sensible Quellen aus Backups und Exporten auslassen",
+  "Dash: inherit; ticked: on; empty: off": "Strich: erben; Haken: an; leer: aus",
+  "Leave sensitive sources out of backups and exports": "Sensible Quellen aus Sicherungen und Exporten auslassen",
   'Plain http is only allowed for this computer (127.0.0.1 / localhost) and for servers on your own network (192.168.x.x, 10.x.x.x, name.local, Tailscale); every other address must use https. A server on your own network still counts as remote. A local model (127.0.0.1 / localhost) ticked "Sensitive provider" is the one used for sensitive sources; they never use any other model.':
-    "Unverschlüsseltes http ist nur für diesen Computer (127.0.0.1 / localhost) und für Server in Ihrem eigenen Netzwerk (192.168.x.x, 10.x.x.x, name.local, Tailscale) erlaubt; jede andere Adresse muss https verwenden. Ein Server im eigenen Netzwerk gilt trotzdem als remote. Das lokale Modell (127.0.0.1 / localhost) mit Haken bei „Sensibler Anbieter“ wird für sensible Quellen verwendet; sie nutzen nie ein anderes Modell.",
+    "Unverschlüsseltes http ist nur für diesen Computer (127.0.0.1 / localhost) und für Server in Ihrem eigenen Netzwerk (192.168.x.x, 10.x.x.x, name.local, Tailscale) erlaubt; jede andere Adresse muss https verwenden. Ein Server im eigenen Netzwerk gilt trotzdem als Remote-Server. Das lokale Modell (127.0.0.1 / localhost) mit Haken bei „Sensibler Anbieter“ wird für sensible Quellen verwendet; sie nutzen nie ein anderes Modell.",
   "Languages for scanned PDFs": "Sprachen für gescannte PDFs",
   "Text in scanned PDFs is read on this computer; page images never leave it.":
     "Text in gescannten PDFs wird auf diesem Computer gelesen; Seitenbilder verlassen ihn nie.",
@@ -276,7 +276,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Reading scanned page {done} of {found}…": "Gescannte Seite {done} von {found} wird gelesen…",
   "Scanned pages could not be read.": "Gescannte Seiten konnten nicht gelesen werden.",
   "The reading is uncertain; the document may be in another language. Choose it under Languages.":
-    "Das Ergebnis ist unsicher; das Dokument ist möglicherweise in einer anderen Sprache. Wähle sie unter „Sprachen“.",
+    "Die Texterkennung ist unsicher; das Dokument ist möglicherweise in einer anderen Sprache. Wählen Sie diese unter „Sprachen“ aus.",
   "Read {done} scanned pages.": "{done} gescannte Seiten gelesen.",
   Remove: "Entfernen",
   Install: "Installieren",
@@ -284,13 +284,13 @@ export const pages_de: Readonly<Record<string, string>> = {
   "The download of {name} did not match its checksum and was discarded.":
     "Der Download von {name} stimmte nicht mit seiner Prüfsumme überein und wurde verworfen.",
   "Could not download {name}. Check your connection and try again.":
-    "{name} konnte nicht heruntergeladen werden. Prüfe deine Verbindung und versuche es erneut.",
+    "{name} konnte nicht heruntergeladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "Built in": "Eingebaut",
   "Read again with these": "Mit diesen erneut lesen",
   "English is built in. Other languages download once from {host}; no document content is sent.":
     "Englisch ist eingebaut. Andere Sprachen werden einmal von {host} geladen; es werden keine Dokumentinhalte gesendet.",
   "Scanned PDFs are read on this computer and page images never leave it. A language pack is downloaded once from jsdelivr.net only when you install one; no document content is sent.":
-    "Gescannte PDFs werden auf diesem Computer gelesen, Seitenbilder verlassen ihn nie. Ein Sprachpaket wird nur dann einmal von jsdelivr.net geladen, wenn du eines installierst; es werden keine Dokumentinhalte gesendet.",
+    "Gescannte PDFs werden auf diesem Computer gelesen, Seitenbilder verlassen ihn nie. Ein Sprachpaket wird nur dann einmal von jsdelivr.net geladen, wenn Sie eines installieren; es werden keine Dokumentinhalte gesendet.",
   Field: "Fachgebiet",
   "All fields": "Alle Fachgebiete",
   Understanding: "Verständnis",
@@ -309,12 +309,12 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Try it first": "Erst ausprobieren",
   "Click the underlined term to see what an explanation looks like.":
     "Klicken Sie auf den unterstrichenen Begriff, um zu sehen, wie eine Erklärung aussieht.",
-  "Model idle timeout (seconds)": "Zeitlimit bei Modellpause (Sekunden)",
+  "Model idle timeout (seconds)": "Leerlauf-Zeitlimit des Modells (Sekunden)",
   "Wait for first text (seconds)": "Wartezeit auf den ersten Text (Sekunden)",
   "Once an answer has started, a model that goes quiet for longer than the idle timeout is given up on. Reasoning models can think for a long time before the first word, so that wait is set separately.":
-    "Sobald eine Antwort begonnen hat, wird ein Modell, das länger als das Zeitlimit schweigt, aufgegeben. Reasoning-Modelle denken oft lange vor dem ersten Wort, deshalb wird diese Wartezeit separat festgelegt.",
+    "Sobald eine Antwort begonnen hat, wird ein Modell, das länger als das Leerlauf-Zeitlimit schweigt, aufgegeben. Reasoning-Modelle denken oft lange vor dem ersten Wort, deshalb wird diese Wartezeit separat festgelegt.",
   "What you met this week, built on this computer from your records; no model is called.":
-    "Was Ihnen diese Woche begegnet ist, auf diesem Computer aus Ihren Aufzeichnungen erstellt; es wird kein Modell aufgerufen.",
+    "Was Ihnen diese Woche begegnet ist, auf diesem Computer aus Ihren Einträgen erstellt; es wird kein Modell aufgerufen.",
   Digest: "Wochenrückblick",
   "Same as the week before": "Wie in der Vorwoche",
   "{n} more than the week before": "{n} mehr als in der Vorwoche",
@@ -326,15 +326,15 @@ export const pages_de: Readonly<Record<string, string>> = {
   "This week": "Diese Woche",
   "Next week →": "Nächste Woche →",
   "This digest is built on this computer from your records; no model is called.":
-    "Dieser Rückblick wird auf diesem Computer aus Ihren Aufzeichnungen erstellt; es wird kein Modell aufgerufen.",
+    "Dieser Rückblick wird auf diesem Computer aus Ihren Einträgen erstellt; es wird kein Modell aufgerufen.",
   "Nothing was recorded this week.": "Diese Woche wurde nichts aufgezeichnet.",
   "Terms met": "Begegnete Begriffe",
   "New terms": "Neue Begriffe",
-  Revisited: "Wiederholt",
+  Revisited: "Wieder begegnet",
   "Active days": "Aktive Tage",
-  "Terms you met": "Begriffe dieser Woche",
+  "Terms you met": "Begriffe, denen Sie begegnet sind",
   "Where you read": "Wo Sie gelesen haben",
-  "{n} look-ups": "{n} Nachschlagen",
+  "{n} look-ups": "{n}-mal nachgeschlagen",
   "New connections": "Neue Verbindungen",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "Ein neuer Begriff ist einen Tag nach dem Nachschlagen fällig; danach wird die nächste Wiederholung auf den Zeitpunkt gelegt, an dem Sie ihn zu vergessen drohen, je nachdem, wie jede Antwort ausfiel.",
@@ -345,7 +345,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "remote service": "Remote-Dienst",
   "on this computer": "auf diesem Computer",
   "Check my answer with {model} ({where})": "Meine Antwort mit {model} prüfen ({where})",
-  "Checking…": "Prüfe…",
+  "Checking…": "Wird geprüft…",
   "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.":
     "Dadurch werden der Begriff, Ihre Antwort und die gespeicherte Erklärung an {model} ({where}) gesendet. Von der Prüfung wird nichts gespeichert, nur die Bewertung, die Sie danach wählen.",
   "Turn off in settings": "In den Einstellungen deaktivieren",
@@ -368,49 +368,50 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Wenn Sie darauf klicken, sendet Harkback den Begriff, Ihre eingegebene Antwort und die gespeicherte Erklärung an Ihr Modell. Es gilt Ihre normale Modellauswahl: Sensible Quellen gehen nur an ein lokales Modell, und jede Prüfung zählt zu Ihren Limits pro Minute und Stunde. Ist dies deaktiviert, erscheint die Schaltfläche nie und es wird nichts gesendet.",
   "In review, the optional “Check my answer” button sends the term, your typed answer and its stored explanation to your model, only when you press it; it can be turned off in settings.":
     "In der Wiederholung sendet die optionale Schaltfläche „Meine Antwort prüfen“ den Begriff, Ihre eingegebene Antwort und die gespeicherte Erklärung nur dann an Ihr Modell, wenn Sie darauf klicken; sie lässt sich in den Einstellungen deaktivieren.",
-  "Ready. Chrome's model runs on this computer.": "Bereit. Das Modell von Chrome läuft auf diesem Computer.",
+  "Ready. Chrome's model runs on this computer.": "Bereit. Das eingebaute Chrome-Modell läuft auf diesem Computer.",
   "Not downloaded yet. Press Download model.": "Noch nicht heruntergeladen. Klicken Sie auf „Modell herunterladen“.",
   "Downloading… {percent}%": "Wird heruntergeladen… {percent} %",
   "Not available on this device. Chrome needs enough disk space and memory, and a recent version.":
     "Auf diesem Gerät nicht verfügbar. Chrome braucht genug Speicherplatz und Arbeitsspeicher sowie eine aktuelle Version.",
-  "This Chrome has no built-in model. Update Chrome.": "Dieses Chrome hat kein eingebautes Modell. Aktualisieren Sie Chrome.",
+  "This Chrome has no built-in model. Update Chrome.": "Diese Chrome-Version hat kein eingebautes Modell. Aktualisieren Sie Chrome.",
   "Download model": "Modell herunterladen",
   "Runs on this computer, with no address or API key. Works best in English, Spanish and Japanese.":
     "Läuft auf diesem Computer, ohne Adresse oder API-Schlüssel. Funktioniert am besten auf Englisch, Spanisch und Japanisch.",
-  "Ships with Chrome, nothing to set up": "Kommt mit Chrome, nichts einzurichten",
+  "Ships with Chrome, nothing to set up": "In Chrome enthalten, keine Einrichtung nötig",
   "Get Chrome's built-in model ready first, or pick another service.":
-    "Mach zuerst das eingebaute Modell von Chrome bereit oder wähle einen anderen Dienst.",
+    "Machen Sie zuerst das eingebaute Chrome-Modell bereit oder wählen Sie einen anderen Dienst.",
   Welcome: "Willkommen",
   "Setup progress": "Fortschritt der Einrichtung",
   "Three steps: see what it does, see how your text is handled, then connect a model. Explanations use the language chosen above.":
-    "Drei Schritte: sieh, was es tut, sieh, wie dein Text behandelt wird, und verbinde dann ein Modell. Erklärungen verwenden die oben gewählte Sprache.",
+    "Drei Schritte: Sehen Sie, was Harkback tut und wie Ihr Text behandelt wird, und verbinden Sie dann ein Modell. Erklärungen verwenden die oben gewählte Sprache.",
   "Ollama and Chrome's built-in model keep text on this computer; cloud services need an API key.":
     "Ollama und das eingebaute Chrome-Modell behalten den Text auf diesem Computer; Cloud-Dienste brauchen einen API-Schlüssel.",
   "You can add more models and change options later in Settings.":
-    "Weitere Modelle und Optionen kannst du später in den Einstellungen hinzufügen.",
+    "Weitere Modelle hinzufügen und Optionen ändern können Sie später in den Einstellungen.",
   Back: "Zurück",
   Next: "Weiter",
   "Settings has more: extra models, per-site rules, scanned PDFs, review and data export.":
-    "In den Einstellungen findest du mehr: zusätzliche Modelle, Regeln pro Website, gescannte PDFs, Wiederholung und Datenexport.",
-  "+ Regional research sites": "+ Regionale Forschungsseiten",
+    "In den Einstellungen finden Sie mehr: zusätzliche Modelle, Regeln pro Website, gescannte PDFs, Wiederholung und Datenexport.",
+  "+ Regional research sites": "+ Regionale Forschungs-Websites",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
-    "Regionale Forschungsseiten: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc und HAL, ebenfalls automatisch gescannt.",
+    "Regionale Forschungs-Websites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc und HAL, ebenfalls automatisch gescannt.",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
-    "Ein solches Backup merkt sich auch nicht, welche Quellen sensibel waren: Markieren Sie sie nach dem Wiederherstellen erneut. Website-Regeln sind nicht im Backup enthalten.",
+    "Eine solche Sicherung merkt sich auch nicht, welche Quellen sensibel waren: Markieren Sie sie nach dem Wiederherstellen erneut. Website-Regeln sind nicht in Sicherungen enthalten.",
   "Confirm this relation": "Diese Beziehung bestätigen",
   "Prerequisite:": "Voraussetzung:",
   "Variant:": "Variante:",
   "Related:": "Verwandt:",
   "Possible relations": "Mögliche Beziehungen",
   "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
-    "Das Modell war sich hier unsicher. Bestätigt werden sie für die Wiederholungsreihenfolge, Wiedersehens-Hinweise und den Graphen verwendet.",
+    "Das Modell war sich hier unsicher. Nach der Bestätigung werden sie für die Wiederholungsreihenfolge, Wiedersehens-Hinweise und den Graphen verwendet.",
   "Setup is not finished yet.": "Die Einrichtung ist noch nicht abgeschlossen.",
   "Continue setup": "Einrichtung fortsetzen",
   "You agreed to these notes during setup on {date}.": "Sie haben diesen Hinweisen bei der Einrichtung am {date} zugestimmt.",
   "What to contribute": "Was beigetragen wird",
   "Every openly licensed paper": "Alle offen lizenzierten Artikel",
   "Save contribution file": "Beitragsdatei speichern",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} Nachschlagen aus {p} Artikeln; {r} von Ihnen bestätigte Beziehungen.",
+  "{n} look-ups from {p} papers; {r} relations you confirmed.":
+    "{n}-mal nachgeschlagen in {p} Artikeln; {r} von Ihnen bestätigte Beziehungen.",
   "Contribute to the data commons": "Zur Datenallmende beitragen",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "Die Datenallmende sammelt die Begriffe, an denen Leser in Artikeln hängen bleiben, für Autoren, Lehrende und andere Leser. Nur arXiv- oder DOI-Artikel mit offener Lizenz (Creative Commons oder gemeinfrei) können beigetragen werden, sensible Quellen nie.",
@@ -422,7 +423,7 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Noch kann kein Artikel beigetragen werden. Harkback kennt eine Lizenz nur, wenn die Seite sie angibt, etwa über den Lizenzlink auf einer arXiv-Abstract-Seite.",
   "Last saved: {date}": "Zuletzt gespeichert: {date}",
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
-    "Macht aus Ihren Nachschlagen in offen lizenzierten Artikeln eine anonyme Datei für die Datenallmende.",
+    "Macht aus Ihren Nachschlagevorgängen in offen lizenzierten Artikeln eine anonyme Datei für die Datenallmende.",
   Contribute: "Beitragen",
   "Confirm merge": "Zusammenführen bestätigen",
   "Split…": "Aufteilen…",
@@ -432,7 +433,7 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Beide hätten weiterhin einen gemeinsamen Namen und würden sofort wieder zusammengeführt. Verschieben Sie auch diesen Namen oder wählen Sie einen anderen.",
   "Split this concept": "Dieses Konzept aufteilen",
   "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
-    "Wählen Sie die Nachschlagen und Namen, die zu einem anderen Konzept gehören; sie wandern in ein neues Konzept. Gehört der neue Name schon zu einem anderen Konzept, schließen sie sich diesem an.",
-  "Look-ups": "Nachschlagen",
+    "Wählen Sie die Nachschlagevorgänge und Namen, die zu einem anderen Konzept gehören; sie werden in ein neues Konzept verschoben. Gehört der neue Name schon zu einem anderen Konzept, schließen sie sich diesem an.",
+  "Look-ups": "Nachschlagevorgänge",
   Names: "Namen",
 };
