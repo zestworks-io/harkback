@@ -29,6 +29,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "That name belongs to another concept; use Merge instead.": "이 이름은 이미 다른 개념에 속해 있습니다. 대신 '병합'을 사용하세요.",
   "That did not work.": "작업에 실패했습니다.",
   "Not explained yet": "아직 설명 없음",
+  "Show concepts not explained yet": "아직 설명하지 않은 개념 표시",
   "Remove this relation": "이 관계 삭제",
   Unmute: "알림 켜기",
   Mute: "알림 끄기",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildGraph, graphModel, layoutGraph } from "../../src/lib/records/graph";
+import { buildGraph, graphModel, layoutGraph, shortLabel, type GraphNode } from "../../src/lib/records/graph";
 import { world } from "../helpers";
 
 function build() {
@@ -70,7 +70,23 @@ describe("graphModel", () => {
     expect(m.nodes).toHaveLength(2);
     expect(m.nodes[0]!.name).toBe("LoRA");
   });
+
+  it("can leave out the concepts nobody has explained yet, with their relations", () => {
+    const { w, ids } = build();
+    const m = graphModel(w.state(), { unexplained: false });
+    expect(m.nodes.some((n) => n.id === ids.peft)).toBe(false);
+    expect(m.edges.some((e) => e.to === ids.peft)).toBe(false);
+    expect(m.edges).toHaveLength(2);
+  });
+
+  it("shows the name it is given for each concept", () => {
+    const { w, ids } = build();
+    const m = graphModel(w.state(), { nameOf: (id) => (id === ids.lora ? "低秩适配" : "x") });
+    expect(m.nodes.find((n) => n.id === ids.lora)!.name).toBe("低秩适配");
+  });
 });
+
+const node = (id: string, name: string, degree: number, studied = true) => ({ id, name, studied, understanding: "new" as const, degree });
 
 describe("layoutGraph", () => {
   it("is deterministic, finite and inside the frame", () => {
@@ -78,13 +94,73 @@ describe("layoutGraph", () => {
     const a = buildGraph(w.state(), { width: 800, height: 500 });
     const b = buildGraph(w.state(), { width: 800, height: 500 });
     expect(a).toEqual(b);
+    expect(a.width).toBeGreaterThanOrEqual(800);
+    expect(a.width / a.height).toBeCloseTo(800 / 500);
     for (const n of a.nodes) {
       expect(Number.isFinite(n.x) && Number.isFinite(n.y)).toBe(true);
-      expect(n.x).toBeGreaterThanOrEqual(0);
-      expect(n.x).toBeLessThanOrEqual(800);
-      expect(n.y).toBeGreaterThanOrEqual(0);
-      expect(n.y).toBeLessThanOrEqual(500);
+      expect(n.x - n.r).toBeGreaterThanOrEqual(0);
+      expect(n.x + n.r).toBeLessThanOrEqual(a.width);
+      expect(n.y - n.r).toBeGreaterThanOrEqual(0);
+      expect(n.y + n.r).toBeLessThanOrEqual(a.height);
     }
+  });
+
+  it("keeps groups with no relation between them near each other, at full size", () => {
+    // Twelve pairs that share nothing: the old layout pushed them to the corners and shrank each pair to a dot.
+    const nodes = Array.from({ length: 24 }, (_, i) => node(`n${String(i).padStart(2, "0")}`, `Concept ${i}`, 1));
+    const edges = Array.from({ length: 12 }, (_, i) => ({
+      id: `e${i}`,
+      from: nodes[2 * i]!.id,
+      to: nodes[2 * i + 1]!.id,
+      rel: "related" as const,
+    }));
+    const g = layoutGraph({ nodes, edges }, 960, 640);
+    const at = new Map(g.nodes.map((n) => [n.id, n]));
+    for (const e of edges) {
+      const d = Math.hypot(at.get(e.from)!.x - at.get(e.to)!.x, at.get(e.from)!.y - at.get(e.to)!.y);
+      expect(d).toBeGreaterThan(30);
+      expect(d).toBeLessThan(400);
+    }
+    // The pairs fill the frame instead of leaving most of it empty.
+    const xs = g.nodes.map((n) => n.x);
+    const ys = g.nodes.map((n) => n.y);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeGreaterThan(g.width * 0.5);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(g.height * 0.4);
+  });
+
+  it("places the labels it shows inside the frame, clear of each other and of the circles", () => {
+    const nodes = Array.from({ length: 40 }, (_, i) =>
+      node(`n${String(i).padStart(2, "0")}`, i % 3 ? `machine translation metric ${i}` : `机器翻译评估指标${i}`, 3, i % 2 === 0),
+    );
+    const edges = nodes.slice(1).map((n, i) => ({ id: `e${i}`, from: nodes[i % 8]!.id, to: n.id, rel: "prerequisite" as const }));
+    const g = layoutGraph({ nodes, edges }, 960, 640);
+    const box = (n: GraphNode) => {
+      const w = [...n.label].reduce((sum, ch) => sum + (ch.codePointAt(0)! >= 0x2e80 ? 12 : 7.2), 0);
+      const x0 = n.labelAnchor === "start" ? n.labelX : n.labelAnchor === "end" ? n.labelX - w : n.labelX - w / 2;
+      return { x0, x1: x0 + w, y0: n.labelY - 12, y1: n.labelY };
+    };
+    const shown = g.nodes.filter((n) => n.labelShown);
+    expect(shown.length).toBeGreaterThan(nodes.length * 0.8);
+    for (const n of shown) {
+      const b = box(n);
+      expect(b.x0).toBeGreaterThanOrEqual(-0.5);
+      expect(b.x1).toBeLessThanOrEqual(g.width + 0.5);
+    }
+    for (let i = 0; i < shown.length; i++)
+      for (let j = i + 1; j < shown.length; j++) {
+        const a = box(shown[i]!);
+        const b = box(shown[j]!);
+        const apart = a.x1 <= b.x0 || b.x1 <= a.x0 || a.y1 <= b.y0 || b.y1 <= a.y0;
+        expect(apart, `${shown[i]!.label} / ${shown[j]!.label}`).toBe(true);
+      }
+  });
+
+  it("shortens long names and draws concepts nobody has explained yet smaller", () => {
+    expect(shortLabel("short")).toBe("short");
+    expect([...shortLabel("Recall-Oriented Understudy for Gisting Evaluation")]).toHaveLength(28);
+    expect(shortLabel("Recall-Oriented Understudy for Gisting Evaluation").endsWith("…")).toBe(true);
+    const g = layoutGraph({ nodes: [node("a", "A", 2, true), node("b", "B", 2, false)], edges: [] });
+    expect(g.nodes[1]!.r).toBeLessThan(g.nodes[0]!.r);
   });
 
   it("puts related concepts closer than unrelated ones, and keeps nodes apart", () => {
@@ -98,11 +174,7 @@ describe("layoutGraph", () => {
 
   it("handles nothing, one node and nodes on the same spot", () => {
     expect(layoutGraph({ nodes: [], edges: [] }).nodes).toEqual([]);
-    const one = layoutGraph(
-      { nodes: [{ id: "a", name: "A", studied: true, understanding: "new", degree: 0, x: 0, y: 0 }], edges: [] },
-      400,
-      300,
-    );
+    const one = layoutGraph({ nodes: [node("a", "A", 0)], edges: [] }, 400, 300);
     expect(one.nodes[0]).toMatchObject({ x: 200, y: 150 });
     const same = Array.from({ length: 3 }, (_, i) => ({
       id: `n${i}`,
@@ -110,8 +182,6 @@ describe("layoutGraph", () => {
       studied: true,
       understanding: "new" as const,
       degree: 0,
-      x: 0,
-      y: 0,
     }));
     for (const n of layoutGraph({ nodes: same, edges: [] }).nodes) expect(Number.isFinite(n.x)).toBe(true);
   });

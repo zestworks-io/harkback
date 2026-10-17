@@ -126,7 +126,7 @@ To turn it off, clear **Offer "Check my answer" in review** under Review in sett
 
 **Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, pale yellow shaky, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
 
-Drag to move, scroll to zoom, click a concept to open it. The search box filters the graph to matching concepts and their neighbours. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
+Drag to move, scroll to zoom, click a concept to open it. Each group of connected concepts is drawn on its own, and the groups sit side by side. A map too large to read whole opens on its best-connected concept; scroll to zoom out to all of it. A label that has no free place beside its circle appears when you point at the circle. The search box filters the graph to matching concepts and their neighbours, and _Show concepts not explained yet_ hides the dashed rings when you untick it. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
 
 ## History
 

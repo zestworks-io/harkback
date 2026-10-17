@@ -30,6 +30,7 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Dieser Name gehört zu einem anderen Konzept; verwenden Sie stattdessen „Zusammenführen“.",
   "That did not work.": "Das hat nicht funktioniert.",
   "Not explained yet": "Noch nicht erklärt",
+  "Show concepts not explained yet": "Noch nicht erklärte Konzepte anzeigen",
   "Remove this relation": "Diese Beziehung entfernen",
   Unmute: "Stummschaltung aufheben",
   Mute: "Stummschalten",

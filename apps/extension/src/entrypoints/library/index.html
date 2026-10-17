@@ -726,6 +726,11 @@
         font-size: 13px;
         color: var(--muted);
       }
+      .graph-filters .graph-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
       .graph-filters select {
         height: 30px;
         font: inherit;
@@ -795,6 +800,7 @@
       svg.graph .node.unstudied circle {
         fill: var(--card);
         stroke: var(--muted);
+        stroke-width: 1.5;
         stroke-dasharray: 3 2;
       }
       svg.graph .node text {
@@ -803,7 +809,17 @@
         paint-order: stroke;
         stroke: var(--card);
         stroke-width: 3px;
-        text-anchor: middle;
+      }
+      svg.graph .node.unstudied text {
+        fill: var(--muted);
+      }
+      /* A label with no free place around its circle appears when the circle is pointed at. */
+      svg.graph .node text.crowded {
+        display: none;
+      }
+      svg.graph a:focus-visible text.crowded,
+      svg.graph a:hover text.crowded {
+        display: inline;
       }
       svg.graph a:focus-visible circle,
       svg.graph a:hover circle {

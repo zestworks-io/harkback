@@ -29,6 +29,7 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "That name belongs to another concept; use Merge instead.": "這個名稱屬於另一個概念，請改用「合併」。",
   "That did not work.": "操作失敗。",
   "Not explained yet": "尚未解釋",
+  "Show concepts not explained yet": "顯示尚未解釋的概念",
   "Remove this relation": "移除這個關係",
   Unmute: "取消靜音",
   Mute: "靜音",

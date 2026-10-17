@@ -29,6 +29,7 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "That name belongs to another concept; use Merge instead.": "Ce nom appartient à un autre concept ; utilisez plutôt Fusionner.",
   "That did not work.": "Cela n’a pas fonctionné.",
   "Not explained yet": "Pas encore expliqué",
+  "Show concepts not explained yet": "Afficher les concepts pas encore expliqués",
   "Remove this relation": "Supprimer cette relation",
   Unmute: "Réactiver",
   Mute: "Mettre en sourdine",

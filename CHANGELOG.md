@@ -4,6 +4,14 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+### Added
+
+- **Hide the concepts you have not explained yet** from the graph: untick _Show concepts not explained yet_ above it. They are shown by default, as smaller rings with grey names.
+
+### Changed
+
+- **The graph is easier to read.** Each group of connected concepts is laid out on its own and the groups are packed side by side, so groups with no relation between them no longer drift to the corners and shrink to a knot. Labels are placed above, below or beside their circle where they cover no other label or circle; a label with no free place appears when you point at its circle. Long names are shortened, labels stay inside the map, and arrows end at the edge of the circle they point to. A map too large to read whole opens on its best-connected concept; scroll to zoom out.
+
 ### Fixed
 
 - **Related concepts are named in English, whatever language you explain in.** The variants, broader concepts and prerequisites the model suggests were written in the explanation language (`参考译文` next to `reference translation`), so each became a concept of its own that never joined the one you had. Concepts recorded this way before stay as they are; they are never explained, so unticking _Show concepts not explained yet_ hides them from the graph.

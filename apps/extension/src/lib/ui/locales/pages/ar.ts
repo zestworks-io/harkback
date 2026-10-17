@@ -29,6 +29,7 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "That name belongs to another concept; use Merge instead.": "هذا الاسم يخص مفهومًا آخر؛ استخدم «دمج» بدلًا من ذلك.",
   "That did not work.": "لم تنجح العملية.",
   "Not explained yet": "لم يُشرح بعد",
+  "Show concepts not explained yet": "إظهار المفاهيم التي لم تُشرح بعد",
   "Remove this relation": "إزالة هذه العلاقة",
   Unmute: "إلغاء الكتم",
   Mute: "كتم",

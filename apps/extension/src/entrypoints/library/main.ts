@@ -950,7 +950,17 @@ async function main(): Promise<void> {
       },
     });
 
-  const graphFilter: { domain: "" | Domain; understanding: "" | Understanding; days: number } = { domain: "", understanding: "", days: 0 };
+  const GRAPH_WIDTH = 960;
+  const GRAPH_HEIGHT = 640;
+  /** The smallest scale a map opens at, so labels stay readable. */
+  const MIN_GRAPH_SCALE = 0.6;
+
+  const graphFilter: { domain: "" | Domain; understanding: "" | Understanding; days: number; unexplained: boolean } = {
+    domain: "",
+    understanding: "",
+    days: 0,
+    unexplained: true,
+  };
 
   /** A drop-down that redraws the map when it changes and keeps the keyboard where it was. */
   function graphSelect(name: string, label: string, options: [string, string][], value: string, set: (v: string) => void): HTMLElement {
@@ -1004,19 +1014,37 @@ async function main(): Promise<void> {
         String(graphFilter.days),
         (v) => (graphFilter.days = Number(v)),
       ),
+      graphUnexplainedToggle(),
     );
+  }
+
+  /** Whether concepts nobody has explained yet are drawn. */
+  function graphUnexplainedToggle(): HTMLElement {
+    const box = h("input", { type: "checkbox", "data-hb": "graph-filter-unexplained" }) as HTMLInputElement;
+    box.checked = graphFilter.unexplained;
+    box.addEventListener("change", () => {
+      graphFilter.unexplained = box.checked;
+      draw();
+      list.querySelector<HTMLElement>('[data-hb="graph-filter-unexplained"]')?.focus();
+    });
+    return h("label", { className: "graph-toggle" }, box, " ", L("显示还没解释过的概念", "Show concepts not explained yet"));
   }
 
   /** The concepts as a map: relations as lines, colour by how well each is understood. Drag to move, wheel to zoom. */
   function graphView(): HTMLElement {
-    const filtered = graphFilter.domain !== "" || graphFilter.understanding !== "" || graphFilter.days > 0;
+    const filtered = graphFilter.domain !== "" || graphFilter.understanding !== "" || graphFilter.days > 0 || !graphFilter.unexplained;
     const g = buildGraph(state, {
       query: search.value,
       ...(graphFilter.domain && { domain: graphFilter.domain }),
       ...(graphFilter.understanding && { understanding: graphFilter.understanding }),
       ...(graphFilter.days > 0 && { since: Date.now() - graphFilter.days * DAY_MS }),
-      width: 960,
-      height: 640,
+      unexplained: graphFilter.unexplained,
+      nameOf: (id) => {
+        const c = state.concepts.get(id)!;
+        return names(c.canonicalName, c.names).name;
+      },
+      width: GRAPH_WIDTH,
+      height: GRAPH_HEIGHT,
     });
     if (g.nodes.length === 0) {
       return h(
@@ -1032,8 +1060,21 @@ async function main(): Promise<void> {
         ),
       );
     }
+    // A map too big to read whole opens on its best connected concept at a readable size; scroll to zoom out to all of it.
     const view = { x: 0, y: 0, w: g.width, h: g.height };
-    const svg = svgEl("svg", { class: "graph", viewBox: `0 0 ${g.width} ${g.height}`, role: "group", "data-hb": "graph" });
+    if (g.width > GRAPH_WIDTH / MIN_GRAPH_SCALE) {
+      const focus = g.nodes[0]!;
+      view.w = GRAPH_WIDTH / MIN_GRAPH_SCALE;
+      view.h = (view.w * g.height) / g.width;
+      view.x = Math.min(Math.max(0, focus.x - view.w / 2), g.width - view.w);
+      view.y = Math.min(Math.max(0, focus.y - view.h / 2), g.height - view.h);
+    }
+    const svg = svgEl("svg", {
+      class: "graph",
+      viewBox: `${view.x} ${view.y} ${view.w} ${view.h}`,
+      role: "group",
+      "data-hb": "graph",
+    });
     svg.setAttribute("aria-label", L("概念关系图", "Concept graph"));
     const marker = (rel: string) =>
       svgEl(
@@ -1042,7 +1083,7 @@ async function main(): Promise<void> {
           id: `arrow-${rel}`,
           class: rel,
           viewBox: "0 0 10 10",
-          refX: 17,
+          refX: 10,
           refY: 5,
           markerWidth: 7,
           markerHeight: 7,
@@ -1055,19 +1096,27 @@ async function main(): Promise<void> {
     for (const e of g.edges) {
       const a = at.get(e.from)!;
       const b = at.get(e.to)!;
+      // From the edge of one circle to the edge of the other, so an arrow points at the circle instead of hiding under it.
+      // Circles that overlap keep the whole line: trimming both ends would make it point backwards.
+      const d = Math.max(0.01, Math.hypot(b.x - a.x, b.y - a.y));
+      const ux = (b.x - a.x) / d;
+      const uy = (b.y - a.y) / d;
+      const apart = d > a.r + b.r + 4;
+      const start = apart ? a.r : 0;
+      const end = apart ? b.r + 2 : 0;
       svg.append(
         svgEl("line", {
           class: `edge ${e.rel}`,
-          x1: a.x,
-          y1: a.y,
-          x2: b.x,
-          y2: b.y,
+          x1: a.x + ux * start,
+          y1: a.y + uy * start,
+          x2: b.x - ux * end,
+          y2: b.y - uy * end,
           ...(e.rel === "related" ? {} : { "marker-end": `url(#arrow-${e.rel})` }),
         }),
       );
     }
     for (const n of g.nodes) {
-      const name = names(n.name, state.concepts.get(n.id)?.names.filter((x) => x !== n.name) ?? []).name;
+      const name = n.name;
       const node = svgEl(
         "a",
         {
@@ -1076,8 +1125,12 @@ async function main(): Promise<void> {
           "data-hb": "graph-node",
           "data-id": n.id,
         },
-        svgEl("circle", { cx: n.x, cy: n.y, r: 6 + Math.min(n.degree, 6) * 1.5 }),
-        svgEl("text", { x: n.x, y: n.y - 12 - Math.min(n.degree, 6) * 1.5 }, document.createTextNode(name)),
+        svgEl("circle", { cx: n.x, cy: n.y, r: n.r }),
+        svgEl(
+          "text",
+          { x: n.labelX, y: n.labelY, "text-anchor": n.labelAnchor, ...(!n.labelShown && { class: "crowded" }) },
+          document.createTextNode(n.label),
+        ),
       );
       node.append(svgEl("title", {}, document.createTextNode(n.studied ? name : `${name} — ${L("还没解释过", "Not explained yet")}`)));
       svg.append(node);

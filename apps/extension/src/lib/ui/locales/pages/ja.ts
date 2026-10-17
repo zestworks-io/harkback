@@ -29,6 +29,7 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "That name belongs to another concept; use Merge instead.": "その名前は別の概念のものです。代わりに「統合」を使ってください。",
   "That did not work.": "うまくいきませんでした。",
   "Not explained yet": "まだ解説がありません",
+  "Show concepts not explained yet": "まだ解説していない概念も表示",
   "Remove this relation": "この関係を削除",
   Unmute: "ミュート解除",
   Mute: "ミュート",
