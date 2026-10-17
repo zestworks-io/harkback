@@ -256,7 +256,7 @@ export class Matcher {
       const compact = e.prepared.replace(/ /g, "");
       const count = e.prepared.split(" ").length;
       const edits = allowedEdits(compact.length);
-      const soundsLike = caseless && e.caseKey !== null && count === 1 && compact.length >= 4 && caselessOk(compact);
+      const soundsLike = caseless && e.caseKey !== null && count === 1 && compact.length >= 4 && caselessOk(e.caseKey);
       if (edits === 0 && !soundsLike) continue;
       const code = soundsLike ? soundex(compact) : "";
       // The same number of words, or one more or fewer: speech splits and joins words ("fine tune", "finetune").

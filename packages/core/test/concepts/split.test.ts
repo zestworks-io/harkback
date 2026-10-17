@@ -128,4 +128,36 @@ describe("replaying name removals and unmerges", () => {
     expect(replay([...base, merged, unmerged]).representative.get(id(2))).toBe(id(2));
     expect(replay([...base, merged, unmerged, again]).representative.get(id(2))).toBe(id(1));
   });
+
+  it("keeps a decision about a suggested name with the look-up it came from", () => {
+    const events = [
+      ...wrongJoin(),
+      ev("concept.alias_confirmed", { concept_id: id(1), alias: "提示调优" }, { ts: "2026-09-12T00:00:00Z" }),
+    ];
+    expect(replay(events).concepts.get(id(1))!.names).toContain("提示调优");
+    const state = replay(
+      apply(
+        events,
+        planSplit(events, { conceptId: id(1), encounterIds: [id(11)], names: ["Prompt tuning"], newName: "Prompt tuning" }, NEW),
+      ),
+    );
+    expect(state.concepts.get(NEW)!.names).toContain("提示调优");
+    expect(state.concepts.get(NEW)!.proposedAliases).toEqual([]);
+  });
+
+  it("keeps a decision about a relation with the look-up it came from, but not one made after the move", () => {
+    const old = edgeId(id(1), "prerequisite", id(2));
+    const events = [...wrongJoin(), ev("edge.rejected", { edge_id: old }, { ts: "2026-09-12T00:00:00Z" })];
+    const split = apply(
+      events,
+      planSplit(events, { conceptId: id(1), encounterIds: [id(11)], names: ["Prompt tuning"], newName: "Prompt tuning" }, NEW),
+    );
+    expect(replay(split).edges.get(edgeId(NEW, "prerequisite", id(2)))!.status).toBe("rejected");
+    const later = [
+      ...wrongJoin(),
+      ...split.slice(wrongJoin().length + 1),
+      ev("edge.confirmed", { edge_id: old }, { ts: "2026-10-02T00:00:00Z" }),
+    ];
+    expect(replay(later).edges.get(edgeId(NEW, "prerequisite", id(2)))!.status).toBe("proposed");
+  });
 });

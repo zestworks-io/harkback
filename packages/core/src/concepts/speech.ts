@@ -19,10 +19,13 @@ export function hasNoCase(line: string): boolean {
   return /\p{L}/u.test(line) && !/\p{Lu}/u.test(line);
 }
 
-/** Whether a short name may be matched without its case: long enough, and not a frequent word. */
+/**
+ * Whether a short name may be matched without its case: an acronym ("GPT", "LoRA": capitals after the first letter), long
+ * enough, and not a frequent word. A name written like a word ("Loss", "Next") keeps needing its case.
+ */
 export function caselessOk(name: string): boolean {
   const n = name.toLowerCase();
-  return n.length >= 3 && !COMMON_WORDS.has(n);
+  return /\p{Lu}/u.test(name.slice(1)) && n.length >= 3 && !COMMON_WORDS.has(n);
 }
 
 /** American Soundex of a word of Latin letters: the first letter and three digits for the consonant sounds that follow. */

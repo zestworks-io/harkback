@@ -42,7 +42,8 @@ export function resolveConcepts(
   const createdAt = new Map<string, number>();
   const extraAliases: [string, string, number][] = [];
   let merges: [string, string][] = [];
-  const proposals: [string, string, number][] = [];
+  /** Concept the name goes to, the name, position, and the concept it was proposed for (they differ when its encounter moved). */
+  const proposals: [string, string, number, string][] = [];
   const decided: [string, string, "confirmed" | "rejected", number][] = [];
   /** Concept id and name key -> where the reader last took the name off that concept. */
   const removedAt = new Map<string, number>();
@@ -65,7 +66,7 @@ export function resolveConcepts(
       removedAt.set(proposalKey(e.payload.concept_id, e.payload.alias), position);
     } else if (e.type === "concept.alias_proposed") {
       const moved = e.payload.evidence.encounter_id ? movedEncounters.get(e.payload.evidence.encounter_id) : undefined;
-      proposals.push([moved ?? e.payload.concept_id, e.payload.alias, position]);
+      proposals.push([moved ?? e.payload.concept_id, e.payload.alias, position, e.payload.concept_id]);
     } else if (e.type === "concept.alias_confirmed" || e.type === "concept.alias_rejected") {
       decided.push([e.payload.concept_id, e.payload.alias, e.type === "concept.alias_confirmed" ? "confirmed" : "rejected", position]);
     } else if (e.type === "concept.merged") {
@@ -96,14 +97,16 @@ export function resolveConcepts(
     decisions.set(proposalKey(explicit.find(conceptId), alias), { decision, position });
   const pending: [string, string][] = [];
   const rejected: [string, string][] = [];
-  for (const [conceptId, alias, position] of proposals) {
+  for (const [conceptId, alias, position, proposedFor] of proposals) {
     const c = raw.get(conceptId);
     if (!c) {
       warnings.push(`alias proposal for unknown concept ${conceptId}`);
       continue;
     }
     // Only a decision made after the proposal counts, so a name rejected earlier can be proposed again.
-    const made = decisions.get(proposalKey(explicit.find(conceptId), alias));
+    // A decision made before the encounter moved was made for the concept it was proposed for.
+    const made =
+      decisions.get(proposalKey(explicit.find(conceptId), alias)) ?? decisions.get(proposalKey(explicit.find(proposedFor), alias));
     const decision = made && made.position > position ? made.decision : undefined;
     if (decision === "confirmed") {
       if (kept(conceptId, alias, made!.position)) c.aliases.push(alias);

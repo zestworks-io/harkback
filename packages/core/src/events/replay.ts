@@ -19,7 +19,12 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const sorted = canonicalOrder(events);
   // Encounter id -> the concept the reader moved it to, the last move winning.
   const moved = new Map<string, string>();
-  for (const e of sorted) if (e.type === "encounter.moved") moved.set(e.payload.encounter_id, e.payload.concept_id);
+  const movedAt = new Map<string, number>();
+  for (const [position, e] of sorted.entries())
+    if (e.type === "encounter.moved") {
+      moved.set(e.payload.encounter_id, e.payload.concept_id);
+      movedAt.set(e.payload.encounter_id, position);
+    }
   const { concepts, representative, aliases, warnings } = resolveConcepts(
     sorted,
     options.ambiguousAcronyms ?? DEFAULT_AMBIGUOUS_ACRONYMS,
@@ -34,10 +39,10 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const dismissals: EventOf<"reunion.dismissed">[] = [];
   const consents: State["consents"] = [];
   const proposals: EventOf<"edge.proposed">[] = [];
-  const statuses: (EventOf<"edge.confirmed"> | EventOf<"edge.rejected">)[] = [];
+  const statuses: [EventOf<"edge.confirmed"> | EventOf<"edge.rejected">, number][] = [];
 
   let seenCount = 0;
-  for (const e of sorted) {
+  for (const [position, e] of sorted.entries()) {
     switch (e.type) {
       case "source.seen": {
         const p = e.payload;
@@ -84,7 +89,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
         break;
       case "edge.confirmed":
       case "edge.rejected":
-        statuses.push(e);
+        statuses.push([e, position]);
         break;
       case "contribution.consent":
         consents.push({ scope: e.payload.scope, target: e.payload.target, at: Date.parse(e.ts) });
@@ -158,6 +163,8 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   }
 
   const edges = new Map<string, EdgeState>();
+  /** Old edge id -> the new one and where its encounter moved, for relations whose explained concept moved with it. */
+  const movedEdges = new Map<string, { id: string; at: number }>();
   for (const pe of proposals) {
     const p = pe.payload;
     // A relation found while explaining an encounter the reader moved belongs to the concept it moved to.
@@ -166,6 +173,11 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     const end = (id: string): string => (movedTo && id === explained ? movedTo : id);
     const from = representative.get(end(p.from));
     const to = representative.get(end(p.to));
+    // A status recorded before the move names the relation by its old ends.
+    const oldFrom = representative.get(p.from);
+    const oldTo = representative.get(p.to);
+    if (from && to && oldFrom && oldTo && (oldFrom !== from || oldTo !== to))
+      movedEdges.set(edgeId(oldFrom, p.rel, oldTo), { id: edgeId(from, p.rel, to), at: movedAt.get(p.evidence.encounter_id!)! });
     if (!from || !to || from === to) continue;
     const key = edgeId(from, p.rel, to);
     const evidence = p.evidence.encounter_id;
@@ -188,14 +200,20 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     }
   }
 
-  for (const s of statuses) {
+  for (const [s, position] of statuses) {
     const parsed = parseEdgeId(s.payload.edge_id);
     if (!parsed) continue;
     const from = representative.get(parsed.from);
     const to = representative.get(parsed.to);
     if (!from || !to) continue;
-    const edge = edges.get(edgeId(from, parsed.rel, to));
-    if (edge) edge.status = s.type === "edge.confirmed" ? "confirmed" : "rejected";
+    const key = edgeId(from, parsed.rel, to);
+    const status = s.type === "edge.confirmed" ? "confirmed" : "rejected";
+    const edge = edges.get(key);
+    if (edge) edge.status = status;
+    // Decided before the encounter moved: the decision goes with the relation.
+    const movedTo = movedEdges.get(key);
+    const movedEdge = movedTo && position < movedTo.at ? edges.get(movedTo.id) : undefined;
+    if (movedEdge) movedEdge.status = status;
   }
 
   return {

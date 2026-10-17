@@ -64,6 +64,8 @@ describe("speech helpers", () => {
     expect(caselessOk("LoRA")).toBe(true);
     expect(caselessOk("SET")).toBe(false);
     expect(caselessOk("AI")).toBe(false);
+    // A name written like a word keeps needing its case.
+    expect(caselessOk("Loss")).toBe(false);
   });
 
   it("joins only runs of single letters", () => {
