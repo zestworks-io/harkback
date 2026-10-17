@@ -75,6 +75,27 @@ Add it to the `Settings` type, `DEFAULT_SETTINGS`, `withDefaults` (so stored set
 
 Add it to `Request`, `ResponseMap` and `REQUEST_TYPES` in `lib/messaging/messages.ts`, handle it in `lib/messaging/requests.ts` with a test, and decide who may send it in `lib/messaging/sender-auth.ts`. Anything that writes or deletes is for extension pages only.
 
+## Measuring explanation quality
+
+`pnpm eval` reads a labelled set of short passages on efficient fine-tuning (`packages/core/test/eval/cases`) in order, the way the extension would: it matches known terms and picks reunions when a paper opens, and for each lookup builds the real explain prompt, asks the model, parses the answer, checks the evidence and records the events. It then compares the result with the gold labels. It needs a real model, so it is not part of `pnpm test`; run it when you change the prompt, the parser, the matcher or the model you recommend.
+
+```sh
+HB_EVAL_BASE_URL=https://api.openai.com/v1 HB_EVAL_API_KEY=… HB_EVAL_MODEL=<model> pnpm eval --record run.json
+pnpm eval --replay run.json                        # score saved answers again, offline
+pnpm eval --replay run.json --baseline base.json   # base.json: {"bCubedF1": 0.93}
+```
+
+Any OpenAI-compatible endpoint works, including a local Ollama (`http://localhost:11434/v1`). The command prints each metric, every miss (a wrong reunion, join, edge or evidence) and the release gates, and exits with 1 when a gate fails:
+
+| Gate                                                                                     | Release needs                       |
+| ---------------------------------------------------------------------------------------- | ----------------------------------- |
+| Reunion precision: reunions shown that the page should show                              | at least 90%                        |
+| Shown `variant_of` edge precision: confirmed edges, or proposed ones at confidence ≥ 0.7 | at least 85%                        |
+| `defined_in_source` precision: evidence that passed the check and really is a definition | at least 90%                        |
+| B-cubed F1 of the concept clusters                                                       | no lower than the recorded baseline |
+
+When a miss is a missing label rather than a mistake (a correct broader term the set does not list, say), add it to `cases/concepts.ts`. `test/eval/evaluate.test.ts` scores the recorded answers in `test/eval/fixtures/recorded.json` offline; a change to the cases or the scoring updates the numbers it expects, and a new lookup needs an answer in the recording.
+
 ## Releasing
 
 1. Move the _Unreleased_ entries in [CHANGELOG.md](CHANGELOG.md) under a new version heading with the date.

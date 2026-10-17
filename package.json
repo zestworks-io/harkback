@@ -9,7 +9,8 @@
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
     "test": "vitest run",
-    "typecheck": "tsc -p packages/spec && tsc -p packages/core && pnpm --filter @harkback/extension typecheck",
+    "typecheck": "tsc -p packages/spec && tsc -p packages/core && tsc -p tools/eval && pnpm --filter @harkback/extension typecheck",
+    "eval": "tsx tools/eval/run.ts",
     "e2e": "pnpm --filter @harkback/extension e2e",
     "zip": "pnpm --filter @harkback/extension zip",
     "zip:edge": "pnpm --filter @harkback/extension exec wxt zip -b edge",
