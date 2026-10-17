@@ -23,7 +23,7 @@ function setup() {
 describe("commonsView", () => {
   it("lists the papers that may be contributed and shows every line of the file", () => {
     const save = vi.fn();
-    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => false, save });
+    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => false, paper: null, onPick: vi.fn(), save });
     const options = [...el.querySelectorAll('[data-hb="commons-scope"] option')].map((o) => o.textContent);
     expect(options).toEqual(["Every openly licensed paper", "LoRA paper", "QLoRA paper"]);
     const preview = JSON.parse(el.querySelector('[data-hb="commons-preview"]')!.textContent!);
@@ -34,7 +34,7 @@ describe("commonsView", () => {
 
   it("narrows to one paper and saves what it shows, with the scope agreed to", () => {
     const save = vi.fn();
-    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => false, save });
+    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => false, paper: null, onPick: vi.fn(), save });
     const select = el.querySelector<HTMLSelectElement>('[data-hb="commons-scope"]')!;
     select.value = "arxiv:2305.14314";
     select.dispatchEvent(new Event("change"));
@@ -46,8 +46,27 @@ describe("commonsView", () => {
   });
 
   it("says so when no paper can be contributed, including those a site rule makes sensitive", () => {
-    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => true, save: vi.fn() });
+    const el = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => true, paper: null, onPick: vi.fn(), save: vi.fn() });
     expect(el.querySelector('[data-hb="commons-empty"]')).not.toBeNull();
     expect(contributablePapers(setup().state(), () => true)).toEqual([]);
+  });
+
+  it("keeps the paper picked when it is drawn again", () => {
+    const onPick = vi.fn();
+    const first = commonsView({ state: setup().state(), lang: "en", alsoSensitive: () => false, paper: null, onPick, save: vi.fn() });
+    const select = first.querySelector<HTMLSelectElement>('[data-hb="commons-scope"]')!;
+    select.value = "arxiv:2305.14314";
+    select.dispatchEvent(new Event("change"));
+    expect(onPick).toHaveBeenCalledWith("arxiv:2305.14314");
+    const again = commonsView({
+      state: setup().state(),
+      lang: "en",
+      alsoSensitive: () => false,
+      paper: "arxiv:2305.14314",
+      onPick,
+      save: vi.fn(),
+    });
+    expect(again.querySelector<HTMLSelectElement>('[data-hb="commons-scope"]')!.value).toBe("arxiv:2305.14314");
+    expect(JSON.parse(again.querySelector('[data-hb="commons-preview"]')!.textContent!).records).toHaveLength(1);
   });
 });

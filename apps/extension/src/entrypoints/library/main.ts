@@ -898,11 +898,15 @@ async function main(): Promise<void> {
       },
     });
 
+  /** The paper picked on the contribute page; it survives the page being drawn again when records change. */
+  let commonsPaper: string | null = null;
   const commonsPage = (): HTMLElement =>
     commonsView({
       state,
       lang: settings.language,
       alsoSensitive: (s) => sensitiveBySiteRule(settings.sites, s),
+      paper: commonsPaper,
+      onPick: (paper) => (commonsPaper = paper),
       save: async (scope, contribution) => {
         const r = await request({ type: "record-consent", scope: scope.scope, target: scope.target }).catch(() => ({ ok: false }));
         if (!r.ok) {

@@ -15,6 +15,9 @@ export interface CommonsViewDeps {
   lang: Lang;
   /** Sources the reader's site rules make sensitive. */
   alsoSensitive: AlsoSensitive;
+  /** The paper picked before the page was drawn again, or null for every paper. */
+  paper: string | null;
+  onPick(paper: string | null): void;
   /** Records the reader's consent for the scope, then saves the file. */
   save(scope: ContributionScope, contribution: Contribution): void;
 }
@@ -34,10 +37,11 @@ export function contributablePapers(state: State, alsoSensitive: AlsoSensitive):
  * Prepares a contribution to the data commons: the reader picks what to include, sees every line of the file, and saves it.
  * Nothing is sent anywhere.
  */
-export function commonsView({ state, lang, alsoSensitive, save }: CommonsViewDeps): HTMLElement {
+export function commonsView({ state, lang, alsoSensitive, paper, onPick, save }: CommonsViewDeps): HTMLElement {
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(lang, zh, en, vars);
   const papers = contributablePapers(state, alsoSensitive);
-  let scope = ALL;
+  // A paper that can no longer be contributed falls back to every paper.
+  let scope: ContributionScope = paper && papers.some((p) => p.sourceId === paper) ? { scope: "this_source", target: paper } : ALL;
 
   const select = h(
     "select",
@@ -45,6 +49,7 @@ export function commonsView({ state, lang, alsoSensitive, save }: CommonsViewDep
     h("option", { value: "" }, L("所有开放许可的论文", "Every openly licensed paper")),
     ...papers.map((p) => h("option", { value: p.sourceId, dir: "auto" }, p.title)),
   );
+  select.value = scope.target ?? "";
   const summary = h("p", { className: "note", "data-hb": "commons-summary" });
   const preview = h("pre", { className: "commons-preview", "data-hb": "commons-preview", dir: "ltr" });
   const saveButton = h("button", { type: "button", "data-hb": "commons-save" }, L("保存贡献文件", "Save contribution file"));
@@ -67,6 +72,7 @@ export function commonsView({ state, lang, alsoSensitive, save }: CommonsViewDep
   };
   select.addEventListener("change", () => {
     scope = select.value ? { scope: "this_source", target: select.value } : ALL;
+    onPick(scope.target);
     show();
   });
   saveButton.addEventListener("click", () => save(scope, contribution));
