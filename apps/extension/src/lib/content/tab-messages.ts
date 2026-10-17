@@ -8,7 +8,6 @@ export function listenForTabMessages(app: ContentApp): void {
     if (sender.id !== browser.runtime.id) return false;
     const m = message as TabMessage | null;
     if (m?.type === "hello") sendResponse(true);
-    else if (m?.type === "activate") void app.activate();
     // The toolbar button and its shortcut: scan for reunions as before, and offer the preview without waiting for that scan.
     else if (m?.type === "preview") {
       void app.activate().catch(() => undefined);

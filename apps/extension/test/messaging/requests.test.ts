@@ -431,7 +431,10 @@ describe("page-only requests", () => {
       expect(await handleRequest(deps, { type: "reject-edge", edgeId: id }, extensionPage)).toEqual({ ok: true });
       expect(written.map((e) => [e.type, e.payload])).toEqual([["edge.rejected", { edge_id: id }]]);
       expect(await handleRequest(deps, { type: "reject-edge", edgeId: "nope" }, extensionPage)).toEqual({ ok: false });
-      expect(written).toHaveLength(1);
+      expect(await handleRequest(deps, { type: "confirm-edge", edgeId: id }, extensionPage)).toEqual({ ok: true });
+      expect(written.at(-1)).toMatchObject({ type: "edge.confirmed", payload: { edge_id: id } });
+      expect(await handleRequest(deps, { type: "confirm-edge", edgeId: "nope" }, extensionPage)).toEqual({ ok: false });
+      expect(written).toHaveLength(2);
     });
 
     it("mutes and unmutes a concept", async () => {

@@ -65,6 +65,8 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   err_unavailable:
     "Chrome 内蔵モデルを使えません。設定でダウンロードするか、このコンピューターと Chrome のバージョンが対応しているか確認してください。",
   previewTitle: "このページを下見",
+  menuReview: "復習",
+  menuHistory: "履歴",
   previewAsk: "このページの重要な概念を調べて、分かっているものと先に読むべきものを確認しますか？",
   openReadable: "読み取れる表示を開く",
   previewScan: "調べる",

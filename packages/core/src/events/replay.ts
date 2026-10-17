@@ -35,6 +35,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
         const p = e.payload;
         const prev = sources.get(p.source_id);
         seenCount++;
+        const keptSensitive = prev?.sensitivity === "sensitive" && p.sensitivity === "normal" && !p.by_user;
         sources.set(p.source_id, {
           id: p.source_id,
           ids: { ...prev?.ids, ...definedOnly(p.ids) },
@@ -42,9 +43,14 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
           license: p.license,
           // Sensitive is sticky: only the reader's own choice makes a source normal again, so a later, automatic record
           // (another device that never knew the source was sensitive) cannot expose it.
-          sensitivity: prev?.sensitivity === "sensitive" && p.sensitivity === "normal" && !p.by_user ? "sensitive" : p.sensitivity,
+          sensitivity: keptSensitive ? "sensitive" : p.sensitivity,
           ...(p.by_user || prev?.chosen ? { chosen: true as const } : {}),
           ...(p.by_user ? { decidedAt: seenCount } : prev?.decidedAt !== undefined ? { decidedAt: prev.decidedAt } : {}),
+          ...(p.sensitivity === "sensitive"
+            ? { sensitiveAt: seenCount }
+            : keptSensitive && prev.sensitiveAt !== undefined
+              ? { sensitiveAt: prev.sensitiveAt }
+              : {}),
         });
         break;
       }

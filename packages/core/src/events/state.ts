@@ -62,6 +62,8 @@ export interface SourceState {
   chosen?: true;
   /** Where in the log the reader last decided about it; a later decision about a part beats an earlier one about the whole. */
   decidedAt?: number;
+  /** Where in the log the latest record that made or kept it sensitive is, by the reader or not. */
+  sensitiveAt?: number;
 }
 
 export type EdgeStatus = "proposed" | "confirmed" | "rejected";
@@ -123,41 +125,58 @@ function reaches(state: SourceView, roots: ReadonlySet<string>, id: string): boo
   return false;
 }
 
-/** Root id of each paper or page with a source where `flagged` holds -> the latest time the reader decided one of them (-1 when never by hand). */
-function rootsDecided(state: SourceView, flagged: (s: SourceState) => boolean): Map<string, number> {
+/** Root id of each paper or page with a source where `flagged` holds -> the latest `at` among them (-1 when none has one). */
+function rootsLatest(
+  state: SourceView,
+  flagged: (s: SourceState) => boolean,
+  at: (s: SourceState) => number | undefined,
+): Map<string, number> {
   const roots = new Map<string, number>();
   for (const [id, src] of state.sources) {
     if (!flagged(src)) continue;
     const root = identityRoot(state, id);
-    roots.set(root, Math.max(roots.get(root) ?? -1, src.decidedAt ?? -1));
+    roots.set(root, Math.max(roots.get(root) ?? -1, at(src) ?? -1));
   }
   return roots;
 }
 
 interface SensitivityMarks {
-  sensitive: Map<string, number>;
-  /** Roots where the reader said a source is fine. */
+  /** When the reader marked each sensitive root, -1 when it was only recorded so. */
+  markedByReader: Map<string, number>;
+  /** When each sensitive root was last recorded sensitive, by anyone. */
+  recorded: Map<string, number>;
+  /** When the reader said a root is fine. */
   fine: Map<string, number>;
 }
 
 function sensitivityMarks(state: SourceView): SensitivityMarks {
+  const sensitive = (s: SourceState) => s.sensitivity === "sensitive";
   return {
-    sensitive: rootsDecided(state, (s) => s.sensitivity === "sensitive"),
-    fine: rootsDecided(state, (s) => s.chosen === true && s.sensitivity === "normal"),
+    markedByReader: rootsLatest(state, sensitive, (s) => s.decidedAt),
+    recorded: rootsLatest(state, sensitive, (s) => s.sensitiveAt),
+    fine: rootsLatest(
+      state,
+      (s) => s.chosen === true && s.sensitivity === "normal",
+      (s) => s.decidedAt,
+    ),
   };
 }
 
 /**
- * Like `reaches` for sensitivity, except that a part the reader said is fine (under any of its ids) stops what the whole above it,
- * or the same paper under another id, passes down, unless the reader marked that after.
+ * Like `reaches` for sensitivity, except that a part the reader said is fine stops what the whole above it passes down, unless the
+ * reader marked the whole after that. Between two ids of one paper the later record wins, as for a single id.
  */
 function sensitiveThrough(state: SourceView, marks: SensitivityMarks, id: string): boolean {
   let exemptAt: number | undefined;
   for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) {
     const root = identityRoot(state, cur);
-    exemptAt ??= marks.fine.get(root);
-    const markedAt = marks.sensitive.get(root);
-    if (markedAt !== undefined) return !(exemptAt !== undefined && exemptAt > markedAt);
+    const recorded = marks.recorded.get(root);
+    const fineHere = marks.fine.get(root);
+    if (recorded !== undefined) {
+      if (fineHere !== undefined) return fineHere < recorded;
+      return !(exemptAt !== undefined && exemptAt > (marks.markedByReader.get(root) ?? -1));
+    }
+    exemptAt ??= fineHere;
   }
   return false;
 }

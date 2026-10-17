@@ -4,6 +4,12 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+### Added
+
+- **Confirm a relation the model was unsure about.** A concept page lists weak relations under _Possible relations_, with ✓ to confirm and × to remove. A confirmed relation is used for the review order, reunion hints, the digest and the graph, like a strong one.
+- **Review and History from the toolbar.** Right-click the toolbar icon for _Review_ (the queue the badge counts) and _History_.
+- **Settings says when setup was not finished**, with a link back to it, and the Privacy card shows when you agreed to the privacy notes.
+
 ### Fixed
 
 - **The lock on a sensitive page marks it normal again.** Pressing it used to do nothing: the request was refused because it came from a web page's tab.

@@ -303,6 +303,11 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       await deps.append((f) => [f.make("edge.rejected", { edge_id: msg.edgeId })]);
       return { ok: true };
     }
+    case "confirm-edge": {
+      if (!(await deps.getState()).edges.has(String(msg.edgeId))) return { ok: false };
+      await deps.append((f) => [f.make("edge.confirmed", { edge_id: msg.edgeId })]);
+      return { ok: true };
+    }
     case "set-muted": {
       const rep = (await deps.getState()).representative.get(msg.conceptId);
       if (incognito || !rep) return { ok: false };

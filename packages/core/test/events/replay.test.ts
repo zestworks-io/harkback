@@ -81,6 +81,7 @@ describe("replay: placeholders, mutes and sources", () => {
       title: "Paper",
       license: "unknown",
       sensitivity: "sensitive",
+      sensitiveAt: 2,
     });
   });
 });

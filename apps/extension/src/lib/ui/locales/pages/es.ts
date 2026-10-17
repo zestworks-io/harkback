@@ -393,4 +393,14 @@ export const pages_es: Readonly<Record<string, string>> = {
     "Sitios de investigación regionales: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc y HAL, también con escaneo automático.",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "Una copia así tampoco recuerda qué fuentes eran sensibles: márcalas de nuevo después de restaurarla. Las reglas de sitios no están en las copias.",
+  "Confirm this relation": "Confirmar esta relación",
+  "Prerequisite:": "Requisito:",
+  "Variant:": "Variante:",
+  "Related:": "Relacionado:",
+  "Possible relations": "Posibles relaciones",
+  "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
+    "El modelo no estaba seguro de estas. Una vez confirmadas, se usan para el orden de repaso, los avisos de reencuentro y el grafo.",
+  "Setup is not finished yet.": "La configuración inicial aún no está terminada.",
+  "Continue setup": "Continuar la configuración",
+  "You agreed to these notes during setup on {date}.": "Aceptaste estas notas durante la configuración el {date}.",
 };

@@ -386,4 +386,14 @@ export const pages_ar: Readonly<Record<string, string>> = {
     "المواقع البحثية الإقليمية: CNKI وJ-STAGE وCiNii وKCI وSciELO وRedalyc وHAL، وتُفحص هي أيضًا تلقائيًا.",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "لا تتذكر هذه النسخة الاحتياطية أيضًا المصادر التي كانت حساسة: ضع عليها العلامة من جديد بعد الاستعادة. قواعد المواقع ليست في النسخ الاحتياطية.",
+  "Confirm this relation": "تأكيد هذه العلاقة",
+  "Prerequisite:": "متطلب سابق:",
+  "Variant:": "صيغة متفرعة:",
+  "Related:": "ذو صلة:",
+  "Possible relations": "علاقات محتملة",
+  "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
+    "لم يكن النموذج متأكدًا من هذه العلاقات. بعد تأكيدها تُستخدم في ترتيب المراجعة وتلميحات اللقاء والمخطط.",
+  "Setup is not finished yet.": "لم يكتمل الإعداد بعد.",
+  "Continue setup": "متابعة الإعداد",
+  "You agreed to these notes during setup on {date}.": "وافقت على هذه الملاحظات أثناء الإعداد في {date}.",
 };

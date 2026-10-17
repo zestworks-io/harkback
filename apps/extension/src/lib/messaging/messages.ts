@@ -81,6 +81,7 @@ export type Request =
   | { type: "add-alias"; conceptId: string; alias: string }
   | { type: "resolve-alias"; conceptId: string; alias: string; accept: boolean }
   | { type: "reject-edge"; edgeId: string }
+  | { type: "confirm-edge"; edgeId: string }
   | { type: "set-muted"; conceptId: string; muted: boolean }
   | { type: "backup-now" }
   | { type: "settings-changed" };
@@ -117,13 +118,14 @@ export interface ResponseMap {
   /** `collides`: accepting the name would merge this concept with another one that has it. */
   "resolve-alias": { ok: boolean; collides?: boolean };
   "reject-edge": { ok: boolean };
+  "confirm-edge": { ok: boolean };
   "set-muted": { ok: boolean };
   "backup-now": { ok: boolean; error?: string };
   "settings-changed": { ok: boolean };
 }
 
 /** Background → content script, via tabs.sendMessage. */
-export type TabMessage = { type: "hello" } | { type: "activate" } | { type: "preview" } | { type: "explain-selection" };
+export type TabMessage = { type: "hello" } | { type: "preview" } | { type: "explain-selection" };
 
 const REQUEST_TYPES = new Set<string>([
   "page-info",
@@ -147,6 +149,7 @@ const REQUEST_TYPES = new Set<string>([
   "add-alias",
   "resolve-alias",
   "reject-edge",
+  "confirm-edge",
   "set-muted",
   "backup-now",
   "settings-changed",

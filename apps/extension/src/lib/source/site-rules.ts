@@ -34,8 +34,10 @@ export function siteHost(url: URL): string {
 function ruleMatches(pattern: string, url: URL): boolean {
   const p = normalizePattern(pattern);
   if (!p) return false;
-  if (isPrefix(p))
-    return url.href.startsWith(p) && (p.endsWith("/") || p.length === url.href.length || "/?#".includes(url.href[p.length]!));
+  if (isPrefix(p)) {
+    const href = url.hostname.endsWith(".") ? Object.assign(new URL(url.href), { hostname: siteHost(url) }).href : url.href;
+    return href.startsWith(p) && (p.endsWith("/") || p.length === href.length || "/?#".includes(href[p.length]!));
+  }
   const host = siteHost(url);
   return host === p || host.endsWith(`.${p}`);
 }

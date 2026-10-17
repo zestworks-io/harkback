@@ -390,4 +390,14 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "各地域の研究サイト: CNKI、J-STAGE、CiNii、KCI、SciELO、Redalyc、HAL。これらも自動でスキャンされます。",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "このようなバックアップは、どのソースが機密だったかも覚えていません。復元後にもう一度マークしてください。サイトのルールはバックアップに含まれません。",
+  "Confirm this relation": "この関係を確定",
+  "Prerequisite:": "前提知識：",
+  "Variant:": "派生：",
+  "Related:": "関連：",
+  "Possible relations": "考えられる関係",
+  "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
+    "モデルはこれらに自信がありませんでした。確定すると、復習の順序、再会ヒント、グラフに使われます。",
+  "Setup is not finished yet.": "初期設定がまだ終わっていません。",
+  "Continue setup": "設定を続ける",
+  "You agreed to these notes during setup on {date}.": "{date} の設定時にこれらの説明に同意しました。",
 };

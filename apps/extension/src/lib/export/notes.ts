@@ -20,10 +20,6 @@ export function noteTitle(name: string): string {
   return RESERVED_ON_WINDOWS.test(bounded) ? `${bounded}_` : bounded;
 }
 
-export function noteFilename(name: string): string {
-  return `${noteTitle(name)}.md`;
-}
-
 /** Everything below this line in a note is the reader's own; exporting again never touches it. */
 export const NOTE_END = "<!-- harkback:end — write below this line; it is kept when notes are exported again -->";
 

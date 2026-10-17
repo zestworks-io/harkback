@@ -52,6 +52,7 @@ import { effectiveRule, hostPermissionPatterns, originPattern, sensitiveBySiteRu
 import { arxivHtmlUrl } from "../lib/source/source-id";
 import { StateCache } from "../lib/storage/state-cache";
 import { UI_STRINGS } from "../lib/ui/locales/ui";
+import { t } from "../lib/ui/strings";
 import { CHANGE_CHANNEL, EventStore } from "../lib/storage/store";
 
 const CONTENT_SCRIPT = "/content-scripts/content.js";
@@ -570,13 +571,18 @@ export default defineBackground(() => {
     `Harkback: ${UI_STRINGS[lang]?.explain ?? (lang === "zh" ? "解释" : "Explain")}`;
   const previewMenuTitle = (lang: Settings["language"]): string =>
     `Harkback: ${UI_STRINGS[lang]?.previewTitle ?? (lang === "zh" ? "预览本页概念" : "Preview this page")}`;
+  const REVIEW_MENU_ID = "open-review";
+  const HISTORY_MENU_ID = "open-history";
 
   /** Creates the right-click entries, or renames them when the interface language changed. */
   async function ensureMenu(): Promise<void> {
     const { language } = await loadSettings();
-    const entries: { id: string; title: string; contexts: ["selection"] | ["page"] }[] = [
+    const entries: { id: string; title: string; contexts: ["selection"] | ["page"] | ["action"] }[] = [
       { id: MENU_ID, title: menuTitle(language), contexts: ["selection"] },
       { id: PREVIEW_MENU_ID, title: previewMenuTitle(language), contexts: ["page"] },
+      // The toolbar button scans the page; its own right-click menu leads to what the badge counts.
+      { id: REVIEW_MENU_ID, title: t(language, "menuReview"), contexts: ["action"] },
+      { id: HISTORY_MENU_ID, title: t(language, "menuHistory"), contexts: ["action"] },
     ];
     for (const { id, title, contexts } of entries) {
       try {
@@ -588,6 +594,11 @@ export default defineBackground(() => {
   }
 
   browser.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === REVIEW_MENU_ID || info.menuItemId === HISTORY_MENU_ID) {
+      const hash = info.menuItemId === REVIEW_MENU_ID ? "#review" : "";
+      void browser.tabs.create({ url: browser.runtime.getURL(`/library.html${hash}`) });
+      return;
+    }
     if (!tab) return;
     if (info.menuItemId === MENU_ID) activateTab(tab, { type: "explain-selection" });
     else if (info.menuItemId === PREVIEW_MENU_ID) activateTab(tab, { type: "preview" });

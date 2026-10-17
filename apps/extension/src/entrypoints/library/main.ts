@@ -23,6 +23,7 @@ import {
   understandingOf,
   type ConceptDetail,
   type RelatedConcept,
+  type SuggestedRelation,
   type Understanding,
 } from "../../lib/records/concept-detail";
 import { localizeNames } from "../../lib/records/names";
@@ -330,7 +331,7 @@ async function main(): Promise<void> {
 
   /** Sends a correction, then re-reads the records and draws again. */
   async function correct(
-    req: Extract<Request, { type: "merge-concepts" | "add-alias" | "resolve-alias" | "reject-edge" | "set-muted" }>,
+    req: Extract<Request, { type: "merge-concepts" | "add-alias" | "resolve-alias" | "reject-edge" | "confirm-edge" | "set-muted" }>,
     afterRefresh?: () => void,
   ): Promise<void> {
     const r = await request(req);
@@ -347,7 +348,8 @@ async function main(): Promise<void> {
     else draw();
   }
 
-  const chip = (r: RelatedConcept): HTMLElement => {
+  /** `suggestion`: the kind of a weak relation, shown before the name, with a button to confirm it. */
+  const chip = (r: RelatedConcept, suggestion?: string): HTMLElement => {
     const label = names(r.name, r.aliases).name;
     const link = r.studied
       ? h("a", { href: conceptHref(r.conceptId), "data-hb": "related" }, label)
@@ -364,7 +366,21 @@ async function main(): Promise<void> {
       "×",
     );
     remove.addEventListener("click", () => void correct({ type: "reject-edge", edgeId: r.edgeId }));
-    return h("span", { className: `chip${r.studied ? "" : " muted"}` }, link, remove);
+    const confirm = suggestion
+      ? h(
+          "button",
+          {
+            type: "button",
+            className: "chip-x chip-ok",
+            title: L("确认这个关系", "Confirm this relation"),
+            "aria-label": L("确认这个关系", "Confirm this relation"),
+            "data-hb": "confirm-edge",
+          },
+          "✓",
+        )
+      : null;
+    confirm?.addEventListener("click", () => void correct({ type: "confirm-edge", edgeId: r.edgeId }));
+    return h("span", { className: `chip${r.studied ? "" : " muted"}` }, suggestion ? `${suggestion} ` : "", link, confirm, remove);
   };
 
   const editTools = (d: ConceptDetail): HTMLElement => {
@@ -471,7 +487,29 @@ async function main(): Promise<void> {
   };
 
   const relatedGroup = (title: string, items: RelatedConcept[]): HTMLElement | null =>
-    items.length === 0 ? null : h("div", { className: "group" }, h("h3", {}, title), h("div", { className: "chips" }, ...items.map(chip)));
+    items.length === 0
+      ? null
+      : h("div", { className: "group" }, h("h3", {}, title), h("div", { className: "chips" }, ...items.map((r) => chip(r))));
+
+  const suggestedRelations = (d: ConceptDetail): HTMLElement | null => {
+    if (d.suggested.length === 0) return null;
+    const kind = (rel: SuggestedRelation["rel"]): string =>
+      rel === "prerequisite" ? L("前置：", "Prerequisite:") : rel === "variant_of" ? L("变体：", "Variant:") : L("相关：", "Related:");
+    return h(
+      "div",
+      { className: "group", "data-hb": "suggested-relations" },
+      h("h3", {}, L("可能的关系", "Possible relations")),
+      h(
+        "p",
+        { className: "note" },
+        L(
+          "模型不太确定这些关系。确认后它们会用于复习顺序、重逢提示和图谱。",
+          "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.",
+        ),
+      ),
+      h("div", { className: "chips" }, ...d.suggested.map((r) => chip(r, kind(r.rel)))),
+    );
+  };
 
   /** For a term you are struggling with: the prerequisites that may be what is missing. */
   const gapsNote = (conceptId: string): HTMLElement | null => {
@@ -526,6 +564,7 @@ async function main(): Promise<void> {
       relatedGroup(L("前置概念", "Prerequisites"), d.prerequisites),
       relatedGroup(L("变体", "Variants"), d.variants),
       relatedGroup(L("相关", "Related"), d.related),
+      suggestedRelations(d),
       h("ul", { className: "entries" }, ...d.entries.map(entryView)),
     );
   };

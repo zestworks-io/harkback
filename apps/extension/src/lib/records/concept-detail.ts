@@ -1,5 +1,5 @@
 import { gradeOf, type State } from "@harkback/core";
-import type { Domain } from "@harkback/spec";
+import type { Domain, Rel } from "@harkback/spec";
 import { isActiveEdge } from "../review/prerequisites";
 import { historyEntries, type HistoryEntry } from "./history";
 
@@ -13,8 +13,15 @@ export interface RelatedConcept {
   aliases: string[];
   /** True when the concept has at least one recorded explanation. */
   studied: boolean;
-  /** The relation between the two concepts, so it can be rejected. */
+  /** The relation between the two concepts, so it can be confirmed or rejected. */
   edgeId: string;
+  /** True once the reader confirmed the relation. */
+  confirmed: boolean;
+}
+
+/** A relation the model proposed with too little confidence to be used until the reader confirms it. */
+export interface SuggestedRelation extends RelatedConcept {
+  rel: Rel;
 }
 
 export interface ConceptDetail {
@@ -29,8 +36,16 @@ export interface ConceptDetail {
   prerequisites: RelatedConcept[];
   variants: RelatedConcept[];
   related: RelatedConcept[];
+  /** Weak relations, shown apart so the reader can confirm or reject them. */
+  suggested: SuggestedRelation[];
   /** Newest first. */
   entries: HistoryEntry[];
+}
+
+type Edge = State["edges"] extends ReadonlyMap<string, infer E> ? E : never;
+
+function groupFor<T>(groups: { prerequisites: T; variants: T; related: T }, rel: Rel): T {
+  return rel === "prerequisite" ? groups.prerequisites : rel === "variant_of" ? groups.variants : groups.related;
 }
 
 /** The most recent decisive action across all encounters of the concept decides. */
@@ -56,25 +71,36 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
     variants: new Map<string, RelatedConcept>(),
     related: new Map<string, RelatedConcept>(),
   };
-  const add = (group: Map<string, RelatedConcept>, otherId: string, edgeId: string): void => {
+  const suggested = new Map<string, SuggestedRelation>();
+  const related = (otherId: string, edge: Edge): RelatedConcept | null => {
     const other = state.concepts.get(otherId);
-    if (!other || otherId === id || group.has(otherId)) return;
-    group.set(otherId, {
+    if (!other || otherId === id) return null;
+    return {
       conceptId: otherId,
       name: other.canonicalName,
       aliases: other.names.filter((n) => n !== other.canonicalName),
       studied: !other.isPlaceholder,
-      edgeId,
-    });
+      edgeId: edge.id,
+      confirmed: edge.status === "confirmed",
+    };
+  };
+  const add = (group: Map<string, RelatedConcept>, otherId: string, edge: Edge): void => {
+    const r = group.has(otherId) ? null : related(otherId, edge);
+    if (r) group.set(otherId, r);
   };
   for (const edge of state.edges.values()) {
     if (edge.from !== id && edge.to !== id) continue;
-    if (!isActiveEdge(edge)) continue;
+    // A prerequisite is shown on the concept that needs it.
+    if (edge.rel === "prerequisite" && edge.from !== id) continue;
     const other = edge.from === id ? edge.to : edge.from;
-    if (edge.rel === "prerequisite") {
-      if (edge.from === id) add(groups.prerequisites, other, edge.id);
-    } else if (edge.rel === "variant_of") add(groups.variants, other, edge.id);
-    else add(groups.related, other, edge.id);
+    if (!isActiveEdge(edge)) {
+      const r = edge.status === "rejected" || suggested.has(`${edge.rel} ${other}`) ? null : related(other, edge);
+      if (r) suggested.set(`${edge.rel} ${other}`, { ...r, rel: edge.rel });
+      continue;
+    }
+    if (edge.rel === "prerequisite") add(groups.prerequisites, other, edge);
+    else if (edge.rel === "variant_of") add(groups.variants, other, edge);
+    else add(groups.related, other, edge);
   }
 
   return {
@@ -88,6 +114,8 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
     prerequisites: [...groups.prerequisites.values()],
     variants: [...groups.variants.values()],
     related: [...groups.related.values()],
+    // A weak relation to a concept already related in that way adds nothing.
+    suggested: [...suggested.values()].filter((r) => !groupFor(groups, r.rel).has(r.conceptId)),
     entries: historyEntries(state, id),
   };
 }

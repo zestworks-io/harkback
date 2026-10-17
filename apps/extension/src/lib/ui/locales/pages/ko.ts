@@ -388,4 +388,14 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "지역별 연구 사이트: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc, HAL. 이 사이트들도 자동으로 스캔됩니다.",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "이런 백업은 어떤 출처가 민감했는지도 기억하지 않습니다. 복원한 뒤 다시 표시하세요. 사이트 규칙은 백업에 들어 있지 않습니다.",
+  "Confirm this relation": "이 관계 확인",
+  "Prerequisite:": "선행 개념:",
+  "Variant:": "변형:",
+  "Related:": "관련:",
+  "Possible relations": "가능한 관계",
+  "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
+    "모델이 이 관계들을 확신하지 못했습니다. 확인하면 복습 순서, 재회 힌트, 그래프에 쓰입니다.",
+  "Setup is not finished yet.": "초기 설정이 아직 끝나지 않았습니다.",
+  "Continue setup": "설정 계속하기",
+  "You agreed to these notes during setup on {date}.": "{date}에 설정하면서 이 안내에 동의했습니다.",
 };

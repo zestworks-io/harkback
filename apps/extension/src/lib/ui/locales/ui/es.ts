@@ -63,6 +63,8 @@ export const ui_es: Readonly<Record<StringKey, string>> = {
   err_unavailable:
     "El modelo integrado de Chrome no está listo. Descárgalo en los ajustes o comprueba que este equipo y esta versión de Chrome lo admiten.",
   previewTitle: "Vista previa de esta página",
+  menuReview: "Repaso",
+  menuHistory: "Historial",
   previewAsk: "¿Buscar los conceptos clave de esta página para ver cuáles ya conoces y cuáles leer primero?",
   openReadable: "Abrir la vista legible",
   previewScan: "Escanear",

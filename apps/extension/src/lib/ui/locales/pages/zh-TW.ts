@@ -380,4 +380,14 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "各地區的研究網站：中國知網（CNKI）、J-STAGE、CiNii、KCI、SciELO、Redalyc 與 HAL，同樣自動掃描。",
   "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
     "這樣的備份也不記得哪些來源是敏感的；還原後請重新標記它們。網站規則不在備份裡。",
+  "Confirm this relation": "確認這個關係",
+  "Prerequisite:": "前置：",
+  "Variant:": "變體：",
+  "Related:": "相關：",
+  "Possible relations": "可能的關係",
+  "The model was unsure about these. Once confirmed, they are used for the review order, reunion hints and the graph.":
+    "模型不太確定這些關係。確認後它們會用於複習順序、重逢提示和圖譜。",
+  "Setup is not finished yet.": "還沒有完成初始設定。",
+  "Continue setup": "繼續設定",
+  "You agreed to these notes during setup on {date}.": "你在 {date} 設定時同意了這些說明。",
 };

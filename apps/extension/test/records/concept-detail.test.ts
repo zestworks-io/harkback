@@ -118,8 +118,15 @@ describe("conceptDetail", () => {
     edge(lora, "related", ft);
     const d = conceptDetail(w.state(), lora)!;
     expect(d.prerequisites).toEqual([
-      { conceptId: matrix, name: "Matrix rank", aliases: [], studied: true, edgeId: edgeId(lora, "prerequisite", matrix) },
-      { conceptId: peft, name: "PEFT", aliases: [], studied: false, edgeId: edgeId(lora, "prerequisite", peft) },
+      {
+        conceptId: matrix,
+        name: "Matrix rank",
+        aliases: [],
+        studied: true,
+        edgeId: edgeId(lora, "prerequisite", matrix),
+        confirmed: false,
+      },
+      { conceptId: peft, name: "PEFT", aliases: [], studied: false, edgeId: edgeId(lora, "prerequisite", peft), confirmed: false },
     ]);
     expect(d.variants.find((r) => r.name === "QLoRA")?.edgeId).toBe(edgeId(qlora, "variant_of", lora));
     expect(d.variants.map((r) => r.name).sort()).toEqual(["Fine-tuning", "QLoRA"]);
@@ -139,7 +146,23 @@ describe("conceptDetail", () => {
     edge(c, "prerequisite", weakConfirmed, 0.5);
     w.events.push(w.f.make("edge.rejected", { edge_id: edgeId(c, "prerequisite", rejected) }));
     w.events.push(w.f.make("edge.confirmed", { edge_id: edgeId(c, "prerequisite", weakConfirmed) }));
-    expect(conceptDetail(w.state(), c)!.prerequisites.map((r) => r.name)).toEqual(["C"]);
+    const d = conceptDetail(w.state(), c)!;
+    expect(d.prerequisites.map((r) => [r.name, r.confirmed])).toEqual([["C", true]]);
+    // The weak one waits for the reader; the rejected one is gone.
+    expect(d.suggested.map((r) => [r.name, r.rel, r.confirmed])).toEqual([["B", "prerequisite", false]]);
+  });
+
+  it("does not suggest a weak relation to a concept already related that way, nor a prerequisite of another concept", () => {
+    const { w, edge } = setup();
+    const c = w.concept("LoRA");
+    const other = w.concept("Rank");
+    const needsC = w.concept("QLoRA");
+    for (const x of [c, other, needsC]) w.encounter(x, "s1");
+    edge(c, "related", other);
+    edge(other, "related", c, 0.4);
+    edge(needsC, "prerequisite", c, 0.4);
+    edge(c, "variant_of", other, 0.4);
+    expect(conceptDetail(w.state(), c)!.suggested.map((r) => [r.name, r.rel])).toEqual([["Rank", "variant_of"]]);
   });
 
   it("resolves merged concepts to one representative and never lists itself", () => {

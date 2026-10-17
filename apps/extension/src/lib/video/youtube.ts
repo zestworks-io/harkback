@@ -1,7 +1,4 @@
-import { formatTimestamp } from "@harkback/core";
 import type { DetectedSource } from "../source/source-id";
-
-export { formatTimestamp };
 
 const ID = /^[A-Za-z0-9_-]{11}$/;
 const HOSTS = /^(?:www\.|m\.|music\.)?youtube(?:-nocookie)?\.com$/;

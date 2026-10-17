@@ -92,7 +92,13 @@ async function main(): Promise<void> {
 
   async function save(): Promise<void> {
     const stored = await loadStored();
-    const next = trimmed({ ...draft, sites: mergeSiteRules(baseSites, draft.sites, stored.sites) });
+    // Setup is finished elsewhere (the onboarding page); this page never changes it.
+    const next = trimmed({
+      ...draft,
+      onboarded: stored.onboarded,
+      consentAt: stored.consentAt,
+      sites: mergeSiteRules(baseSites, draft.sites, stored.sites),
+    });
     const errors = validateSettings(next);
     if (errors.length > 0) {
       status.textContent = `${L("请检查：", "Please check: ")}${errors.join(", ")}`;
@@ -105,6 +111,8 @@ async function main(): Promise<void> {
       ]),
     ];
     const granted = origins.length === 0 || (await requestOrigins(origins));
+    // The browser's prompt can stay open while a page saves a rule; merge once more just before writing.
+    next.sites = mergeSiteRules(baseSites, next.sites, (await loadStored()).sites);
     Object.assign(draft, next);
     baseSites = structuredClone(next.sites);
     await browser.storage.local.set({ settings: next });
@@ -492,6 +500,17 @@ async function main(): Promise<void> {
           language,
         ),
       ),
+      ...(draft.onboarded
+        ? []
+        : [
+            h(
+              "p",
+              { className: "note setup-banner", "data-hb": "setup-banner" },
+              L("还没有完成初始设置。", "Setup is not finished yet."),
+              " ",
+              h("a", { href: browser.runtime.getURL("/onboarding.html") }, L("继续设置", "Continue setup")),
+            ),
+          ]),
       tabBar,
       ...tabPanels(
         tabs,
@@ -744,6 +763,15 @@ async function main(): Promise<void> {
           ),
           card(L("隐私", "Privacy"), null, [
             h("ul", { className: "privacy" }, ...privacyNotes(draft.language).map((line) => h("li", {}, line))),
+            draft.consentAt
+              ? h(
+                  "p",
+                  { className: "note", "data-hb": "consent-at" },
+                  L("你在 {date} 设置时同意了这些说明。", "You agreed to these notes during setup on {date}.", {
+                    date: new Date(draft.consentAt).toLocaleDateString(`${draft.language}-u-nu-latn`),
+                  }),
+                )
+              : null,
           ]),
         ],
       ),
@@ -755,7 +783,13 @@ async function main(): Promise<void> {
   // A rule saved from a page shows up here at once, unless the site rules have unsaved edits; Save merges those.
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== "local" || !changes.settings) return;
-    const sites = withDefaults(changes.settings.newValue).sites;
+    const stored = withDefaults(changes.settings.newValue);
+    if (stored.onboarded !== draft.onboarded || stored.consentAt !== draft.consentAt) {
+      draft.onboarded = stored.onboarded;
+      draft.consentAt = stored.consentAt;
+      render();
+    }
+    const sites = stored.sites;
     if (JSON.stringify(draft.sites) !== JSON.stringify(baseSites) || JSON.stringify(sites) === JSON.stringify(draft.sites)) return;
     draft.sites = structuredClone(sites);
     baseSites = structuredClone(sites);

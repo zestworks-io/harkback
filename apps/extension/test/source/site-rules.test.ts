@@ -8,6 +8,7 @@ describe("a host name written with a trailing dot", () => {
     expect(sensitiveStated(rules, "https://mail.example.com./inbox")).toBe(true);
     expect(effectiveRule(rules, "https://example.com./").autoScan).toBe(true);
     expect(onPrivateByDefaultSite("https://www.notion.so./page")).toBe(true);
+    expect(sensitiveStated([{ pattern: "https://example.com/private", sensitive: true }], "https://example.com./private/x")).toBe(true);
   });
 });
 

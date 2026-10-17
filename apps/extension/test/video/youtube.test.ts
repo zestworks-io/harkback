@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { formatTimestamp } from "@harkback/core";
 import {
-  formatTimestamp,
   isWatchPage,
   sourceIdFor,
   videoIdFromSourceId,

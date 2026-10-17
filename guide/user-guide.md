@@ -81,11 +81,11 @@ Pages that load more text, or a single-page app that moves to another page witho
 - An abbreviation matches its full name when the name has at least three words. Two different full names for the same abbreviation in one field stay separate concepts.
 - Chinese names, and Japanese names written only in kanji, of three or more characters are underlined wherever they appear. A two-character name is underlined only where it is a word of its own on the page; a one-character name never is. Names with kana or Hangul need two characters.
 
-A term you select in another language joins the concept you already have when the model's card names it, so "注意力机制" and "attention mechanism" end up as one concept. When the model knows the term's name in your explanation language, it appears under **Suggested names** on the concept page. It is only recognised on pages once you **Accept** it, and a name you **Reject** is not suggested again. On a concept page you can also **add an alias**, **merge** two concepts that are the same (this cannot be undone), **remove** a wrong relation, or **mute** the concept. Adding an alias that already belongs to another concept is refused; merge instead.
+A term you select in another language joins the concept you already have when the model's card names it, so "注意力机制" and "attention mechanism" end up as one concept. When the model knows the term's name in your explanation language, it appears under **Suggested names** on the concept page. It is only recognised on pages once you **Accept** it, and a name you **Reject** is not suggested again. On a concept page you can also **add an alias**, **merge** two concepts that are the same (this cannot be undone), **remove** a wrong relation, or **mute** the concept. Relations the model was unsure about are listed apart under **Possible relations**: they are not used until you confirm one with ✓, and × removes it. Adding an alias that already belongs to another concept is refused; merge instead.
 
 ## Review
 
-**Review (n)** on the History page opens the queue of concepts that are due. The toolbar icon shows the same number.
+**Review (n)** on the History page opens the queue of concepts that are due. The toolbar icon shows the same number; right-click the icon and choose **Review** to open the queue, or **History** for the History page.
 
 For each concept you see its name first. Try to remember it; you can type what you remember in the box. Then press **Show explanation** and grade yourself:
 
@@ -123,7 +123,7 @@ To turn it off, clear **Offer "Check my answer" in review** under Review in sett
 
 **Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, pale yellow shaky, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
 
-Drag to move, scroll to zoom, click a concept to open it. The search box filters the graph to matching concepts and their neighbours. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out.
+Drag to move, scroll to zoom, click a concept to open it. The search box filters the graph to matching concepts and their neighbours. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
 
 ## History
 

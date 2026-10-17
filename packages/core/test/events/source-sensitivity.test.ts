@@ -146,4 +146,21 @@ describe("a paper marked sensitive under one id and fine under the other", () =>
     expect(isSensitiveSource(state, "doi:10.48550/arxiv.2401.00001")).toBe(true);
     expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(true);
   });
+
+  it("is sensitive when another device recorded it so under the other id after the reader said it is fine", () => {
+    const automatic = ev(
+      "source.seen",
+      {
+        source_id: "doi:10.48550/arxiv.2401.00001",
+        ids: { arxiv: "2401.00001", doi: "10.48550/arxiv.2401.00001" },
+        title: "P",
+        license: "unknown",
+        sensitivity: "sensitive",
+      },
+      { ts: "2026-09-02T00:00:00Z" },
+    );
+    const state = replay([paper("arxiv:2401.00001", "normal", "2026-09-01T00:00:00Z"), automatic]);
+    expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(true);
+    expect(isSensitiveSource(state, "doi:10.48550/arxiv.2401.00001")).toBe(true);
+  });
 });

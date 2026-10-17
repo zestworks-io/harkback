@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { conceptDetail } from "../../src/lib/records/concept-detail";
-import { conceptNote, mergeNote, NOTE_END, noteFilename, noteFiles, writeNoteFiles } from "../../src/lib/export/notes";
+import { conceptNote, mergeNote, NOTE_END, noteFiles, noteTitle, writeNoteFiles } from "../../src/lib/export/notes";
 import { world } from "../helpers";
 
 function build() {
@@ -22,15 +22,15 @@ function build() {
   return { w, lora };
 }
 
-describe("noteFilename", () => {
+describe("noteTitle", () => {
   it("keeps readable names and removes characters files cannot hold", () => {
-    expect(noteFilename("LoRA")).toBe("LoRA.md");
-    expect(noteFilename("Low-Rank Adaptation")).toBe("Low-Rank Adaptation.md");
-    expect(noteFilename("a/b:c*d?e")).toBe("a b c d e.md");
-    expect(noteFilename("  ..  ")).toBe("concept.md");
-    expect(noteFilename("v1.")).toBe("v1.md");
-    expect(noteFilename("CON")).toBe("CON_.md");
-    expect(noteFilename("x".repeat(300)).length).toBeLessThanOrEqual(123);
+    expect(noteTitle("LoRA")).toBe("LoRA");
+    expect(noteTitle("Low-Rank Adaptation")).toBe("Low-Rank Adaptation");
+    expect(noteTitle("a/b:c*d?e")).toBe("a b c d e");
+    expect(noteTitle("  ..  ")).toBe("concept");
+    expect(noteTitle("v1.")).toBe("v1");
+    expect(noteTitle("CON")).toBe("CON_");
+    expect(noteTitle("x".repeat(300)).length).toBeLessThanOrEqual(120);
   });
 });
 
