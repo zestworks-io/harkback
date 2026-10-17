@@ -503,6 +503,11 @@
       .split-panel h4 {
         margin: 0 0 6px;
       }
+      .split-panel .note,
+      .group > .note {
+        margin: 0 0 8px;
+      }
+
       .split-group {
         display: grid;
         gap: 4px;
@@ -560,7 +565,9 @@
         margin-top: 12px;
       }
       .edit-tools input,
-      .edit-tools select {
+      .edit-tools select,
+      .split-tools input,
+      .commons-tools select {
         height: 30px;
         font: inherit;
         color: var(--fg);
@@ -569,6 +576,12 @@
         border-radius: 8px;
         padding: 0 10px;
         max-width: 200px;
+      }
+      .commons-tools select {
+        flex: 1 1 220px;
+        min-width: 0;
+        height: 36px;
+        max-width: 420px;
       }
       .small-btn {
         height: 30px;

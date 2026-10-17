@@ -28,7 +28,7 @@ describe("commonsView", () => {
     expect(options).toEqual(["Every openly licensed paper", "LoRA paper", "QLoRA paper"]);
     const preview = JSON.parse(el.querySelector('[data-hb="commons-preview"]')!.textContent!);
     expect(preview.records.map((r: { paper: string }) => r.paper)).toEqual(["arxiv:2106.09685", "arxiv:2305.14314"]);
-    expect(el.querySelector('[data-hb="commons-summary"]')!.textContent).toBe("2 look-ups from 2 papers; 0 relations you confirmed.");
+    expect(el.querySelector('[data-hb="commons-summary"]')!.textContent).toBe("Look-ups: 2 · Papers: 2 · Confirmed relations: 0");
     expect(el.textContent).not.toContain("blog.example");
   });
 

@@ -399,8 +399,7 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "What to contribute": "ما الذي تساهم به",
   "Every openly licensed paper": "كل الأوراق ذات الترخيص المفتوح",
   "Save contribution file": "حفظ ملف المساهمة",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.":
-    "{n#one=عملية بحث واحدة|two=عمليتا بحث|few=# عمليات بحث|many=# عملية بحث|other=# عملية بحث} في {p#one=ورقة واحدة|two=ورقتين|few=# أوراق|many=# ورقة|other=# ورقة}؛ و{r#one=علاقة واحدة|two=علاقتان|few=# علاقات|many=# علاقة|other=# علاقة} أكدتَها.",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "عمليات البحث: {n} · الأوراق: {p} · العلاقات المؤكدة: {r}",
   "Contribute to the data commons": "المساهمة في مشاع البيانات",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "يجمع مشاع البيانات المصطلحات التي يتعثر فيها القراء في الأوراق، ليستفيد منها المؤلفون والمعلمون والقراء الآخرون. لا يمكن المساهمة إلا بأوراق arXiv أو DOI ذات الترخيص المفتوح (المشاع الإبداعي أو الملكية العامة)، ولا تُضمَّن المصادر الحساسة أبدًا.",

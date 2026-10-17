@@ -399,7 +399,7 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "What to contribute": "기여할 범위",
   "Every openly licensed paper": "공개 라이선스가 있는 모든 논문",
   "Save contribution file": "기여 파일 저장",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.": "논문 {p}편에서 찾아본 {n}건, 확인한 관계 {r}개.",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "찾아본 기록: {n}건 · 논문: {p}편 · 확인한 관계: {r}개",
   "Contribute to the data commons": "데이터 공유지에 기여",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "데이터 공유지는 독자가 논문에서 막힌 용어를 모아 저자, 교사, 다른 독자가 쓸 수 있게 합니다. 공개 라이선스(크리에이티브 커먼즈 또는 퍼블릭 도메인)가 있는 arXiv나 DOI 논문만 기여할 수 있고, 민감한 출처는 절대 포함되지 않습니다.",

@@ -410,8 +410,7 @@ export const pages_de: Readonly<Record<string, string>> = {
   "What to contribute": "Was beigetragen wird",
   "Every openly licensed paper": "Alle offen lizenzierten Artikel",
   "Save contribution file": "Beitragsdatei speichern",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.":
-    "{n}-mal nachgeschlagen in {p} Artikeln; {r} von Ihnen bestätigte Beziehungen.",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "Nachschlagevorgänge: {n} · Artikel: {p} · Bestätigte Beziehungen: {r}",
   "Contribute to the data commons": "Zur Datenallmende beitragen",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "Die Datenallmende sammelt die Begriffe, an denen Leser in Artikeln hängen bleiben, für Autoren, Lehrende und andere Leser. Nur arXiv- oder DOI-Artikel mit offener Lizenz (Creative Commons oder gemeinfrei) können beigetragen werden, sensible Quellen nie.",

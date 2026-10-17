@@ -58,15 +58,11 @@ export function commonsView({ state, lang, alsoSensitive, paper, onPick, save }:
   const show = (): void => {
     contribution = buildContribution(state, scope, alsoSensitive);
     const paperCount = new Set(contribution.records.map((r) => r.paper)).size;
-    summary.textContent = L(
-      "{n} 次查词，来自 {p} 篇论文；{r} 个你确认过的关系。",
-      "{n} look-ups from {p} papers; {r} relations you confirmed.",
-      {
-        n: contribution.records.length,
-        p: paperCount,
-        r: contribution.relations.length,
-      },
-    );
+    summary.textContent = L("查词 {n} 次 · 论文 {p} 篇 · 确认过的关系 {r} 个", "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}", {
+      n: contribution.records.length,
+      p: paperCount,
+      r: contribution.relations.length,
+    });
     preview.textContent = JSON.stringify(contribution, null, 2);
     saveButton.disabled = contribution.records.length === 0;
   };

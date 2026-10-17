@@ -405,7 +405,7 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "What to contribute": "O que contribuir",
   "Every openly licensed paper": "Todos os artigos com licença aberta",
   "Save contribution file": "Salvar arquivo de contribuição",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} consultas de {p} artigos; {r} relações que você confirmou.",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "Consultas: {n} · Artigos: {p} · Relações confirmadas: {r}",
   "Contribute to the data commons": "Contribuir para o acervo comum de dados",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "O acervo comum de dados reúne os termos em que os leitores travam nos artigos, para autores, professores e outros leitores. Só artigos do arXiv ou com DOI e licença aberta (Creative Commons ou domínio público) podem ser contribuídos, e fontes sensíveis nunca são.",

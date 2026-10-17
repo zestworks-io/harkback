@@ -393,7 +393,7 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "What to contribute": "貢獻範圍",
   "Every openly licensed paper": "所有開放授權的論文",
   "Save contribution file": "儲存貢獻檔案",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{n} 次查詢，來自 {p} 篇論文；你確認過的關係 {r} 個。",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "查詢 {n} 次 · 論文 {p} 篇 · 確認過的關係 {r} 個",
   "Contribute to the data commons": "貢獻給資料公地",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "資料公地收集讀者在論文中卡住的術語，供作者、教師和其他讀者使用。只有採用開放授權（Creative Commons 或公有領域）的 arXiv 或 DOI 論文可以貢獻，敏感來源一律不會包含在內。",

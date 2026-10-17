@@ -402,7 +402,7 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "What to contribute": "貢献する範囲",
   "Every openly licensed paper": "オープンライセンスのすべての論文",
   "Save contribution file": "貢献ファイルを保存",
-  "{n} look-ups from {p} papers; {r} relations you confirmed.": "{p} 本の論文での調べもの {n} 件、確定した関係 {r} 件。",
+  "Look-ups: {n} · Papers: {p} · Confirmed relations: {r}": "調べもの：{n} 件 · 論文：{p} 本 · 確定した関係：{r} 件",
   "Contribute to the data commons": "データコモンズに貢献",
   "The data commons collects the terms readers get stuck on in papers, for authors, teachers and other readers. Only arXiv or DOI papers with an open licence (Creative Commons or public domain) can be contributed, and sensitive sources never are.":
     "データコモンズは、読者が論文でつまずいた用語を集め、著者、教員、ほかの読者が使えるようにします。貢献できるのはオープンライセンス（クリエイティブ・コモンズまたはパブリックドメイン）の arXiv または DOI の論文だけで、機密ソースは決して含まれません。",
