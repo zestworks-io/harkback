@@ -44,7 +44,6 @@ export const pages_de: Readonly<Record<string, string>> = {
   Add: "Hinzufügen",
   "Merge into…": "Zusammenführen mit…",
   Merge: "Zusammenführen",
-  "Confirm merge (cannot be undone)": "Zusammenführen bestätigen (nicht rückgängig zu machen)",
   "Muted: no reunion hints and no review.": "Stummgeschaltet: keine Wiedersehens-Hinweise und keine Wiederholung.",
   Prerequisites: "Voraussetzungen",
   Variants: "Varianten",
@@ -425,4 +424,15 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "Macht aus Ihren Nachschlagen in offen lizenzierten Artikeln eine anonyme Datei für die Datenallmende.",
   Contribute: "Beitragen",
+  "Confirm merge": "Zusammenführen bestätigen",
+  "Split…": "Aufteilen…",
+  "Name of the new concept": "Name des neuen Konzepts",
+  "Split off": "Abtrennen",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "Beide hätten weiterhin einen gemeinsamen Namen und würden sofort wieder zusammengeführt. Verschieben Sie auch diesen Namen oder wählen Sie einen anderen.",
+  "Split this concept": "Dieses Konzept aufteilen",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "Wählen Sie die Nachschlagen und Namen, die zu einem anderen Konzept gehören; sie wandern in ein neues Konzept. Gehört der neue Name schon zu einem anderen Konzept, schließen sie sich diesem an.",
+  "Look-ups": "Nachschlagen",
+  Names: "Namen",
 };

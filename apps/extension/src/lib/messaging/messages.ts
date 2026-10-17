@@ -82,6 +82,7 @@ export type Request =
   | { type: "resolve-alias"; conceptId: string; alias: string; accept: boolean }
   | { type: "reject-edge"; edgeId: string }
   | { type: "confirm-edge"; edgeId: string }
+  | { type: "split-concept"; conceptId: string; encounterIds: string[]; names: string[]; newName: string }
   | { type: "record-consent"; scope: ConsentScope; target: string | null }
   | { type: "set-muted"; conceptId: string; muted: boolean }
   | { type: "backup-now" }
@@ -120,6 +121,7 @@ export interface ResponseMap {
   "resolve-alias": { ok: boolean; collides?: boolean };
   "reject-edge": { ok: boolean };
   "confirm-edge": { ok: boolean };
+  "split-concept": { ok: true; conceptId: string } | { ok: false; rejoins?: true };
   "record-consent": { ok: boolean };
   "set-muted": { ok: boolean };
   "backup-now": { ok: boolean; error?: string };
@@ -152,6 +154,7 @@ const REQUEST_TYPES = new Set<string>([
   "resolve-alias",
   "reject-edge",
   "confirm-edge",
+  "split-concept",
   "record-consent",
   "set-muted",
   "backup-now",

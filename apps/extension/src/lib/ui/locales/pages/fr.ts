@@ -42,7 +42,6 @@ export const pages_fr: Readonly<Record<string, string>> = {
   Add: "Ajouter",
   "Merge into…": "Fusionner avec…",
   Merge: "Fusionner",
-  "Confirm merge (cannot be undone)": "Confirmer la fusion (irréversible)",
   "Muted: no reunion hints and no review.": "En sourdine : plus d'indices de retrouvailles ni de révision.",
   Prerequisites: "Prérequis",
   Variants: "Variantes",
@@ -422,4 +421,15 @@ export const pages_fr: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "Transformez vos recherches dans des articles sous licence ouverte en un fichier anonyme pour les communs de données.",
   Contribute: "Contribuer",
+  "Confirm merge": "Confirmer la fusion",
+  "Split…": "Scinder…",
+  "Name of the new concept": "Nom du nouveau concept",
+  "Split off": "Séparer",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "Les deux partageraient encore un nom, ce qui les réunirait aussitôt. Déplacez aussi ce nom ou choisissez-en un autre.",
+  "Split this concept": "Scinder ce concept",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "Choisissez les recherches et les noms qui appartiennent à un autre concept ; ils passent dans un nouveau concept. Si le nouveau nom appartient déjà à un autre concept, ils rejoignent celui-ci.",
+  "Look-ups": "Recherches",
+  Names: "Noms",
 };

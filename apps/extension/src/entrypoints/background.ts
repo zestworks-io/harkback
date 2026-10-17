@@ -465,6 +465,7 @@ export default defineBackground(() => {
   const requestDeps: RequestDeps = {
     loadSettings,
     getState,
+    events: async () => (await getServices()).store.all(),
     append,
     async compact() {
       const { store, cache } = await getServices();

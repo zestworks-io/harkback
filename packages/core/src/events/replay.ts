@@ -17,7 +17,14 @@ function definedOnly<T extends object>(o: T): Partial<T> {
 
 export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}): State {
   const sorted = canonicalOrder(events);
-  const { concepts, representative, aliases, warnings } = resolveConcepts(sorted, options.ambiguousAcronyms ?? DEFAULT_AMBIGUOUS_ACRONYMS);
+  // Encounter id -> the concept the reader moved it to, the last move winning.
+  const moved = new Map<string, string>();
+  for (const e of sorted) if (e.type === "encounter.moved") moved.set(e.payload.encounter_id, e.payload.concept_id);
+  const { concepts, representative, aliases, warnings } = resolveConcepts(
+    sorted,
+    options.ambiguousAcronyms ?? DEFAULT_AMBIGUOUS_ACRONYMS,
+    moved,
+  );
 
   const sources = new Map<string, SourceState>();
   const created = new Map<string, EventOf<"encounter.created">>();
@@ -91,9 +98,10 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   for (const [encounterId, e] of created) {
     if (deleted.has(encounterId)) continue;
     const p = e.payload!;
-    const rep = representative.get(p.concept_id);
+    const conceptId = moved.get(encounterId) ?? p.concept_id;
+    const rep = representative.get(conceptId);
     if (!rep) {
-      warnings.push(`encounter ${encounterId} references unknown concept ${p.concept_id}`);
+      warnings.push(`encounter ${encounterId} references unknown concept ${conceptId}`);
       continue;
     }
     const at = Date.parse(e.ts);
@@ -152,8 +160,12 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const edges = new Map<string, EdgeState>();
   for (const pe of proposals) {
     const p = pe.payload;
-    const from = representative.get(p.from);
-    const to = representative.get(p.to);
+    // A relation found while explaining an encounter the reader moved belongs to the concept it moved to.
+    const explained = p.evidence.encounter_id ? created.get(p.evidence.encounter_id)?.payload?.concept_id : undefined;
+    const movedTo = p.evidence.encounter_id ? moved.get(p.evidence.encounter_id) : undefined;
+    const end = (id: string): string => (movedTo && id === explained ? movedTo : id);
+    const from = representative.get(end(p.from));
+    const to = representative.get(end(p.to));
     if (!from || !to || from === to) continue;
     const key = edgeId(from, p.rel, to);
     const evidence = p.evidence.encounter_id;

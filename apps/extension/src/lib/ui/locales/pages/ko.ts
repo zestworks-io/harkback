@@ -42,7 +42,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Add: "추가",
   "Merge into…": "병합할 개념 선택…",
   Merge: "병합",
-  "Confirm merge (cannot be undone)": "병합 확인 (되돌릴 수 없음)",
   "Muted: no reunion hints and no review.": "음소거됨: 재회 힌트와 복습이 표시되지 않습니다.",
   Prerequisites: "선행 개념",
   Variants: "변형",
@@ -415,4 +414,15 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "공개 라이선스 논문에서 찾아본 기록을 데이터 공유지용 익명 파일로 만듭니다.",
   Contribute: "기여",
+  "Confirm merge": "병합 확인",
+  "Split…": "분할…",
+  "Name of the new concept": "새 개념의 이름",
+  "Split off": "분리하기",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "양쪽에 같은 이름이 남아 있어 곧바로 다시 병합됩니다. 그 이름도 옮기거나 다른 이름을 고르세요.",
+  "Split this concept": "이 개념 분할",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "다른 개념에 속하는 찾아본 기록과 이름을 고르면 새 개념으로 옮겨집니다. 새 이름이 이미 다른 개념의 이름이면 그 개념에 합쳐집니다.",
+  "Look-ups": "찾아본 기록",
+  Names: "이름",
 };

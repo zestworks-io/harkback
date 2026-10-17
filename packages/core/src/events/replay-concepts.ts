@@ -29,16 +29,23 @@ function domainKey(domain: Domain, name: string): string | null {
   return key ? `${domain}\u0000${key}` : null;
 }
 
-/** `sorted` must already be in canonicalOrder. */
+/**
+ * `sorted` must already be in canonicalOrder. `movedEncounters` maps an encounter the reader moved to the concept it now
+ * belongs to, so a name proposed from it goes with it.
+ */
 export function resolveConcepts(
   sorted: readonly HarkEvent[],
   ambiguousAcronyms: ReadonlySet<string> = DEFAULT_AMBIGUOUS_ACRONYMS,
+  movedEncounters: ReadonlyMap<string, string> = new Map(),
 ): ConceptResolution {
   const raw = new Map<string, RawConcept>();
-  const extraAliases: [string, string][] = [];
-  const merges: [string, string][] = [];
+  const createdAt = new Map<string, number>();
+  const extraAliases: [string, string, number][] = [];
+  let merges: [string, string][] = [];
   const proposals: [string, string, number][] = [];
   const decided: [string, string, "confirmed" | "rejected", number][] = [];
+  /** Concept id and name key -> where the reader last took the name off that concept. */
+  const removedAt = new Map<string, number>();
   const warnings: string[] = [];
 
   for (const [position, e] of sorted.entries()) {
@@ -51,21 +58,32 @@ export function resolveConcepts(
         domain: p.domain,
         aliases: [...(prev?.aliases ?? []), ...p.aliases],
       });
+      createdAt.set(p.concept_id, position);
     } else if (e.type === "concept.alias_added") {
-      extraAliases.push([e.payload.concept_id, e.payload.alias]);
+      extraAliases.push([e.payload.concept_id, e.payload.alias, position]);
+    } else if (e.type === "concept.alias_removed") {
+      removedAt.set(proposalKey(e.payload.concept_id, e.payload.alias), position);
     } else if (e.type === "concept.alias_proposed") {
-      proposals.push([e.payload.concept_id, e.payload.alias, position]);
+      const moved = e.payload.evidence.encounter_id ? movedEncounters.get(e.payload.evidence.encounter_id) : undefined;
+      proposals.push([moved ?? e.payload.concept_id, e.payload.alias, position]);
     } else if (e.type === "concept.alias_confirmed" || e.type === "concept.alias_rejected") {
       decided.push([e.payload.concept_id, e.payload.alias, e.type === "concept.alias_confirmed" ? "confirmed" : "rejected", position]);
     } else if (e.type === "concept.merged") {
       merges.push([e.payload.from, e.payload.into]);
+    } else if (e.type === "concept.unmerged") {
+      const { from, into } = e.payload;
+      merges = merges.filter(([a, b]) => !((a === from && b === into) || (a === into && b === from)));
     }
   }
 
-  for (const [conceptId, alias] of extraAliases) {
+  /** False when the reader took the name off the concept after it was given. */
+  const kept = (conceptId: string, alias: string, position: number): boolean =>
+    (removedAt.get(proposalKey(conceptId, alias)) ?? -1) < position;
+  for (const c of raw.values()) c.aliases = c.aliases.filter((a) => kept(c.id, a, createdAt.get(c.id)!));
+  for (const [conceptId, alias, position] of extraAliases) {
     const c = raw.get(conceptId);
-    if (c) c.aliases.push(alias);
-    else warnings.push(`alias for unknown concept ${conceptId}`);
+    if (!c) warnings.push(`alias for unknown concept ${conceptId}`);
+    else if (kept(conceptId, alias, position)) c.aliases.push(alias);
   }
 
   // A proposed name matches nothing until confirmed; a rejected one is remembered so it is not proposed again.
@@ -87,8 +105,9 @@ export function resolveConcepts(
     // Only a decision made after the proposal counts, so a name rejected earlier can be proposed again.
     const made = decisions.get(proposalKey(explicit.find(conceptId), alias));
     const decision = made && made.position > position ? made.decision : undefined;
-    if (decision === "confirmed") c.aliases.push(alias);
-    else if (decision === "rejected") rejected.push([conceptId, alias]);
+    if (decision === "confirmed") {
+      if (kept(conceptId, alias, made!.position)) c.aliases.push(alias);
+    } else if (decision === "rejected") rejected.push([conceptId, alias]);
     else pending.push([conceptId, alias]);
   }
 

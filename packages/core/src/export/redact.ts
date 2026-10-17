@@ -60,11 +60,15 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
         return !isHidden(e.payload.concept_id);
       case "concept.created":
       case "concept.alias_added":
+      case "concept.alias_removed":
       case "concept.muted":
       case "concept.unmuted":
         return !isHidden(e.payload.concept_id);
       case "concept.merged":
+      case "concept.unmerged":
         return !isHidden(e.payload.from) && !isHidden(e.payload.into);
+      case "encounter.moved":
+        return !sensitiveEncounters.has(e.payload.encounter_id) && !isHidden(e.payload.concept_id);
       case "concept.alias_proposed":
         return !isHidden(e.payload.concept_id) && !sensitiveEncounters.has(e.payload.evidence.encounter_id);
       case "edge.proposed": {

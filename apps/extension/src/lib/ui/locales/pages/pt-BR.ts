@@ -43,7 +43,6 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   Add: "Adicionar",
   "Merge into…": "Mesclar com…",
   Merge: "Mesclar",
-  "Confirm merge (cannot be undone)": "Confirmar mesclagem (não pode ser desfeita)",
   "Muted: no reunion hints and no review.": "Silenciado: sem avisos de reencontro e sem revisão.",
   Prerequisites: "Pré-requisitos",
   Variants: "Variantes",
@@ -420,4 +419,15 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "Transforme suas consultas em artigos com licença aberta em um arquivo anônimo para os dados comuns.",
   Contribute: "Contribuir",
+  "Confirm merge": "Confirmar mesclagem",
+  "Split…": "Dividir…",
+  "Name of the new concept": "Nome do novo conceito",
+  "Split off": "Separar",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "Os dois ainda teriam um nome em comum, o que os juntaria de novo na hora. Mova também esse nome ou escolha outro.",
+  "Split this concept": "Dividir este conceito",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "Escolha as consultas e os nomes que pertencem a outro conceito; eles vão para um conceito novo. Se o novo nome já for de outro conceito, eles se juntam a ele.",
+  "Look-ups": "Consultas",
+  Names: "Nomes",
 };

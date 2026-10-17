@@ -17,6 +17,7 @@ import { buildDigest, weekOf } from "../../lib/records/digest";
 import { buildGraph } from "../../lib/records/graph";
 import { digestView } from "../../lib/pages/digest-view";
 import { commonsView } from "../../lib/pages/commons-view";
+import { splitPanel } from "../../lib/pages/split-panel";
 import type { Request, ResponseMap } from "../../lib/messaging/messages";
 import { foundationGaps } from "../../lib/review/foundation";
 import {
@@ -428,7 +429,7 @@ async function main(): Promise<void> {
       if (!into) return;
       if (merge.dataset.confirm !== "1") {
         merge.dataset.confirm = "1";
-        merge.textContent = L("确认合并（不可撤销）", "Confirm merge (cannot be undone)");
+        merge.textContent = L("确认合并", "Confirm merge");
         return;
       }
       void correct({ type: "merge-concepts", fromId: d.conceptId, intoId: into }, () => {
@@ -438,7 +439,33 @@ async function main(): Promise<void> {
       });
     });
 
-    return h("div", { className: "edit-tools", "data-hb": "edit-tools" }, muteButton, alias, addAlias, target, datalist, merge);
+    const splitHost = h("div", { "data-hb": "split-host" });
+    const splitToggle = h("button", { type: "button", className: "small-btn", "data-hb": "split" }, L("拆分…", "Split…"));
+    splitToggle.addEventListener("click", () => {
+      if (splitHost.firstChild) return void splitHost.replaceChildren();
+      splitHost.replaceChildren(
+        splitPanel({
+          detail: d,
+          lang: settings.language,
+          split: (req) => request(req),
+          done: (conceptId) => {
+            void (async () => {
+              state = replay(await store.all());
+              const next = conceptHref(state.representative.get(conceptId) ?? conceptId);
+              if (location.hash === next) draw();
+              else location.hash = next; // hashchange redraws
+            })();
+          },
+        }),
+      );
+    });
+
+    return h(
+      "div",
+      {},
+      h("div", { className: "edit-tools", "data-hb": "edit-tools" }, muteButton, alias, addAlias, target, datalist, merge, splitToggle),
+      splitHost,
+    );
   };
 
   /** Names the model suggested, such as a translation. They match nothing on pages until accepted. */

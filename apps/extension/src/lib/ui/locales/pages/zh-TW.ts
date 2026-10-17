@@ -42,7 +42,6 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Add: "新增",
   "Merge into…": "合併到…",
   Merge: "合併",
-  "Confirm merge (cannot be undone)": "確認合併（無法復原）",
   "Muted: no reunion hints and no review.": "已靜音：不再顯示重逢提示，也不會安排複習。",
   Prerequisites: "前置概念",
   Variants: "變體",
@@ -407,4 +406,15 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "把開放授權論文裡的查詞整理成匿名檔案，貢獻給資料公地。",
   Contribute: "貢獻",
+  "Confirm merge": "確認合併",
+  "Split…": "拆分…",
+  "Name of the new concept": "新概念的名字",
+  "Split off": "拆分出去",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "兩邊仍有相同的名字，拆開後會馬上重新合併。把那個名字也移過去，或換一個新名字。",
+  "Split this concept": "拆分這個概念",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "選出屬於另一個概念的查詞記錄和名字，它們會移到一個新概念。新名字若已是另一個概念的名字，就會併入那個概念。",
+  "Look-ups": "查詞記錄",
+  Names: "名字",
 };

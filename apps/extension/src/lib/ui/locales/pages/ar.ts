@@ -42,7 +42,6 @@ export const pages_ar: Readonly<Record<string, string>> = {
   Add: "إضافة",
   "Merge into…": "دمج في…",
   Merge: "دمج",
-  "Confirm merge (cannot be undone)": "تأكيد الدمج (لا يمكن التراجع عنه)",
   "Muted: no reunion hints and no review.": "مكتوم: لا تلميحات لقاء ولا مراجعة.",
   Prerequisites: "المتطلبات السابقة",
   Variants: "الصيغ المتفرعة",
@@ -413,4 +412,15 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "حوّل عمليات بحثك في الأوراق ذات الترخيص المفتوح إلى ملف مجهول الهوية لمشاع البيانات.",
   Contribute: "ساهم",
+  "Confirm merge": "تأكيد الدمج",
+  "Split…": "تقسيم…",
+  "Name of the new concept": "اسم المفهوم الجديد",
+  "Split off": "فصل",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "سيبقى بينهما اسم مشترك، فيُدمجان من جديد فورًا. انقل ذلك الاسم أيضًا أو اختر اسمًا آخر.",
+  "Split this concept": "تقسيم هذا المفهوم",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "اختر عمليات البحث والأسماء التي تنتمي إلى مفهوم آخر؛ فتنتقل إلى مفهوم جديد. وإذا كان الاسم الجديد يخص مفهومًا آخر، تنضم إليه.",
+  "Look-ups": "عمليات البحث",
+  Names: "الأسماء",
 };

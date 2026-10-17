@@ -42,7 +42,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Add: "追加",
   "Merge into…": "統合先を選択…",
   Merge: "統合",
-  "Confirm merge (cannot be undone)": "統合を確定（元に戻せません）",
   "Muted: no reunion hints and no review.": "ミュート中：再会のヒントも復習も表示されません。",
   Prerequisites: "前提知識",
   Variants: "派生",
@@ -417,4 +416,15 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Turn your look-ups in openly licensed papers into an anonymous file for the data commons.":
     "オープンライセンスの論文での調べものを、データコモンズ向けの匿名ファイルにまとめます。",
   Contribute: "貢献",
+  "Confirm merge": "統合を確定",
+  "Split…": "分割…",
+  "Name of the new concept": "新しい概念の名前",
+  "Split off": "分割する",
+  "Both would still share a name, which would join them again at once. Move that name too, or choose another name.":
+    "両方に同じ名前が残るため、すぐにまた統合されてしまいます。その名前も移すか、別の名前を選んでください。",
+  "Split this concept": "この概念を分割",
+  "Pick the look-ups and names that belong to another concept; they move to a new concept. If the new name already belongs to another concept, they join that one.":
+    "別の概念に属する調べものと名前を選ぶと、新しい概念に移ります。新しい名前がすでに別の概念の名前なら、その概念に加わります。",
+  "Look-ups": "調べもの",
+  Names: "名前",
 };

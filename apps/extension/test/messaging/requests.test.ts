@@ -24,6 +24,7 @@ function setup(settings: unknown = {}) {
   const deps: RequestDeps = {
     loadSettings: async () => withDefaults({ reunion: { minGapDays: 0 }, ...(settings as object) }),
     getState: async () => w.state(),
+    events: async () => [...w.events, ...written],
     append: async (build: (f: EventFactory) => HarkEvent[]) => {
       const events = build(createEventFactory({ device: "dev_bbbb", nextSeq: () => written.length + 1, now: () => NOW }));
       written.push(...events);
@@ -627,6 +628,39 @@ describe("agreeing to contribute to the data commons", () => {
     expect(await handleRequest(deps, { type: "record-consent", scope: "this_source", target: "arxiv:1" }, page)).toEqual({ ok: false });
     expect(await handleRequest(deps, { type: "record-consent", scope: "everything" as never, target: null }, page)).toEqual({ ok: false });
     expect(await handleRequest(deps, { type: "record-consent", scope: "all_public_sources", target: "x" }, page)).toEqual({ ok: false });
+    expect(written).toEqual([]);
+  });
+});
+
+describe("splitting a concept", () => {
+  const extensionPage = { url: "chrome-extension://abc/library.html" };
+  it("moves a look-up and a name to a new concept and answers with its id", async () => {
+    const { deps, w, written, conceptId, encounterId } = setup();
+    w.events.push(w.f.make("concept.alias_added", { concept_id: conceptId, alias: "Prompt tuning" }));
+    const r = await handleRequest(
+      deps,
+      { type: "split-concept", conceptId, encounterIds: [encounterId], names: ["Prompt tuning"], newName: "Prompt tuning" },
+      extensionPage,
+    );
+    expect(r).toMatchObject({ ok: true });
+    const state = replay([...w.events, ...written]);
+    const moved = (r as { conceptId: string }).conceptId;
+    expect(state.encounters.get(encounterId)!.conceptId).toBe(moved);
+    expect(state.concepts.get(conceptId)!.names).toEqual(["LoRA"]);
+  });
+
+  it("says when the two would join again, and refuses what does not fit", async () => {
+    const { deps, written, conceptId, encounterId } = setup();
+    expect(
+      await handleRequest(
+        deps,
+        { type: "split-concept", conceptId, encounterIds: [encounterId], names: [], newName: "LoRA" },
+        extensionPage,
+      ),
+    ).toEqual({ ok: false, rejoins: true });
+    expect(
+      await handleRequest(deps, { type: "split-concept", conceptId, encounterIds: ["nope"], names: [], newName: "X" }, extensionPage),
+    ).toEqual({ ok: false });
     expect(written).toEqual([]);
   });
 });

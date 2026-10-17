@@ -2,6 +2,8 @@ import {
   acronymOf,
   clampSource,
   isContributable,
+  planSplit,
+  ulid,
   identityKey,
   matcherEntriesFromState,
   MAX_PREVIEW_PAGE_CHARS,
@@ -33,6 +35,8 @@ let siteWrites: Promise<void> = Promise.resolve();
 export interface RequestDeps {
   loadSettings(): Promise<Settings>;
   getState(): Promise<State>;
+  /** Every event in the log, for changes that must be checked against all of it. */
+  events(): Promise<HarkEvent[]>;
   append(build: (f: EventFactory) => HarkEvent[]): Promise<HarkEvent[]>;
   /** Erases the payloads of deleted encounters and refreshes the cached state. */
   compact(): Promise<void>;
@@ -308,6 +312,22 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       if (!(await deps.getState()).edges.has(String(msg.edgeId))) return { ok: false };
       await deps.append((f) => [f.make("edge.confirmed", { edge_id: msg.edgeId })]);
       return { ok: true };
+    }
+    case "split-concept": {
+      const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+      const plan = planSplit(
+        await deps.events(),
+        {
+          conceptId: String(msg.conceptId),
+          encounterIds: strings(msg.encounterIds).slice(0, MAX_HITS),
+          names: strings(msg.names).slice(0, MAX_HITS),
+          newName: typeof msg.newName === "string" ? msg.newName : "",
+        },
+        ulid(),
+      );
+      if (!plan.ok) return plan.reason === "rejoins" ? { ok: false, rejoins: true } : { ok: false };
+      await deps.append(plan.build);
+      return { ok: true, conceptId: plan.conceptId };
     }
     case "record-consent": {
       const state = await deps.getState();

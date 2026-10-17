@@ -88,6 +88,8 @@ export const encounterActionPayload = z.object({
 export const reunionDismissedPayload = z.object({ concept_id: ulidSchema, source_id: sourceIdSchema });
 
 export const encounterDeletedPayload = z.object({ encounter_id: ulidSchema });
+/** The reader moved an encounter to another concept (splitting a concept that was joined by mistake). */
+export const encounterMovedPayload = z.object({ encounter_id: ulidSchema, concept_id: ulidSchema });
 
 export const edgeProposedPayload = z.object({
   from: ulidSchema,
@@ -126,11 +128,16 @@ export const eventSchema = z.discriminatedUnion("type", [
   ev("concept.alias_confirmed", conceptAliasStatusPayload),
   ev("concept.alias_rejected", conceptAliasStatusPayload),
   ev("concept.merged", conceptMergedPayload),
+  // Cancels the earlier merges of the same two concepts, either way round.
+  ev("concept.unmerged", conceptMergedPayload),
+  // Takes a name off a concept; a name added again afterwards counts again.
+  ev("concept.alias_removed", conceptAliasAddedPayload),
   ev("concept.muted", conceptMutePayload),
   ev("concept.unmuted", conceptMutePayload),
   ev("encounter.created", encounterCreatedPayload.nullable()),
   ev("encounter.action", encounterActionPayload.nullable()),
   ev("encounter.deleted", encounterDeletedPayload),
+  ev("encounter.moved", encounterMovedPayload),
   ev("reunion.dismissed", reunionDismissedPayload),
   ev("edge.proposed", edgeProposedPayload),
   ev("edge.confirmed", edgeStatusPayload),
