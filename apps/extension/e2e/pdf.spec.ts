@@ -179,5 +179,5 @@ test("reads a scanned PDF again in place when the languages are applied", async 
   await expect(page.locator("#scanbar-status")).toContainText("Read 2 scanned pages", { timeout: 45_000 });
   await expect(page.locator(".hb-page[data-page='1'] .textLayer")).toContainText("Low-rank adaptation");
   expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
-  expect(await page.locator(".hb-page").count()).toBe(2);
+  await expect(page.locator(".hb-page")).toHaveCount(2);
 });
