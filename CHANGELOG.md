@@ -2,6 +2,12 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Fixed
+
+- **Related concepts are named in English, whatever language you explain in.** The variants, broader concepts and prerequisites the model suggests were written in the explanation language (`参考译文` next to `reference translation`), so each became a concept of its own that never joined the one you had. Concepts recorded this way before stay as they are; they are never explained, so unticking _Show concepts not explained yet_ hides them from the graph.
+
 ## 1.0.4 - 2026-10-17
 
 ### Added

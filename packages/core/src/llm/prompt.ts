@@ -78,6 +78,7 @@ function systemMessage(language: string): string {
     `Write the explanation in ${explainLanguageName(language)}; keep technical terms in their original form.`,
     UNTRUSTED,
     "Name the concept, not the wording of the selection: drop articles and surrounding words, and treat an abbreviation and its full form as the same concept.",
+    "In the card, name the concepts in broader, variants and prerequisites in English, like canonical, whatever language the explanation is in.",
     "Respond with exactly three blocks, in this order, and nothing else:",
     "<explanation>2-6 sentences explaining the selected term as it is used in this context.</explanation>",
     "<evidence>A verbatim quote of at most 300 characters from the page content that defines the term, or NONE if the page does not define it.</evidence>",
