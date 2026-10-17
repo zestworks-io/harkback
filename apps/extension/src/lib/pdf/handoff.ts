@@ -54,6 +54,23 @@ export async function putHandoff(data: string, o: Options = {}): Promise<string>
   }
 }
 
+/** Drops files nobody collected, such as one opened from a private window whose reader never loaded. */
+export async function sweepHandoffs(o: Options = {}): Promise<void> {
+  const now = (o.now ?? Date.now)();
+  const db = await open(o.factory ?? indexedDB);
+  try {
+    const tx = db.transaction(STORE, "readwrite");
+    const store = tx.objectStore(STORE);
+    const all = store.getAll();
+    all.onsuccess = () => {
+      for (const e of all.result as Entry[]) if (now - e.at > KEEP_MS) store.delete(e.id);
+    };
+    await done(tx);
+  } finally {
+    db.close();
+  }
+}
+
 /** Returns the file once and removes it. */
 export async function takeHandoff(id: string, o: Options = {}): Promise<string | null> {
   const db = await open(o.factory ?? indexedDB);

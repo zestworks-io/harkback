@@ -37,7 +37,6 @@ export function readerSource(readerUrl: string | undefined): string {
 
 const PAGE_ONLY = new Set<Request["type"]>([
   "delete-encounter",
-  "mark-normal",
   "import-events",
   "review-answer",
   "check-answer",
@@ -50,6 +49,10 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "settings-changed",
 ]);
 
+/** Unmarking from the lock on a page, or from the library; a page may already tell a whole site it is fine (`remember-site`). */
+const EVERYWHERE = new Set<Request["type"]>(["mark-normal"]);
+
 export function allowed(type: Request["type"], kind: SenderKind): boolean {
+  if (EVERYWHERE.has(type)) return true;
   return kind === "page" ? PAGE_ONLY.has(type) : !PAGE_ONLY.has(type);
 }

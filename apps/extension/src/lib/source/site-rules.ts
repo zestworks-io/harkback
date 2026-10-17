@@ -26,12 +26,18 @@ export function normalizePattern(raw: string): string | null {
   return /^(localhost|[a-z0-9-]+(\.[a-z0-9-]+)+)$/.test(domain) ? domain : null;
 }
 
+/** A host name without the trailing dot of a fully qualified name: `example.com.` is the same site as `example.com`. */
+export function siteHost(url: URL): string {
+  return url.hostname.replace(/\.$/, "");
+}
+
 function ruleMatches(pattern: string, url: URL): boolean {
   const p = normalizePattern(pattern);
   if (!p) return false;
   if (isPrefix(p))
     return url.href.startsWith(p) && (p.endsWith("/") || p.length === url.href.length || "/?#".includes(url.href[p.length]!));
-  return url.hostname === p || url.hostname.endsWith(`.${p}`);
+  const host = siteHost(url);
+  return host === p || host.endsWith(`.${p}`);
 }
 
 /** A URL prefix is more specific than a domain; between two of a kind, the longer one is. */
@@ -124,8 +130,8 @@ export const PRIVATE_BY_DEFAULT_SITES: readonly string[] = ["notion.so", "docs.g
 
 export function onPrivateByDefaultSite(url: string): boolean {
   try {
-    const u = new URL(url);
-    return PRIVATE_BY_DEFAULT_SITES.some((site) => u.hostname === site || u.hostname.endsWith(`.${site}`));
+    const host = siteHost(new URL(url));
+    return PRIVATE_BY_DEFAULT_SITES.some((site) => host === site || host.endsWith(`.${site}`));
   } catch {
     return false;
   }
@@ -151,4 +157,49 @@ export function addRegionalSites(rules: SiteRule[]): number {
 /** Same for the video sites. */
 export function addVideoSites(rules: SiteRule[]): number {
   return addAutoScanRules(rules, VIDEO_SITES);
+}
+
+const ruleKey = (r: SiteRule) => normalizePattern(r.pattern) ?? r.pattern.trim().toLowerCase();
+const sameRule = (a: SiteRule, b: SiteRule) =>
+  a.pattern === b.pattern &&
+  a.autoScan === b.autoScan &&
+  a.sensitive === b.sensitive &&
+  a.disabled === b.disabled &&
+  a.modelId === b.modelId;
+
+/**
+ * The rules after a page that was opened with `base` saves `mine` while `theirs` was saved elsewhere in the meantime (a page's
+ * "remember for this site"). A rule only one side changed takes that side's version; when both changed it, the page's version
+ * wins, except that a site the other side made sensitive stays sensitive.
+ */
+export function mergeSiteRules(base: readonly SiteRule[], mine: readonly SiteRule[], theirs: readonly SiteRule[]): SiteRule[] {
+  const byKey = (rules: readonly SiteRule[]) => {
+    const m = new Map<string, SiteRule>();
+    for (const r of rules) if (!m.has(ruleKey(r))) m.set(ruleKey(r), r);
+    return m;
+  };
+  const b = byKey(base);
+  const t = byKey(theirs);
+  const mineKeys = new Set(mine.map(ruleKey));
+  const madeSensitive = (k: string) => t.get(k)?.sensitive === true && b.get(k)?.sensitive !== true;
+  const out: SiteRule[] = [];
+  for (const r of mine) {
+    const k = ruleKey(r);
+    const before = b.get(k);
+    const other = t.get(k);
+    if (before && sameRule(r, before)) {
+      if (other) out.push(other);
+    } else if (other && !(before && sameRule(other, before)) && madeSensitive(k)) {
+      out.push({ ...r, sensitive: true });
+    } else {
+      out.push(r);
+    }
+  }
+  for (const [k, other] of t) {
+    if (mineKeys.has(k)) continue;
+    const before = b.get(k);
+    // Added elsewhere, or removed here while it was made sensitive elsewhere.
+    if (!before || (!sameRule(other, before) && madeSensitive(k))) out.push(other);
+  }
+  return out;
 }

@@ -10,7 +10,14 @@ import { BUILTIN_MODEL, builtInState, downloadBuiltIn } from "../../lib/models/b
 import { validateSettings, withDefaults, type Settings, type SiteRule } from "../../lib/storage/settings";
 import { applyTheme } from "../../lib/ui/theme";
 import { PROVIDERS, providerById } from "../../lib/models/providers";
-import { addRegionalSites, addSuggestedSites, addVideoSites, hostPermissionPatterns, originPattern } from "../../lib/source/site-rules";
+import {
+  addRegionalSites,
+  addSuggestedSites,
+  addVideoSites,
+  hostPermissionPatterns,
+  mergeSiteRules,
+  originPattern,
+} from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
 import { applyLanguage, isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
@@ -74,14 +81,18 @@ const TAB_IDS: readonly TabId[] = ["general", "models", "sites", "pdf", "data"];
 
 async function main(): Promise<void> {
   let activeTab: TabId = TAB_IDS.find((t) => t === location.hash.slice(1)) ?? "models";
-  const draft: Settings = withDefaults((await browser.storage.local.get("settings")).settings);
+  const loadStored = async () => withDefaults((await browser.storage.local.get("settings")).settings);
+  const draft: Settings = await loadStored();
+  // The site rules as last read or saved here; a page can add one ("remember for this site") while this page is open.
+  let baseSites: SiteRule[] = structuredClone(draft.sites);
   applyTheme(draft.theme);
   const root = document.getElementById("app")!;
   const status = h("div", { className: "result", "data-hb": "status" });
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(draft.language, zh, en, vars);
 
   async function save(): Promise<void> {
-    const next = trimmed(draft);
+    const stored = await loadStored();
+    const next = trimmed({ ...draft, sites: mergeSiteRules(baseSites, draft.sites, stored.sites) });
     const errors = validateSettings(next);
     if (errors.length > 0) {
       status.textContent = `${L("请检查：", "Please check: ")}${errors.join(", ")}`;
@@ -95,6 +106,7 @@ async function main(): Promise<void> {
     ];
     const granted = origins.length === 0 || (await requestOrigins(origins));
     Object.assign(draft, next);
+    baseSites = structuredClone(next.sites);
     await browser.storage.local.set({ settings: next });
     await request({ type: "settings-changed" });
     // The rows still hold the objects from before the save; drawing them again keeps the next edit from being lost.
@@ -719,6 +731,14 @@ async function main(): Promise<void> {
                 checkbox(draft.backup.excludeSensitive, (v) => (draft.backup.excludeSensitive = v), { "data-hb": "exclude-sensitive" }),
                 L("备份和导出时不包含敏感来源的内容", "Leave sensitive sources out of backups and exports"),
               ),
+              h(
+                "p",
+                { className: "note" },
+                L(
+                  "这样的备份也不记得哪些来源是敏感的；恢复后请重新标记它们。网站规则不在备份里。",
+                  "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.",
+                ),
+              ),
             ],
             [backupButton],
           ),
@@ -731,6 +751,16 @@ async function main(): Promise<void> {
     );
   }
   render();
+
+  // A rule saved from a page shows up here at once, unless the site rules have unsaved edits; Save merges those.
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !changes.settings) return;
+    const sites = withDefaults(changes.settings.newValue).sites;
+    if (JSON.stringify(draft.sites) !== JSON.stringify(baseSites) || JSON.stringify(sites) === JSON.stringify(draft.sites)) return;
+    draft.sites = structuredClone(sites);
+    baseSites = structuredClone(sites);
+    render();
+  });
 }
 
 void main();

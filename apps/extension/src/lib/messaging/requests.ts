@@ -16,7 +16,7 @@ import { reunionCards } from "../records/reunion-cards";
 import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "../storage/settings";
 import { gateSource, isChoice, isPrivacy } from "../source/privacy-gate";
-import { effectiveRule, normalizePattern, sensitiveStated } from "../source/site-rules";
+import { effectiveRule, normalizePattern, sensitiveStated, siteHost } from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
 
@@ -25,6 +25,8 @@ const REVIEW_ANSWERS = new Set<string>(REVIEW_ACTIONS);
 const MAX_HITS = 500;
 const MAX_ANSWER_CHARS = 2000;
 const MAX_TERM_CHARS = 200;
+
+let siteWrites: Promise<void> = Promise.resolve();
 
 /** What the one-shot request handlers need from the background page; tests supply fakes. */
 export interface RequestDeps {
@@ -175,17 +177,23 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       let host: string | null = null;
       try {
         const u = new URL(sender.url ?? "");
-        host = u.protocol === "http:" || u.protocol === "https:" ? normalizePattern(u.hostname) : null;
+        host = u.protocol === "http:" || u.protocol === "https:" ? normalizePattern(siteHost(u)) : null;
       } catch {
         host = null;
       }
       if (incognito || !host) return { ok: false };
-      const settings = await deps.loadSettings();
+      const site = host;
       const sensitive = msg.sensitive === true;
-      const sites = settings.sites.some((r) => normalizePattern(r.pattern) === host)
-        ? settings.sites.map((r) => (normalizePattern(r.pattern) === host ? { ...r, sensitive } : r))
-        : [...settings.sites, { pattern: host, sensitive }];
-      await deps.saveSettings({ ...settings, sites });
+      // One read-modify-write at a time, so two tabs answering at once both keep their rule.
+      const write = siteWrites.then(async () => {
+        const settings = await deps.loadSettings();
+        const sites = settings.sites.some((r) => normalizePattern(r.pattern) === site)
+          ? settings.sites.map((r) => (normalizePattern(r.pattern) === site ? { ...r, sensitive } : r))
+          : [...settings.sites, { pattern: site, sensitive }];
+        await deps.saveSettings({ ...settings, sites });
+      });
+      siteWrites = write.catch(() => undefined);
+      await write;
       return { ok: true };
     }
     case "import-events": {
@@ -195,7 +203,10 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
         const r = parseEvent(e);
         return r.kind === "event" ? [r.event] : [];
       });
-      return { ok: true, added: await deps.importEvents(events) };
+      const added = await deps.importEvents(events);
+      // A backup can hold a deletion of an encounter that is here in full, or the full encounter of one deleted here.
+      if (added > 0) await deps.compact();
+      return { ok: true, added };
     }
     case "delete-encounter": {
       if (!(await deps.getState()).encounters.has(msg.encounterId)) return { ok: false };

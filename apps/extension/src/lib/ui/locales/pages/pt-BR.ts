@@ -391,4 +391,6 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "+ Regional research sites": "+ Sites de pesquisa regionais",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
     "Sites de pesquisa regionais: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc e HAL, também verificados automaticamente.",
+  "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
+    "Um backup assim também não lembra quais fontes eram sensíveis: marque-as de novo depois de restaurar. As regras de sites não ficam nos backups.",
 };

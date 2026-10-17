@@ -386,4 +386,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "+ Regional research sites": "+ 지역별 연구 사이트",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
     "지역별 연구 사이트: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc, HAL. 이 사이트들도 자동으로 스캔됩니다.",
+  "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
+    "이런 백업은 어떤 출처가 민감했는지도 기억하지 않습니다. 복원한 뒤 다시 표시하세요. 사이트 규칙은 백업에 들어 있지 않습니다.",
 };

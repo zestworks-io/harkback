@@ -1,4 +1,4 @@
-import { createEventFactory, edgeId, type EventFactory } from "@harkback/core";
+import { createEventFactory, edgeId, isSensitiveSource, replay, type EventFactory } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { describe, expect, it } from "vitest";
 import type { Request } from "../../src/lib/messaging/messages";
@@ -144,12 +144,14 @@ describe("writes", () => {
   });
 
   it("imports only valid events", async () => {
-    const { deps, imported, w, written } = setup();
+    const { deps, imported, w, written, calls } = setup();
     const good = w.events[0]!;
     const r = await handleRequest(deps, { type: "import-events", events: [good, { nonsense: true } as never] }, { id: "x" });
     expect(r).toEqual({ ok: true, added: 1 });
     expect(imported).toEqual([good]);
     expect(written).toEqual([]);
+    // A deletion that came with the backup erases what it deleted here, and the other way round.
+    expect(calls.compact).toBe(1);
     expect(await handleRequest(deps, { type: "import-events", events: "x" as never }, { id: "x" })).toEqual({ ok: false });
   });
 
@@ -567,5 +569,38 @@ describe("unmarking and the lock", () => {
     const { deps, w } = setup();
     w.source("github:acme/secret", "sensitive", "Repo", {}, true);
     expect(await handleRequest(deps, { type: "source-status", sourceId: "github:acme/secret" }, github)).toEqual({ status: "sensitive" });
+  });
+});
+
+describe("remembering a site from two tabs at once", () => {
+  it("keeps both rules", async () => {
+    const { deps } = setup();
+    let current = withDefaults({});
+    deps.loadSettings = async () => current;
+    deps.saveSettings = async (s) => {
+      await new Promise((r) => setTimeout(r, 5));
+      current = s;
+    };
+    await Promise.all([
+      handleRequest(deps, { type: "remember-site", sensitive: true }, { url: "https://a.example.com/", tab: { id: 1 } }),
+      handleRequest(deps, { type: "remember-site", sensitive: false }, { url: "https://b.example.org./", tab: { id: 2 } }),
+    ]);
+    expect(current.sites).toEqual([
+      { pattern: "a.example.com", sensitive: true },
+      { pattern: "b.example.org", sensitive: false },
+    ]);
+  });
+});
+
+describe("marking a paper normal under its other id", () => {
+  it("makes the paper normal under both ids", async () => {
+    const { deps, w, written } = setup();
+    const ids = { arxiv: "2401.00001", doi: "10.48550/arxiv.2401.00001" };
+    w.source("arxiv:2401.00001", "sensitive", "P", ids, true);
+    w.source("doi:10.48550/arxiv.2401.00001", "normal", "P", ids);
+    expect(await handleRequest(deps, { type: "mark-normal", sourceId: "doi:10.48550/arxiv.2401.00001" }, page)).toEqual({ ok: true });
+    const state = replay([...w.events, ...written]);
+    expect(isSensitiveSource(state, "doi:10.48550/arxiv.2401.00001")).toBe(false);
+    expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(false);
   });
 });

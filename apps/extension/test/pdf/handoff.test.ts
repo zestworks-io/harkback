@@ -1,6 +1,6 @@
 import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it } from "vitest";
-import { putHandoff, takeHandoff } from "../../src/lib/pdf/handoff";
+import { putHandoff, sweepHandoffs, takeHandoff } from "../../src/lib/pdf/handoff";
 
 const setup = () => ({ factory: new IDBFactory() as unknown as IDBFactory, now: () => clock.t });
 const clock = { t: 1_000_000 };
@@ -29,5 +29,16 @@ describe("PDF handoff", () => {
     clock.t += 11 * 60_000;
     await putHandoff("new", o);
     expect(await takeHandoff(stale, o)).toBeNull();
+  });
+
+  it("sweeps files nobody picked up without storing a new one", async () => {
+    const o = setup();
+    const stale = await putHandoff("old", o);
+    clock.t += 5 * 60_000;
+    const recent = await putHandoff("recent", o);
+    clock.t += 6 * 60_000;
+    await sweepHandoffs(o);
+    expect(await takeHandoff(stale, o)).toBeNull();
+    expect(await takeHandoff(recent, o)).toBe("recent");
   });
 });

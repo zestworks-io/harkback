@@ -123,36 +123,54 @@ function reaches(state: SourceView, roots: ReadonlySet<string>, id: string): boo
   return false;
 }
 
+/** Root id of each paper or page with a source where `flagged` holds -> the latest time the reader decided one of them (-1 when never by hand). */
+function rootsDecided(state: SourceView, flagged: (s: SourceState) => boolean): Map<string, number> {
+  const roots = new Map<string, number>();
+  for (const [id, src] of state.sources) {
+    if (!flagged(src)) continue;
+    const root = identityRoot(state, id);
+    roots.set(root, Math.max(roots.get(root) ?? -1, src.decidedAt ?? -1));
+  }
+  return roots;
+}
+
+interface SensitivityMarks {
+  sensitive: Map<string, number>;
+  /** Roots where the reader said a source is fine. */
+  fine: Map<string, number>;
+}
+
+function sensitivityMarks(state: SourceView): SensitivityMarks {
+  return {
+    sensitive: rootsDecided(state, (s) => s.sensitivity === "sensitive"),
+    fine: rootsDecided(state, (s) => s.chosen === true && s.sensitivity === "normal"),
+  };
+}
+
 /**
- * Like `reaches` for sensitivity, except that a part the reader said is fine stops what the whole above it passes down, unless the
- * reader marked the whole after that.
+ * Like `reaches` for sensitivity, except that a part the reader said is fine (under any of its ids) stops what the whole above it,
+ * or the same paper under another id, passes down, unless the reader marked that after.
  */
-function sensitiveThrough(state: SourceView, roots: ReadonlySet<string>, id: string): boolean {
-  let exemption: SourceState | undefined;
+function sensitiveThrough(state: SourceView, marks: SensitivityMarks, id: string): boolean {
+  let exemptAt: number | undefined;
   for (let cur: string | null = id; cur !== null; cur = parentSourceId(cur)) {
-    if (roots.has(identityRoot(state, cur))) {
-      const markedAt = state.sources.get(cur)?.decidedAt ?? -1;
-      return !(exemption && (exemption.decidedAt ?? -1) > markedAt);
-    }
-    const own = state.sources.get(cur);
-    if (!exemption && own?.chosen && own.sensitivity === "normal") exemption = own;
+    const root = identityRoot(state, cur);
+    exemptAt ??= marks.fine.get(root);
+    const markedAt = marks.sensitive.get(root);
+    if (markedAt !== undefined) return !(exemptAt !== undefined && exemptAt > markedAt);
   }
   return false;
 }
 
 /** True when the source, or the same paper under its other id, or the repository an issue or pull request belongs to, is marked sensitive. */
 export function isSensitiveSource(state: SourceView, sourceId: string): boolean {
-  return sensitiveThrough(
-    state,
-    rootsWhere(state, (s) => s.sensitivity === "sensitive"),
-    sourceId,
-  );
+  return sensitiveThrough(state, sensitivityMarks(state), sourceId);
 }
 
 /** Every recorded source for which `isSensitiveSource` holds, found in one pass. */
 export function sensitiveSourceIds(state: SourceView): Set<string> {
-  const roots = rootsWhere(state, (s) => s.sensitivity === "sensitive");
-  return new Set([...state.sources.keys()].filter((id) => sensitiveThrough(state, roots, id)));
+  const marks = sensitivityMarks(state);
+  return new Set([...state.sources.keys()].filter((id) => sensitiveThrough(state, marks, id)));
 }
 
 /** True when the reader chose the sensitivity of the source, its paper's other id, or its repository. */

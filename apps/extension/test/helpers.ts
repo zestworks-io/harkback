@@ -17,7 +17,13 @@ export function world(start = Date.UTC(2026, 8, 1)) {
     setTime(ms: number): void {
       clock = ms;
     },
-    source(sourceId: string, sensitivity: Sensitivity = "normal", title = sourceId, ids: { url?: string } = {}, byUser = false): void {
+    source(
+      sourceId: string,
+      sensitivity: Sensitivity = "normal",
+      title = sourceId,
+      ids: { url?: string; arxiv?: string; doi?: string } = {},
+      byUser = false,
+    ): void {
       add(f.make("source.seen", { source_id: sourceId, ids, title, license: "unknown", sensitivity, ...(byUser && { by_user: true }) }));
     },
     concept(name: string, aliases: string[] = []): string {

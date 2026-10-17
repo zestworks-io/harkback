@@ -45,7 +45,7 @@ import { badgeFor } from "../lib/review/review-badge";
 import { RateLimiter, type RateResult } from "../lib/models/rate-limit";
 import { handleRequest, type RequestDeps } from "../lib/messaging/requests";
 import { fetchAsDataUrl, openReader, type OpenDeps } from "../lib/pdf/open";
-import { putHandoff } from "../lib/pdf/handoff";
+import { putHandoff, sweepHandoffs } from "../lib/pdf/handoff";
 import { allowed, readerSource, senderKind } from "../lib/messaging/sender-auth";
 import { explainLanguageOf, withDefaults, type ModelConfig, type Settings } from "../lib/storage/settings";
 import { effectiveRule, hostPermissionPatterns, originPattern, sensitiveBySiteRule } from "../lib/source/site-rules";
@@ -695,7 +695,10 @@ export default defineBackground(() => {
 
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === BACKUP_ALARM) void maybeBackup().catch(() => undefined);
-    if (alarm.name === BADGE_ALARM) void refreshBadge();
+    if (alarm.name === BADGE_ALARM) {
+      void refreshBadge();
+      void sweepHandoffs().catch(() => undefined);
+    }
   });
 
   // ---- lifecycle ------------------------------------------------------------
@@ -710,6 +713,7 @@ export default defineBackground(() => {
     void ensureAlarm();
     void ensureMenu();
     sync();
+    void sweepHandoffs().catch(() => undefined);
   });
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && "settings" in changes) {

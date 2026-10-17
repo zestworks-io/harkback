@@ -113,3 +113,37 @@ describe("which came last, the repository's mark or the issue's answer", () => {
     expect(isSensitiveSource(state, "github:acme/secret#4")).toBe(false);
   });
 });
+
+describe("a paper marked sensitive under one id and fine under the other", () => {
+  const paper = (source_id: string, sensitivity: "normal" | "sensitive", ts: string) =>
+    ev(
+      "source.seen",
+      {
+        source_id,
+        ids: { arxiv: "2401.00001", doi: "10.48550/arxiv.2401.00001" },
+        title: "P",
+        license: "unknown",
+        sensitivity,
+        by_user: true,
+      },
+      { ts },
+    );
+
+  it("is fine when the reader said so after marking it", () => {
+    const state = replay([
+      paper("arxiv:2401.00001", "sensitive", "2026-09-01T00:00:00Z"),
+      paper("doi:10.48550/arxiv.2401.00001", "normal", "2026-09-02T00:00:00Z"),
+    ]);
+    expect(isSensitiveSource(state, "doi:10.48550/arxiv.2401.00001")).toBe(false);
+    expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(false);
+  });
+
+  it("is sensitive again when the reader marks it afterwards", () => {
+    const state = replay([
+      paper("doi:10.48550/arxiv.2401.00001", "normal", "2026-09-01T00:00:00Z"),
+      paper("arxiv:2401.00001", "sensitive", "2026-09-02T00:00:00Z"),
+    ]);
+    expect(isSensitiveSource(state, "doi:10.48550/arxiv.2401.00001")).toBe(true);
+    expect(isSensitiveSource(state, "arxiv:2401.00001")).toBe(true);
+  });
+});

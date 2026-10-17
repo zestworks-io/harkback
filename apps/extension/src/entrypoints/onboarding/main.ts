@@ -255,8 +255,9 @@ async function main(): Promise<void> {
           return;
         }
         const label = providerById(form.templateId).label;
+        // Read again: a site rule may have been saved from a page since this page opened.
         settings = onboardingSettings(
-          settings,
+          withDefaults((await browser.storage.local.get("settings")).settings),
           { language: lang, label, baseUrl: BUILTIN_URL, apiKey: "", model: BUILTIN_MODEL, provider: form.templateId },
           new Date(),
           () => ulid(),
@@ -278,7 +279,7 @@ async function main(): Promise<void> {
       }
       const label = providerById(form.templateId).label;
       settings = onboardingSettings(
-        settings,
+        withDefaults((await browser.storage.local.get("settings")).settings),
         { language: lang, label, baseUrl: baseUrl.value, apiKey: apiKey.value, model: model.value, provider: form.templateId },
         new Date(),
         () => ulid(),

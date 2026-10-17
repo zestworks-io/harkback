@@ -2,6 +2,22 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Fixed
+
+- **The lock on a sensitive page marks it normal again.** Pressing it used to do nothing: the request was refused because it came from a web page's tab.
+- **Saving Settings no longer drops a site rule saved from a page meanwhile.** A rule made with _Remember for this site_ while the Settings page was open was removed by the next Save, so a site you had called private could be sent to a remote model again. Settings now shows such a rule at once, and Save merges it with your edits; a site made sensitive elsewhere stays sensitive. Two tabs remembering a site at the same moment both keep their rule.
+- **A paper marked normal under one id is normal under the other.** Marking the DOI page of a paper normal, when its arXiv id had been marked sensitive, said it worked but changed nothing.
+- **_Local only_ on a page beats a rule that calls its whole site fine.**
+- **Site rules match an address written with a trailing dot** (`https://mail.example.com./`).
+- **Importing a backup clears the text of deleted entries**, whether they were deleted here or in the backup. It used to wait for the next deletion.
+- **A PDF that was never opened in the reader is removed after 10 minutes,** even when no other PDF is opened.
+
+### Changed
+
+- Settings → Backup says that a backup without sensitive sources does not remember which sources were sensitive, and that site rules are not in backups. The user guide and privacy notes say what deleting an entry leaves in the log: the term's name and the source's title and address.
+
 ## 1.0.3 - 2026-10-12
 
 ### Added

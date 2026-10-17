@@ -18,6 +18,11 @@ describe("the privacy gate", () => {
     expect(gate({ privacy: "likely-public" })).toBe("normal");
   });
 
+  it("keeps a page the reader chose local only, even on a site a rule calls fine", () => {
+    expect(gate({ rules: [{ pattern: "github.com", sensitive: false }], choice: "local" })).toBe("sensitive");
+    expect(gate({ rules: [{ pattern: "github.com", sensitive: false }], choice: "anyway" })).toBe("normal");
+  });
+
   it("asks before sending a page that looks private", () => {
     expect(gate({ privacy: "likely-private" })).toBe("ask");
   });

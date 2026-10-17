@@ -384,4 +384,6 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "+ Regional research sites": "+ مواقع بحثية إقليمية",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
     "المواقع البحثية الإقليمية: CNKI وJ-STAGE وCiNii وKCI وSciELO وRedalyc وHAL، وتُفحص هي أيضًا تلقائيًا.",
+  "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
+    "لا تتذكر هذه النسخة الاحتياطية أيضًا المصادر التي كانت حساسة: ضع عليها العلامة من جديد بعد الاستعادة. قواعد المواقع ليست في النسخ الاحتياطية.",
 };

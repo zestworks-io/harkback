@@ -50,13 +50,17 @@ describe("allowed", () => {
     expect(allowed("check-answer", "page")).toBe(true);
     expect(allowed("check-answer", "content")).toBe(false);
     expect(allowed("check-answer", "reader")).toBe(false);
-    for (const type of ["merge-concepts", "add-alias", "reject-edge", "set-muted", "mark-normal", "import-events"] as const) {
+    for (const type of ["merge-concepts", "add-alias", "reject-edge", "set-muted", "import-events"] as const) {
       expect(allowed(type, "page")).toBe(true);
       expect(allowed(type, "content")).toBe(false);
       expect(allowed(type, "reader")).toBe(false);
     }
     expect(allowed("reunions", "content")).toBe(true);
     expect(allowed("reunions", "page")).toBe(false);
+  });
+
+  it("lets the lock on a page and the library both unmark a sensitive source", () => {
+    for (const kind of ["page", "content", "reader"] as const) expect(allowed("mark-normal", kind)).toBe(true);
   });
 
   it("gives the reader page the same rights as a content script", () => {

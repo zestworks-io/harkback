@@ -35,11 +35,13 @@ export function gateSource(input: GateInput): Gate {
     choice: isChoice(input.choice) ? input.choice : undefined,
   };
   if (isSensitiveSource(i.state, i.sourceId)) return "sensitive";
+  // "Local only" for this page is narrower than any rule for its whole site.
+  if (i.choice === "local") return "sensitive";
   const stated = sensitiveStated(i.rules, i.url);
   if (stated === true) return "sensitive";
   // A rule that says "fine" settles it, unless the page itself says it is private: a whole site is not one page.
   if (stated === false && i.privacy !== "likely-private") return "normal";
-  if (i.choice) return i.choice === "local" ? "sensitive" : "normal";
+  if (i.choice) return "normal";
   if (isChosenSource(i.state, i.sourceId)) return "normal";
   if (i.privacy === "likely-private") return "ask";
   if (i.privacy === "unknown" && onPrivateByDefaultSite(i.url)) return "ask";

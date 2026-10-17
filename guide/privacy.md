@@ -63,13 +63,13 @@ Incognito windows must be allowed for the extension in Chrome. In them Harkback 
 | Settings and API keys               | `chrome.storage.local`, unencrypted                                                                  | Never in backups or exports                                                   |
 | Weekly backup                       | `Downloads/harkback/` as JSONL                                                                       | It is a plain file; protect it like any other                                 |
 | Scanned PDF text and language packs | IndexedDB `harkback-ocr`, in this browser profile; the text is cached per page so a PDF is read once | Never; not in backups or exports; language packs are downloaded, not uploaded |
-| PDF being opened                    | A temporary IndexedDB entry, deleted when the reader takes it, or after 10 minutes at the next PDF   | No                                                                            |
+| PDF being opened                    | A temporary IndexedDB entry, deleted when the reader takes it, or once it is 10 minutes old          | No                                                                            |
 
-**Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files.
+**Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files. Such a backup does not record which sources were sensitive either, so mark them again after restoring it. Site rules are settings and are never in backups.
 
 ## Limits to know about
 
 - **Reunion underlines live in the page**, so the page's own scripts may infer which terms you have records for.
-- **Deletion** removes an entry in the app and clears its text from the stored log; traces may remain on disk, and exported backups cannot be recalled. Use full-disk encryption.
+- **Deletion** removes an entry in the app and clears its text (the quote, the explanation and any follow-up) from the stored log. The name of the term and the title and address of the source stay in the log, because other entries and backups may refer to them. Traces may remain on disk, and exported backups cannot be recalled. Use full-disk encryption.
 - **Keys are unencrypted** in extension storage.
 - **The model service's terms apply** to what you send it. A local model keeps even that on your computer.

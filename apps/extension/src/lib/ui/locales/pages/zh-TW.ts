@@ -378,4 +378,6 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "+ Regional research sites": "+ 各地區的研究網站",
   "Regional research sites: CNKI, J-STAGE, CiNii, KCI, SciELO, Redalyc and HAL, also scanned automatically.":
     "各地區的研究網站：中國知網（CNKI）、J-STAGE、CiNii、KCI、SciELO、Redalyc 與 HAL，同樣自動掃描。",
+  "Such a backup does not remember which sources were sensitive either: mark them again after restoring. Site rules are not in backups.":
+    "這樣的備份也不記得哪些來源是敏感的；還原後請重新標記它們。網站規則不在備份裡。",
 };
