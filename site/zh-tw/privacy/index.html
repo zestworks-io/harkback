@@ -28,14 +28,14 @@
 <main><div class="wrap">
 
 <h1>隱私權政策</h1>
-<p class="meta">最後更新：2026 年 10 月 17 日</p>
+<p class="meta">最後更新：2026 年 10 月 20 日</p>
 <p class="meta">這是翻譯版本；若與英文版本有出入，以英文版本為準。</p>
 <p>Harkback 是一個瀏覽器擴充功能：閱讀時解釋術語，並記住你理解了什麼。它沒有自己的伺服器，開發者不會接收、儲存或看到你的任何資料。</p>
 
 <h2>Harkback 儲存什麼</h2>
 <ul>
 <li><strong>你的紀錄</strong>（解釋、追問、筆記、「懂了 / 還沒懂」標記以及它們的來源；頁面註明了授權的，還包括來源的授權）保存在你的瀏覽器中，也就是擴充功能的本機儲存空間。它們不會傳送給開發者。</li>
-<li><strong>你的設定</strong>，包括你填寫的模型 API 金鑰，保存在瀏覽器的擴充功能儲存空間中。金鑰<strong>未加密</strong>，只會傳送到你填寫的模型位址。</li>
+<li><strong>你的設定</strong>，包括你填寫的模型 API 金鑰和 Zotero API 金鑰，保存在瀏覽器的擴充功能儲存空間中。金鑰<strong>未加密</strong>。模型金鑰只會傳送到你填寫的模型位址，Zotero 金鑰只會傳送到 <code>api.zotero.org</code>。</li>
 <li><strong>備份。</strong>Harkback 每週把一份包含你紀錄的 JSONL 檔案存到你電腦的 <code>Downloads/harkback</code> 資料夾。備份只含紀錄，不含設定或 API 金鑰。你也可以在資料庫頁自行匯出資料。</li>
 <li><strong>貢獻檔案（選用）。</strong>如果你在資料庫頁選擇<em>貢獻</em>，Harkback 會用你在開放授權的 arXiv 與 DOI 論文中的查詢，產生一個匿名檔案：論文編號、授權、術語、所屬領域和章節、你的理解程度和月份，以及你確認過的關係。檔案不含引文、解釋、網址或確切時間，也絕不包含敏感來源。存到電腦之前，你可以看到檔案的全部內容。不會上傳任何東西；是否提交、提交到哪裡，由你決定。儲存時會在你的紀錄中留下一則說明，寫明你同意貢獻的範圍。</li>
 </ul>
@@ -43,11 +43,12 @@
 <h2>哪些內容會離開你的瀏覽器</h2>
 <p>只有你觸發的請求。當你要求解釋時，Harkback 會把選取的文字、所在段落、章節和頁面標題傳送給<strong>你設定的模型服務</strong>（例如雲端 API 或 Ollama 這類本機服務）。該服務依其自身的條款和隱私權政策處理這些資料。你標為敏感的來源，其內容絕不會傳給非本機模型。複習中選用的「檢查我的回答」也是如此：只有你按下時，Harkback 才會把術語、你輸入的回答和當時的解釋傳給你的模型。你可以在設定中關閉它。頁面預覽也是如此：只有你按下「掃描」時，Harkback 才會把頁面文字（前 16,000 個字元）傳給你的模型，你標為敏感的頁面只會使用本機模型。Chrome 內建模型在你的電腦上執行，不會傳送到任何地方；該模型由 Chrome 自己在你按下「下載模型」時下載。</p>
 <p>掃描版 PDF 在你的電腦上辨識文字，頁面影像不會離開電腦。辨識唯一可能發出的網路請求，是從 <code>jsdelivr.net</code>（<code>cdn.jsdelivr.net</code>；無法連線時改用 <code>fastly.jsdelivr.net</code> 和 <code>gcore.jsdelivr.net</code>）下載語言包（英文已內建），且只在你於「語言」中安裝某種語言時下載一次。該請求不含任何文件內容，語言包在使用前會以隨 Harkback 發布的檢查碼驗證。</p>
+<p><strong>從 Zotero 匯入（選用）。</strong>只有當你在「設定 → 資料與隱私 → Zotero」中按下<em>尋找劃線</em>時，Harkback 才會把你的 Zotero API 金鑰傳送到 <code>api.zotero.org</code>，讀取你的劃線以及它們所屬的論文和檔案。你保持勾選的簡短劃線會記為查詢，附上論文標題及其 arXiv 編號或 DOI；不是已發表論文的檔案會記為敏感來源。不會向你的 Zotero 文獻庫寫入任何內容，你的紀錄也不會傳送給 Zotero。</p>
 <p>Harkback 不含分析、廣告或追蹤，也不會出售或分享你的資料。</p>
 
 <h2>權限</h2>
 <ul>
-<li><strong>網站存取（選用）。</strong>只有當你選擇掃描某個網站或將它加入允許清單時，Harkback 才會要求存取該網站；它還會要求存取你的模型位址，以便傳送你的請求。在 arxiv.org 上會自動執行。</li>
+<li><strong>網站存取（選用）。</strong>只有當你選擇掃描某個網站或將它加入允許清單時，Harkback 才會要求存取該網站；它還會要求存取你的模型位址，以便傳送你的請求；從 Zotero 匯入時，還會要求存取 <code>api.zotero.org</code>。在 arxiv.org 上會自動執行。</li>
 <li><strong>本機檔案（選用）。</strong>若要讀取電腦上的 PDF，你可以允許存取本機檔案。檔案只在瀏覽器中讀取，不會上傳。</li>
 <li><strong>其他權限。</strong><code>storage</code> 用於保存紀錄和設定；<code>alarms</code> 用於安排每週備份並更新工具列圖示上的待複習數量；<code>downloads</code> 用於寫入備份；<code>offscreen</code> 用於產生備份檔案；<code>scripting</code> 和 <code>activeTab</code> 讓工具列按鈕和快速鍵可以讀取你目前所在的頁面；<code>contextMenus</code> 在選取文字的右鍵選單中加入「Harkback: 解釋」，在頁面右鍵選單中加入「Harkback: 預覽本頁概念」，並在工具列圖示的右鍵選單中加入「複習」和「歷史」。</li>
 </ul>

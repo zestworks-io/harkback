@@ -156,6 +156,26 @@ describe("writes", () => {
     expect(await handleRequest(deps, { type: "import-events", events: "x" as never }, { id: "x" })).toEqual({ ok: false });
   });
 
+  it("records well-formed Zotero terms and ignores the rest", async () => {
+    const { deps, written, conceptId } = setup();
+    const paper = { sourceId: "arxiv:2106.09685", ids: { arxiv: "2106.09685" }, title: "LoRA", sensitive: false };
+    const good = { annotationKey: "ANNLORA1", term: "LoRA", paper };
+    const bad = [
+      { ...good, term: "" },
+      { ...good, paper: { ...paper, sourceId: "url:https://example.com/" } },
+      { ...good, paper: { ...paper, ids: { url: 7 } } },
+      null,
+    ];
+    expect(await handleRequest(deps, { type: "import-zotero", terms: [good, ...bad] as never }, { id: "x" })).toEqual({
+      ok: true,
+      added: 1,
+    });
+    // LoRA is already a concept here: the highlight is recorded on it.
+    expect(written.map((e) => e.type)).toEqual(["source.seen", "encounter.created"]);
+    expect(written[1]!.payload).toMatchObject({ concept_id: conceptId, selection: "LoRA", explanation: { text: "", model: "zotero" } });
+    expect(await handleRequest(deps, { type: "import-zotero", terms: bad as never }, { id: "x" })).toEqual({ ok: false });
+  });
+
   it("refuses every write from a private window", async () => {
     const { deps, written, encounterId, conceptId } = setup();
     expect(await handleRequest(deps, { type: "action", encounterId, action: "marked_understood" }, priv)).toEqual({ ok: false });
@@ -182,6 +202,17 @@ describe("page-only requests", () => {
     expect(written.map((e) => e.type)).toEqual(["encounter.deleted"]);
     expect(calls.compact).toBe(1);
     expect(await handleRequest(deps, { type: "delete-encounter", encounterId: "missing" }, extensionPage)).toEqual({ ok: false });
+  });
+
+  it("records a review answer on the latest encounter with an explanation, not on one imported from Zotero", async () => {
+    const { deps, written, conceptId, encounterId, w } = setup();
+    const paper = { sourceId: "arxiv:2106.09685", ids: { arxiv: "2106.09685" }, title: "LoRA", sensitive: false };
+    await handleRequest(deps, { type: "import-zotero", terms: [{ annotationKey: "A", term: "LoRA", paper }] }, extensionPage);
+    // The import is now the concept's latest encounter.
+    w.events.push(...written.splice(0));
+    expect(w.state().encountersByConcept.get(conceptId)!.at(-1)).not.toBe(encounterId);
+    expect(await handleRequest(deps, { type: "review-answer", conceptId, action: "review_good" }, extensionPage)).toEqual({ ok: true });
+    expect(written[0]!.payload).toMatchObject({ encounter_id: encounterId, action: "review_good" });
   });
 
   it("records a review answer on the concept's latest encounter", async () => {

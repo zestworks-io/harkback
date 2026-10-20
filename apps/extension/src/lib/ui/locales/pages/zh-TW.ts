@@ -419,4 +419,28 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
     "選出屬於另一個概念的查詢記錄和名稱，它們會移到一個新概念。若新名稱已屬於另一個概念，就會併入那個概念。",
   "Look-ups": "查詢記錄",
   Names: "名稱",
+  "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.":
+    "匯入你在 Zotero 裡劃過的術語：每個簡短的劃線記為它所在論文裡的一次查詢，較長的段落不匯入。Harkback 用 API 金鑰讀取你的文獻庫，不會寫入 Zotero。",
+  "API key": "API 金鑰",
+  "Create a key on zotero.org": "在 zotero.org 上建立金鑰",
+  "Only “Allow library access” is needed. The key is kept on this computer with your settings.":
+    "只需勾選「Allow library access」。金鑰和設定一起保存在這台電腦上。",
+  "Paste your Zotero API key first.": "請先貼上你的 Zotero API 金鑰。",
+  "Access to Zotero was not granted.": "沒有取得存取 Zotero 的權限。",
+  "The key is wrong or was revoked.": "金鑰不對，或已被撤銷。",
+  "This key cannot read your library: tick “Allow library access” for it on zotero.org.":
+    "這個金鑰無法讀取你的文獻庫：在 zotero.org 上為它勾選「Allow library access」。",
+  "Zotero could not be reached.": "連不上 Zotero。",
+  "Zotero is busy; try again later.": "Zotero 現在很忙，請稍後再試。",
+  "Zotero answered with an error; try again later.": "Zotero 回傳了錯誤，請稍後再試。",
+  "Find highlights": "尋找劃線",
+  "Reading Zotero…": "正在讀取 Zotero…",
+  "Look-ups imported: {n}.": "已匯入的查詢：{n}。",
+  "No new terms in your highlights.": "你的劃線裡沒有新的術語。",
+  "Terms found: {n}. Longer highlights left out: {m}.": "找到的術語：{n}。較長的劃線沒有列出：{m}。",
+  "Import ticked terms": "匯入勾選的術語",
+  "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
+    "不是已發表論文的檔案可能是私人文件，從中匯入的術語會標為敏感。",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
+    "從 Zotero 匯入時，你的 Zotero API 金鑰只會傳送到 api.zotero.org，用來讀取你的劃線和它們所在的論文；不會向 Zotero 寫入任何內容。",
 };

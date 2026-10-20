@@ -425,4 +425,28 @@ export const pages_ko: Readonly<Record<string, string>> = {
     "다른 개념에 속하는 찾아본 기록과 이름을 고르면 새 개념으로 옮겨집니다. 새 이름이 이미 다른 개념의 이름이면 그 개념에 합쳐집니다.",
   "Look-ups": "찾아본 기록",
   Names: "이름",
+  "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.":
+    "Zotero에서 하이라이트한 용어를 가져옵니다. 짧은 하이라이트는 각각 해당 논문에서의 조회로 기록되고, 긴 문장은 제외됩니다. Harkback은 API 키로 라이브러리를 읽기만 하며 Zotero에는 아무것도 쓰지 않습니다.",
+  "API key": "API 키",
+  "Create a key on zotero.org": "zotero.org에서 키 만들기",
+  "Only “Allow library access” is needed. The key is kept on this computer with your settings.":
+    "“Allow library access”만 있으면 됩니다. 키는 설정과 함께 이 컴퓨터에 저장됩니다.",
+  "Paste your Zotero API key first.": "먼저 Zotero API 키를 붙여 넣으세요.",
+  "Access to Zotero was not granted.": "Zotero 접근 권한을 받지 못했습니다.",
+  "The key is wrong or was revoked.": "키가 잘못되었거나 취소되었습니다.",
+  "This key cannot read your library: tick “Allow library access” for it on zotero.org.":
+    "이 키로는 라이브러리를 읽을 수 없습니다. zotero.org에서 이 키의 “Allow library access”를 선택하세요.",
+  "Zotero could not be reached.": "Zotero에 연결할 수 없습니다.",
+  "Zotero is busy; try again later.": "Zotero가 바쁩니다. 잠시 후 다시 시도하세요.",
+  "Zotero answered with an error; try again later.": "Zotero가 오류를 반환했습니다. 잠시 후 다시 시도하세요.",
+  "Find highlights": "하이라이트 찾기",
+  "Reading Zotero…": "Zotero 읽는 중…",
+  "Look-ups imported: {n}.": "가져온 조회: {n}.",
+  "No new terms in your highlights.": "하이라이트에 새 용어가 없습니다.",
+  "Terms found: {n}. Longer highlights left out: {m}.": "찾은 용어: {n}. 제외한 긴 하이라이트: {m}.",
+  "Import ticked terms": "선택한 용어 가져오기",
+  "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
+    "출판된 논문이 아닌 파일은 개인 문서일 수 있으므로, 그 파일에서 가져온 용어는 민감한 것으로 기록됩니다.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
+    "Zotero에서 가져올 때 Zotero API 키는 하이라이트와 그 논문을 읽기 위해 api.zotero.org로만 전송됩니다. Zotero에는 아무것도 쓰지 않습니다.",
 };

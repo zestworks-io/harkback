@@ -54,6 +54,8 @@ export interface Settings {
   review: { desiredRetention: number; modelCheck: boolean };
   /** `excludeSensitive`: backups and exports leave out everything that came from sensitive sources. */
   backup: { enabled: boolean; excludeSensitive: boolean };
+  /** `apiKey`: a Zotero web API key that can read the reader's library, for importing highlighted terms. */
+  zotero: { apiKey: string };
 }
 
 /** The language to write explanations in. */
@@ -76,6 +78,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timeouts: { idleSeconds: 30, firstTextSeconds: 120 },
   review: { desiredRetention: 0.9, modelCheck: true },
   backup: { enabled: true, excludeSensitive: false },
+  zotero: { apiKey: "" },
 };
 
 function obj(v: unknown): Record<string, unknown> {
@@ -162,6 +165,7 @@ export function withDefaults(raw: unknown): Settings {
       enabled: obj(s.backup).enabled === false ? false : d.backup.enabled,
       excludeSensitive: obj(s.backup).excludeSensitive === true,
     },
+    zotero: { apiKey: typeof obj(s.zotero).apiKey === "string" ? (obj(s.zotero).apiKey as string).trim().slice(0, 128) : "" },
   };
 }
 

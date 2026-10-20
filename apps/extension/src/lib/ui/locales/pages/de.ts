@@ -436,4 +436,28 @@ export const pages_de: Readonly<Record<string, string>> = {
     "Wählen Sie die Nachschlagevorgänge und Namen, die zu einem anderen Konzept gehören; sie werden in ein neues Konzept verschoben. Gehört der neue Name schon zu einem anderen Konzept, schließen sie sich diesem an.",
   "Look-ups": "Nachschlagevorgänge",
   Names: "Namen",
+  "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.":
+    "Importieren Sie die Begriffe, die Sie in Zotero markiert haben: Jede kurze Markierung wird als Nachschlagen in ihrem Artikel gespeichert, längere Passagen werden ausgelassen. Harkback liest Ihre Bibliothek mit einem API-Schlüssel und schreibt nichts in Zotero.",
+  "API key": "API-Schlüssel",
+  "Create a key on zotero.org": "Schlüssel auf zotero.org erstellen",
+  "Only “Allow library access” is needed. The key is kept on this computer with your settings.":
+    "Nur „Allow library access“ ist nötig. Der Schlüssel wird mit Ihren Einstellungen auf diesem Computer gespeichert.",
+  "Paste your Zotero API key first.": "Fügen Sie zuerst Ihren Zotero-API-Schlüssel ein.",
+  "Access to Zotero was not granted.": "Der Zugriff auf Zotero wurde nicht erlaubt.",
+  "The key is wrong or was revoked.": "Der Schlüssel ist falsch oder wurde widerrufen.",
+  "This key cannot read your library: tick “Allow library access” for it on zotero.org.":
+    "Dieser Schlüssel kann Ihre Bibliothek nicht lesen: Aktivieren Sie auf zotero.org „Allow library access“ für ihn.",
+  "Zotero could not be reached.": "Zotero ist nicht erreichbar.",
+  "Zotero is busy; try again later.": "Zotero ist ausgelastet; versuchen Sie es später erneut.",
+  "Zotero answered with an error; try again later.": "Zotero hat mit einem Fehler geantwortet; versuchen Sie es später erneut.",
+  "Find highlights": "Markierungen suchen",
+  "Reading Zotero…": "Zotero wird gelesen…",
+  "Look-ups imported: {n}.": "Importierte Nachschlagen: {n}.",
+  "No new terms in your highlights.": "Keine neuen Begriffe in Ihren Markierungen.",
+  "Terms found: {n}. Longer highlights left out: {m}.": "Gefundene Begriffe: {n}. Ausgelassene längere Markierungen: {m}.",
+  "Import ticked terms": "Angehakte Begriffe importieren",
+  "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
+    "Eine Datei, die kein veröffentlichter Artikel ist, kann ein privates Dokument sein; Begriffe daraus werden deshalb als sensibel gespeichert.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
+    "Beim Import aus Zotero wird Ihr Zotero-API-Schlüssel nur an api.zotero.org gesendet, um Ihre Markierungen und die Artikel zu lesen, in denen sie stehen; in Zotero wird nichts geschrieben.",
 };

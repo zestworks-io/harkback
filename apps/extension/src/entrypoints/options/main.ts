@@ -19,6 +19,8 @@ import {
   originPattern,
 } from "../../lib/source/site-rules";
 import { secretInput } from "../../lib/ui/secret-input";
+import { zoteroView, type ZoteroProgress } from "../../lib/pages/zotero-view";
+import { ZOTERO_ORIGIN, zoteroClient } from "../../lib/zotero/client";
 import { applyLanguage, isLang, UI_LANGUAGES } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
 
@@ -62,6 +64,12 @@ function triState(
   return el;
 }
 
+/** What was imported from each Zotero library, by user id. */
+const zoteroProgress = (stored: Record<string, unknown>): Record<string, ZoteroProgress> => {
+  const v = stored.zotero;
+  return typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, ZoteroProgress>) : {};
+};
+
 function trimmed(s: Settings): Settings {
   return {
     ...s,
@@ -73,6 +81,7 @@ function trimmed(s: Settings): Settings {
       model: m.model.trim(),
     })),
     sites: s.sites.map((r) => ({ ...r, pattern: r.pattern.trim() })),
+    zotero: { apiKey: s.zotero.apiKey.trim() },
   };
 }
 
@@ -128,10 +137,25 @@ async function main(): Promise<void> {
   }
 
   const ocrHost = h("div", { "data-hb": "ocr-host" });
+  // Kept across redraws, so what was found in Zotero is not lost when the page is drawn again.
+  const zotero = zoteroView({
+    lang: () => draft.language,
+    key: () => draft.zotero.apiKey,
+    grant: () => requestOrigins([ZOTERO_ORIGIN]),
+    client: (key) => zoteroClient({ key }),
+    loadProgress: async (userID) => zoteroProgress(await browser.storage.local.get("zotero"))[userID] ?? null,
+    saveProgress: async (userID, p) =>
+      browser.storage.local.set({ zotero: { ...zoteroProgress(await browser.storage.local.get("zotero")), [userID]: p } }),
+    record: async (terms) => {
+      const r = await request({ type: "import-zotero", terms });
+      return { ok: r.ok, ...("added" in r && r.added !== undefined && { added: r.added }) };
+    },
+  });
   let suggestMessage = "";
 
   function render(): void {
     applyLanguage(document.documentElement, draft.language);
+    zotero.paint();
     void languagePanel({ L }).then((panel) => ocrHost.replaceChildren(panel));
     const language = h(
       "select",
@@ -760,6 +784,42 @@ async function main(): Promise<void> {
               ),
             ],
             [backupButton],
+          ),
+          card(
+            "Zotero",
+            L(
+              "导入你在 Zotero 里划过的术语：每个简短的划线记为它所在论文里的一次查词，较长的段落不导入。Harkback 用 API 密钥读取你的文献库，不会写入 Zotero。",
+              "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.",
+            ),
+            [
+              field(
+                L("API 密钥", "API key"),
+                secretInput(
+                  input(draft.zotero.apiKey, (v) => (draft.zotero.apiKey = v), {
+                    type: "password",
+                    autocomplete: "off",
+                    "data-hb": "zotero-key",
+                  }),
+                  { show: L("显示", "Show"), hide: L("隐藏", "Hide") },
+                ),
+                "wide",
+              ),
+              h(
+                "p",
+                { className: "note" },
+                h(
+                  "a",
+                  { href: "https://www.zotero.org/settings/keys/new", target: "_blank", rel: "noopener" },
+                  L("在 zotero.org 上创建密钥", "Create a key on zotero.org"),
+                ),
+                " · ",
+                L(
+                  "只需勾选“Allow library access”。密钥和设置一起保存在这台电脑上。",
+                  "Only “Allow library access” is needed. The key is kept on this computer with your settings.",
+                ),
+              ),
+              zotero.element,
+            ],
           ),
           card(L("隐私", "Privacy"), null, [
             h("ul", { className: "privacy" }, ...privacyNotes(draft.language).map((line) => h("li", {}, line))),

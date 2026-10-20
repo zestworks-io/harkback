@@ -38,6 +38,7 @@ export function readerSource(readerUrl: string | undefined): string {
 const PAGE_ONLY = new Set<Request["type"]>([
   "delete-encounter",
   "import-events",
+  "import-zotero",
   "review-answer",
   "check-answer",
   "merge-concepts",

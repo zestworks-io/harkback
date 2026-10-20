@@ -61,7 +61,10 @@ function scheduleOf(
   retention: number,
 ): (Schedule & { latestId: string }) | null {
   if (concept.isPlaceholder || concept.muted) return null;
-  const encounters = (state.encountersByConcept.get(concept.id) ?? []).map((id) => state.encounters.get(id)!);
+  // A term highlighted in Zotero and never explained has nothing to review yet.
+  const encounters = (state.encountersByConcept.get(concept.id) ?? [])
+    .map((id) => state.encounters.get(id)!)
+    .filter((e) => e.explanation.text !== "");
   const latest = encounters.at(-1);
   if (!latest) return null;
   const answers = encounters

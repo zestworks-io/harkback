@@ -362,6 +362,8 @@ export class ContentApp {
     else if (action === "mute") void this.rpc.request({ type: "mute", conceptId: card.conceptId });
     else if (action === "different")
       void this.rpc.request({ type: "dismiss-reunion", conceptId: card.conceptId, sourceId: this.detect().source_id });
+    // A term only highlighted in Zotero has never been explained: this is its first explanation, not another one.
+    else if (!card.preview) this.explain(range, { mode: "explain", conceptId: card.conceptId, text: card.matched });
     else this.explain(range, { mode: action, earlierEncounterId: card.encounterId, conceptId: card.conceptId, text: card.matched });
   }
 

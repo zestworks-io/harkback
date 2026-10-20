@@ -29,6 +29,26 @@ describe("selectReunions: direct", () => {
     ).toEqual([]);
   });
 
+  it("shows an explained look-up rather than a newer one imported unexplained, which does not count as meeting the term", () => {
+    const imported = ev(
+      "encounter.created",
+      {
+        encounter_id: id(11),
+        concept_id: id(1),
+        source_id: "arxiv:3",
+        locator: { exact: "LoRA", prefix: "", suffix: "" },
+        selection: "LoRA",
+        explanation: { text: "", tier: "external_knowledge", evidence_span: null, model: "zotero" },
+        flags: [],
+      },
+      { ts: "2026-09-23T00:00:00Z" },
+    );
+    const both = run([concept(1, "LoRA"), encounter(10, 1, "arxiv:1", "2026-09-10T00:00:00Z"), imported], "LoRA");
+    expect(both.map((r) => r.encounter.id)).toEqual([id(10)]);
+    const only = run([concept(1, "LoRA"), imported], "LoRA");
+    expect(only.map((r) => r.encounter.id)).toEqual([id(11)]);
+  });
+
   it("skips concepts only seen in the current source, and muted concepts", () => {
     expect(run([concept(1, "LoRA"), encounter(10, 1, "arxiv:2", "2026-09-01T00:00:00Z")], "LoRA")).toEqual([]);
     expect(

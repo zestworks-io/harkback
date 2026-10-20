@@ -425,4 +425,28 @@ export const pages_ar: Readonly<Record<string, string>> = {
     "اختر عمليات البحث والأسماء التي تنتمي إلى مفهوم آخر؛ فتنتقل إلى مفهوم جديد. وإذا كان الاسم الجديد يخص مفهومًا آخر، تنضم إليه.",
   "Look-ups": "عمليات البحث",
   Names: "الأسماء",
+  "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.":
+    "استورد المصطلحات التي ظلّلتها في Zotero: يُسجَّل كل تظليل قصير بحثًا في ورقته، وتُستبعد المقاطع الطويلة. يقرأ Harkback مكتبتك بمفتاح API ولا يكتب شيئًا في Zotero.",
+  "API key": "مفتاح API",
+  "Create a key on zotero.org": "أنشئ مفتاحًا على zotero.org",
+  "Only “Allow library access” is needed. The key is kept on this computer with your settings.":
+    "يكفي خيار “Allow library access”. يُحفظ المفتاح على هذا الحاسوب مع إعداداتك.",
+  "Paste your Zotero API key first.": "الصق مفتاح Zotero API أولًا.",
+  "Access to Zotero was not granted.": "لم يُمنح إذن الوصول إلى Zotero.",
+  "The key is wrong or was revoked.": "المفتاح خاطئ أو أُلغي.",
+  "This key cannot read your library: tick “Allow library access” for it on zotero.org.":
+    "لا يستطيع هذا المفتاح قراءة مكتبتك: فعّل له “Allow library access” على zotero.org.",
+  "Zotero could not be reached.": "تعذّر الاتصال بـ Zotero.",
+  "Zotero is busy; try again later.": "Zotero مشغول؛ حاول لاحقًا.",
+  "Zotero answered with an error; try again later.": "ردّ Zotero بخطأ؛ حاول لاحقًا.",
+  "Find highlights": "ابحث عن التظليلات",
+  "Reading Zotero…": "جارٍ قراءة Zotero…",
+  "Look-ups imported: {n}.": "عمليات البحث المستوردة: {n}.",
+  "No new terms in your highlights.": "لا مصطلحات جديدة في تظليلاتك.",
+  "Terms found: {n}. Longer highlights left out: {m}.": "المصطلحات التي وُجدت: {n}. التظليلات الطويلة المستبعدة: {m}.",
+  "Import ticked terms": "استورد المصطلحات المحددة",
+  "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
+    "قد يكون الملف الذي ليس ورقة منشورة مستندًا خاصًا، لذا تُسجَّل المصطلحات المأخوذة منه على أنها حساسة.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
+    "عند الاستيراد من Zotero يُرسَل مفتاح Zotero API إلى api.zotero.org فقط، لقراءة تظليلاتك والأوراق التي هي فيها؛ ولا يُكتب شيء في Zotero.",
 };

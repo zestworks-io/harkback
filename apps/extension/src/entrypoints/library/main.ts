@@ -42,7 +42,7 @@ import { sensitiveBySiteRule } from "../../lib/source/site-rules";
 import { initTheme } from "../../lib/ui/theme";
 import { applyLanguage, quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
-import { errorText, useStrings } from "../../lib/ui/strings";
+import { errorText, t, useStrings } from "../../lib/ui/strings";
 import { UI_STRINGS } from "../../lib/ui/locales/ui";
 import { CHANGE_CHANNEL, EventStore } from "../../lib/storage/store";
 
@@ -207,8 +207,9 @@ async function main(): Promise<void> {
       }
     });
     const tier = e.tier === "defined_in_source" ? L("原文定义", "Defined in source") : L("外部知识", "External knowledge");
-    const body = h("div", { className: "explanation", dir: "auto" });
-    body.append(renderMarkdown(e.explanation));
+    const body = e.explanation
+      ? h("div", { className: "explanation", dir: "auto" }, renderMarkdown(e.explanation))
+      : h("p", { className: "note", "data-hb": "not-explained" }, t(settings.language, "highlightedInZotero"));
     const chat =
       e.followUps.length === 0
         ? null
@@ -244,7 +245,7 @@ async function main(): Promise<void> {
         sourceLink(quoteTitle(e.sourceTitle, settings.language), e.sourceUrl),
         timestamp(e.t),
         h("span", {}, e.date),
-        h("span", { className: `tier ${e.tier}` }, tier),
+        e.explanation ? h("span", { className: `tier ${e.tier}` }, tier) : null,
         e.sensitive ? sensitiveBadge(e.sourceId) : null,
         selecting ? null : del,
       ),

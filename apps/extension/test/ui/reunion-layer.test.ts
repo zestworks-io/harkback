@@ -38,6 +38,20 @@ describe("reunionCardView", () => {
     expect(act).toHaveBeenCalledWith("compare");
   });
 
+  it("offers to explain a term only highlighted in Zotero", () => {
+    const act = vi.fn();
+    const el = reunionCardView({ ...card, preview: "", tier: "external_knowledge" }, "en", act);
+    expect(el.textContent).toContain("Highlighted in Zotero; not explained yet.");
+    expect(el.textContent).not.toContain("External knowledge");
+    expect([...el.querySelectorAll("button")].map((b) => b.textContent)).toEqual([
+      "Explain it here",
+      "Means something else here",
+      "Don't show again",
+    ]);
+    el.querySelector<HTMLButtonElement>(".hb-primary")!.click();
+    expect(act).toHaveBeenCalledWith("reexplain");
+  });
+
   it("gives the position in the video where the term was met", () => {
     const video = { ...card, sourceTitle: "A talk", section: "", t: 754 };
     const el = reunionCardView(video, "en", () => {});

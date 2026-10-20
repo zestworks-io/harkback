@@ -51,7 +51,14 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
   }
 
   const encountersOf = (conceptId: string) => (state.encountersByConcept.get(conceptId) ?? []).map((eid) => state.encounters.get(eid)!);
-  const lastTouched = (conceptId: string) => Math.max(...encountersOf(conceptId).map((e) => e.lastTouchedAt));
+  // A look-up with no explanation (a term imported from Zotero) is not the reader meeting the term, so it does not count here.
+  const lastTouched = (conceptId: string) =>
+    Math.max(
+      0,
+      ...encountersOf(conceptId)
+        .filter((e) => e.explanation.text !== "")
+        .map((e) => e.lastTouchedAt),
+    );
 
   // The reader said the term means something else on this page.
   const dismissedHere = (conceptId: string): boolean =>
@@ -63,7 +70,9 @@ export function selectReunions(state: State, hits: readonly Hit[], ctx: ReunionC
     if (ctx.now - lastTouched(conceptId) < minGap) return null;
     const fromOther = encountersOf(conceptId).filter((e) => !sameSource(state, e.sourceId, ctx.sourceId));
     if (fromOther.length === 0) return null;
-    return fromOther.reduce((a, b) => (b.lastTouchedAt > a.lastTouchedAt ? b : a));
+    // An explanation is what the hint shows, so a look-up that has one is preferred.
+    const explained = fromOther.filter((e) => e.explanation.text !== "");
+    return (explained.length > 0 ? explained : fromOther).reduce((a, b) => (b.lastTouchedAt > a.lastTouchedAt ? b : a));
   };
 
   const picked = new Map<string, Reunion>();

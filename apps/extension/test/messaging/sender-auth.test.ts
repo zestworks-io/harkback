@@ -58,6 +58,7 @@ describe("allowed", () => {
       "record-consent",
       "set-muted",
       "import-events",
+      "import-zotero",
     ] as const) {
       expect(allowed(type, "page")).toBe(true);
       expect(allowed(type, "content")).toBe(false);

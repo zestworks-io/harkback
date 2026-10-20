@@ -17,6 +17,8 @@ Only the request you trigger: when you ask for an explanation or a follow-up, th
 
 Nothing else is sent: not the rest of the page, not your history, not your other settings. There is no analytics and no developer server.
 
+**Importing from Zotero** is the one request to another service, and it happens only when you press _Find highlights_ in Settings → Data and privacy → Zotero. Your Zotero API key goes to `api.zotero.org` (and nowhere else), and Harkback reads your highlights and the papers and files they hang from. Nothing from your records is sent to Zotero, and nothing is written there. A file that is not a published paper is recorded as a sensitive source.
+
 Page text and earlier explanations are placed inside delimiters, and the model is told not to follow instructions found in them. The reply is parsed defensively and shown as text or through a restricted Markdown renderer; it is never inserted as HTML.
 
 ## Sensitive sources
@@ -57,13 +59,13 @@ Incognito windows must be allowed for the extension in Chrome. In them Harkback 
 
 ## Where your data is
 
-| What                                | Where                                                                                                | Leaves the browser?                                                           |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Records (event log)                 | IndexedDB, in this browser profile                                                                   | Only in backups and exports you make or enable                                |
-| Settings and API keys               | `chrome.storage.local`, unencrypted                                                                  | Never in backups or exports                                                   |
-| Weekly backup                       | `Downloads/harkback/` as JSONL                                                                       | It is a plain file; protect it like any other                                 |
-| Scanned PDF text and language packs | IndexedDB `harkback-ocr`, in this browser profile; the text is cached per page so a PDF is read once | Never; not in backups or exports; language packs are downloaded, not uploaded |
-| PDF being opened                    | A temporary IndexedDB entry, deleted when the reader takes it, or once it is 10 minutes old          | No                                                                            |
+| What                                     | Where                                                                                                | Leaves the browser?                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Records (event log)                      | IndexedDB, in this browser profile                                                                   | Only in backups and exports you make or enable                                |
+| Settings and API keys (model and Zotero) | `chrome.storage.local`, unencrypted                                                                  | Never in backups or exports                                                   |
+| Weekly backup                            | `Downloads/harkback/` as JSONL                                                                       | It is a plain file; protect it like any other                                 |
+| Scanned PDF text and language packs      | IndexedDB `harkback-ocr`, in this browser profile; the text is cached per page so a PDF is read once | Never; not in backups or exports; language packs are downloaded, not uploaded |
+| PDF being opened                         | A temporary IndexedDB entry, deleted when the reader takes it, or once it is 10 minutes old          | No                                                                            |
 
 **Leave sensitive sources out of backups and exports** (settings → Backup) removes everything that came from sensitive sources, and concepts known only from them, from backups, Markdown, notes and Anki files. Such a backup does not record which sources were sensitive either, so mark them again after restoring it. Site rules are settings and are never in backups.
 

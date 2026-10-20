@@ -17,7 +17,11 @@ export function ankiTsv(state: State): string {
     .filter((c) => !c.isPlaceholder && !c.muted)
     .sort((a, b) => a.canonicalName.localeCompare(b.canonicalName, "en"));
   for (const c of concepts) {
-    const latest = state.encounters.get(state.encountersByConcept.get(c.id)?.at(-1) ?? "");
+    // The latest look-up with an explanation: a term only highlighted in Zotero has nothing for the back of a card.
+    const latest = (state.encountersByConcept.get(c.id) ?? [])
+      .map((id) => state.encounters.get(id)!)
+      .filter((e) => e.explanation.text !== "")
+      .at(-1);
     if (!latest) continue;
     const others = c.names.filter((n) => n !== c.canonicalName);
     const front = `<b>${field(c.canonicalName)}</b>${others.length > 0 ? `<br><small>${field(others.join(" · "))}</small>` : ""}`;

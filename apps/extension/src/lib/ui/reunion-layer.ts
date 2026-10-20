@@ -8,6 +8,7 @@ import { t, type Lang } from "./strings";
 export type ReunionAction = "recalled" | "reexplain" | "compare" | "different" | "mute";
 
 const ACTIONS: readonly ReunionAction[] = ["recalled", "reexplain", "compare", "different", "mute"];
+const UNEXPLAINED_ACTIONS: readonly ReunionAction[] = ["reexplain", "different", "mute"];
 const HIDE_DELAY_MS = 300;
 
 export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionAction) => void): HTMLElement {
@@ -23,10 +24,14 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
       "div",
       { className: "hb-meta" },
       h("span", { "data-hb": "reunion-title" }, title),
-      " ",
-      h("span", { className: `hb-tier hb-${card.tier}` }, tier),
+      // A term highlighted in Zotero has no explanation, so no kind of explanation either.
+      ...(card.preview ? [" ", h("span", { className: `hb-tier hb-${card.tier}` }, tier)] : []),
     ),
-    h("div", { className: "hb-body", dir: "auto" }, t(lang, "thenExplained", { text: card.preview })),
+    h(
+      "div",
+      { className: "hb-body", dir: "auto" },
+      card.preview ? t(lang, "thenExplained", { text: card.preview }) : t(lang, "highlightedInZotero"),
+    ),
     h(
       "div",
       { className: "hb-why", "data-hb": "reunion-why" },
@@ -37,16 +42,17 @@ export function reunionCardView(card: ReunionCard, lang: Lang, act: (a: ReunionA
     h(
       "div",
       { className: "hb-footer" },
-      ...ACTIONS.map((a) =>
+      // A term only highlighted in Zotero has nothing to remember or compare yet: it can be explained here.
+      ...(card.preview ? ACTIONS : UNEXPLAINED_ACTIONS).map((a) =>
         h(
           "button",
           {
             type: "button",
-            className: a === "recalled" ? "hb-primary" : a === "mute" ? "hb-quiet" : null,
+            className: a === (card.preview ? "recalled" : "reexplain") ? "hb-primary" : a === "mute" ? "hb-quiet" : null,
             "data-hb": a,
             onclick: () => act(a),
           },
-          t(lang, a),
+          t(lang, a === "reexplain" && !card.preview ? "explainHere" : a),
         ),
       ),
     ),

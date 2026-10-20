@@ -6,6 +6,8 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Added
 
+- **Import the terms you highlighted in Zotero.** Settings → Data and privacy → _Zotero_: paste a Zotero API key that can read your library and press _Find highlights_. Harkback lists each short highlight (at most five words, no sentence inside) with its paper; untick any you do not want and import the rest. Each becomes a look-up of the term in its paper, named by its arXiv id or DOI, so the term is underlined and brings a reunion hint when you meet it again. A file that is not a published paper is recorded as a sensitive source. Imported look-ups have no explanation: History and reunion hints say so, a reunion hint offers _Explain it here_, and review and Anki exports leave such a term out until you explain it. Only highlights changed since the last import are asked for, and none you imported or unticked is offered again. Only your personal library is read, and nothing is written to Zotero. The browser asks for access to `api.zotero.org` the first time. The privacy notes say what is sent.
+
 - **Hide the concepts you have not explained yet** from the graph: untick _Show concepts not explained yet_ above it. They are shown by default, as smaller rings with grey names.
 
 ### Changed

@@ -22,6 +22,7 @@ import { gateSource, isChoice, isPrivacy } from "../source/privacy-gate";
 import { effectiveRule, normalizePattern, sensitiveBySiteRule, sensitiveStated, siteHost } from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
+import { buildImportEvents, isZoteroTerm } from "../zotero/highlights";
 
 const USER_ACTIONS = new Set(["marked_understood", "marked_confused", "reunion_recalled"]);
 const REVIEW_ANSWERS = new Set<string>(REVIEW_ACTIONS);
@@ -213,6 +214,19 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       if (added > 0) await deps.compact();
       return { ok: true, added };
     }
+    case "import-zotero": {
+      // A message is not a trusted channel: only well-formed terms are recorded.
+      const terms = Array.isArray(msg.terms) ? msg.terms.filter(isZoteroTerm) : [];
+      if (terms.length === 0) return { ok: false };
+      const state = await deps.getState();
+      let added = 0;
+      await deps.append((f) => {
+        const events = buildImportEvents(f, state, terms);
+        added = events.filter((e) => e.type === "encounter.created").length;
+        return events;
+      });
+      return { ok: true, added };
+    }
     case "delete-encounter": {
       if (!(await deps.getState()).encounters.has(msg.encounterId)) return { ok: false };
       await deps.append((f) => [f.make("encounter.deleted", { encounter_id: msg.encounterId })]);
@@ -222,7 +236,10 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
     case "review-answer": {
       const state = await deps.getState();
       const rep = state.representative.get(msg.conceptId);
-      const encounterId = rep ? state.encountersByConcept.get(rep)?.at(-1) : undefined;
+      // On the latest look-up with an explanation, the one review shows: a term only highlighted in Zotero is not reviewed.
+      const encounterId = (rep ? (state.encountersByConcept.get(rep) ?? []) : []).findLast(
+        (id) => state.encounters.get(id)?.explanation.text !== "",
+      );
       if (!encounterId || !REVIEW_ANSWERS.has(msg.action)) return { ok: false };
       await deps.append((f) => [f.make("encounter.action", { encounter_id: encounterId, action: msg.action })]);
       return { ok: true };

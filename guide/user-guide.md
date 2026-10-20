@@ -13,6 +13,7 @@
 - [History](#history)
 - [Export, backup and restore](#export-backup-and-restore)
 - [Contributing to the data commons](#contributing-to-the-data-commons)
+- [Importing from Zotero](#importing-from-zotero)
 - [Site rules](#site-rules)
 - [YouTube captions](#youtube-captions)
 - [GitHub, Notion and Google Docs](#github-notion-and-google-docs)
@@ -156,6 +157,19 @@ The data commons is a shared, openly licensed dataset of the terms readers get s
 - **What the file holds.** For each look-up: the paper's id, its licence, the term, its field and section, how well you understood it (confused, shaky, understood or not rated) and the month. Relations between those terms are included only when you confirmed them on a concept page. There are no quotes, explanations, addresses, device ids or exact times.
 - **You see every line.** Pick every paper or one paper, and the page shows the whole file before you save it.
 - **Nothing is uploaded.** _Save contribution file_ downloads `harkback-commons-YYYY-MM.json`; whether and where you submit it is up to you. Saving records what you agreed to contribute (a `contribution.consent` event), so the History page can say when you last did.
+
+## Importing from Zotero
+
+If you highlight terms in Zotero's PDF reader, Harkback can take them in, so they are underlined and bring a reunion hint when you meet them again on the web.
+
+1. On zotero.org, open [Settings → Security → Create new private key](https://www.zotero.org/settings/keys/new). Tick only **Allow library access** and save the key.
+2. In Harkback, open **Settings → Data and privacy → Zotero**, paste the key and press **Find highlights**. The browser asks once for access to `api.zotero.org`.
+3. Harkback lists the terms it found, each with its paper. Untick any you do not want and press **Import ticked terms**. Press **Save changes** to keep the key for next time.
+
+- **What counts as a term.** A highlight or underline of at most five words (or twelve characters in Chinese or Japanese) with no sentence punctuation inside. Longer passages, notes, images and ink drawings are left out and counted.
+- **How it is recorded.** Each highlight becomes a look-up of the term in its paper, dated the day you import it. A term that already names one of your concepts is added to it; otherwise it becomes a new concept. The paper is named by its arXiv id or DOI, as when you read it on the web. A file that is not a published paper (no arXiv id or DOI) may be a private document, so it is recorded as a sensitive source.
+- **Not explained yet.** Imported look-ups have no explanation: History and reunion hints say _Highlighted in Zotero; not explained yet_, a reunion hint offers **Explain it here**, and review leaves such a term out until you have explained it once. Anki exports skip it.
+- **Next time.** Harkback asks Zotero only for highlights changed since the last import and never offers one you imported or unticked before. Only your personal library is read, not group libraries. Nothing is written to Zotero.
 
 ## Site rules
 

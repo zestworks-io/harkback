@@ -42,6 +42,8 @@ const TIER_LABEL = {
   zh: { defined_in_source: "原文定义", external_knowledge: "外部知识" },
   en: { defined_in_source: "Defined in source", external_knowledge: "External knowledge" },
 } as const;
+/** A look-up imported from Zotero has no explanation. */
+const NOT_EXPLAINED = { zh: "在 Zotero 里划过，还没解释过。", en: "Highlighted in Zotero; not explained yet." } as const;
 
 /** `language` is an interface language code; anything but "zh" is exported with English labels. */
 export function exportMarkdown(state: State, language = "en"): string {
@@ -60,6 +62,10 @@ export function exportMarkdown(state: State, language = "en"): string {
       const date = new Date(e.createdAt).toISOString().slice(0, 10);
       const source = labels === "zh" ? `《${title}》` : `“${title}”`;
       const at = e.locator.t !== undefined ? ` ${formatTimestamp(e.locator.t)}` : "";
+      if (!e.explanation.text) {
+        lines.push(`- ${date} · ${source}${at}`, `  > ${NOT_EXPLAINED[labels]}`);
+        continue;
+      }
       lines.push(`- ${date} · ${source}${at} · ${TIER_LABEL[labels][e.explanation.tier]}`);
       lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
     }

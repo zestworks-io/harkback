@@ -8,6 +8,7 @@ import type { Theme } from "../storage/settings";
 import type { Choice, Gate } from "../source/privacy-gate";
 import type { Privacy } from "../source/site-profiles";
 import type { DetectedSource } from "../source/source-id";
+import type { ZoteroTerm } from "../zotero/highlights";
 import type { Lang, StringKey } from "../ui/strings";
 
 export type ErrorCode = PlanError | ModelErrorCode | "local_rate" | "no_permission" | "expired" | "internal" | "unreadable_page";
@@ -71,6 +72,7 @@ export type Request =
   /** Makes the choice for the whole site this message came from, as a site rule. */
   | { type: "remember-site"; sensitive: boolean }
   | { type: "import-events"; events: HarkEvent[] }
+  | { type: "import-zotero"; terms: ZoteroTerm[] }
   | { type: "delete-encounter"; encounterId: string }
   | { type: "review-answer"; conceptId: string; action: ReviewAction }
   | { type: "check-answer"; conceptId: string; answer: string }
@@ -101,6 +103,8 @@ export interface ResponseMap {
   "source-status": { status: Gate; byRule?: true };
   "remember-site": { ok: boolean };
   "import-events": { ok: boolean; added?: number };
+  /** `added`: how many highlights were recorded. */
+  "import-zotero": { ok: boolean; added?: number };
   "delete-encounter": { ok: boolean };
   "review-answer": { ok: boolean };
   /** A model's opinion of an answer given from memory. `suggested` is only a hint: the reader grades. */
@@ -143,6 +147,7 @@ const REQUEST_TYPES = new Set<string>([
   "source-status",
   "remember-site",
   "import-events",
+  "import-zotero",
   "delete-encounter",
   "review-answer",
   "check-answer",

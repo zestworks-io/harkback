@@ -62,6 +62,7 @@ export default defineConfig({
             "*://*.notion.so/*",
             "*://*.notion.site/*",
             "*://docs.google.com/*",
+            "https://api.zotero.org/*",
           ]
         : [],
     action: { default_title: "Harkback: scan this page" },

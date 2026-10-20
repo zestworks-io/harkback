@@ -1,0 +1,236 @@
+[
+  {
+    "key": "ANNVISA1",
+    "version": 806,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNVISA1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNVISA1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAVISA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNVISA1",
+      "version": 806,
+      "parentItem": "ATTAVISA",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "visual analytics",
+      "annotationComment": "concepte interessant",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "49",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNATTN1",
+    "version": 807,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNATTN1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNATTN1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAATTN",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNATTN1",
+      "version": 807,
+      "parentItem": "ATTAATTN",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "“Transformer”,",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNLONE1",
+    "version": 808,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNLONE1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNLONE1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALONE",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNLONE1",
+      "version": 808,
+      "parentItem": "ATTALONE",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "置信区间",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNLORA2",
+    "version": 809,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNLORA2",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNLORA2",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAVISA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNLORA2",
+      "version": 809,
+      "parentItem": "ATTAVISA",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "LoRA",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNINK01",
+    "version": 810,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNINK01",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNINK01",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAATTN",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNINK01",
+      "version": 810,
+      "parentItem": "ATTAATTN",
+      "itemType": "annotation",
+      "annotationType": "ink",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"width\":2,\"paths\":[[10,10,20,20]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  }
+]

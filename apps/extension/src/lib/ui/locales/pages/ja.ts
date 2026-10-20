@@ -428,4 +428,28 @@ export const pages_ja: Readonly<Record<string, string>> = {
     "別の概念に属する調べものと名前を選ぶと、新しい概念に移ります。新しい名前がすでに別の概念の名前なら、その概念に加わります。",
   "Look-ups": "調べもの",
   Names: "名前",
+  "Import the terms you highlighted in Zotero: each short highlight is recorded as a look-up in its paper, and longer passages are left out. Harkback reads your library with an API key and writes nothing to Zotero.":
+    "Zotero でハイライトした用語を取り込みます。短いハイライトはそれぞれ論文内の検索として記録され、長い文章は除外されます。Harkback は API キーでライブラリを読み取るだけで、Zotero には何も書き込みません。",
+  "API key": "API キー",
+  "Create a key on zotero.org": "zotero.org でキーを作成",
+  "Only “Allow library access” is needed. The key is kept on this computer with your settings.":
+    "必要なのは「Allow library access」だけです。キーは設定と一緒にこのコンピューターに保存されます。",
+  "Paste your Zotero API key first.": "まず Zotero の API キーを貼り付けてください。",
+  "Access to Zotero was not granted.": "Zotero へのアクセスが許可されませんでした。",
+  "The key is wrong or was revoked.": "キーが間違っているか、取り消されています。",
+  "This key cannot read your library: tick “Allow library access” for it on zotero.org.":
+    "このキーではライブラリを読み取れません。zotero.org でこのキーの「Allow library access」にチェックを入れてください。",
+  "Zotero could not be reached.": "Zotero に接続できませんでした。",
+  "Zotero is busy; try again later.": "Zotero が混み合っています。しばらくしてからもう一度お試しください。",
+  "Zotero answered with an error; try again later.": "Zotero がエラーを返しました。しばらくしてからもう一度お試しください。",
+  "Find highlights": "ハイライトを探す",
+  "Reading Zotero…": "Zotero を読み込み中…",
+  "Look-ups imported: {n}.": "取り込んだ検索：{n}。",
+  "No new terms in your highlights.": "ハイライトに新しい用語はありません。",
+  "Terms found: {n}. Longer highlights left out: {m}.": "見つかった用語：{n}。除外した長いハイライト：{m}。",
+  "Import ticked terms": "チェックした用語を取り込む",
+  "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
+    "公開論文でないファイルは個人的な文書かもしれないため、そこから取り込んだ用語は機密として記録されます。",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
+    "Zotero から取り込むとき、Zotero の API キーは api.zotero.org にだけ送られ、ハイライトとその論文を読み取るために使われます。Zotero には何も書き込みません。",
 };

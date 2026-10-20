@@ -30,6 +30,7 @@ const TEXT = {
     related: "相关",
     timeline: "记录",
     tier: { defined_in_source: "原文定义", external_knowledge: "外部知识" },
+    notExplained: "在 Zotero 里划过，还没解释过。",
     source: (t: string) => `《${t}》`,
   },
   en: {
@@ -38,6 +39,7 @@ const TEXT = {
     related: "Related",
     timeline: "Timeline",
     tier: { defined_in_source: "Defined in source", external_knowledge: "External knowledge" },
+    notExplained: "Highlighted in Zotero; not explained yet.",
     source: (t: string) => `“${t}”`,
   },
 } as const;
@@ -68,8 +70,9 @@ export function conceptNote(d: ConceptDetail, language: Lang, titleOf: TitleOf =
   for (const e of d.entries) {
     // A video is linked at the moment the term was met.
     const at = e.t === null ? "" : e.sourceUrl ? ` [${formatTimestamp(e.t)}](${e.sourceUrl})` : ` ${formatTimestamp(e.t)}`;
-    lines.push(`- ${e.date} · ${t.source(e.sourceTitle)}${at} · ${t.tier[e.tier]}`);
-    lines.push(`  > ${e.explanation.replace(/\s*\n\s*/g, " ").trim()}`);
+    // A look-up imported from Zotero has no explanation, and so no kind of explanation either.
+    lines.push(`- ${e.date} · ${t.source(e.sourceTitle)}${at}${e.explanation ? ` · ${t.tier[e.tier]}` : ""}`);
+    lines.push(`  > ${e.explanation ? e.explanation.replace(/\s*\n\s*/g, " ").trim() : t.notExplained}`);
   }
   lines.push("", NOTE_END, "");
   return lines.join("\n");

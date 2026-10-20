@@ -33,6 +33,16 @@ describe("classifyTerms", () => {
     expect(statusOf(terms)).toEqual({ LoRA: "confused", Attention: "rusty", Softmax: "understood", "Flash attention": "new" });
   });
 
+  it("calls a term only highlighted in Zotero new, with nothing stored to show", () => {
+    const { w } = setup();
+    const id = w.concept("Diffusion model");
+    w.encounter(id, "s1", "");
+    expect(classifyTerms(w.state(), ["Diffusion model"], T0 + DAY_MS)).toEqual([
+      { term: "Diffusion model", conceptId: null, name: "Diffusion model", status: "new" },
+    ]);
+    expect(storedExplanation(w.state(), id)).toBeNull();
+  });
+
   it("calls a term rusty once it is due for review, even if it was understood", () => {
     const { w, studied } = setup();
     studied("Softmax", "review_good");

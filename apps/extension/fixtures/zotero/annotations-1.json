@@ -1,0 +1,235 @@
+[
+  {
+    "key": "ANNLORA1",
+    "version": 801,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNLORA1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNLORA1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNLORA1",
+      "version": 801,
+      "parentItem": "ATTALORA",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "LoRA",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNPASS1",
+    "version": 802,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNPASS1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNPASS1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNPASS1",
+      "version": 802,
+      "parentItem": "ATTALORA",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "We propose Low-Rank Adaptation, or LoRA, which freezes the pretrained model weights and injects trainable rank decomposition matrices into each layer of the Transformer architecture.",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNUNDR1",
+    "version": 803,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNUNDR1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNUNDR1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNUNDR1",
+      "version": 803,
+      "parentItem": "ATTALORA",
+      "itemType": "annotation",
+      "annotationType": "underline",
+      "annotationText": "low-rank adaptation",
+      "annotationComment": "key idea",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNNOTE1",
+    "version": 804,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNNOTE1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNNOTE1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNNOTE1",
+      "version": 804,
+      "parentItem": "ATTALORA",
+      "itemType": "annotation",
+      "annotationType": "note",
+      "annotationComment": "check the rank ablation",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  },
+  {
+    "key": "ANNIMAG1",
+    "version": 805,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ANNIMAG1",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ANNIMAG1",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ANNIMAG1",
+      "version": 805,
+      "parentItem": "ATTALORA",
+      "itemType": "annotation",
+      "annotationType": "image",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "1",
+      "annotationSortIndex": "00000|000125|00117",
+      "annotationPosition": "{\"pageIndex\":0,\"rects\":[[48.09,651.132,465.776,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  }
+]

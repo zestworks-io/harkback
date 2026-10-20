@@ -1,0 +1,410 @@
+[
+  {
+    "key": "PAPRLORA",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRLORA",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/PAPRLORA",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "creatorSummary": "Hu et al.",
+      "parsedDate": "2021-10-16",
+      "numChildren": 2
+    },
+    "data": {
+      "key": "PAPRLORA",
+      "version": 700,
+      "itemType": "preprint",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "creators": [
+        {
+          "creatorType": "author",
+          "firstName": "Edward J.",
+          "lastName": "Hu"
+        }
+      ],
+      "abstractNote": "",
+      "genre": "",
+      "repository": "arXiv",
+      "archiveID": "arXiv:2106.09685",
+      "place": "",
+      "date": "2021-10-16",
+      "series": "",
+      "seriesNumber": "",
+      "DOI": "10.48550/arXiv.2106.09685",
+      "citationKey": "",
+      "url": "http://arxiv.org/abs/2106.09685",
+      "accessDate": "2026-09-01T08:00:00Z",
+      "archive": "",
+      "archiveLocation": "",
+      "shortTitle": "LoRA",
+      "language": "",
+      "libraryCatalog": "arXiv.org",
+      "callNumber": "",
+      "rights": "",
+      "extra": "arXiv:2106.09685 [cs]",
+      "collections": [],
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "PAPRVISA",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRVISA",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/PAPRVISA",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "creatorSummary": "Heer and Agrawala",
+      "parsedDate": "2008",
+      "numChildren": 1
+    },
+    "data": {
+      "key": "PAPRVISA",
+      "version": 700,
+      "itemType": "journalArticle",
+      "title": "Design considerations for collaborative visual analytics",
+      "creators": [
+        {
+          "creatorType": "author",
+          "firstName": "Jeffrey",
+          "lastName": "Heer"
+        },
+        {
+          "creatorType": "author",
+          "firstName": "Maneesh",
+          "lastName": "Agrawala"
+        }
+      ],
+      "abstractNote": "",
+      "publicationTitle": "Information Visualization",
+      "volume": "7",
+      "issue": "1",
+      "pages": "49-62",
+      "date": "2008",
+      "series": "",
+      "seriesTitle": "",
+      "seriesText": "",
+      "journalAbbreviation": "",
+      "language": "",
+      "DOI": "http://0-dx.doi.org.cataleg.uoc.edu/10.1057/palgrave.ivs.9500167",
+      "ISSN": "",
+      "shortTitle": "",
+      "url": "http://0-search.proquest.com.cataleg.uoc.edu/docview/237203462/abstract?accountid=15299",
+      "accessDate": "",
+      "archive": "",
+      "archiveLocation": "",
+      "libraryCatalog": "",
+      "callNumber": "",
+      "rights": "",
+      "extra": "00129",
+      "collections": [],
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "PAPRATTN",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRATTN",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/PAPRATTN",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "creatorSummary": "Vaswani",
+      "parsedDate": "2017",
+      "numChildren": 1
+    },
+    "data": {
+      "key": "PAPRATTN",
+      "version": 700,
+      "itemType": "journalArticle",
+      "title": "Attention Is All You Need",
+      "creators": [
+        {
+          "creatorType": "author",
+          "firstName": "Ashish",
+          "lastName": "Vaswani"
+        }
+      ],
+      "abstractNote": "",
+      "publicationTitle": "Advances in Neural Information Processing Systems",
+      "volume": "30",
+      "issue": "",
+      "pages": "",
+      "date": "2017",
+      "series": "",
+      "seriesTitle": "",
+      "seriesText": "",
+      "journalAbbreviation": "",
+      "language": "",
+      "DOI": "10.5555/3295222.3295349",
+      "ISSN": "",
+      "shortTitle": "",
+      "url": "http://arxiv.org/abs/1706.03762",
+      "accessDate": "",
+      "archive": "",
+      "archiveLocation": "",
+      "libraryCatalog": "arXiv.org",
+      "callNumber": "",
+      "rights": "",
+      "extra": "arXiv:1706.03762 [cs]",
+      "collections": [],
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "ATTALORA",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALORA",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ATTALORA",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRLORA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ATTALORA",
+      "version": 700,
+      "parentItem": "PAPRLORA",
+      "itemType": "attachment",
+      "linkMode": "imported_url",
+      "title": "Preprint PDF",
+      "accessDate": "",
+      "url": "http://arxiv.org/pdf/2106.09685v2",
+      "note": "",
+      "contentType": "application/pdf",
+      "charset": "",
+      "filename": "Hu et al. - 2021 - LoRA.pdf",
+      "md5": "00000000000000000000000000000000",
+      "mtime": 1758000000000,
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "ATTAVISA",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAVISA",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ATTAVISA",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRVISA",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ATTAVISA",
+      "version": 700,
+      "parentItem": "PAPRVISA",
+      "itemType": "attachment",
+      "linkMode": "imported_url",
+      "title": "Full Text PDF",
+      "accessDate": "",
+      "url": "http://0-media.proquest.com.cataleg.uoc.edu/media/pq/classic/doc/1452797381/fmt/pi/rep/NONE",
+      "note": "",
+      "contentType": "application/pdf",
+      "charset": "",
+      "filename": "Heer i Agrawala - 2008 - Design considerations.pdf",
+      "md5": "00000000000000000000000000000000",
+      "mtime": 1758000000000,
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "ATTAATTN",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTAATTN",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ATTAATTN",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/users/4242424/items/PAPRATTN",
+        "type": "application/json"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ATTAATTN",
+      "version": 700,
+      "parentItem": "PAPRATTN",
+      "itemType": "attachment",
+      "linkMode": "imported_url",
+      "title": "Full Text PDF",
+      "accessDate": "",
+      "url": "",
+      "note": "",
+      "contentType": "application/pdf",
+      "charset": "",
+      "filename": "Vaswani - 2017 - Attention.pdf",
+      "md5": "00000000000000000000000000000000",
+      "mtime": 1758000000000,
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "ATTALONE",
+    "version": 700,
+    "library": {
+      "type": "user",
+      "id": 4242424,
+      "name": "reader",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/reader",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/users/4242424/items/ATTALONE",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/reader/items/ATTALONE",
+        "type": "text/html"
+      }
+    },
+    "meta": {},
+    "data": {
+      "key": "ATTALONE",
+      "version": 700,
+      "itemType": "attachment",
+      "linkMode": "imported_url",
+      "title": "lab notes.pdf",
+      "accessDate": "",
+      "url": "",
+      "note": "",
+      "contentType": "application/pdf",
+      "charset": "",
+      "filename": "lab notes.pdf",
+      "md5": "00000000000000000000000000000000",
+      "mtime": 1758000000000,
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  }
+]

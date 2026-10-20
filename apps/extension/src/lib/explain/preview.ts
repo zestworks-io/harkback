@@ -37,6 +37,11 @@ export function classifyTerms(state: State, terms: readonly string[], now: numbe
     const concept = state.concepts.get(id);
     if (!concept || concept.muted || seen.has(id)) continue;
     seen.add(id);
+    // A term only highlighted in Zotero was never explained: it is still new to the reader.
+    if (!(state.encountersByConcept.get(id) ?? []).some((e) => state.encounters.get(e)?.explanation.text !== "")) {
+      out.push({ term, conceptId: null, name: term, status: "new" });
+      continue;
+    }
     const understanding = understandingOf(state, id);
     const due = dueAtOf(state, id);
     const status: PreviewStatus =
@@ -50,7 +55,8 @@ export function classifyTerms(state: State, terms: readonly string[], now: numbe
 export function storedExplanation(state: State, conceptId: string): string | null {
   const id = state.representative.get(conceptId) ?? conceptId;
   if (!state.concepts.get(id) || state.concepts.get(id)!.isPlaceholder) return null;
-  const latest = state.encounters.get(state.encountersByConcept.get(id)?.at(-1) ?? "");
+  // A term only highlighted in Zotero has no explanation yet.
+  const latest = (state.encountersByConcept.get(id) ?? []).map((e) => state.encounters.get(e)!).findLast((e) => e.explanation.text !== "");
   return latest?.explanation.text ?? null;
 }
 
