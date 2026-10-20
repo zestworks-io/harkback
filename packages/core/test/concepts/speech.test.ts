@@ -36,6 +36,17 @@ describe("names in automatic captions", () => {
     expect(found(m, "We train Laura adapters")).toEqual([]);
   });
 
+  it("judges case line by line", () => {
+    const m = matcher("LoRA", "Low-Rank Adaptation");
+    // A capital on the line beside it does not stop a line without case from being read without case.
+    expect(found(m, "so we use lora here\nI think that works")).toEqual(["lora"]);
+    expect(found(m, "I think laura helps\nso we train laura adapters")).toEqual(["laura"]);
+    expect(found(m, "So we use lora here\nand it works")).toEqual([]);
+    expect(found(m, "so we use\n\u266a\nlora here")).toEqual(["lora"]);
+    // A name may still run on to the next caption line.
+    expect(found(m, "with low-rank\nadaptation it works")).toEqual(["low-rank\nadaptation"]);
+  });
+
   it("does not find a name twice when it is also matched exactly", () => {
     const m = matcher("quantization");
     expect(found(m, "quantization quantization")).toEqual(["quantization", "quantization"]);

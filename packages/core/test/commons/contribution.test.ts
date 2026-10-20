@@ -24,9 +24,23 @@ function events() {
     encounter(14, 3, "arxiv:2305.14314"),
     action(10, "review_hard"),
     action(10, "followed_up", "2026-09-12T00:00:00Z"),
-    ev("edge.proposed", { from: id(1), to: id(2), rel: "prerequisite", source: "llm_explain", confidence: 0.9, evidence: {} }),
+    ev("edge.proposed", {
+      from: id(1),
+      to: id(2),
+      rel: "prerequisite",
+      source: "llm_explain",
+      confidence: 0.9,
+      evidence: { encounter_id: id(10) },
+    }),
     ev("edge.confirmed", { edge_id: edgeId(id(1), "prerequisite", id(2)) }),
-    ev("edge.proposed", { from: id(2), to: id(1), rel: "related", source: "llm_explain", confidence: 0.9, evidence: {} }),
+    ev("edge.proposed", {
+      from: id(2),
+      to: id(1),
+      rel: "related",
+      source: "llm_explain",
+      confidence: 0.9,
+      evidence: { encounter_id: id(11) },
+    }),
   ];
 }
 
@@ -63,6 +77,29 @@ describe("buildContribution", () => {
     expect(buildContribution(replay(events()), { scope: "all_public_sources", target: null }).relations).toEqual([
       { from: "LoRA", rel: "prerequisite", to: "Low-rank matrix" },
     ]);
+  });
+
+  it("leaves out a relation found on a sensitive page or only outside the contribution", () => {
+    const variant = (evidence: number) => [
+      ev("edge.proposed", {
+        from: id(2),
+        to: id(1),
+        rel: "variant_of",
+        source: "llm_explain",
+        confidence: 0.9,
+        evidence: { encounter_id: id(evidence) },
+      }),
+      ev("edge.confirmed", { edge_id: edgeId(id(2), "variant_of", id(1)) }),
+    ];
+    const all = { scope: "all_public_sources", target: null } as const;
+    const rels = (state: ReturnType<typeof replay>, scope: Parameters<typeof buildContribution>[1] = all) =>
+      buildContribution(state, scope).relations.map((r) => r.rel);
+    // Found in a contributed paper and also on a sensitive one.
+    expect(rels(replay([...events(), ...variant(10), ...variant(14)]))).toEqual(["prerequisite"]);
+    // Found only on a page that is not contributed.
+    expect(rels(replay([...events(), ...variant(13)]))).toEqual(["prerequisite"]);
+    // One look-up contributed: the relation was found in another.
+    expect(rels(replay(events()), { scope: "this_record", target: id(11) })).toEqual([]);
   });
 
   it("narrows to one source or one look-up", () => {

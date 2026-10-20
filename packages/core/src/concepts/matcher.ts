@@ -211,15 +211,23 @@ export class Matcher {
    */
   scan(raw: string, opts: { speech?: boolean } = {}): Hit[] {
     const prepared = prepareText(raw);
-    if (!opts.speech) return dropContained(this.exact(raw, prepared.text, prepared.map, false));
+    if (!opts.speech)
+      return dropContained(
+        this.exact(
+          raw,
+          prepared.text,
+          prepared.map,
+          Object.assign(() => false, { anywhere: false }),
+        ),
+      );
     const joined = joinSpelledLetters(prepared.text);
     const map = joined.map.map((i) => prepared.map[i]!);
-    const caseless = hasNoCase(raw);
+    const caseless = caselessLines(raw);
     const exact = this.exact(raw, joined.text, map, caseless);
     return dropContained([...exact, ...this.heard(raw, joined.text, map, caseless, exact)]);
   }
 
-  private exact(raw: string, text: string, map: readonly number[], caseless: boolean): Hit[] {
+  private exact(raw: string, text: string, map: readonly number[], caseless: Caseless): Hit[] {
     const hits: Hit[] = [];
     let s = 0;
     for (let i = 0; i < text.length; i++) {
@@ -244,7 +252,7 @@ export class Matcher {
    * Latin names heard slightly wrong, word by word: within a few edits for a long name, or sounding the same (Soundex) and at
    * most two edits away for a short name matched by case, on a line without case. Words already matched exactly are skipped.
    */
-  private heard(raw: string, text: string, map: readonly number[], caseless: boolean, exact: readonly Hit[]): Hit[] {
+  private heard(raw: string, text: string, map: readonly number[], caseless: Caseless, exact: readonly Hit[]): Hit[] {
     const words = [...text.matchAll(/[\p{L}\p{N}]+/gu)].map((m) => ({ word: m[0], start: m.index, end: m.index + m[0].length }));
     const taken = (start: number, end: number) => exact.some((h) => h.start < end && start < h.end);
     const hits: Hit[] = [];
@@ -256,7 +264,7 @@ export class Matcher {
       const compact = e.prepared.replace(/ /g, "");
       const count = e.prepared.split(" ").length;
       const edits = allowedEdits(compact.length);
-      const soundsLike = caseless && e.caseKey !== null && count === 1 && compact.length >= 4 && caselessOk(e.caseKey);
+      const soundsLike = caseless.anywhere && e.caseKey !== null && count === 1 && compact.length >= 4 && caselessOk(e.caseKey);
       if (edits === 0 && !soundsLike) continue;
       const code = soundsLike ? soundex(compact) : "";
       // The same number of words, or one more or fewer: speech splits and joins words ("fine tune", "finetune").
@@ -267,12 +275,12 @@ export class Matcher {
             .slice(w, w + n)
             .map((x) => x.word)
             .join("");
-          let ok = edits > 0 && boundedDistance(heardAs, compact, edits) <= edits;
-          if (!ok && soundsLike && n === 1 && heardAs[0] === compact[0] && soundex(heardAs) === code)
-            ok = boundedDistance(heardAs, compact, 2) <= 2;
-          if (!ok) continue;
           const start = map[words[w]!.start]!;
           const end = after(raw, map[words[w + n - 1]!.end - 1]!);
+          let ok = edits > 0 && boundedDistance(heardAs, compact, edits) <= edits;
+          if (!ok && soundsLike && n === 1 && heardAs[0] === compact[0] && caseless(start, end) && soundex(heardAs) === code)
+            ok = boundedDistance(heardAs, compact, 2) <= 2;
+          if (!ok) continue;
           if (!taken(start, end)) hits.push({ key: e.key, start, end, text: raw.slice(start, end) });
         }
       }
@@ -281,7 +289,7 @@ export class Matcher {
   }
 
   /** Returns the accepted end index in prepared text (possibly extended by a plural "s"), or -1. */
-  private accept(e: Entry, text: string, startP: number, endP: number, raw: string, map: readonly number[], caseless: boolean): number {
+  private accept(e: Entry, text: string, startP: number, endP: number, raw: string, map: readonly number[], caseless: Caseless): number {
     let end = endP;
     if (e.script === "latin") {
       if (isLatinWordChar(text[startP - 1])) return -1;
@@ -297,11 +305,35 @@ export class Matcher {
     if (e.caseKey) {
       const original = raw.slice(map[startP]!, after(raw, map[end]!)).replace(SEPARATORS_G, "");
       // A line without case says nothing about case, so a name matched by case is taken as written unless it is a common word.
-      const ignored = caseless && caselessOk(e.caseKey) && original.toLowerCase().replace(/\./g, "") === e.caseKey.toLowerCase();
+      const ignored =
+        caseless(map[startP]!, after(raw, map[end]!)) &&
+        caselessOk(e.caseKey) &&
+        original.toLowerCase().replace(/\./g, "") === e.caseKey.toLowerCase();
       if (!ignored && normalizeName(original).caseKey !== e.caseKey) return -1;
     }
     return end;
   }
+}
+
+/** Whether every line that raw[start, end) touches has no case. */
+type Caseless = ((start: number, end: number) => boolean) & {
+  /** Whether some line with letters has no case. */
+  anywhere: boolean;
+};
+
+/** Case is judged line by line: one caption line written with capitals says nothing about the line beside it. */
+function caselessLines(raw: string): Caseless {
+  const lines: { start: number; end: number; caseless: boolean }[] = [];
+  for (let start = 0; start <= raw.length;) {
+    const nl = raw.indexOf("\n", start);
+    const end = nl < 0 ? raw.length : nl;
+    const line = raw.slice(start, end);
+    // A line without letters (a blank one, or a music note) says nothing either way.
+    lines.push({ start, end, caseless: hasNoCase(line) || !/\p{L}/u.test(line) });
+    start = end + 1;
+  }
+  const at = (start: number, end: number) => lines.every((l) => l.caseless || l.end < start || l.start >= end);
+  return Object.assign(at, { anywhere: lines.some((l) => l.caseless && /\p{L}/u.test(raw.slice(l.start, l.end))) });
 }
 
 /**

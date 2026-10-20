@@ -35,6 +35,15 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
     return rep === undefined || hidden.has(rep);
   };
 
+  // A name split off on its own makes a concept with no look-up, which is left out because nothing says where it came from;
+  // the name then stays on the concept it was taken from, instead of being lost from both.
+  const namesOnly = new Set<string>();
+  for (const id of hidden) {
+    const c = state.concepts.get(id)!;
+    const related = [...state.edges.values()].some((e) => e.from === id || e.to === id);
+    if (!state.encountersByConcept.get(id)?.length && !related) for (const n of c.names) namesOnly.add(identityKey(n));
+  }
+
   // A decision about a name that was proposed from a sensitive page carries the same text, so it goes with the proposal.
   const hiddenNames = new Set<string>();
   for (const e of events) {
@@ -58,9 +67,10 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
       case "concept.alias_rejected":
         if (hiddenNames.has(identityKey(e.payload.alias))) return false;
         return !isHidden(e.payload.concept_id);
+      case "concept.alias_removed":
+        return !isHidden(e.payload.concept_id) && !namesOnly.has(identityKey(e.payload.alias));
       case "concept.created":
       case "concept.alias_added":
-      case "concept.alias_removed":
       case "concept.muted":
       case "concept.unmuted":
         return !isHidden(e.payload.concept_id);

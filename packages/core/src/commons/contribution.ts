@@ -79,12 +79,13 @@ export function isContributable(state: State, sourceId: string, alsoSensitive: A
 /**
  * A contribution to the data commons, built on this computer. It holds no quote, explanation, address, device or exact time:
  * for each look-up in an openly licensed paper, the paper's id, the term, its field and section, how well it was understood,
- * and the month; and the relations between the terms it contains.
+ * and the month; and the relations you confirmed between the terms it contains, when found in those look-ups and on no sensitive page.
  */
 export function buildContribution(state: State, scope: ContributionScope, alsoSensitive: AlsoSensitive = () => false): Contribution {
   const records: ContributedRecord[] = [];
   /** Representative concept id -> the term it is contributed as. */
   const included = new Map<string, string>();
+  const contributed = new Set<string>();
   for (const e of state.encounters.values()) {
     if (scope.scope === "this_record" && e.id !== scope.target) continue;
     if (scope.scope === "this_source" && e.sourceId !== scope.target) continue;
@@ -93,6 +94,7 @@ export function buildContribution(state: State, scope: ContributionScope, alsoSe
     const concept = state.concepts.get(conceptId);
     if (!concept) continue;
     included.set(conceptId, concept.canonicalName.slice(0, MAX_TERM));
+    contributed.add(e.id);
     records.push({
       paper: paperId(state, e.sourceId)!,
       license: state.sources.get(e.sourceId)!.license,
@@ -106,9 +108,15 @@ export function buildContribution(state: State, scope: ContributionScope, alsoSe
   }
   records.sort((a, b) => cmp(a.paper, b.paper) || cmp(a.term, b.term) || cmp(a.month, b.month));
 
+  const notSensitive = (encounterId: string): boolean => {
+    const source = state.sources.get(state.encounters.get(encounterId)?.sourceId ?? "");
+    return !!source && !isSensitiveSource(state, source.id) && !alsoSensitive(source);
+  };
   const relations: ContributedRelation[] = [];
   for (const edge of state.edges.values()) {
-    if (edge.status !== "confirmed") continue;
+    // Only a relation found in a look-up contributed here, and never on a sensitive page (or one since deleted, which may have been).
+    if (edge.status !== "confirmed" || !edge.evidenceEncounterIds.some((id) => contributed.has(id))) continue;
+    if (!edge.evidenceEncounterIds.every((id) => notSensitive(id))) continue;
     const from = included.get(edge.from);
     const to = included.get(edge.to);
     if (from && to) relations.push({ from, rel: edge.rel, to });

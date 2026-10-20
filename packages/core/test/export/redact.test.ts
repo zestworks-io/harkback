@@ -112,6 +112,23 @@ describe("withoutSensitive", () => {
     expect(dismissed).toEqual(["arxiv:1"]);
   });
 
+  it("keeps a name split off on its own on the concept it came from", () => {
+    const l = log();
+    l.source("pub", "normal");
+    l.source("secret", "sensitive");
+    l.encounter(l.concept("Other"), "secret");
+    const a = l.concept("Prefix tuning");
+    l.encounter(a, "pub");
+    l.events.push(l.f.make("concept.alias_added", { concept_id: a, alias: "Prompt tuning" }));
+    const b = ulid();
+    l.events.push(l.f.make("concept.created", { concept_id: b, canonical_name: "Prompt tuning", aliases: [], domain: "ml" }));
+    l.events.push(l.f.make("concept.alias_removed", { concept_id: a, alias: "Prompt tuning" }));
+    expect(replay(l.events).concepts.get(a)!.names).toEqual(["Prefix tuning"]);
+    const restored = replay(withoutSensitive(l.events));
+    expect(restored.concepts.has(b)).toBe(false);
+    expect(restored.concepts.get(a)!.names).toEqual(["Prefix tuning", "Prompt tuning"]);
+  });
+
   it("returns everything when nothing is sensitive, and the result is valid JSONL", () => {
     const l = log();
     l.source("pub", "normal");

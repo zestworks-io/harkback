@@ -100,6 +100,37 @@ describe("planSplit", () => {
     expect(state.encountersByConcept.get(state.representative.get(NEW)!)).toEqual([id(12)]);
   });
 
+  it("keeps a concept merged in through the one that moves, unless its own name moves too", () => {
+    const events = [
+      ...wrongJoin(),
+      concept(3, "P-tuning", "ml", [], "2026-09-12T00:00:00Z"),
+      concept(4, "Prompt learning", "ml", [], "2026-09-12T00:00:00Z"),
+      encounter(13, 4, "s1", "2026-09-12T00:00:00Z"),
+      ev("concept.merged", { from: id(4), into: id(3) }, { ts: "2026-09-13T00:00:00Z" }),
+      ev("concept.merged", { from: id(3), into: id(1) }, { ts: "2026-09-14T00:00:00Z" }),
+    ];
+    const split = (names: string[]) =>
+      replay(apply(events, planSplit(events, { conceptId: id(1), encounterIds: [], names, newName: "P-tuning" }, NEW)));
+    const one = split(["P-tuning"]);
+    expect(one.representative.get(id(4))).toBe(one.representative.get(id(1)));
+    expect(one.representative.get(id(3))).toBe(one.representative.get(NEW));
+    expect(one.representative.get(NEW)).not.toBe(one.representative.get(id(1)));
+    const both = split(["P-tuning", "Prompt learning"]);
+    expect(both.representative.get(id(4))).toBe(both.representative.get(NEW));
+  });
+
+  it("adds no merge for a concept joined by a name they share", () => {
+    const events = [...wrongJoin(), concept(3, "Prefix-tuning", "ml", ["Prefix tuning"], "2026-09-12T00:00:00Z")];
+    expect(replay(events).representative.get(id(3))).toBe(replay(events).representative.get(id(1)));
+    const after = apply(
+      events,
+      planSplit(events, { conceptId: id(1), encounterIds: [id(11)], names: ["Prompt tuning"], newName: "Prompt tuning" }, NEW),
+    );
+    expect(after.slice(events.length).filter((e) => e.type === "concept.merged")).toEqual([]);
+    const state = replay(after);
+    expect(state.representative.get(id(3))).toBe(state.representative.get(id(1)));
+  });
+
   it("joins an existing concept when the new name is already one", () => {
     const events = wrongJoin();
     const state = replay(

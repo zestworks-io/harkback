@@ -14,6 +14,11 @@ All notable changes to Harkback. The format follows [Keep a Changelog](https://k
 
 ### Fixed
 
+- **The graph is laid out for the size it is shown at.** It was laid out for a wider, flatter box than the page gives it, so a map of a few dozen concepts opened at half size with small labels and empty bands above and below. Zooming out now stops at the whole map instead of shrinking it to a speck.
+- **Automatic captions are judged line by line.** One caption line with a capital (`I think that works`) stopped the line beside it (`so we use lora here`) from being read without case, so lower-case names were missed whenever two lines were on screen.
+- **Splitting off a merged concept keeps the ones merged through it.** When _B_ had been merged into _A_ and _C_ into _B_, moving _B_'s name to a new concept left _C_ on its own, belonging to neither.
+- **A contribution leaves out relations found on sensitive pages.** A relation you confirmed was included whenever both its terms were, even when it was found only on a sensitive page or in a paper outside the contribution. It is now included only when it was found in a look-up the file contains, and never on a sensitive page.
+- **A backup without sensitive sources keeps a name split off on its own.** The new concept, which has no look-up, was left out of such a backup, and the name was lost from both concepts when it was restored. It now stays on the concept it came from.
 - **Related concepts are named in English, whatever language you explain in.** The variants, broader concepts and prerequisites the model suggests were written in the explanation language (`参考译文` next to `reference translation`), so each became a concept of its own that never joined the one you had. Concepts recorded this way before stay as they are; they are never explained, so unticking _Show concepts not explained yet_ hides them from the graph.
 
 ## 1.0.4 - 2026-10-17

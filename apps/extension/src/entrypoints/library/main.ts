@@ -950,6 +950,7 @@ async function main(): Promise<void> {
       },
     });
 
+  /** The map's size when the page cannot be measured; it is otherwise laid out for the size it is shown at. */
   const GRAPH_WIDTH = 960;
   const GRAPH_HEIGHT = 640;
   /** The smallest scale a map opens at, so labels stay readable. */
@@ -1033,6 +1034,9 @@ async function main(): Promise<void> {
   /** The concepts as a map: relations as lines, colour by how well each is understood. Drag to move, wheel to zoom. */
   function graphView(): HTMLElement {
     const filtered = graphFilter.domain !== "" || graphFilter.understanding !== "" || graphFilter.days > 0 || !graphFilter.unexplained;
+    // Laid out for the box it is drawn in (see svg.graph in the page's style), so one unit of the map is one pixel.
+    const width = list.clientWidth || GRAPH_WIDTH;
+    const height = Math.min(window.innerHeight * 0.7, GRAPH_HEIGHT) || GRAPH_HEIGHT;
     const g = buildGraph(state, {
       query: search.value,
       ...(graphFilter.domain && { domain: graphFilter.domain }),
@@ -1043,8 +1047,8 @@ async function main(): Promise<void> {
         const c = state.concepts.get(id)!;
         return names(c.canonicalName, c.names).name;
       },
-      width: GRAPH_WIDTH,
-      height: GRAPH_HEIGHT,
+      width,
+      height,
     });
     if (g.nodes.length === 0) {
       return h(
@@ -1062,9 +1066,9 @@ async function main(): Promise<void> {
     }
     // A map too big to read whole opens on its best connected concept at a readable size; scroll to zoom out to all of it.
     const view = { x: 0, y: 0, w: g.width, h: g.height };
-    if (g.width > GRAPH_WIDTH / MIN_GRAPH_SCALE) {
+    if (g.width > width / MIN_GRAPH_SCALE) {
       const focus = g.nodes[0]!;
-      view.w = GRAPH_WIDTH / MIN_GRAPH_SCALE;
+      view.w = width / MIN_GRAPH_SCALE;
       view.h = (view.w * g.height) / g.width;
       view.x = Math.min(Math.max(0, focus.x - view.w / 2), g.width - view.w);
       view.y = Math.min(Math.max(0, focus.y - view.h / 2), g.height - view.h);
@@ -1142,7 +1146,8 @@ async function main(): Promise<void> {
         ev.preventDefault();
         const rect = svg.getBoundingClientRect();
         const factor = ev.deltaY < 0 ? 0.85 : 1 / 0.85;
-        const w = Math.min(g.width * 4, Math.max(g.width / 8, view.w * factor));
+        // Out no further than the whole map, so it cannot shrink to a speck.
+        const w = Math.min(g.width, Math.max(g.width / 8, view.w * factor));
         const k = w / view.w;
         const px = view.x + ((ev.clientX - rect.left) / rect.width) * view.w;
         const py = view.y + ((ev.clientY - rect.top) / rect.height) * view.h;
@@ -1150,6 +1155,7 @@ async function main(): Promise<void> {
         view.y = py - (py - view.y) * k;
         view.w = w;
         view.h = view.h * k;
+        if (w >= g.width) Object.assign(view, { x: 0, y: 0, w: g.width, h: g.height });
         apply();
       },
       { passive: false },
