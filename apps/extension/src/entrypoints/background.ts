@@ -39,6 +39,7 @@ import {
 } from "../lib/messaging/messages";
 import { classifyTerms, routePreview, storedExplanation } from "../lib/explain/preview";
 import { routeCheck } from "../lib/review/review-check";
+import { importedExplanation, routeImported } from "../lib/explain/imported";
 import { ModelError, streamChat } from "../lib/models/model-client";
 import { reviewQueue } from "../lib/review/review";
 import { badgeFor } from "../lib/review/review-badge";
@@ -247,7 +248,12 @@ export default defineBackground(() => {
         // The model took a while: join against what is recorded now, not what was when the request started.
         const outcome = finishExplain(raw, plan, req, await getState());
         last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
-        post({ type: "explained", explanation: outcome.parsed.explanation, tier: outcome.tier });
+        post({
+          type: "explained",
+          explanation: outcome.parsed.explanation,
+          tier: outcome.tier,
+          ...(outcome.tier === "defined_in_source" && outcome.parsed.evidence && { evidence: outcome.parsed.evidence }),
+        });
         if (incognito)
           return post({ type: "done", encounterId: null, recorded: false, sensitive: isSensitiveSource(state, req.source.source_id) });
         // Started from a reunion card: the concept is already known.
@@ -351,29 +357,19 @@ export default defineBackground(() => {
     const settings = await loadSettings();
     const routed = routeCheck(settings, await getState(), conceptId);
     if (routed.kind === "error") return { ok: false, code: routed.code };
-    if (!(await canReach(routed.model))) return { ok: false, code: "no_permission" };
-    const asked = Date.now();
-    const rate = await acquireRate(settings, asked);
-    if (!rate.ok) return { ok: false, code: "local_rate", retryAfterMs: rate.retryAfterMs };
-    try {
-      const messages = buildCheckPrompt({
-        term: routed.term,
-        explanation: routed.explanation,
-        answer,
-        language: explainLanguageOf(settings),
-      });
-      const raw = await streamChat(routed.model, messages, () => undefined, timeoutsOf(settings));
-      const result = parseCheckReply(raw);
-      if (!result) {
-        // The model answered, but not in the format asked for; that is no use of the reader's budget.
-        await refundRate(asked);
-        return { ok: false, code: "http" };
-      }
-      return { ok: true, ...result, model: routed.model.label };
-    } catch (e) {
-      await refundRate(asked);
-      return { ok: false, code: e instanceof ModelError ? e.code : "internal" };
-    }
+    const r = await askModel(
+      routed.model,
+      settings,
+      (model) =>
+        streamChat(
+          model,
+          buildCheckPrompt({ term: routed.term, explanation: routed.explanation, answer, language: explainLanguageOf(settings) }),
+          () => undefined,
+          timeoutsOf(settings),
+        ),
+      parseCheckReply,
+    );
+    return r.ok ? { ok: true, ...r.value, model: routed.model.label } : r;
   }
 
   /**
@@ -390,21 +386,69 @@ export default defineBackground(() => {
     const settings = await loadSettings();
     const routed = routePreview(settings, await getState(), url, sourceId, hint);
     if (routed.kind === "error") return { ok: false, code: routed.code };
-    if (!(await canReach(routed.model))) return { ok: false, code: "no_permission" };
+    const r = await askModel(routed.model, settings, ask, read);
+    return r.ok ? { ...r, model: routed.model, remote: routed.remote } : r;
+  }
+
+  /**
+   * One request to a model, within the rate limit: refused without site access to it, and refunded when it fails or its
+   * reply is unusable (`read` gives null).
+   */
+  async function askModel<T>(
+    model: ModelConfig,
+    settings: Settings,
+    ask: (model: ModelConfig, settings: Settings) => Promise<string>,
+    read: (raw: string) => T | null,
+  ): Promise<{ ok: true; value: T } | { ok: false; code: ErrorCode; retryAfterMs?: number }> {
+    if (!(await canReach(model))) return { ok: false, code: "no_permission" };
     const asked = Date.now();
     const rate = await acquireRate(settings, asked);
     if (!rate.ok) return { ok: false, code: "local_rate", retryAfterMs: rate.retryAfterMs };
     try {
-      const value = read(await ask(routed.model, settings));
+      const value = read(await ask(model, settings));
       if (value === null) {
         await refundRate(asked);
         return { ok: false, code: "http" };
       }
-      return { ok: true, value, model: routed.model, remote: routed.remote };
+      return { ok: true, value };
     } catch (e) {
       await refundRate(asked);
       return { ok: false, code: e instanceof ModelError ? e.code : "internal" };
     }
+  }
+
+  /** A short plain reply: only the tags of the reply format are removed, since an explanation may contain "x < 3 and y > 2". */
+  const plainReply = (raw: string): string | null => raw.replace(/<\/?(?:explanation|terms?)>/gi, "").trim() || null;
+
+  /** A term imported from Zotero, explained from its name and its paper's title, and the explanation recorded on its look-up. */
+  async function explainImported(encounterId: string): Promise<ResponseMap["explain-imported"]> {
+    const settings = await loadSettings();
+    const routed = routeImported(settings, await getState(), encounterId);
+    if (routed.kind === "error") return { ok: false, code: routed.code };
+    const r = await askModel(
+      routed.model,
+      settings,
+      (model) =>
+        streamChat(
+          model,
+          buildPreviewExplainPrompt({ term: routed.term, pageTitle: routed.title, context: "", language: explainLanguageOf(settings) }),
+          () => undefined,
+          timeoutsOf(settings),
+        ),
+      plainReply,
+    );
+    if (!r.ok) return r;
+    // Checked again: the look-up may have been deleted or explained while the model was answering.
+    if ((await getState()).encounters.get(encounterId)?.explanation.text !== "") return { ok: false, code: "expired" };
+    await append((f) => [
+      f.make("encounter.explained", { encounter_id: encounterId, explanation: importedExplanation(r.value, routed.model.model) }),
+    ]);
+    // Deleted between the check and the write: the deletion has already cleared its events, so the explanation is cleared now.
+    if (!(await getState()).encounters.has(encounterId)) {
+      await requestDeps.compact();
+      return { ok: false, code: "expired" };
+    }
+    return { ok: true };
   }
 
   async function previewPlan(req: Parameters<RequestDeps["previewPlan"]>[0]): Promise<ResponseMap["preview-plan"]> {
@@ -456,8 +500,7 @@ export default defineBackground(() => {
           () => undefined,
           timeoutsOf(settings),
         ),
-      // Only the tags of the reply format are removed: an explanation may contain "x < 3 and y > 2".
-      (raw) => raw.replace(/<\/?(?:explanation|terms?)>/gi, "").trim() || null,
+      plainReply,
     );
     return result.ok ? { ok: true, explanation: result.value, stored: false } : result;
   }
@@ -475,6 +518,7 @@ export default defineBackground(() => {
     runBackup,
     saveSettings: (settings) => browser.storage.local.set({ settings }),
     checkAnswer,
+    explainImported,
     previewPlan,
     previewTerms,
     previewExplain,

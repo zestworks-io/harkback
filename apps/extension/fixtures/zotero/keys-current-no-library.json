@@ -3,9 +3,5 @@
   "userID": 4242424,
   "username": "reader",
   "displayName": "A Reader",
-  "name": "Harkback",
-  "access": {
-    "user": [],
-    "groups": []
-  }
+  "name": "Harkback"
 }

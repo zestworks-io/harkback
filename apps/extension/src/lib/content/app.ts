@@ -1,4 +1,4 @@
-import { Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
+import { locateEvidence, Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain/explain";
 import { contextForRange, extractPage, rangeFor, type ExtractedPage, type SelectionContext } from "../source/extract";
 import { h } from "../ui/dom";
@@ -10,7 +10,7 @@ import { profileFor, type Privacy } from "../source/site-profiles";
 import { detectSource, type DetectedSource } from "../source/source-id";
 import { ExplainCard } from "../ui/explain-card";
 import { dirOf } from "../ui/languages";
-import { createOverlay, placeNear, runsRtl, type Overlay } from "../ui/overlay";
+import { createOverlay, placeNear, runsRtl, visibleRects, type Overlay } from "../ui/overlay";
 import { LockChip } from "../ui/lock-chip";
 import { PreviewPanel } from "../ui/preview-panel";
 import { ReunionLayer, type ReunionAction } from "../ui/reunion-layer";
@@ -299,6 +299,7 @@ export class ContentApp {
     this.endSession();
     this.closePreview();
     this.layer?.clear();
+    this.stopEvidence?.();
     this.page = null;
     this.reunions.clear();
     this.answered.clear();
@@ -348,6 +349,7 @@ export class ContentApp {
       this.endSession();
       this.closePreview();
       this.layer?.clear();
+      this.stopEvidence?.();
       this.page = null;
       await this.activate().catch(() => undefined);
       return;
@@ -567,9 +569,12 @@ export class ContentApp {
       case "delta":
         s.card.setStreaming(m.text);
         break;
-      case "explained":
-        s.card.setExplained(m.explanation, m.tier);
+      case "explained": {
+        // Captions scroll away, so only a page's own text can be pointed at.
+        const evidence = m.evidence && !this.live() ? m.evidence : null;
+        s.card.setExplained(m.explanation, m.tier, evidence ? () => this.showEvidence(evidence) : undefined);
         break;
+      }
       case "ask":
         s.card.ask(m.name, m.daysAgo);
         break;
@@ -603,6 +608,70 @@ export class ContentApp {
     s.card.close();
     clearInterval(s.ping);
     s.port.disconnect();
+  }
+
+  /** Ends the marks on the passage last shown, if they are still there. */
+  private stopEvidence: (() => void) | null = null;
+
+  /**
+   * Scrolls to the passage an explanation quotes and marks it for a few seconds, drawn in the overlay like the underlines. The
+   * marks are placed again whenever anything scrolls, so they stay on the text in a panel that scrolls on its own too.
+   */
+  showEvidence(evidence: string): void {
+    const page = (this.page ??= this.extract());
+    const at = locateEvidence(evidence, page.text);
+    const range = at && rangeFor(page, at.start, at.end);
+    if (!range) return;
+    this.stopEvidence?.();
+    const start = range.startContainer;
+    (start.nodeType === Node.ELEMENT_NODE ? (start as Element) : start.parentElement)?.scrollIntoView({
+      block: "center",
+      behavior: "smooth",
+    });
+    const root = this.ensureOverlay().root;
+    let marks: HTMLElement[] = [];
+    let faded = false;
+    const place = (): void => {
+      const rects = visibleRects(range);
+      while (marks.length > rects.length) marks.pop()!.remove();
+      while (marks.length < rects.length) {
+        const mark = h("div", { className: "hb-evidence", "data-hb": "evidence-mark" });
+        if (faded) mark.style.opacity = "0";
+        root.append(mark);
+        marks.push(mark);
+      }
+      rects.forEach((r, i) => {
+        const mark = marks[i]!;
+        mark.style.left = `${r.left + window.scrollX}px`;
+        mark.style.top = `${r.top + window.scrollY}px`;
+        mark.style.width = `${r.width}px`;
+        mark.style.height = `${r.height}px`;
+      });
+    };
+    let frame = 0;
+    const onMove = (): void => {
+      if (!frame) frame = requestAnimationFrame(() => ((frame = 0), place()));
+    };
+    // Capturing: a panel that scrolls on its own does not pass its scroll on to the page.
+    document.addEventListener("scroll", onMove, { capture: true, passive: true });
+    window.addEventListener("resize", onMove, { passive: true });
+    const fade = setTimeout(() => {
+      faded = true;
+      for (const mark of marks) mark.style.opacity = "0";
+    }, 5000);
+    const end = setTimeout(() => stop(), 6000);
+    const stop = (): void => {
+      document.removeEventListener("scroll", onMove, { capture: true });
+      window.removeEventListener("resize", onMove);
+      cancelAnimationFrame(frame);
+      clearTimeout(fade);
+      clearTimeout(end);
+      for (const mark of marks) mark.remove();
+      marks = [];
+      if (this.stopEvidence === stop) this.stopEvidence = null;
+    };
+    this.stopEvidence = stop;
+    place();
   }
 
   private ensureOverlay(): Overlay {

@@ -23,6 +23,7 @@ export const ui_ptBR: Readonly<Record<StringKey, string>> = {
   daysAgo: "há {n} dias",
   related: "Você não consultou “{a}”, mas entendeu “{b}” há {n} dias",
   thenExplained: "Explicação anterior: {text}",
+  showEvidence: "Mostrar na página",
   highlightedInZotero: "Destacado no Zotero; ainda não explicado.",
   whyDirect: "Sublinhado porque “{text}” nesta página é o termo “{name}” que você consultou.",
   whyRelated: "Sublinhado porque “{text}” nesta página está relacionado a “{via}”, que você entendeu.",

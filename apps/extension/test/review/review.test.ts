@@ -40,6 +40,22 @@ describe("reviewQueue", () => {
     });
   });
 
+  it("makes a term imported without an explanation due one day after it was explained", () => {
+    const { w } = setup();
+    const c = w.concept("LoRA");
+    const e = w.encounter(c, "s1", "");
+    w.setTime(day(10));
+    w.events.push(
+      w.f.make("encounter.explained", {
+        encounter_id: e,
+        explanation: { text: "Low-rank adapters.", tier: "external_knowledge", evidence_span: null, model: "m" },
+      }),
+    );
+    expect(reviewQueue(w.state(), day(10) + DAY_MS - 1)).toEqual([]);
+    expect(dueAtOf(w.state(), c)).toBe(day(11));
+    expect(reviewQueue(w.state(), day(11))[0]).toMatchObject({ conceptId: c, explanation: "Low-rank adapters." });
+  });
+
   it("makes a forgotten concept due one day after it was answered", () => {
     const { w, act } = setup();
     const c = w.concept("LoRA");

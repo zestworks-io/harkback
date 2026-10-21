@@ -5,7 +5,7 @@ import { readLibrary, zoteroClient, ZoteroError } from "../../src/lib/zotero/cli
 import { buildImportEvents, findTerms, paperOf, termOfHighlight, type ZoteroItem } from "../../src/lib/zotero/highlights";
 import { world } from "../helpers";
 
-import { fakeZotero, fixture, USER } from "./fake";
+import { fakeZotero, fixture, ME, READING_GROUP, USER } from "./fake";
 
 describe("termOfHighlight", () => {
   it("keeps a term and drops a passage", () => {
@@ -32,7 +32,7 @@ describe("termOfHighlight", () => {
 
 describe("paperOf", () => {
   const items = new Map(fixture<ZoteroItem[]>("items.json").map((i) => [i.key, i]));
-  const of = (paper: string | null, file: string) => paperOf(paper ? items.get(paper) : undefined, items.get(file)!, USER);
+  const of = (paper: string | null, file: string) => paperOf(paper ? items.get(paper) : undefined, items.get(file)!, ME);
 
   it("names an arXiv paper by its arXiv id, also once it is published in a journal", () => {
     expect(of("PAPRLORA", "ATTALORA")).toEqual({
@@ -55,8 +55,23 @@ describe("paperOf", () => {
 
   it("finds an arXiv id written only in Extra, and a DOI written there", () => {
     const item = (data: Record<string, unknown>): ZoteroItem => ({ key: "K", data: { itemType: "report", ...data } });
-    expect(paperOf(item({ extra: "arXiv:hep-th/9901001v2 [hep-th]" }), item({}), USER).sourceId).toBe("arxiv:hep-th/9901001");
-    expect(paperOf(item({ extra: "tex.key: x\nDOI: 10.1000/ABC.1." }), item({}), USER).sourceId).toBe("doi:10.1000/abc.1");
+    expect(paperOf(item({ extra: "arXiv:hep-th/9901001v2 [hep-th]" }), item({}), ME).sourceId).toBe("arxiv:hep-th/9901001");
+    expect(paperOf(item({ extra: "tex.key: x\nDOI: 10.1000/ABC.1." }), item({}), ME).sourceId).toBe("doi:10.1000/abc.1");
+  });
+
+  it("does not use an id longer than the records hold, and names the item as it would be without one", () => {
+    const item = (data: Record<string, unknown>): ZoteroItem => ({ key: "K", data: { itemType: "report", ...data } });
+    const longArxiv = `arXiv:${"a".repeat(70)}/9901001`;
+    const longDoi = `10.1000/${"x".repeat(260)}`;
+    expect(paperOf(item({ extra: longArxiv, DOI: "10.1000/abc" }), item({}), ME)).toMatchObject({
+      sourceId: "doi:10.1000/abc",
+      ids: { doi: "10.1000/abc" },
+    });
+    expect(paperOf(item({ extra: longArxiv, DOI: longDoi }), item({}), ME)).toMatchObject({
+      sourceId: `zotero:${USER}/K`,
+      ids: {},
+      sensitive: true,
+    });
   });
 
   it("names a file with no paper by its Zotero item, linked to its page, and calls it sensitive", () => {
@@ -73,8 +88,11 @@ describe("zoteroClient", () => {
   it("checks the key, reads every page of highlights, and asks for files 50 at a time", async () => {
     const z = fakeZotero();
     const client = zoteroClient({ key: "secret", fetch: z.fetch, sleep: z.sleep });
-    expect(await client.user()).toEqual({ userID: USER, username: "reader" });
-    const lib = await readLibrary(client, USER, 0);
+    expect(await client.libraries()).toEqual({
+      userID: USER,
+      libraries: [ME, READING_GROUP, { type: "group", id: 777002, name: "Another group" }],
+    });
+    const lib = await readLibrary(client, ME, 0);
     expect(lib.annotations.map((a) => a.key)).toHaveLength(10);
     expect(lib.version).toBe(965);
     expect([...lib.items.keys()].sort()).toEqual(["ATTAATTN", "ATTALONE", "ATTALORA", "ATTAVISA", "PAPRATTN", "PAPRLORA", "PAPRVISA"]);
@@ -82,20 +100,54 @@ describe("zoteroClient", () => {
     expect(z.calls.some((c) => c.url.includes("key="))).toBe(false);
 
     const keys = Array.from({ length: 120 }, (_, i) => `K${i}`);
-    await client.items(USER, keys);
+    await client.items(ME, keys);
     expect(z.calls.slice(-3).map((c) => new URL(c.url).searchParams.get("itemKey")!.split(",").length)).toEqual([50, 50, 20]);
+  });
+
+  it("reads the groups the key may read, and a group library like the reader's own", async () => {
+    const z = fakeZotero({ keys: "keys-current-group-only.json" });
+    const client = zoteroClient({ key: "k", fetch: z.fetch });
+    expect(await client.libraries()).toEqual({ userID: USER, libraries: [READING_GROUP] });
+    const lib = await readLibrary(client, READING_GROUP, 0);
+    expect(lib.version).toBe(41);
+    const found = findTerms(lib.annotations, lib.items, new Set(), READING_GROUP);
+    expect(found.terms).toEqual([
+      {
+        annotationKey: "GANNRLHF",
+        term: "RLHF",
+        group: "Reading group",
+        paper: {
+          sourceId: "arxiv:2203.02155",
+          ids: { arxiv: "2203.02155", doi: "10.48550/arxiv.2203.02155" },
+          title: "Training language models to follow instructions with human feedback",
+          sensitive: false,
+        },
+      },
+    ]);
+    // Read as another member of the group: the highlight is marked as someone else's.
+    expect(findTerms(lib.annotations, lib.items, new Set(), READING_GROUP, USER + 1).terms[0]).toMatchObject({ highlightedBy: "reader" });
+    expect(findTerms(lib.annotations, lib.items, new Set(), READING_GROUP, USER).terms[0]!.highlightedBy).toBeUndefined();
+    // A file added on its own, with no paper and no address of its own.
+    const file = { ...lib.items.get("GATTRLHF")!, data: { ...lib.items.get("GATTRLHF")!.data, url: "", parentItem: undefined } };
+    expect(paperOf(undefined, file, READING_GROUP)).toMatchObject({
+      sourceId: `zotero:groups/${READING_GROUP.id}/GATTRLHF`,
+      ids: { url: "https://www.zotero.org/groups/reading_group/items/GATTRLHF" },
+      sensitive: true,
+    });
   });
 
   it("asks only for what changed since the last import", async () => {
     const z = fakeZotero();
-    const lib = await readLibrary(zoteroClient({ key: "k", fetch: z.fetch }), USER, 806);
+    const lib = await readLibrary(zoteroClient({ key: "k", fetch: z.fetch }), ME, 806);
     expect(lib.annotations.map((a) => a.key)).toEqual(["ANNATTN1", "ANNLONE1", "ANNLORA2", "ANNINK01"]);
     expect(z.calls[0]!.url).toContain("since=806");
   });
 
   it("tells a wrong key from a key that cannot read the library", async () => {
-    await expect(zoteroClient({ key: "k", fetch: fakeZotero({ status: [403] }).fetch }).user()).rejects.toEqual(new ZoteroError("key"));
-    await expect(zoteroClient({ key: "k", fetch: fakeZotero({ keys: "keys-current-no-library.json" }).fetch }).user()).rejects.toEqual(
+    await expect(zoteroClient({ key: "k", fetch: fakeZotero({ status: [403] }).fetch }).libraries()).rejects.toEqual(
+      new ZoteroError("key"),
+    );
+    await expect(zoteroClient({ key: "k", fetch: fakeZotero({ keys: "keys-current-no-library.json" }).fetch }).libraries()).rejects.toEqual(
       new ZoteroError("no-library"),
     );
   });
@@ -109,25 +161,25 @@ describe("zoteroClient", () => {
       sleep: async (ms) => void (z.slept.push(ms), (clock += ms)),
       now: () => clock,
     });
-    await client.user();
-    await client.user();
+    await client.libraries();
+    await client.libraries();
     expect(z.slept).toEqual([7000, 3000]);
     const busy = fakeZotero({ status: [503, 503, 503] });
-    await expect(zoteroClient({ key: "k", fetch: busy.fetch, sleep: busy.sleep }).user()).rejects.toEqual(new ZoteroError("busy"));
+    await expect(zoteroClient({ key: "k", fetch: busy.fetch, sleep: busy.sleep }).libraries()).rejects.toEqual(new ZoteroError("busy"));
     const long = fakeZotero({ status: [429], headers: [{ "Retry-After": "3600" }] });
-    await expect(zoteroClient({ key: "k", fetch: long.fetch, sleep: long.sleep }).user()).rejects.toEqual(new ZoteroError("busy"));
+    await expect(zoteroClient({ key: "k", fetch: long.fetch, sleep: long.sleep }).libraries()).rejects.toEqual(new ZoteroError("busy"));
   });
 });
 
 describe("findTerms and buildImportEvents", () => {
   async function library() {
     const z = fakeZotero();
-    return readLibrary(zoteroClient({ key: "k", fetch: z.fetch }), USER, 0);
+    return readLibrary(zoteroClient({ key: "k", fetch: z.fetch }), ME, 0);
   }
 
   it("keeps the terms, counts the passages, and skips notes, images, ink and what was decided before", async () => {
     const lib = await library();
-    const found = findTerms(lib.annotations, lib.items, new Set(["ANNLORA2"]), USER);
+    const found = findTerms(lib.annotations, lib.items, new Set(["ANNLORA2"]), ME);
     expect(found.terms.map((t) => [t.annotationKey, t.term, t.paper.sourceId])).toEqual([
       ["ANNLORA1", "LoRA", "arxiv:2106.09685"],
       ["ANNUNDR1", "low-rank adaptation", "arxiv:2106.09685"],
@@ -142,7 +194,7 @@ describe("findTerms and buildImportEvents", () => {
   it("counts a highlight whose file is gone", async () => {
     const lib = await library();
     lib.items.delete("ATTAVISA");
-    expect(findTerms(lib.annotations, lib.items, new Set(), USER).orphans).toBe(2);
+    expect(findTerms(lib.annotations, lib.items, new Set(), ME).orphans).toBe(2);
   });
 
   it("records one concept per term, joins a concept already named so, and leaves a known source as it is", async () => {
@@ -152,7 +204,7 @@ describe("findTerms and buildImportEvents", () => {
     w.encounter(known, "arxiv:2106.09685");
     const state = replay(w.events);
     const lib = await library();
-    const found = findTerms(lib.annotations, lib.items, new Set(), USER);
+    const found = findTerms(lib.annotations, lib.items, new Set(), ME);
     const events = buildImportEvents(w.f, state, found.terms);
     const after = replay([...w.events, ...events]);
     expect(events.filter((e) => e.type === "concept.created").map((e) => e.payload.canonical_name)).toEqual([
@@ -168,6 +220,11 @@ describe("findTerms and buildImportEvents", () => {
     expect(after.sources.get("arxiv:2106.09685")).toMatchObject({ sensitivity: "sensitive", title: "LoRA (seen on arXiv)" });
     expect(after.sources.get(`zotero:${USER}/ATTALONE`)?.sensitivity).toBe("sensitive");
     expect(after.sources.get("doi:10.1057/palgrave.ivs.9500167")?.sensitivity).toBe("normal");
+    // The comment on a highlight is the reader's note on the look-up.
+    expect([...after.encounters.values()].filter((e) => e.note).map((e) => [e.selection, e.note])).toEqual([
+      ["low-rank adaptation", "key idea"],
+      ["visual analytics", "concepte interessant"],
+    ]);
     const imported = [...after.encounters.values()].filter((e) => e.explanation.model === "zotero");
     expect(imported.every((e) => e.explanation.text === "" && e.selection === e.locator.exact)).toBe(true);
   });
@@ -175,16 +232,36 @@ describe("findTerms and buildImportEvents", () => {
   it("does not record a highlight twice, even when it is imported again", async () => {
     const w = world();
     const lib = await library();
-    const terms = findTerms(lib.annotations, lib.items, new Set(), USER).terms;
+    const terms = findTerms(lib.annotations, lib.items, new Set(), ME).terms;
     w.events.push(...buildImportEvents(w.f, replay([]), [...terms, ...terms]));
     expect(w.events.filter((e) => e.type === "encounter.created")).toHaveLength(6);
     expect(buildImportEvents(w.f, replay(w.events), terms)).toEqual([]);
+    // Still once explained: the look-up then has the model's explanation, but is the same highlight.
+    const first = w.events.find((e) => e.type === "encounter.created")!;
+    w.events.push(
+      w.f.make("encounter.explained", {
+        encounter_id: (first.payload as { encounter_id: string }).encounter_id,
+        explanation: { text: "Explained.", tier: "external_knowledge", evidence_span: null, model: "gpt" },
+      }),
+    );
+    expect(buildImportEvents(w.f, replay(w.events), terms)).toEqual([]);
+  });
+
+  it("leaves out a term the records could not hold and imports the rest", async () => {
+    const w = world();
+    const lib = await library();
+    const terms = findTerms(lib.annotations, lib.items, new Set(), ME).terms;
+    const broken = { ...terms[0]!, term: "Broken", paper: { ...terms[0]!.paper, sourceId: "arxiv:x", ids: { arxiv: "a".repeat(65) } } };
+    const events = buildImportEvents(w.f, replay([]), [broken, ...terms]);
+    expect(events.filter((e) => e.type === "encounter.created")).toHaveLength(6);
+    expect(events.some((e) => e.type === "concept.created" && e.payload.canonical_name === "Broken")).toBe(false);
+    expect(events.some((e) => e.type === "source.seen" && e.payload.source_id === "arxiv:x")).toBe(false);
   });
 
   it("leaves a term only highlighted out of review, and reviews it once it is explained", async () => {
     const w = world();
     const lib = await library();
-    const found = findTerms(lib.annotations, lib.items, new Set(), USER);
+    const found = findTerms(lib.annotations, lib.items, new Set(), ME);
     w.events.push(...buildImportEvents(w.f, replay([]), found.terms));
     const later = Date.UTC(2026, 9, 1);
     expect(reviewQueue(replay(w.events), later)).toEqual([]);
@@ -201,12 +278,13 @@ describe("exports of terms only highlighted", () => {
     const { ankiTsv } = await import("../../src/lib/export/anki");
     const { exportMarkdown } = await import("@harkback/core");
     const w = world();
-    const lib = await readLibrary(zoteroClient({ key: "k", fetch: fakeZotero().fetch }), USER, 0);
-    w.events.push(...buildImportEvents(w.f, replay([]), findTerms(lib.annotations, lib.items, new Set(), USER).terms));
+    const lib = await readLibrary(zoteroClient({ key: "k", fetch: fakeZotero().fetch }), ME, 0);
+    w.events.push(...buildImportEvents(w.f, replay([]), findTerms(lib.annotations, lib.items, new Set(), ME).terms));
     const state = replay(w.events);
     expect(ankiTsv(state).trim().split("\n")).toHaveLength(3);
     const md = exportMarkdown(state, "en");
     expect(md).toContain("  > Highlighted in Zotero; not explained yet.");
     expect(md).not.toContain("External knowledge");
+    expect(md).toContain("  Your note: key idea");
   });
 });

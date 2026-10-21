@@ -22,7 +22,7 @@ import { chooseModel } from "../models/model-policy";
 import { explainLanguageOf, type ModelConfig, type Settings, type SiteRule } from "../storage/settings";
 import { gateSource, type Choice } from "../source/privacy-gate";
 import type { Privacy } from "../source/site-profiles";
-import { effectiveRule } from "../source/site-rules";
+import { effectiveRule, sensitiveBySiteRule } from "../source/site-rules";
 import type { DetectedSource } from "../source/source-id";
 
 export interface ExplainRequestMsg {
@@ -71,7 +71,7 @@ export function applySiteRules(state: State, rules: readonly SiteRule[]): State 
   if (!rules.some((r) => r.sensitive)) return state;
   const sources = new Map(state.sources);
   for (const [id, src] of sources) {
-    if (src.sensitivity !== "sensitive" && src.ids.url && effectiveRule(rules, src.ids.url).sensitive) {
+    if (src.sensitivity !== "sensitive" && sensitiveBySiteRule(rules, src)) {
       sources.set(id, { ...src, sensitivity: "sensitive" });
     }
   }
@@ -127,7 +127,8 @@ export function planExplain(
   let earlier: { title: string; context: string; explanation: string } | undefined;
   if (req.mode === "compare" && req.earlierEncounterId) {
     const enc = state.encounters.get(req.earlierEncounterId);
-    if (enc) {
+    // A look-up imported without an explanation has nothing to compare with: the term is explained as usual.
+    if (enc && enc.explanation.text !== "") {
       const source = state.sources.get(enc.sourceId);
       if (isSensitiveSource(state, enc.sourceId) && routed.remote) return { kind: "error", code: "sensitive_compare" };
       earlier = {

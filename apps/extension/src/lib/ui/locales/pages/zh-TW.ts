@@ -240,9 +240,6 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "Sensitive source": "敏感來源",
   "No concepts to show yet.": "還沒有可顯示的概念。",
   "Concept graph": "概念關係圖",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "藍色箭頭：前置概念 · 紫色箭頭：變體 · 虛線：相關",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "綠：已理解 · 淺黃：不太牢 · 黃：仍困惑 · 藍：新 · 虛線圈：尚未解釋",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "每個概念一張卡片（以 Tab 分隔的文字），可在 Anki 中用「檔案 → 匯入」開啟。",
   "Export Anki cards": "匯出 Anki 卡片",
@@ -439,8 +436,24 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "你的劃線裡沒有新的術語。",
   "Terms found: {n}. Longer highlights left out: {m}.": "找到的術語：{n}。較長的劃線沒有列出：{m}。",
   "Import ticked terms": "匯入勾選的術語",
+  "highlighted by {name}": "{name} 的劃線",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "不是已發表論文的檔案可能是私人文件，從中匯入的術語會標為敏感。",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "從 Zotero 匯入時，你的 Zotero API 金鑰只會傳送到 api.zotero.org，用來讀取你的劃線和它們所在的論文；不會向 Zotero 寫入任何內容。",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "從 Zotero 匯入時，你的 Zotero API 金鑰只會傳送到 api.zotero.org，用來讀取你的劃線和它們所在的論文；不會向 Zotero 寫入任何內容。解釋匯入的術語時，會把每個術語和它所在論文的標題傳送給你的模型。",
+  "Your note: ": "我的筆記：",
+  "Explain them with my model": "用我的模型解釋它們",
+  "Explained {done} of {total}; waiting for the rate limit…": "已解釋 {done} / {total}，正在等待速率限制…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "已解釋：{done}。無法解釋：{failed}。{error}",
+  "Explained: {done}.": "已解釋：{done}。",
+  "Explaining {done} of {total}…": "正在解釋 {done} / {total}…",
+  "Look-ups from Zotero not explained yet: {n}.": "從 Zotero 匯入的查詢中，還沒解釋過的：{n}。",
+  Stop: "停止",
+  "See the quoted passage on the page": "在原頁面上查看引用的段落",
+  "Zoom in": "放大",
+  "Zoom out": "縮小",
+  "Show the whole map": "顯示整張圖",
+  Prerequisite: "前置概念",
+  Variant: "變體",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.": "拖曳移動，滾輪縮放；指向一個概念會突顯它的關係。",
 };

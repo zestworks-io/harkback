@@ -1,24 +1,17 @@
-import {
-  DAY_MS,
-  exportMarkdown,
-  formatTimestamp,
-  parseJsonl,
-  replay,
-  withoutSensitive,
-  type Grade,
-  type ReviewAction,
-  type State,
-} from "@harkback/core";
-import { DOMAINS, type Domain } from "@harkback/spec";
+import { exportMarkdown, formatTimestamp, parseJsonl, replay, withoutSensitive, type State } from "@harkback/core";
 import { browser } from "wxt/browser";
 import { ankiTsv } from "../../lib/export/anki";
 import { h } from "../../lib/ui/dom";
 import { buildDigest, weekOf } from "../../lib/records/digest";
-import { buildGraph } from "../../lib/records/graph";
+import { defaultGraphFilter, graphView } from "../../lib/pages/graph-view";
 import { digestView } from "../../lib/pages/digest-view";
+import { createReview } from "../../lib/pages/review-view";
+import { explainImported } from "../../lib/pages/explain-imported";
+import { unexplainedEncounters } from "../../lib/explain/imported";
 import { commonsView } from "../../lib/pages/commons-view";
 import { splitPanel } from "../../lib/pages/split-panel";
-import type { Request, ResponseMap } from "../../lib/messaging/messages";
+import { coalesce } from "../../lib/pages/coalesce";
+import type { Request } from "../../lib/messaging/messages";
 import { foundationGaps } from "../../lib/review/foundation";
 import {
   conceptDetail,
@@ -33,16 +26,14 @@ import { historyModel, type HistoryConcept, type HistoryEntry } from "../../lib/
 import { renderMarkdown } from "../../lib/ui/markdown";
 import { backupNow, request } from "../../lib/pages/request";
 import { noteFiles, NOTES_FOLDER, writeNoteFiles } from "../../lib/export/notes";
-import { dueText, daysText } from "../../lib/review/due";
-import { clozeHint } from "../../lib/review/cloze";
-import { dueAtOf, nextDueAt, reviewQueue } from "../../lib/review/review";
-import { routeCheck } from "../../lib/review/review-check";
+import { dueText } from "../../lib/review/due";
+import { dueAtOf } from "../../lib/review/review";
 import { explainLanguageOf, withDefaults } from "../../lib/storage/settings";
 import { sensitiveBySiteRule } from "../../lib/source/site-rules";
 import { initTheme } from "../../lib/ui/theme";
 import { applyLanguage, quoteTitle } from "../../lib/ui/languages";
 import { pick } from "../../lib/ui/pick";
-import { errorText, t, useStrings } from "../../lib/ui/strings";
+import { t, useStrings } from "../../lib/ui/strings";
 import { UI_STRINGS } from "../../lib/ui/locales/ui";
 import { CHANGE_CHANNEL, EventStore } from "../../lib/storage/store";
 
@@ -54,7 +45,10 @@ async function main(): Promise<void> {
   applyLanguage(document.documentElement, settings.language);
   useStrings(settings.language, UI_STRINGS[settings.language] ?? {});
   const store = await EventStore.open();
-  let state: State = replay(await store.all());
+  const initial = await store.all();
+  let state: State = replay(initial);
+  /** How many events the page last read on its own: a refresh with no new ones leaves the page as it is. */
+  let readCount = initial.length;
 
   const root = document.getElementById("app")!;
   const list = h("div", { "data-hb": "history" });
@@ -245,11 +239,34 @@ async function main(): Promise<void> {
         sourceLink(quoteTitle(e.sourceTitle, settings.language), e.sourceUrl),
         timestamp(e.t),
         h("span", {}, e.date),
-        e.explanation ? h("span", { className: `tier ${e.tier}` }, tier) : null,
+        !e.explanation
+          ? null
+          : e.evidenceUrl
+            ? h(
+                "a",
+                {
+                  className: `tier ${e.tier}`,
+                  href: e.evidenceUrl,
+                  target: "_blank",
+                  rel: "noopener",
+                  title: L("在原页面上查看引用的段落", "See the quoted passage on the page"),
+                  "data-hb": "evidence-link",
+                },
+                tier,
+              )
+            : h("span", { className: `tier ${e.tier}` }, tier),
         e.sensitive ? sensitiveBadge(e.sourceId) : null,
         selecting ? null : del,
       ),
       h("blockquote", { className: "quote", dir: "auto" }, e.selection),
+      e.note
+        ? h(
+            "p",
+            { className: "reader-note", dir: "auto", "data-hb": "entry-note" },
+            h("strong", {}, L("我的笔记：", "Your note: ")),
+            e.note,
+          )
+        : null,
       body,
       chat,
     );
@@ -613,304 +630,31 @@ async function main(): Promise<void> {
   /** Pages of their own, apart from the list and the concept pages. */
   const VIEWS: readonly string[] = ["#review", "#graph", "#digest", "#commons"];
   const onList = (): boolean => currentConceptId() === null && !VIEWS.includes(location.hash);
-  const skipped = new Set<string>();
-  let reviewed = 0;
-  let revealed = false;
-  /** Whether the cloze hint of the current term is showing. */
-  let hintShown = false;
-
-  const retention = settings.review.desiredRetention;
-  const dueItems = () => reviewQueue(state, Date.now(), { retention }).filter((i) => !skipped.has(i.conceptId));
-
-  const GRADE_ACTIONS: Record<Grade, ReviewAction> = { 1: "review_again", 2: "review_hard", 3: "review_good", 4: "review_easy" };
-  const gradeName = (g: Grade): string =>
-    g === 1 ? L("没记住", "Again") : g === 2 ? L("勉强记得", "Hard") : g === 3 ? L("记住了", "Good") : L("很轻松", "Easy");
-  /** What the reader typed for the current term, and what the model made of it. */
-  let typed = "";
-  type CheckOk = Extract<ResponseMap["check-answer"], { ok: true }>;
-  let check: { busy: true } | { busy: false; result: CheckOk } | { busy: false; error: string } | null = null;
-  /** Counts the cards shown, so a model reply that arrives after the reader moved on is dropped. */
-  let cardSeq = 0;
-  /** True while a grade is being saved; a second key press or click must not record it twice. */
-  let saving = false;
-  const resetCard = (): void => {
-    cardSeq++;
-    revealed = false;
-    hintShown = false;
-    typed = "";
-    check = null;
-  };
-
-  async function answer(conceptId: string, grade: Grade): Promise<void> {
-    if (saving) return;
-    saving = true;
-    try {
-      const r = await request({ type: "review-answer", conceptId, action: GRADE_ACTIONS[grade] });
-      if (!r.ok) {
-        status.textContent = L("保存失败。", "Could not save.");
-        return;
-      }
-      reviewed++;
-      resetCard();
-      state = replay(await store.all());
-      draw();
-    } finally {
-      saving = false;
-    }
-  }
-
-  async function checkAnswer(conceptId: string): Promise<void> {
-    if (!typed.trim()) return;
-    if (check?.busy) return;
-    const seq = cardSeq;
-    check = { busy: true };
-    draw();
-    const r = await request({ type: "check-answer", conceptId, answer: typed });
-    if (seq !== cardSeq) return; // the reader skipped or graded this card meanwhile
-    check = r.ok
-      ? { busy: false, result: r as CheckOk }
-      : { busy: false, error: errorText(settings.language, "code" in r ? r.code : "internal", "retryAfterMs" in r ? r.retryAfterMs : 0) };
-    draw();
-  }
-
-  const nextReviewNote = (at: number): HTMLElement =>
-    h(
-      "span",
-      { className: "next-review", "data-hb": "next-review" },
-      L("下一次复习：", "Next review: "),
-      dueText(at, Date.now(), settings.language),
-    );
-
-  /** The optional model check: a button that says where the answer goes, and what the model said. */
-  function checkPanel(item: { conceptId: string }): HTMLElement | null {
-    const route = routeCheck(settings, state, item.conceptId);
-    if (route.kind === "error") {
-      // Off in settings: nothing is offered. Any other failure (no model yet, sensitive source without a local one) is explained.
-      if (!settings.review.modelCheck) return null;
-      return h("p", { className: "check-note", "data-hb": "check-unavailable" }, errorText(settings.language, route.code));
-    }
-    const where = route.remote ? L("远程服务", "remote service") : L("本机", "on this computer");
-    const label = L("用 {model} 检查我的回答（{where}）", "Check my answer with {model} ({where})", { model: route.model.label, where });
-    const button = h(
-      "button",
-      { type: "button", "data-hb": "review-check", disabled: typed.trim() === "" || (check !== null && check.busy) },
-      check?.busy ? L("正在检查…", "Checking…") : label,
-    );
-    button.addEventListener("click", () => void checkAnswer(item.conceptId));
-    const result = check && !check.busy ? check : null;
-    return h(
-      "div",
-      { className: "check", "data-hb": "check-panel" },
-      button,
-      h(
-        "p",
-        { className: "check-note", "data-hb": "check-disclosure" },
-        L(
-          "会把术语、你的回答和当时的解释发给 {model}（{where}）。检查本身不会保存，只保存你之后选的评分。",
-          "This sends the term, your answer and its stored explanation to {model} ({where}). Nothing from the check is saved; only the grade you pick afterwards is.",
-          { model: route.model.label, where },
-        ),
-        " ",
-        h("a", { href: browser.runtime.getURL("/options.html"), "data-hb": "check-off" }, L("在设置中关闭", "Turn off in settings")),
-      ),
-      result && "result" in result
-        ? h(
-            "div",
-            { className: `check-result ${result.result.verdict}`, "data-hb": "check-result" },
-            h(
-              "strong",
-              {},
-              result.result.verdict === "correct"
-                ? L("基本正确", "Looks right")
-                : result.result.verdict === "partial"
-                  ? L("部分正确", "Partly right")
-                  : L("不太对", "Not quite"),
-            ),
-            result.result.feedback ? ` ${result.result.feedback}` : "",
-            h(
-              "div",
-              { className: "check-suggest" },
-              L("建议评分：{grade}（由你决定）", "Suggested: {grade} (you decide)", { grade: gradeName(result.result.suggested) }),
-            ),
-          )
-        : result
-          ? h("p", { className: "check-error", role: "alert", "data-hb": "check-error" }, result.error)
-          : null,
-    );
-  }
-
-  /** For a term answered "Again" again and again: more repetition will not help, so point to what might. */
-  const leechNote = (item: { conceptId: string; lapses: number; leech: boolean }): HTMLElement | null => {
-    if (!item.leech) return null;
-    return h(
-      "div",
-      { "data-hb": "review-leech" },
-      h(
-        "p",
-        { className: "leech note" },
-        L(
-          "最近几次复习中有 {n} 次没记住，再重复可能没有帮助。",
-          "You forgot this {n} times in your last few reviews; more repetition may not help.",
-          { n: item.lapses },
-        ),
-      ),
-      gapsNote(item.conceptId) ??
-        h(
-          "a",
-          { href: conceptHref(item.conceptId), "data-hb": "leech-page" },
-          L("看看它的页面，检查别名和关系。", "Open its page to check its aliases and relations."),
-        ),
-    );
-  };
-
-  function reviewView(): HTMLElement {
-    const [item] = dueItems();
-    if (!item) {
-      return h(
-        "p",
-        { className: "empty", "data-hb": "review-done" },
-        reviewed > 0
-          ? L("今天的复习完成了，共 {n} 个。", "All done for now: {n} reviewed.", { n: reviewed })
-          : L("现在没有需要复习的概念。", "Nothing to review right now."),
-        ...(nextDueAt(state, retention) === null ? [] : [h("br"), nextReviewNote(nextDueAt(state, retention)!)]),
-      );
-    }
-    const show = h("button", { type: "button", className: "primary", "data-hb": "review-show" }, L("显示解释", "Show explanation"));
-    show.addEventListener("click", () => {
-      revealed = true;
-      draw();
-    });
-    const button = (label: string, hb: string, onClick: () => void, cls = ""): HTMLElement => {
-      const b = h("button", { type: "button", className: cls, "data-hb": hb }, label);
-      b.addEventListener("click", onClick);
-      return b;
-    };
-    const explanation = h("div", { className: "explanation", dir: "auto" });
-    explanation.append(renderMarkdown(item.explanation));
-    const n = names(item.name, item.aliases);
-    const answerBox = h("textarea", {
-      className: "review-answer",
-      rows: "3",
-      "data-hb": "review-answer",
-      placeholder: L("凭记忆写下你记得的（可选）", "Type what you remember (optional)"),
-      "aria-label": L("你的回答", "Your answer"),
-    });
-    answerBox.value = typed;
-    answerBox.addEventListener("input", () => {
-      typed = answerBox.value;
-      const checkButton = list.querySelector<HTMLButtonElement>('[data-hb="review-check"]');
-      if (checkButton) checkButton.disabled = typed.trim() === "";
-    });
-    const gradable = revealed || (check !== null && !check.busy && "result" in check);
-    const hintText = gradable ? null : clozeHint(item.explanation, [item.name, ...item.aliases]);
-    const hint =
-      hintText === null
-        ? null
-        : hintShown
-          ? h("p", { className: "cloze", "data-hb": "review-hint-text" }, hintText)
-          : button(L("提示：填空", "Show a fill-in-the-blank hint"), "review-hint-show", () => {
-              hintShown = true;
-              draw();
-            });
-    const grades: Grade[] = [1, 2, 3, 4];
-    return h(
-      "section",
-      { className: "concept review", "data-hb": "review-card" },
-      h("div", { className: "concept-head" }, h("h2", { dir: "auto" }, n.name), badge(item.understanding)),
-      n.aliases.length > 0 ? h("div", { className: "aliases", dir: "auto" }, n.aliases.join(" · ")) : null,
-      h(
-        "div",
-        { className: "meta" },
-        sourceLink(quoteTitle(item.sourceTitle, settings.language), item.sourceUrl),
-        timestamp(item.t),
-        h("span", {}, L("还剩 {n} 个", "{n} left", { n: dueItems().length })),
-        item.unlocks.length > 0
-          ? h(
-              "span",
-              { className: "unlocks", "data-hb": "review-unlocks" },
-              L("先修概念：{names} 建立在它之上", "Comes first: {names} build on it", {
-                names: item.unlocks.slice(0, 3).join(", ") + (item.unlocks.length > 3 ? ` +${item.unlocks.length - 3}` : ""),
-              }),
-            )
-          : null,
-        h("span", { className: "due now", "data-hb": "review-due" }, dueText(item.dueAt, Date.now(), settings.language)),
-      ),
-      h(
-        "div",
-        { className: "actions" },
-        h("p", { className: "prompt" }, L("你还记得这个概念吗？", "Do you still remember this?")),
-        revealed ? null : leechNote(item),
-        revealed ? null : answerBox,
-        gradable ? null : hint,
-        revealed ? null : show,
-        revealed ? null : checkPanel(item),
-      ),
-      revealed
-        ? h("div", {}, h("blockquote", { className: "quote", dir: "auto" }, item.selection), explanation, gapsNote(item.conceptId))
-        : null,
-      gradable
-        ? h(
-            "div",
-            { className: "actions" },
-            ...grades.map((g) =>
-              button(
-                `${gradeName(g)} · ${daysText(item.previews[g], settings.language)}`,
-                `review-${GRADE_ACTIONS[g].slice(7)}`,
-                () => void answer(item.conceptId, g),
-                g === (check && !check.busy && "result" in check ? check.result.suggested : 3) ? "primary" : "",
-              ),
-            ),
-            button(L("跳过", "Skip"), "review-skip", () => skip(item.conceptId)),
-            h(
-              "p",
-              { className: "prompt", "data-hb": "review-hint" },
-              L(
-                "按钮上是选这个评分后再次复习的间隔；跳过不改变安排。快捷键：空格显示解释，1–4 评分，S 跳过。",
-                "Each button shows when the term comes back if you pick it; Skip changes nothing. Keys: Space shows the explanation, 1–4 grade, S skips.",
-              ),
-            ),
-          )
-        : null,
-      !gradable && revealed === false
-        ? h(
-            "div",
-            { className: "actions" },
-            button(L("跳过", "Skip"), "review-skip", () => skip(item.conceptId)),
-          )
-        : null,
-    );
-  }
-
-  function skip(conceptId: string): void {
-    skipped.add(conceptId);
-    resetCard();
-    draw();
-  }
-
-  /** Keyboard-only review: Space shows the explanation, 1–4 grade, S skips. Ignored while typing or on a focused control. */
-  document.addEventListener("keydown", (e) => {
-    if (location.hash !== "#review" || e.metaKey || e.ctrlKey || e.altKey) return;
-    const target = e.target as HTMLElement | null;
-    if (target?.closest("input, textarea, select, [contenteditable]")) return;
-    const item = dueItems()[0];
-    if (!item || saving || check?.busy) return;
-    const gradable = revealed || (check !== null && !check.busy && "result" in check);
-    if (e.key === " " && !revealed && !target?.closest("button, a")) {
-      e.preventDefault();
-      revealed = true;
-      draw();
-    } else if (gradable && e.key >= "1" && e.key <= "4") {
-      void answer(item.conceptId, Number(e.key) as Grade);
-    } else if (e.key.toLowerCase() === "s") skip(item.conceptId);
+  const imported = explainImported({
+    lang: () => settings.language,
+    pending: () => unexplainedEncounters(state),
+    explain: (encounterId) => request({ type: "explain-imported", encounterId }),
+    reload: () => refresh(),
+    draw: () => draw(),
   });
 
-  const SVG = "http://www.w3.org/2000/svg";
-  const svgEl = (tag: string, attrs: Record<string, string | number> = {}, ...children: Node[]): SVGElement => {
-    const el = document.createElementNS(SVG, tag);
-    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
-    el.append(...children);
-    return el;
-  };
+  const review = createReview({
+    state: () => state,
+    settings,
+    reload: async () => {
+      state = replay(await store.all());
+      draw();
+    },
+    draw: () => draw(),
+    setStatus: (text) => (status.textContent = text),
+    names,
+    badge,
+    sourceLink,
+    timestamp,
+    gapsNote,
+    conceptHref,
+  });
+  document.addEventListener("keydown", (e) => review.onKey(e));
 
   /** Which week the digest shows: 0 is this week, -1 the one before. Never in the future. */
   let digestOffset = 0;
@@ -951,257 +695,9 @@ async function main(): Promise<void> {
       },
     });
 
-  /** The map's size when the page cannot be measured; it is otherwise laid out for the size it is shown at. */
-  const GRAPH_WIDTH = 960;
-  const GRAPH_HEIGHT = 640;
-  /** The smallest scale a map opens at, so labels stay readable. */
-  const MIN_GRAPH_SCALE = 0.6;
-
-  const graphFilter: { domain: "" | Domain; understanding: "" | Understanding; days: number; unexplained: boolean } = {
-    domain: "",
-    understanding: "",
-    days: 0,
-    unexplained: true,
-  };
-
-  /** A drop-down that redraws the map when it changes and keeps the keyboard where it was. */
-  function graphSelect(name: string, label: string, options: [string, string][], value: string, set: (v: string) => void): HTMLElement {
-    const select = h(
-      "select",
-      { "data-hb": `graph-filter-${name}`, "aria-label": label },
-      ...options.map(([v, text]) => h("option", { value: v }, text)),
-    );
-    select.value = value;
-    select.addEventListener("change", () => {
-      set(select.value);
-      draw();
-      list.querySelector<HTMLElement>(`[data-hb="graph-filter-${name}"]`)?.focus();
-    });
-    return h("label", {}, label, " ", select);
-  }
-
-  function graphFilterBar(): HTMLElement {
-    return h(
-      "div",
-      { className: "graph-filters", "data-hb": "graph-filters" },
-      graphSelect(
-        "domain",
-        L("领域", "Field"),
-        [["", L("全部领域", "All fields")], ...DOMAINS.map((d): [string, string] => [d, d])],
-        graphFilter.domain,
-        (v) => (graphFilter.domain = v as "" | Domain),
-      ),
-      graphSelect(
-        "understanding",
-        L("理解程度", "Understanding"),
-        [
-          ["", L("全部", "All levels")],
-          ["understood", L("已理解", "Understood")],
-          ["shaky", L("不太牢", "Shaky")],
-          ["confused", L("仍困惑", "Confused")],
-          ["new", L("新", "New")],
-        ],
-        graphFilter.understanding,
-        (v) => (graphFilter.understanding = v as "" | Understanding),
-      ),
-      graphSelect(
-        "days",
-        L("最近查过", "Looked up"),
-        [
-          ["0", L("任何时间", "Any time")],
-          ["7", L("最近 7 天", "Last 7 days")],
-          ["30", L("最近 30 天", "Last 30 days")],
-          ["90", L("最近 90 天", "Last 90 days")],
-        ],
-        String(graphFilter.days),
-        (v) => (graphFilter.days = Number(v)),
-      ),
-      graphUnexplainedToggle(),
-    );
-  }
-
-  /** Whether concepts nobody has explained yet are drawn. */
-  function graphUnexplainedToggle(): HTMLElement {
-    const box = h("input", { type: "checkbox", "data-hb": "graph-filter-unexplained" }) as HTMLInputElement;
-    box.checked = graphFilter.unexplained;
-    box.addEventListener("change", () => {
-      graphFilter.unexplained = box.checked;
-      draw();
-      list.querySelector<HTMLElement>('[data-hb="graph-filter-unexplained"]')?.focus();
-    });
-    return h("label", { className: "graph-toggle" }, box, " ", L("显示还没解释过的概念", "Show concepts not explained yet"));
-  }
-
-  /** The concepts as a map: relations as lines, colour by how well each is understood. Drag to move, wheel to zoom. */
-  function graphView(): HTMLElement {
-    const filtered = graphFilter.domain !== "" || graphFilter.understanding !== "" || graphFilter.days > 0 || !graphFilter.unexplained;
-    // Laid out for the box it is drawn in (see svg.graph in the page's style), so one unit of the map is one pixel.
-    const width = list.clientWidth || GRAPH_WIDTH;
-    const height = Math.min(window.innerHeight * 0.7, GRAPH_HEIGHT) || GRAPH_HEIGHT;
-    const g = buildGraph(state, {
-      query: search.value,
-      ...(graphFilter.domain && { domain: graphFilter.domain }),
-      ...(graphFilter.understanding && { understanding: graphFilter.understanding }),
-      ...(graphFilter.days > 0 && { since: Date.now() - graphFilter.days * DAY_MS }),
-      unexplained: graphFilter.unexplained,
-      nameOf: (id) => {
-        const c = state.concepts.get(id)!;
-        return names(c.canonicalName, c.names).name;
-      },
-      width,
-      height,
-    });
-    if (g.nodes.length === 0) {
-      return h(
-        "div",
-        {},
-        graphFilterBar(),
-        h(
-          "p",
-          { className: "empty", "data-hb": "graph-empty" },
-          filtered
-            ? L("没有符合这些筛选条件的概念。", "No concepts match these filters.")
-            : L("还没有可显示的概念。", "No concepts to show yet."),
-        ),
-      );
-    }
-    // A map too big to read whole opens on its best connected concept at a readable size; scroll to zoom out to all of it.
-    const view = { x: 0, y: 0, w: g.width, h: g.height };
-    if (g.width > width / MIN_GRAPH_SCALE) {
-      const focus = g.nodes[0]!;
-      view.w = width / MIN_GRAPH_SCALE;
-      view.h = (view.w * g.height) / g.width;
-      view.x = Math.min(Math.max(0, focus.x - view.w / 2), g.width - view.w);
-      view.y = Math.min(Math.max(0, focus.y - view.h / 2), g.height - view.h);
-    }
-    const svg = svgEl("svg", {
-      class: "graph",
-      viewBox: `${view.x} ${view.y} ${view.w} ${view.h}`,
-      role: "group",
-      "data-hb": "graph",
-    });
-    svg.setAttribute("aria-label", L("概念关系图", "Concept graph"));
-    const marker = (rel: string) =>
-      svgEl(
-        "marker",
-        {
-          id: `arrow-${rel}`,
-          class: rel,
-          viewBox: "0 0 10 10",
-          refX: 10,
-          refY: 5,
-          markerWidth: 7,
-          markerHeight: 7,
-          orient: "auto-start-reverse",
-        },
-        svgEl("path", { d: "M0 0 L10 5 L0 10 z" }),
-      );
-    svg.append(svgEl("defs", {}, marker("prerequisite"), marker("variant_of")));
-    const at = new Map(g.nodes.map((n) => [n.id, n]));
-    for (const e of g.edges) {
-      const a = at.get(e.from)!;
-      const b = at.get(e.to)!;
-      // From the edge of one circle to the edge of the other, so an arrow points at the circle instead of hiding under it.
-      // Circles that overlap keep the whole line: trimming both ends would make it point backwards.
-      const d = Math.max(0.01, Math.hypot(b.x - a.x, b.y - a.y));
-      const ux = (b.x - a.x) / d;
-      const uy = (b.y - a.y) / d;
-      const apart = d > a.r + b.r + 4;
-      const start = apart ? a.r : 0;
-      const end = apart ? b.r + 2 : 0;
-      svg.append(
-        svgEl("line", {
-          class: `edge ${e.rel}`,
-          x1: a.x + ux * start,
-          y1: a.y + uy * start,
-          x2: b.x - ux * end,
-          y2: b.y - uy * end,
-          ...(e.rel === "related" ? {} : { "marker-end": `url(#arrow-${e.rel})` }),
-        }),
-      );
-    }
-    for (const n of g.nodes) {
-      const name = n.name;
-      const node = svgEl(
-        "a",
-        {
-          href: n.studied ? conceptHref(n.id) : "#graph",
-          class: `node ${n.studied ? n.understanding : "unstudied"}`,
-          "data-hb": "graph-node",
-          "data-id": n.id,
-        },
-        svgEl("circle", { cx: n.x, cy: n.y, r: n.r }),
-        svgEl(
-          "text",
-          { x: n.labelX, y: n.labelY, "text-anchor": n.labelAnchor, ...(!n.labelShown && { class: "crowded" }) },
-          document.createTextNode(n.label),
-        ),
-      );
-      node.append(svgEl("title", {}, document.createTextNode(n.studied ? name : `${name} — ${L("还没解释过", "Not explained yet")}`)));
-      svg.append(node);
-    }
-    const apply = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
-    svg.addEventListener(
-      "wheel",
-      (ev) => {
-        ev.preventDefault();
-        const rect = svg.getBoundingClientRect();
-        const factor = ev.deltaY < 0 ? 0.85 : 1 / 0.85;
-        // Out no further than the whole map, so it cannot shrink to a speck.
-        const w = Math.min(g.width, Math.max(g.width / 8, view.w * factor));
-        const k = w / view.w;
-        const px = view.x + ((ev.clientX - rect.left) / rect.width) * view.w;
-        const py = view.y + ((ev.clientY - rect.top) / rect.height) * view.h;
-        view.x = px - (px - view.x) * k;
-        view.y = py - (py - view.y) * k;
-        view.w = w;
-        view.h = view.h * k;
-        if (w >= g.width) Object.assign(view, { x: 0, y: 0, w: g.width, h: g.height });
-        apply();
-      },
-      { passive: false },
-    );
-    let drag: { x: number; y: number } | null = null;
-    svg.addEventListener("pointerdown", (ev) => {
-      if ((ev.target as Element).closest("a")) return;
-      drag = { x: ev.clientX, y: ev.clientY };
-      svg.classList.add("dragging");
-      svg.setPointerCapture(ev.pointerId);
-    });
-    svg.addEventListener("pointermove", (ev) => {
-      if (!drag) return;
-      const rect = svg.getBoundingClientRect();
-      view.x -= ((ev.clientX - drag.x) / rect.width) * view.w;
-      view.y -= ((ev.clientY - drag.y) / rect.height) * view.h;
-      drag = { x: ev.clientX, y: ev.clientY };
-      apply();
-    });
-    const end = () => {
-      drag = null;
-      svg.classList.remove("dragging");
-    };
-    svg.addEventListener("pointerup", end);
-    svg.addEventListener("pointercancel", end);
-    return h(
-      "div",
-      {},
-      graphFilterBar(),
-      h(
-        "div",
-        { className: "graph-wrap" },
-        svg,
-        h(
-          "div",
-          { className: "legend", "data-hb": "graph-legend" },
-          L("蓝线箭头：前置概念 · 紫线箭头：变体 · 虚线：相关", "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related"),
-          L(
-            "实心绿：已理解 · 浅黄：不太牢 · 黄：仍困惑 · 蓝：新 · 虚线圈：还没解释过",
-            "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet",
-          ),
-        ),
-      ),
-    );
-  }
+  const graphFilter = defaultGraphFilter();
+  /** The size the map was last laid out for. */
+  let graphSize = "";
 
   function draw(): void {
     const id = currentConceptId();
@@ -1216,13 +712,32 @@ async function main(): Promise<void> {
     queueMicrotask(renderBar);
     toolbar.hidden = !onList() && location.hash !== "#graph" && location.hash !== "#digest";
     for (const el of toolbar.querySelectorAll<HTMLElement>("[data-list-only]")) el.hidden = !onList();
-    reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: dueItems().length });
+    reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: review.dueCount() });
     if (location.hash === "#review") {
-      list.replaceChildren(backLink, reviewView());
+      list.replaceChildren(backLink, review.view());
       return;
     }
     if (location.hash === "#graph") {
-      list.replaceChildren(backLink, graphView());
+      graphSize = `${list.clientWidth}x${window.innerHeight}`;
+      list.replaceChildren(
+        backLink,
+        graphView({
+          state,
+          lang: settings.language,
+          query: search.value,
+          width: list.clientWidth,
+          filter: graphFilter,
+          nameOf: (id) => {
+            const c = state.concepts.get(id)!;
+            return names(c.canonicalName, c.names).name;
+          },
+          conceptHref,
+          redraw: (focus) => {
+            draw();
+            list.querySelector<HTMLElement>(`[data-hb="${focus}"]`)?.focus();
+          },
+        }),
+      );
       return;
     }
     if (location.hash === "#digest") {
@@ -1243,6 +758,7 @@ async function main(): Promise<void> {
     }
     const model = historyModel(state, search.value);
     list.replaceChildren(
+      ...[imported.view()].filter((el): el is HTMLElement => el !== null),
       ...(model.length > 0
         ? model.map(conceptView)
         : [
@@ -1259,14 +775,27 @@ async function main(): Promise<void> {
     else draw();
   });
   window.addEventListener("hashchange", draw);
-  // Explanations are recorded on other tabs while this one stays open.
-  const refresh = async (): Promise<void> => {
-    state = replay(await store.all());
+  // The map is laid out for the size it is shown at: a window made another size lays it out again.
+  let resizing: ReturnType<typeof setTimeout> | undefined;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizing);
+    resizing = setTimeout(() => {
+      if (location.hash === "#graph" && `${list.clientWidth}x${window.innerHeight}` !== graphSize) draw();
+    }, 250);
+  });
+  // Explanations are recorded on other tabs while this one stays open. A burst of them is read about once a second.
+  // Focus comes back often with nothing new: then the page is left alone, so a panned graph or a half-typed answer stays.
+  const refresh = coalesce(async () => {
+    const events = await store.all();
+    if (events.length === readCount) return;
+    readCount = events.length;
+    state = replay(events);
     draw();
-  };
-  document.addEventListener("visibilitychange", () => document.hidden || void refresh());
-  window.addEventListener("focus", () => void refresh());
-  new BroadcastChannel(CHANGE_CHANNEL).addEventListener("message", () => void refresh());
+  }, 1000);
+  const refreshQuietly = (): void => void refresh().catch(() => undefined);
+  document.addEventListener("visibilitychange", () => document.hidden || refreshQuietly());
+  window.addEventListener("focus", refreshQuietly);
+  new BroadcastChannel(CHANGE_CHANNEL).addEventListener("message", refreshQuietly);
 
   const backupButton = h("button", { type: "button", "data-hb": "backup-now" }, L("立即备份 JSONL", "Back up JSONL now"));
   backupButton.addEventListener("click", async () => {

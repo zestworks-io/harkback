@@ -243,9 +243,6 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "Sensitive source": "機密ソース",
   "No concepts to show yet.": "表示できる概念はまだありません。",
   "Concept graph": "概念グラフ",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "青い矢印：前提知識 · 紫の矢印：派生 · 破線：関連",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "緑：理解済み · 薄い黄：あやふや · 黄：まだ分からない · 青：新規 · 破線の円：未解説",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "概念ごとに 1 枚のカード（タブ区切りテキスト）。Anki の「ファイル → インポート」で開けます。",
   "Export Anki cards": "Anki カードを書き出す",
@@ -448,8 +445,25 @@ export const pages_ja: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "ハイライトに新しい用語はありません。",
   "Terms found: {n}. Longer highlights left out: {m}.": "見つかった用語：{n}。除外した長いハイライト：{m}。",
   "Import ticked terms": "チェックした用語を取り込む",
+  "highlighted by {name}": "{name} さんのハイライト",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "公開論文でないファイルは個人的な文書かもしれないため、そこから取り込んだ用語は機密として記録されます。",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "Zotero から取り込むとき、Zotero の API キーは api.zotero.org にだけ送られ、ハイライトとその論文を読み取るために使われます。Zotero には何も書き込みません。",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "Zotero から取り込むとき、Zotero の API キーは api.zotero.org にだけ送られ、ハイライトとその論文を読み取るために使われます。Zotero には何も書き込みません。取り込んだ用語を解説するときは、各用語とその論文のタイトルがあなたのモデルに送られます。",
+  "Your note: ": "自分のメモ：",
+  "Explain them with my model": "自分のモデルで解説する",
+  "Explained {done} of {total}; waiting for the rate limit…": "{total} 件中 {done} 件を解説済み。レート制限の解除を待っています…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "解説済み：{done}。解説できなかったもの：{failed}。{error}",
+  "Explained: {done}.": "解説済み：{done}。",
+  "Explaining {done} of {total}…": "{total} 件中 {done} 件を解説中…",
+  "Look-ups from Zotero not explained yet: {n}.": "Zotero から取り込んだ未解説の検索：{n}。",
+  Stop: "停止",
+  "See the quoted passage on the page": "元のページで引用箇所を見る",
+  "Zoom in": "拡大",
+  "Zoom out": "縮小",
+  "Show the whole map": "マップ全体を表示",
+  Prerequisite: "前提概念",
+  Variant: "バリエーション",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
+    "ドラッグで移動、スクロールでズーム。概念を指すとその関係が強調されます。",
 };

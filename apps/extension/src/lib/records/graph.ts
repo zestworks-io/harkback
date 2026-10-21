@@ -1,12 +1,14 @@
 import { THRESHOLDS, type State } from "@harkback/core";
 import type { Domain, Rel } from "@harkback/spec";
-import { understandingOf, type Understanding } from "./concept-detail";
+import { isExplained, understandingOf, type Understanding } from "./concept-detail";
 
 export interface GraphNode {
   id: string;
   name: string;
   /** False for a concept that is only mentioned (a prerequisite or variant nobody has explained yet). */
   studied: boolean;
+  /** Whether any look-up of it has an explanation: a term only highlighted in Zotero has none yet. */
+  explained: boolean;
   understanding: Understanding;
   /** How many relations it has in the graph. */
   degree: number;
@@ -38,7 +40,7 @@ export interface Graph {
 }
 
 /** A concept to draw, before it has a place. */
-export type ModelNode = Pick<GraphNode, "id" | "name" | "studied" | "understanding" | "degree">;
+export type ModelNode = Pick<GraphNode, "id" | "name" | "studied" | "explained" | "understanding" | "degree">;
 
 export interface GraphModel {
   nodes: ModelNode[];
@@ -72,7 +74,7 @@ export function graphModel(state: State, o: GraphOptions = {}): GraphModel {
   const degree = new Map<string, number>();
   const drawn = (id: string): boolean => {
     const c = state.concepts.get(id);
-    return c !== undefined && (o.unexplained !== false || !c.isPlaceholder);
+    return c !== undefined && (o.unexplained !== false || isExplained(state, id));
   };
   for (const e of state.edges.values()) {
     if (e.status === "rejected" || (e.status !== "confirmed" && e.confidence < THRESHOLDS.relatedEdgeConfidence)) continue;
@@ -128,6 +130,7 @@ export function graphModel(state: State, o: GraphOptions = {}): GraphModel {
         id,
         name: o.nameOf?.(id) ?? c.canonicalName,
         studied: !c.isPlaceholder,
+        explained: isExplained(state, id),
         understanding: understandingOf(state, id),
         degree: shown.get(id) ?? 0,
       };
@@ -162,7 +165,7 @@ export function labelWidth(label: string): number {
   return w;
 }
 
-interface Box {
+export interface Box {
   x0: number;
   y0: number;
   x1: number;
@@ -277,48 +280,89 @@ function forceLayout(points: { x: number; y: number; r: number }[], links: reado
   }
 }
 
-/** The box a label takes at one of four places around its circle. */
-function labelBox(node: GraphNode, place: number): { box: Box; x: number; y: number; anchor: GraphNode["labelAnchor"] } {
-  const w = labelWidth(node.label);
+/** The box a label takes at one of four places around its circle, with text `scale` times its usual size. */
+function labelBox(node: GraphNode, place: number, scale: number): { box: Box; x: number; y: number; anchor: GraphNode["labelAnchor"] } {
+  const w = labelWidth(node.label) * scale;
+  const font = FONT * scale;
+  const tall = LABEL_HEIGHT * scale;
   const { x, y, r } = node;
-  const pad = 4;
+  const pad = 4 * scale;
   switch (place) {
     case 0: // above
-      return {
-        x,
-        y: y - r - pad,
-        anchor: "middle",
-        box: { x0: x - w / 2, y0: y - r - pad - LABEL_HEIGHT, x1: x + w / 2, y1: y - r - pad },
-      };
+      return { x, y: y - r - pad, anchor: "middle", box: { x0: x - w / 2, y0: y - r - pad - tall, x1: x + w / 2, y1: y - r - pad } };
     case 1: // below
       return {
         x,
-        y: y + r + pad + FONT,
+        y: y + r + pad + font,
         anchor: "middle",
-        box: { x0: x - w / 2, y0: y + r + pad, x1: x + w / 2, y1: y + r + pad + LABEL_HEIGHT },
+        box: { x0: x - w / 2, y0: y + r + pad, x1: x + w / 2, y1: y + r + pad + tall },
       };
     case 2: // right
       return {
         x: x + r + pad,
-        y: y + FONT / 3,
+        y: y + font / 3,
         anchor: "start",
-        box: { x0: x + r + pad, y0: y - LABEL_HEIGHT / 2, x1: x + r + pad + w, y1: y + LABEL_HEIGHT / 2 },
+        box: { x0: x + r + pad, y0: y - tall / 2, x1: x + r + pad + w, y1: y + tall / 2 },
       };
     default: // left
       return {
         x: x - r - pad,
-        y: y + FONT / 3,
+        y: y + font / 3,
         anchor: "end",
-        box: { x0: x - r - pad - w, y0: y - LABEL_HEIGHT / 2, x1: x - r - pad, y1: y + LABEL_HEIGHT / 2 },
+        box: { x0: x - r - pad - w, y0: y - tall / 2, x1: x - r - pad, y1: y + tall / 2 },
       };
   }
 }
 
+/** A relation as drawn: a straight line between two circles. */
+export interface Segment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+/** The lines of a graph's relations, for labels to keep clear of. */
+export function edgeSegments(nodes: readonly GraphNode[], edges: readonly GraphEdge[]): Segment[] {
+  const at = new Map(nodes.map((n) => [n.id, n]));
+  return edges.flatMap((e) => {
+    const a = at.get(e.from);
+    const b = at.get(e.to);
+    return a && b ? [{ x1: a.x, y1: a.y, x2: b.x, y2: b.y }] : [];
+  });
+}
+
+/** Whether a line passes through a box (Liang–Barsky clipping). */
+export function crosses(s: Segment, b: Box): boolean {
+  const dx = s.x2 - s.x1;
+  const dy = s.y2 - s.y1;
+  let t0 = 0;
+  let t1 = 1;
+  for (const [p, q] of [
+    [-dx, s.x1 - b.x0],
+    [dx, b.x1 - s.x1],
+    [-dy, s.y1 - b.y0],
+    [dy, b.y1 - s.y1],
+  ] as const) {
+    if (p === 0) {
+      if (q < 0) return false;
+      continue;
+    }
+    const t = q / p;
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1) return false;
+  }
+  return true;
+}
+
 /**
- * Places each label above, below, right or left of its circle, wherever it covers no circle and no label placed before.
- * Studied concepts and the best connected go first; a label with no free place is shown only on hover.
+ * Places each label above, below, right or left of its circle, wherever it covers no circle and no label placed before,
+ * preferring the place that crosses the fewest lines. Studied concepts and the best connected go first; a label with no
+ * free place is shown only on hover. `scale` is the size the text is drawn at, in units of the map: zoomed out, labels take
+ * more of the map and fewer of them fit.
  */
-function placeLabels(nodes: GraphNode[], frame: Box): void {
+export function placeLabels(nodes: GraphNode[], frame: Box, scale = 1, segments: readonly Segment[] = []): void {
   const circles: Box[] = nodes.map((n) => ({ x0: n.x - n.r, y0: n.y - n.r, x1: n.x + n.r, y1: n.y + n.r }));
   const placed: Box[] = [];
   const order = nodes
@@ -327,13 +371,19 @@ function placeLabels(nodes: GraphNode[], frame: Box): void {
   for (const i of order) {
     const node = nodes[i]!;
     let chosen: ReturnType<typeof labelBox> | undefined;
-    for (let place = 0; place < 4 && !chosen; place++) {
-      const c = labelBox(node, place);
+    let fewest = Infinity;
+    for (let place = 0; place < 4 && fewest > 0; place++) {
+      const c = labelBox(node, place, scale);
       const inside = c.box.x0 >= frame.x0 && c.box.x1 <= frame.x1 && c.box.y0 >= frame.y0 && c.box.y1 <= frame.y1;
       const free = inside && !placed.some((b) => overlaps(b, c.box)) && !circles.some((b, j) => j !== i && overlaps(b, c.box));
-      if (free) chosen = c;
+      if (!free) continue;
+      const crossed = segments.reduce((n, s) => n + Number(crosses(s, c.box)), 0);
+      if (crossed < fewest) {
+        fewest = crossed;
+        chosen = c;
+      }
     }
-    const at = chosen ?? labelBox(node, 0);
+    const at = chosen ?? labelBox(node, 0, scale);
     node.labelX = at.x;
     node.labelY = at.y;
     node.labelAnchor = at.anchor;
@@ -430,7 +480,7 @@ export function layoutGraph(model: GraphModel, width = 900, height = 600, rounds
     p.x = offsetX + p.x * spread;
     p.y = offsetY + p.y * spread;
   }
-  placeLabels(nodes, { x0: 0, y0: 0, x1: frameW, y1: frameH });
+  placeLabels(nodes, { x0: 0, y0: 0, x1: frameW, y1: frameH }, 1, edgeSegments(nodes, model.edges));
   return { nodes, edges: model.edges, width: frameW, height: frameH };
 }
 

@@ -44,6 +44,7 @@ const TIER_LABEL = {
 } as const;
 /** A look-up imported from Zotero has no explanation. */
 const NOT_EXPLAINED = { zh: "在 Zotero 里划过，还没解释过。", en: "Highlighted in Zotero; not explained yet." } as const;
+const NOTE_LABEL = { zh: "我的笔记：", en: "Your note: " } as const;
 
 /** `language` is an interface language code; anything but "zh" is exported with English labels. */
 export function exportMarkdown(state: State, language = "en"): string {
@@ -64,10 +65,11 @@ export function exportMarkdown(state: State, language = "en"): string {
       const at = e.locator.t !== undefined ? ` ${formatTimestamp(e.locator.t)}` : "";
       if (!e.explanation.text) {
         lines.push(`- ${date} · ${source}${at}`, `  > ${NOT_EXPLAINED[labels]}`);
-        continue;
+      } else {
+        lines.push(`- ${date} · ${source}${at} · ${TIER_LABEL[labels][e.explanation.tier]}`);
+        lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
       }
-      lines.push(`- ${date} · ${source}${at} · ${TIER_LABEL[labels][e.explanation.tier]}`);
-      lines.push(`  > ${e.explanation.text.replace(/\s*\n\s*/g, " ").slice(0, 500)}`);
+      if (e.note) lines.push(`  ${NOTE_LABEL[labels]}${e.note.replace(/\s*\n\s*/g, " ")}`);
     }
     lines.push("");
   }

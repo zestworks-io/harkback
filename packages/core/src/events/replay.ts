@@ -35,6 +35,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const created = new Map<string, EventOf<"encounter.created">>();
   const deleted = new Set<string>();
   const actions: EventOf<"encounter.action">[] = [];
+  const later: EventOf<"encounter.noted" | "encounter.explained">[] = [];
   const mutes: (EventOf<"concept.muted"> | EventOf<"concept.unmuted">)[] = [];
   const dismissals: EventOf<"reunion.dismissed">[] = [];
   const consents: State["consents"] = [];
@@ -76,6 +77,10 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
         break;
       case "encounter.action":
         actions.push(e);
+        break;
+      case "encounter.noted":
+      case "encounter.explained":
+        later.push(e);
         break;
       case "concept.muted":
       case "concept.unmuted":
@@ -125,6 +130,22 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
       lastTouchedAt: at,
       everConfused: false,
     });
+  }
+
+  for (const e of later) {
+    if (!e.payload) continue;
+    const enc = encounters.get(e.payload.encounter_id);
+    if (!enc) continue;
+    if (e.type === "encounter.noted") {
+      if (e.payload.text.trim()) enc.note = e.payload.text;
+      else delete enc.note;
+    } else if (enc.explanation.text === "") {
+      // Only fills an encounter recorded without an explanation; one it already has is never replaced.
+      enc.explanation = e.payload.explanation;
+      enc.explainedLater = true;
+      enc.explainedAt = Date.parse(e.ts);
+      enc.lastTouchedAt = Math.max(enc.lastTouchedAt, enc.explainedAt);
+    }
   }
 
   for (const a of actions) {

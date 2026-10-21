@@ -1,5 +1,5 @@
 import type { State } from "@harkback/core";
-import { understandingOf } from "../records/concept-detail";
+import { isExplained, understandingOf } from "../records/concept-detail";
 import { prerequisiteMap } from "./prerequisites";
 
 export type GapReason = "confused" | "shaky" | "unstudied";
@@ -27,7 +27,7 @@ export function foundationGaps(state: State, conceptId: string): FoundationGap[]
   const reasonOf = (cid: string): GapReason | null => {
     const concept = state.concepts.get(cid);
     if (!concept || concept.muted) return null;
-    if (concept.isPlaceholder) return "unstudied";
+    if (!isExplained(state, cid)) return "unstudied";
     const u = understandingOf(state, cid);
     return u === "confused" || u === "shaky" ? u : null;
   };

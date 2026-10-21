@@ -1,0 +1,70 @@
+[
+  {
+    "id": 777001,
+    "version": 9,
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/groups/777001",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/groups/reading_group",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "created": "2026-09-01T10:16:40Z",
+      "lastModified": "2026-09-18T10:25:03Z",
+      "numItems": 3
+    },
+    "data": {
+      "id": 777001,
+      "version": 9,
+      "name": "Reading group",
+      "owner": 4242424,
+      "type": "Private",
+      "description": "",
+      "url": "",
+      "libraryEditing": "members",
+      "libraryReading": "members",
+      "fileEditing": "members",
+      "admins": [
+        4242424
+      ]
+    }
+  },
+  {
+    "id": 777002,
+    "version": 9,
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/groups/777001",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/groups/reading_group",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "created": "2026-09-01T10:16:40Z",
+      "lastModified": "2026-09-18T10:25:03Z",
+      "numItems": 3
+    },
+    "data": {
+      "id": 777002,
+      "version": 9,
+      "name": "Another group",
+      "owner": 4242424,
+      "type": "Private",
+      "description": "",
+      "url": "",
+      "libraryEditing": "members",
+      "libraryReading": "members",
+      "fileEditing": "members",
+      "admins": [
+        4242424
+      ]
+    }
+  }
+]

@@ -39,6 +39,7 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "delete-encounter",
   "import-events",
   "import-zotero",
+  "explain-imported",
   "review-answer",
   "check-answer",
   "merge-concepts",

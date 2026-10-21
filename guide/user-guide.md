@@ -34,7 +34,7 @@ The card shows the answer as it is written. While it is being written, **Stop** 
 
 Each answer carries a tag:
 
-- **Defined in source** – the page defines the term, and the quote the model gave was found in the page text.
+- **Defined in source** – the page defines the term, and the quote the model gave was found in the page text. **Show it on the page** next to the label scrolls to that passage and marks it for a few seconds, so you can check it.
 - **External knowledge** – the model explained it from what it knows.
 
 Explanations are written in the language you choose in settings (16 languages, or "follow the interface"). Technical terms keep their original form. Formulas are typeset, and tables and nested lists are shown.
@@ -127,11 +127,11 @@ To turn it off, clear **Offer "Check my answer" in review** under Review in sett
 
 **Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, pale yellow shaky, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
 
-Drag to move, scroll to zoom, click a concept to open it. Each group of connected concepts is drawn on its own, and the groups sit side by side. A map too large to read whole opens on its best-connected concept; scroll to zoom out to all of it. A label that has no free place beside its circle appears when you point at the circle. The search box filters the graph to matching concepts and their neighbours, and _Show concepts not explained yet_ hides the dashed rings when you untick it. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
+Drag to move, scroll or use the + and − buttons to zoom, and ⤢ to see the whole map again; click a concept to open it. Pointing at a concept (or moving to it with Tab) brings forward its relations and the concepts at their other ends, and fades the rest. Each group of connected concepts is drawn on its own, and the groups sit side by side. The map opens whole unless that would make it too small to point at; then it opens on its best-connected concept. Labels keep their size at any zoom and are placed where they cover no other label or circle, and cross as few lines as they can; zoomed out, fewer fit, and a label with no free place appears when you point at its circle. The search box filters the graph to matching concepts and their neighbours, and _Show concepts not explained yet_ hides the dashed rings when you untick it. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
 
 ## History
 
-Everything is grouped by concept, newest first, and updates live while other tabs record. Search covers names, quotes, explanations and follow-up conversations. **Select** lets you delete several entries at once. Each entry names its source; when the source has a web address (its page, or its arXiv or DOI page) the title is a link that opens it in a new tab, and the same link appears on the review card. A source you marked sensitive shows a badge with **Mark as normal** (two clicks, because it allows its content to go to remote models again).
+Everything is grouped by concept, newest first, and updates live while other tabs record. Search covers names, quotes, explanations, notes and follow-up conversations. On an entry whose explanation is _Defined in source_, that label opens the page at the passage the model quoted, highlighted by the browser. **Select** lets you delete several entries at once. Each entry names its source; when the source has a web address (its page, or its arXiv or DOI page) the title is a link that opens it in a new tab, and the same link appears on the review card. A source you marked sensitive shows a badge with **Mark as normal** (two clicks, because it allows its content to go to remote models again).
 
 Deleting an entry removes it from the app and clears its text (the quote, the explanation and any follow-up) from the stored log; the term's name and the source's title and address stay. Importing a backup clears the text of entries deleted on either side. Exported backups cannot be recalled.
 
@@ -168,8 +168,11 @@ If you highlight terms in Zotero's PDF reader, Harkback can take them in, so the
 
 - **What counts as a term.** A highlight or underline of at most five words (or twelve characters in Chinese or Japanese) with no sentence punctuation inside. Longer passages, notes, images and ink drawings are left out and counted.
 - **How it is recorded.** Each highlight becomes a look-up of the term in its paper, dated the day you import it. A term that already names one of your concepts is added to it; otherwise it becomes a new concept. The paper is named by its arXiv id or DOI, as when you read it on the web. A file that is not a published paper (no arXiv id or DOI) may be a private document, so it is recorded as a sensitive source.
-- **Not explained yet.** Imported look-ups have no explanation: History and reunion hints say _Highlighted in Zotero; not explained yet_, a reunion hint offers **Explain it here**, and review leaves such a term out until you have explained it once. Anki exports skip it.
-- **Next time.** Harkback asks Zotero only for highlights changed since the last import and never offers one you imported or unticked before. Only your personal library is read, not group libraries. Nothing is written to Zotero.
+- **Not explained yet.** Imported look-ups have no explanation: History and reunion hints say _Highlighted in Zotero; not explained yet_, a reunion hint offers **Explain it here**, and review leaves such a term out until it is explained. Anki exports skip it.
+- **Explain them all.** History shows how many look-ups from Zotero are not explained yet, with **Explain them with my model**. Each term is explained from its name and its paper's title (nothing else is sent), by the model your settings choose for that paper; a term from a sensitive file only goes to a local model. When the rate limit is reached the run waits, a term that cannot be explained is skipped and counted, and **Stop** ends it. The explanation is recorded on the imported look-up.
+- **Your notes.** The comment you wrote on a highlight in Zotero becomes your note on the look-up. History shows it under the quote and finds it when you search, and the Markdown and notes exports include it.
+- **Group libraries.** Every group library the key may read is searched too, and its name is shown next to each term. To include groups, give the key access to them on zotero.org.
+- **Next time.** Harkback asks Zotero only for highlights changed since the last import, separately for each library, and never offers one you imported or unticked before. Nothing is written to Zotero.
 
 ## Site rules
 

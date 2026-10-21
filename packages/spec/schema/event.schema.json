@@ -1203,6 +1203,182 @@
         },
         "type": {
           "type": "string",
+          "const": "encounter.noted"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "encounter_id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 2000
+                }
+              },
+              "required": [
+                "encounter_id",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "device",
+        "seq",
+        "ts",
+        "enc",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "device": {
+          "type": "string",
+          "pattern": "^(dev|svc)_[0-9a-f]{4,32}$"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ts": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "enc": {
+          "type": "string",
+          "const": "none"
+        },
+        "type": {
+          "type": "string",
+          "const": "encounter.explained"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "encounter_id": {
+                  "type": "string",
+                  "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+                },
+                "explanation": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "maxLength": 20000
+                    },
+                    "tier": {
+                      "type": "string",
+                      "enum": [
+                        "defined_in_source",
+                        "external_knowledge"
+                      ]
+                    },
+                    "evidence_span": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "model": {
+                      "type": "string",
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "tier",
+                    "evidence_span",
+                    "model"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "encounter_id",
+                "explanation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "v",
+        "id",
+        "device",
+        "seq",
+        "ts",
+        "enc",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "device": {
+          "type": "string",
+          "pattern": "^(dev|svc)_[0-9a-f]{4,32}$"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ts": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "enc": {
+          "type": "string",
+          "const": "none"
+        },
+        "type": {
+          "type": "string",
           "const": "reunion.dismissed"
         },
         "payload": {

@@ -19,6 +19,7 @@ function setup(settings: unknown = {}) {
   const imported: HarkEvent[] = [];
   const calls = { compact: 0, backup: 0, sync: 0 };
   const checked: { conceptId: string; answer: string }[] = [];
+  const explained: string[] = [];
   const saved: Settings[] = [];
   const previewed: unknown[] = [];
   const deps: RequestDeps = {
@@ -36,6 +37,10 @@ function setup(settings: unknown = {}) {
       return events.length;
     },
     runBackup: async () => void calls.backup++,
+    explainImported: async (encounterId: string) => {
+      explained.push(encounterId);
+      return { ok: true as const };
+    },
     checkAnswer: async (conceptId: string, answer: string) => {
       checked.push({ conceptId, answer });
       return { ok: true as const, verdict: "partial" as const, feedback: "close", suggested: 2 as const, model: "m" };
@@ -50,7 +55,7 @@ function setup(settings: unknown = {}) {
     syncContentScripts: async () => void calls.sync++,
     now: () => NOW + DAY,
   };
-  return { deps, written, imported, calls, checked, saved, previewed, conceptId, encounterId, w };
+  return { deps, written, imported, calls, checked, explained, saved, previewed, conceptId, encounterId, w };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -174,6 +179,17 @@ describe("writes", () => {
     expect(written.map((e) => e.type)).toEqual(["source.seen", "encounter.created"]);
     expect(written[1]!.payload).toMatchObject({ concept_id: conceptId, selection: "LoRA", explanation: { text: "", model: "zotero" } });
     expect(await handleRequest(deps, { type: "import-zotero", terms: bad as never }, { id: "x" })).toEqual({ ok: false });
+  });
+
+  it("passes a look-up to explain on, and nothing else", async () => {
+    const { deps, explained, encounterId } = setup();
+    const extensionPage = { url: "chrome-extension://abc/library.html" };
+    expect(await handleRequest(deps, { type: "explain-imported", encounterId }, extensionPage)).toEqual({ ok: true });
+    expect(await handleRequest(deps, { type: "explain-imported", encounterId: 7 as never }, extensionPage)).toEqual({
+      ok: false,
+      code: "internal",
+    });
+    expect(explained).toEqual([encounterId]);
   });
 
   it("refuses every write from a private window", async () => {

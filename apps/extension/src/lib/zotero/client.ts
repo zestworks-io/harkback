@@ -7,6 +7,21 @@ export const ZOTERO_ORIGIN = `${ZOTERO_API}/*`;
 /** `key`: the key is wrong or was revoked. `no-library`: it cannot read the library. `busy`: Zotero asked to wait too long. */
 export type ZoteroErrorCode = "key" | "no-library" | "network" | "busy" | "server";
 
+/** A library the key can read: the reader's own, or a group's. */
+export interface ZoteroLibrary {
+  type: "user" | "group";
+  id: number;
+  /** A group's name; empty for the reader's own library. */
+  name: string;
+}
+
+/** The path the API names a library by, and the key its progress is kept under: `users/123` or `groups/456`. */
+export const libraryPath = (lib: Pick<ZoteroLibrary, "type" | "id">): string => `${lib.type}s/${lib.id}`;
+
+/** A group's name as shown and recorded: never empty, never longer than a term may say. */
+const groupName = (name: unknown, id: number): string =>
+  (typeof name === "string" ? name.replace(/\s+/g, " ").trim().slice(0, 200) : "") || `Group ${id}`;
+
 export class ZoteroError extends Error {
   constructor(readonly code: ZoteroErrorCode) {
     super(`zotero: ${code}`);
@@ -87,20 +102,40 @@ export function zoteroClient(o: ZoteroClientOptions) {
   }
 
   return {
-    /** The library the key belongs to. */
-    async user(): Promise<{ userID: number; username: string }> {
-      const body = await json<{ userID?: unknown; username?: unknown; access?: { user?: { library?: unknown } } }>(
+    /**
+     * The libraries the key can read: its owner's own (when it may) and the groups it may. A key that can read none
+     * fails with `no-library`.
+     */
+    async libraries(): Promise<{ userID: number; libraries: ZoteroLibrary[] }> {
+      type Access = { library?: unknown };
+      const body = await json<{ userID?: unknown; access?: { user?: Access; groups?: Record<string, Access> } }>(
         await get(`${ZOTERO_API}/keys/current`),
       );
       if (typeof body.userID !== "number") throw new ZoteroError("server");
-      // A key with no access to the personal library has `"user": []` there.
-      if (body.access?.user?.library !== true) throw new ZoteroError("no-library");
-      return { userID: body.userID, username: typeof body.username === "string" ? body.username : "" };
+      const userID = body.userID;
+      // The server leaves out what the key may not read: `user` without personal access, `groups` without group access.
+      const libraries: ZoteroLibrary[] = body.access?.user?.library === true ? [{ type: "user", id: userID, name: "" }] : [];
+      const groups = body.access?.groups ?? {};
+      const readable = (id: number) => groups.all?.library === true || groups[String(id)]?.library === true;
+      if (Object.keys(groups).length > 0) {
+        let url: string | null = `${ZOTERO_API}/users/${userID}/groups?limit=${PAGE}`;
+        while (url) {
+          const res = await get(url);
+          for (const g of await json<{ id?: unknown; data?: { name?: unknown } }[]>(res)) {
+            if (typeof g.id === "number" && readable(g.id))
+              libraries.push({ type: "group", id: g.id, name: groupName(g.data?.name, g.id) });
+          }
+          url = nextLink(res.headers.get("Link"));
+        }
+      }
+      if (libraries.length === 0) throw new ZoteroError("no-library");
+      return { userID, libraries };
     },
 
     /** Every annotation changed after library version `since` (all of them for 0), and the library's version now. */
-    async annotations(userID: number, since: number): Promise<{ items: ZoteroItem[]; version: number }> {
-      let url: string | null = `${ZOTERO_API}/users/${userID}/items?itemType=annotation&limit=${PAGE}${since > 0 ? `&since=${since}` : ""}`;
+    async annotations(lib: ZoteroLibrary, since: number): Promise<{ items: ZoteroItem[]; version: number }> {
+      let url: string | null =
+        `${ZOTERO_API}/${libraryPath(lib)}/items?itemType=annotation&limit=${PAGE}${since > 0 ? `&since=${since}` : ""}`;
       const items: ZoteroItem[] = [];
       let version = since;
       for (let first = true; url; first = false) {
@@ -113,7 +148,7 @@ export function zoteroClient(o: ZoteroClientOptions) {
     },
 
     /** The items with these keys; a key that is not there (deleted meanwhile) is left out. */
-    async items(userID: number, keys: readonly string[]): Promise<ZoteroItem[]> {
+    async items(lib: ZoteroLibrary, keys: readonly string[]): Promise<ZoteroItem[]> {
       const unique = [...new Set(keys)];
       const out: ZoteroItem[] = [];
       for (let i = 0; i < unique.length; i += KEYS_PER_REQUEST) {
@@ -121,7 +156,7 @@ export function zoteroClient(o: ZoteroClientOptions) {
           .slice(i, i + KEYS_PER_REQUEST)
           .map(encodeURIComponent)
           .join(",");
-        out.push(...(await json<ZoteroItem[]>(await get(`${ZOTERO_API}/users/${userID}/items?itemKey=${batch}&limit=${PAGE}`))));
+        out.push(...(await json<ZoteroItem[]>(await get(`${ZOTERO_API}/${libraryPath(lib)}/items?itemKey=${batch}&limit=${PAGE}`))));
       }
       return out;
     },
@@ -133,14 +168,14 @@ export type ZoteroClient = ReturnType<typeof zoteroClient>;
 /** The highlights and the files and papers they hang from, read in three steps. */
 export async function readLibrary(
   client: ZoteroClient,
-  userID: number,
+  lib: ZoteroLibrary,
   since: number,
 ): Promise<{ annotations: ZoteroItem[]; items: Map<string, ZoteroItem>; version: number }> {
-  const { items: annotations, version } = await client.annotations(userID, since);
+  const { items: annotations, version } = await client.annotations(lib, since);
   const items = new Map<string, ZoteroItem>();
   const fetchKeys = async (keys: (string | undefined)[]) => {
     const wanted = keys.filter((k): k is string => typeof k === "string" && !items.has(k));
-    for (const item of await client.items(userID, wanted)) items.set(item.key, item);
+    for (const item of await client.items(lib, wanted)) items.set(item.key, item);
   };
   // A highlight hangs from its file, and the file from its paper (a file added on its own has none).
   await fetchKeys(annotations.map((a) => a.data.parentItem));

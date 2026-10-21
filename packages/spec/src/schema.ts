@@ -88,6 +88,10 @@ export const encounterActionPayload = z.object({
 export const reunionDismissedPayload = z.object({ concept_id: ulidSchema, source_id: sourceIdSchema });
 
 export const encounterDeletedPayload = z.object({ encounter_id: ulidSchema });
+/** The reader's own note on an encounter, such as the comment on a highlight imported from Zotero; empty text removes it. */
+export const encounterNotedPayload = z.object({ encounter_id: ulidSchema, text: z.string().max(CARD_LIMITS.maxNoteLength) });
+/** The explanation of an encounter recorded without one (a term imported from Zotero), given later. */
+export const encounterExplainedPayload = z.object({ encounter_id: ulidSchema, explanation: explanationSchema });
 /** The reader moved an encounter to another concept (splitting a concept that was joined by mistake). */
 export const encounterMovedPayload = z.object({ encounter_id: ulidSchema, concept_id: ulidSchema });
 
@@ -138,6 +142,9 @@ export const eventSchema = z.discriminatedUnion("type", [
   ev("encounter.action", encounterActionPayload.nullable()),
   ev("encounter.deleted", encounterDeletedPayload),
   ev("encounter.moved", encounterMovedPayload),
+  // Nullable like the encounter itself: deleting the encounter clears its note and its later explanation.
+  ev("encounter.noted", encounterNotedPayload.nullable()),
+  ev("encounter.explained", encounterExplainedPayload.nullable()),
   ev("reunion.dismissed", reunionDismissedPayload),
   ev("edge.proposed", edgeProposedPayload),
   ev("edge.confirmed", edgeStatusPayload),

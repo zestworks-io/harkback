@@ -108,6 +108,8 @@ describe("conceptDetail", () => {
     const qlora = w.concept("QLoRA");
     w.encounter(qlora, "s1");
     const peft = w.concept("PEFT");
+    // Only highlighted in Zotero: looked up, but never explained.
+    w.encounter(peft, "s1", "");
     const dora = w.concept("DoRA");
     w.encounter(dora, "s1");
     edge(lora, "prerequisite", matrix);

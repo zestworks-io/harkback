@@ -23,6 +23,7 @@ export const ui_ar: Readonly<Record<StringKey, string>> = {
   daysAgo: "منذ {n#one=يوم واحد|two=يومين|few=# أيام|many=# يومًا|other=# يوم}",
   related: "لم تبحث عن «{a}»، لكنك فهمتَ «{b}» منذ {n#one=يوم واحد|two=يومين|few=# أيام|many=# يومًا|other=# يوم}",
   thenExplained: "الشرح السابق: {text}",
+  showEvidence: "اعرضه في الصفحة",
   highlightedInZotero: "مظلَّل في Zotero؛ لم يُشرح بعد.",
   whyDirect: "وُضع تحته خط لأن «{text}» في هذه الصفحة هو المصطلح «{name}» الذي بحثتَ عنه.",
   whyRelated: "وُضع تحته خط لأن «{text}» في هذه الصفحة مرتبط بـ«{via}» الذي فهمتَه.",

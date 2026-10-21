@@ -102,6 +102,21 @@ describe("buildContribution", () => {
     expect(rels(replay(events()), { scope: "this_record", target: id(11) })).toEqual([]);
   });
 
+  it("leaves out a term highlighted in Zotero until it is explained", () => {
+    const imported = encounter(15, 3, "arxiv:2106.09685");
+    imported.payload!.explanation = { text: "", tier: "external_knowledge", evidence_span: null, model: "zotero" };
+    const terms = (extra: ReturnType<typeof ev>[]) =>
+      buildContribution(replay([...events(), imported, ...extra]), { scope: "all_public_sources", target: null }).records.map(
+        (r) => r.term,
+      );
+    expect(terms([])).toEqual(["LoRA", "Low-rank matrix"]);
+    const explained = ev("encounter.explained", {
+      encounter_id: id(15),
+      explanation: { text: "Quantised LoRA.", tier: "external_knowledge", evidence_span: null, model: "m" },
+    });
+    expect(terms([explained])).toEqual(["LoRA", "Low-rank matrix", "QLoRA"]);
+  });
+
   it("narrows to one source or one look-up", () => {
     const state = replay(events());
     expect(buildContribution(state, { scope: "this_source", target: "doi:10.1/x" }).records).toEqual([]);

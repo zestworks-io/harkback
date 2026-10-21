@@ -1,0 +1,122 @@
+[
+  {
+    "key": "GATTRLHF",
+    "version": 30,
+    "library": {
+      "type": "group",
+      "id": 777001,
+      "name": "Reading group",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/groups/reading_group",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/groups/777001/items/GATTRLHF",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/groups/reading_group/items/GATTRLHF",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/groups/777001/items/GPAPRLHF",
+        "type": "application/json"
+      }
+    },
+    "meta": {
+      "numChildren": 1
+    },
+    "data": {
+      "key": "GATTRLHF",
+      "version": 30,
+      "parentItem": "GPAPRLHF",
+      "itemType": "attachment",
+      "linkMode": "imported_url",
+      "title": "Preprint PDF",
+      "accessDate": "",
+      "url": "http://arxiv.org/pdf/2203.02155v1",
+      "note": "",
+      "contentType": "application/pdf",
+      "charset": "",
+      "filename": "Ouyang et al. - 2022 - Training language models to follow instructions.pdf",
+      "md5": "00000000000000000000000000000000",
+      "mtime": 1758000000000,
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  },
+  {
+    "key": "GPAPRLHF",
+    "version": 30,
+    "library": {
+      "type": "group",
+      "id": 777001,
+      "name": "Reading group",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/groups/reading_group",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/groups/777001/items/GPAPRLHF",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/groups/reading_group/items/GPAPRLHF",
+        "type": "text/html"
+      }
+    },
+    "meta": {
+      "creatorSummary": "Ouyang et al.",
+      "parsedDate": "2022-03-04",
+      "numChildren": 1
+    },
+    "data": {
+      "key": "GPAPRLHF",
+      "version": 30,
+      "itemType": "preprint",
+      "title": "Training language models to follow instructions with human feedback",
+      "creators": [
+        {
+          "creatorType": "author",
+          "firstName": "Long",
+          "lastName": "Ouyang"
+        }
+      ],
+      "abstractNote": "",
+      "genre": "",
+      "repository": "arXiv",
+      "archiveID": "arXiv:2203.02155",
+      "place": "",
+      "date": "2022-03-04",
+      "series": "",
+      "seriesNumber": "",
+      "DOI": "10.48550/arXiv.2203.02155",
+      "citationKey": "",
+      "url": "http://arxiv.org/abs/2203.02155",
+      "accessDate": "",
+      "archive": "",
+      "archiveLocation": "",
+      "shortTitle": "",
+      "language": "",
+      "libraryCatalog": "arXiv.org",
+      "callNumber": "",
+      "rights": "",
+      "extra": "arXiv:2203.02155 [cs]",
+      "collections": [],
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-01T08:00:00Z",
+      "dateModified": "2026-09-01T08:00:00Z"
+    }
+  }
+]

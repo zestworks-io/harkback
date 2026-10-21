@@ -1,12 +1,24 @@
 import { identityKey, normalizeSourceId, ulid, type EventFactory, type State } from "@harkback/core";
-import { CARD_LIMITS, parseEvent, type HarkEvent, type PayloadOf, type SourceIds } from "@harkback/spec";
+import {
+  CARD_LIMITS,
+  conceptCreatedPayload,
+  encounterCreatedPayload,
+  encounterNotedPayload,
+  sourceSeenPayload,
+  type HarkEvent,
+  type PayloadOf,
+  type SourceIds,
+} from "@harkback/spec";
 import { arxivIdFromUrl } from "../source/source-id";
+import type { ZoteroLibrary } from "./client";
 
 /** An item as the Zotero web API sends it (`format=json`); only what the import reads is typed. */
 export interface ZoteroItem {
   key: string;
   version?: number;
   links?: { alternate?: { href?: string } };
+  /** Who added the item: in a group library, any of its members. */
+  meta?: { createdByUser?: { id?: unknown; username?: unknown } };
   data: { itemType: string; parentItem?: string; [field: string]: unknown };
 }
 
@@ -24,6 +36,12 @@ export interface ZoteroTerm {
   annotationKey: string;
   term: string;
   paper: ZoteroPaper;
+  /** The reader's comment on the highlight, kept as their note on the look-up. */
+  note?: string;
+  /** The group library it was found in; absent for the reader's own library. */
+  group?: string;
+  /** In a group library, the member who made the highlight when it was not the reader. */
+  highlightedBy?: string;
 }
 
 export interface ZoteroFindings {
@@ -62,6 +80,9 @@ export function termOfHighlight(text: string): string | null {
   return t;
 }
 
+/** The longest ids the records hold. */
+const MAX_ARXIV = 64;
+const MAX_DOI = 256;
 const text = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 const ARXIV_ID = /^(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})(?:v\d+)?$/i;
 const DOI = /10\.\d{4,9}\/[^\s"<>]+/;
@@ -98,10 +119,12 @@ function doiOf(field: string): string | null {
  * since it can be a library proxy's address with a session in it. A file with neither id is named by its Zotero item and
  * linked to its page in the Zotero web library.
  */
-export function paperOf(paper: ZoteroItem | undefined, file: ZoteroItem, userID: number): ZoteroPaper {
+export function paperOf(paper: ZoteroItem | undefined, file: ZoteroItem, lib: Pick<ZoteroLibrary, "type" | "id">): ZoteroPaper {
   const item = paper ?? file;
-  const arxiv = arxivOf(item.data);
-  const doi = doiOf(text(item.data.DOI)) ?? doiOf(/^DOI:\s*(\S+)/im.exec(text(item.data.extra))?.[1] ?? "");
+  // An id longer than the records allow is not used: the item is named as it would be without one.
+  const fits = (id: string | null, max: number): string | null => (id && id.length <= max ? id : null);
+  const arxiv = fits(arxivOf(item.data), MAX_ARXIV);
+  const doi = fits(doiOf(text(item.data.DOI)) ?? doiOf(/^DOI:\s*(\S+)/im.exec(text(item.data.extra))?.[1] ?? ""), MAX_DOI);
   const title = (text(item.data.title) || text(item.data.filename) || item.key).slice(0, 500);
   if (arxiv || doi) {
     return {
@@ -113,7 +136,8 @@ export function paperOf(paper: ZoteroItem | undefined, file: ZoteroItem, userID:
   }
   const page = item.links?.alternate?.href;
   return {
-    sourceId: `zotero:${userID}/${item.key}`,
+    // The reader's own library keeps the form the first version wrote: `zotero:<user id>/<key>`.
+    sourceId: lib.type === "user" ? `zotero:${lib.id}/${item.key}` : `zotero:groups/${lib.id}/${item.key}`,
     ids: page && /^https:\/\/www\.zotero\.org\//.test(page) ? { url: page } : {},
     title,
     sensitive: true,
@@ -130,13 +154,18 @@ export function isZoteroTerm(v: unknown): v is ZoteroTerm {
   return (
     isString(t.annotationKey, 64) &&
     isString(t.term, CARD_LIMITS.maxNameLength) &&
+    (t.note === undefined || isString(t.note, CARD_LIMITS.maxNoteLength)) &&
+    (t.group === undefined || isString(t.group, 500)) &&
+    (t.highlightedBy === undefined || isString(t.highlightedBy, 200)) &&
     isString(sourceId, 2048) &&
     /^(arxiv|doi|zotero):/.test(sourceId) &&
     typeof title === "string" &&
     typeof sensitive === "boolean" &&
     typeof ids === "object" &&
     ids !== null &&
-    Object.entries(ids).every(([k, val]) => ["arxiv", "doi", "url"].includes(k) && isString(val, k === "url" ? 2048 : 256))
+    Object.entries(ids).every(
+      ([k, val]) => ["arxiv", "doi", "url"].includes(k) && isString(val, k === "url" ? 2048 : k === "arxiv" ? MAX_ARXIV : MAX_DOI),
+    )
   );
 }
 
@@ -148,15 +177,24 @@ function conceptNamed(state: State, term: string): string | null {
   return reps.size === 1 ? [...reps][0]! : null;
 }
 
+/** The member of a group who made a highlight, when it was someone other than the reader (`userID`). */
+function otherMember(a: ZoteroItem, lib: ZoteroLibrary, userID: number | undefined): string | undefined {
+  const by = a.meta?.createdByUser;
+  if (lib.type !== "group" || userID === undefined || typeof by?.id !== "number" || by.id === userID) return undefined;
+  return (typeof by.username === "string" ? by.username.replace(/\s+/g, " ").trim().slice(0, 200) : "") || `#${by.id}`;
+}
+
 /**
  * The terms among the highlights, each with its paper. `items` holds the files and papers the highlights hang from;
- * `decided` the highlights already imported or turned down.
+ * `decided` the highlights already imported or turned down; `userID` the reader, to tell their highlights in a group
+ * library from other members'.
  */
 export function findTerms(
   annotations: readonly ZoteroItem[],
   items: ReadonlyMap<string, ZoteroItem>,
   decided: ReadonlySet<string>,
-  userID: number,
+  lib: ZoteroLibrary,
+  userID?: number,
 ): ZoteroFindings {
   const out: ZoteroFindings = { terms: [], passages: 0, orphans: 0 };
   for (const a of annotations) {
@@ -173,7 +211,16 @@ export function findTerms(
       out.orphans++;
       continue;
     }
-    out.terms.push({ annotationKey: a.key, term, paper: paperOf(paper, file, userID) });
+    const note = text(a.data.annotationComment).slice(0, CARD_LIMITS.maxNoteLength);
+    const by = otherMember(a, lib, userID);
+    out.terms.push({
+      annotationKey: a.key,
+      term,
+      paper: paperOf(paper, file, lib),
+      ...(note && { note }),
+      ...(lib.type === "group" && { group: lib.name }),
+      ...(by && { highlightedBy: by }),
+    });
   }
   return out;
 }
@@ -189,7 +236,7 @@ export function buildImportEvents(f: EventFactory, state: State, terms: readonly
   // One look-up per term and paper, even when the same highlight is imported again (after its progress was lost).
   const recorded = new Set(
     [...state.encounters.values()]
-      .filter((e) => e.explanation.model === "zotero")
+      .filter((e) => e.explanation.model === "zotero" || e.explainedLater)
       .map((e) => `${normalizeSourceId(e.sourceId)}\u0000${identityKey(e.selection)}`),
   );
   for (const t of terms) {
@@ -198,40 +245,46 @@ export function buildImportEvents(f: EventFactory, state: State, terms: readonly
     const { sourceId } = t.paper;
     const once = `${normalizeSourceId(sourceId)}\u0000${identityKey(term)}`;
     if (recorded.has(once)) continue;
-    recorded.add(once);
-    if (!state.sources.has(sourceId) && !sources.has(sourceId)) {
-      const source: PayloadOf<"source.seen"> = {
-        source_id: sourceId.slice(0, 2048),
-        ids: t.paper.ids,
-        title: t.paper.title.slice(0, 500),
-        license: "unknown",
-        sensitivity: t.paper.sensitive ? "sensitive" : "normal",
-      };
-      out.push(f.make("source.seen", source));
-    }
-    sources.add(sourceId);
     const key = identityKey(term);
-    let conceptId = concepts.get(key) ?? conceptNamed(state, term);
-    if (!conceptId) {
-      conceptId = newId();
-      out.push(f.make("concept.created", { concept_id: conceptId, canonical_name: term, aliases: [], domain: "other" }));
-    }
+    const source: PayloadOf<"source.seen"> | null =
+      state.sources.has(sourceId) || sources.has(sourceId)
+        ? null
+        : {
+            source_id: sourceId.slice(0, 2048),
+            ids: t.paper.ids,
+            title: t.paper.title.slice(0, 500),
+            license: "unknown",
+            sensitivity: t.paper.sensitive ? "sensitive" : "normal",
+          };
+    const known = concepts.get(key) ?? conceptNamed(state, term);
+    const conceptId = known ?? newId();
+    const concept: PayloadOf<"concept.created"> | null = known
+      ? null
+      : { concept_id: conceptId, canonical_name: term, aliases: [], domain: "other" };
+    const encounter: PayloadOf<"encounter.created"> = {
+      encounter_id: newId(),
+      concept_id: conceptId,
+      source_id: sourceId,
+      locator: { exact: term, prefix: "", suffix: "" },
+      selection: term.slice(0, CARD_LIMITS.maxSelectionLength),
+      explanation: { text: "", tier: "external_knowledge", evidence_span: null, model: "zotero" },
+      flags: [],
+    };
+    const note: PayloadOf<"encounter.noted"> | null = t.note ? { encounter_id: encounter.encounter_id, text: t.note } : null;
+    // A term the records could not hold is left out; the others are still imported.
+    const valid =
+      (!source || sourceSeenPayload.safeParse(source).success) &&
+      (!concept || conceptCreatedPayload.safeParse(concept).success) &&
+      encounterCreatedPayload.safeParse(encounter).success &&
+      (!note || encounterNotedPayload.safeParse(note).success);
+    if (!valid) continue;
+    recorded.add(once);
+    sources.add(sourceId);
     concepts.set(key, conceptId);
-    out.push(
-      f.make("encounter.created", {
-        encounter_id: newId(),
-        concept_id: conceptId,
-        source_id: sourceId,
-        locator: { exact: term, prefix: "", suffix: "" },
-        selection: term.slice(0, CARD_LIMITS.maxSelectionLength),
-        explanation: { text: "", tier: "external_knowledge", evidence_span: null, model: "zotero" },
-        flags: [],
-      }),
-    );
-  }
-  for (const e of out) {
-    const r = parseEvent(e);
-    if (r.kind !== "event") throw new Error(`invalid ${e.type} event`);
+    if (source) out.push(f.make("source.seen", source));
+    if (concept) out.push(f.make("concept.created", concept));
+    out.push(f.make("encounter.created", encounter));
+    if (note) out.push(f.make("encounter.noted", note));
   }
   return out;
 }

@@ -138,6 +138,13 @@
         margin: 0;
         color: var(--danger, #c0392b);
       }
+      .reader-note {
+        margin: 8px 0 0;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: var(--subtle);
+        font-size: 13.5px;
+      }
       .review .quote {
         margin-top: 12px;
       }
@@ -741,10 +748,34 @@
         padding: 0 8px;
       }
       .graph-wrap {
+        position: relative;
         border: 1px solid var(--border);
         border-radius: 12px;
         background: var(--card);
         overflow: hidden;
+      }
+      .graph-zoom {
+        position: absolute;
+        top: 10px;
+        inset-inline-end: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .graph-zoom button {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 16px;
+        line-height: 1;
+        color: var(--fg);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .graph-zoom button:hover {
+        border-color: var(--muted);
       }
       svg.graph {
         display: block;
@@ -752,21 +783,25 @@
         height: min(70vh, 640px);
         cursor: grab;
         touch-action: none;
+        /* Units of the map per pixel on screen, set as the map is zoomed: text and lines keep their size on screen. */
+        --u: 1;
       }
       svg.graph.dragging {
         cursor: grabbing;
       }
-      svg.graph .edge {
+      svg .edge {
         stroke-width: 1.4;
         fill: none;
+        vector-effect: non-scaling-stroke;
+        transition: opacity 0.15s;
       }
-      svg.graph .edge.prerequisite {
+      svg .edge.prerequisite {
         stroke: var(--accent);
       }
-      svg.graph .edge.variant_of {
+      svg .edge.variant_of {
         stroke: #a855f7;
       }
-      svg.graph .edge.related {
+      svg .edge.related {
         stroke: var(--muted);
         stroke-dasharray: 4 3;
       }
@@ -776,39 +811,44 @@
       svg.graph marker.variant_of path {
         fill: #a855f7;
       }
-      svg.graph .node circle {
+      svg .node circle {
         stroke-width: 2;
         fill: var(--card);
         stroke: var(--muted);
+        vector-effect: non-scaling-stroke;
       }
-      svg.graph .node.understood circle {
+      svg .node.understood circle {
         fill: var(--defined);
         stroke: var(--defined);
       }
-      svg.graph .node.confused circle {
+      svg .node.confused circle {
         fill: var(--external);
         stroke: var(--external);
       }
-      svg.graph .node.shaky circle {
+      svg .node.shaky circle {
         fill: var(--external-soft);
         stroke: var(--external);
       }
-      svg.graph .node.new circle {
+      svg .node.new circle {
         fill: var(--accent-soft);
         stroke: var(--accent);
       }
-      svg.graph .node.unstudied circle {
+      svg .node.unstudied circle {
         fill: var(--card);
         stroke: var(--muted);
         stroke-width: 1.5;
         stroke-dasharray: 3 2;
       }
+      svg.graph .node {
+        transition: opacity 0.15s;
+      }
       svg.graph .node text {
         fill: var(--fg);
-        font-size: 12px;
+        font-size: calc(12px * var(--u));
         paint-order: stroke;
         stroke: var(--card);
-        stroke-width: 3px;
+        stroke-width: calc(3px * var(--u));
+        stroke-linejoin: round;
       }
       svg.graph .node.unstudied text {
         fill: var(--muted);
@@ -817,22 +857,53 @@
       svg.graph .node text.crowded {
         display: none;
       }
-      svg.graph a:focus-visible text.crowded,
-      svg.graph a:hover text.crowded {
+      svg.graph .node:focus-visible text.crowded,
+      svg.graph .node:hover text.crowded,
+      svg.graph.focusing .node.near text.crowded {
         display: inline;
       }
-      svg.graph a:focus-visible circle,
-      svg.graph a:hover circle {
+      svg.graph .node:focus {
+        outline: none;
+      }
+      svg.graph .node:focus-visible circle,
+      svg.graph .node:hover circle {
         stroke: var(--fg);
+        stroke-width: 3;
+      }
+      /* Pointing at a concept brings forward its relations and the concepts at their other ends. */
+      svg.graph.focusing .node:not(.near),
+      svg.graph.focusing .edge:not(.near) {
+        opacity: 0.18;
+      }
+      svg.graph.focusing .edge.near {
+        stroke-width: 2.2;
       }
       .legend {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px 16px;
-        padding: 8px 14px;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 14px;
         border-top: 1px solid var(--border);
         font-size: 12.5px;
         color: var(--muted);
+      }
+      .legend-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+      }
+      .legend .key {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend svg.swatch {
+        width: 24px;
+        height: 14px;
+        flex: none;
+      }
+      .legend-hint {
+        font-size: 12px;
       }
     </style>
   </head>

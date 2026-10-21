@@ -17,7 +17,7 @@ Only the request you trigger: when you ask for an explanation or a follow-up, th
 
 Nothing else is sent: not the rest of the page, not your history, not your other settings. There is no analytics and no developer server.
 
-**Importing from Zotero** is the one request to another service, and it happens only when you press _Find highlights_ in Settings → Data and privacy → Zotero. Your Zotero API key goes to `api.zotero.org` (and nowhere else), and Harkback reads your highlights and the papers and files they hang from. Nothing from your records is sent to Zotero, and nothing is written there. A file that is not a published paper is recorded as a sensitive source.
+**Importing from Zotero** is the one request to another service, and it happens only when you press _Find highlights_ in Settings → Data and privacy → Zotero. Your Zotero API key goes to `api.zotero.org` (and nowhere else), and Harkback reads your highlights and the papers and files they hang from. Nothing from your records is sent to Zotero, and nothing is written there. A file that is not a published paper is recorded as a sensitive source. **Explain them with my model** in History then sends each imported term and its paper's title, and nothing else, to your model, under the same sensitive-source rules as an explanation.
 
 Page text and earlier explanations are placed inside delimiters, and the model is told not to follow instructions found in them. The reply is parsed defensively and shown as text or through a restricted Markdown renderer; it is never inserted as HTML.
 

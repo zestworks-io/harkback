@@ -36,3 +36,35 @@ export function placeNear(el: HTMLElement, rect: DOMRect | null, width = 400, rt
   el.style.left = `${left + window.scrollX}px`;
   el.style.top = `${top + window.scrollY}px`;
 }
+
+/**
+ * The boxes of a range on screen, cut to what its scrolling ancestors show: text scrolled out of sight inside a panel has no
+ * box, and a line half out of it only its visible part.
+ */
+export function visibleRects(range: Range): DOMRect[] {
+  let left = -Infinity;
+  let top = -Infinity;
+  let right = Infinity;
+  let bottom = Infinity;
+  const start = range.commonAncestorContainer;
+  for (let el = start.nodeType === Node.ELEMENT_NODE ? (start as Element) : start.parentElement; el; el = el.parentElement) {
+    // The page itself scrolls the overlay along with the text.
+    if (el === document.documentElement || el === document.body) break;
+    const s = getComputedStyle(el);
+    if (s.overflowX === "visible" && s.overflowY === "visible") continue;
+    const r = el.getBoundingClientRect();
+    left = Math.max(left, r.left);
+    top = Math.max(top, r.top);
+    right = Math.min(right, r.right);
+    bottom = Math.min(bottom, r.bottom);
+  }
+  const out: DOMRect[] = [];
+  for (const r of range.getClientRects()) {
+    const l = Math.max(r.left, left);
+    const t = Math.max(r.top, top);
+    const w = Math.min(r.right, right) - l;
+    const ht = Math.min(r.bottom, bottom) - t;
+    if (w > 0 && ht > 0) out.push(new DOMRect(l, t, w, ht));
+  }
+  return out;
+}

@@ -31,6 +31,7 @@ const TEXT = {
     timeline: "记录",
     tier: { defined_in_source: "原文定义", external_knowledge: "外部知识" },
     notExplained: "在 Zotero 里划过，还没解释过。",
+    note: "我的笔记：",
     source: (t: string) => `《${t}》`,
   },
   en: {
@@ -40,6 +41,7 @@ const TEXT = {
     timeline: "Timeline",
     tier: { defined_in_source: "Defined in source", external_knowledge: "External knowledge" },
     notExplained: "Highlighted in Zotero; not explained yet.",
+    note: "Your note: ",
     source: (t: string) => `“${t}”`,
   },
 } as const;
@@ -73,6 +75,7 @@ export function conceptNote(d: ConceptDetail, language: Lang, titleOf: TitleOf =
     // A look-up imported from Zotero has no explanation, and so no kind of explanation either.
     lines.push(`- ${e.date} · ${t.source(e.sourceTitle)}${at}${e.explanation ? ` · ${t.tier[e.tier]}` : ""}`);
     lines.push(`  > ${e.explanation ? e.explanation.replace(/\s*\n\s*/g, " ").trim() : t.notExplained}`);
+    if (e.note) lines.push(`  ${t.note}${e.note.replace(/\s*\n\s*/g, " ").trim()}`);
   }
   lines.push("", NOTE_END, "");
   return lines.join("\n");

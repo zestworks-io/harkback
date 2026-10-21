@@ -248,10 +248,6 @@ export const pages_de: Readonly<Record<string, string>> = {
   "Sensitive source": "Sensible Quelle",
   "No concepts to show yet.": "Noch keine Konzepte vorhanden.",
   "Concept graph": "Konzeptgraph",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
-    "Blauer Pfeil: Voraussetzung · Lila Pfeil: Variante · Gestrichelt: verwandt",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Grün: verstanden · Hellgelb: unsicher · Gelb: unklar · Blau: neu · Gestrichelter Kreis: noch nicht erklärt",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Eine Karte pro Konzept als tabulatorgetrennter Text; in Anki über Datei → Importieren öffnen.",
   "Export Anki cards": "Anki-Karten exportieren",
@@ -456,8 +452,25 @@ export const pages_de: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "Keine neuen Begriffe in Ihren Markierungen.",
   "Terms found: {n}. Longer highlights left out: {m}.": "Gefundene Begriffe: {n}. Ausgelassene längere Markierungen: {m}.",
   "Import ticked terms": "Angehakte Begriffe importieren",
+  "highlighted by {name}": "markiert von {name}",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "Eine Datei, die kein veröffentlichter Artikel ist, kann ein privates Dokument sein; Begriffe daraus werden deshalb als sensibel gespeichert.",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "Beim Import aus Zotero wird Ihr Zotero-API-Schlüssel nur an api.zotero.org gesendet, um Ihre Markierungen und die Artikel zu lesen, in denen sie stehen; in Zotero wird nichts geschrieben.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "Beim Import aus Zotero wird Ihr Zotero-API-Schlüssel nur an api.zotero.org gesendet, um Ihre Markierungen und die Artikel zu lesen, in denen sie stehen; in Zotero wird nichts geschrieben. Beim Erklären der importierten Begriffe werden jeder Begriff und der Titel seines Artikels an Ihr Modell gesendet.",
+  "Your note: ": "Ihre Notiz: ",
+  "Explain them with my model": "Mit meinem Modell erklären",
+  "Explained {done} of {total}; waiting for the rate limit…": "{done} von {total} erklärt; warte auf das Anfragelimit…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "Erklärt: {done}. Nicht erklärbar: {failed}. {error}",
+  "Explained: {done}.": "Erklärt: {done}.",
+  "Explaining {done} of {total}…": "Erkläre {done} von {total}…",
+  "Look-ups from Zotero not explained yet: {n}.": "Noch nicht erklärte Nachschlagen aus Zotero: {n}.",
+  Stop: "Anhalten",
+  "See the quoted passage on the page": "Die zitierte Stelle auf der Seite ansehen",
+  "Zoom in": "Vergrößern",
+  "Zoom out": "Verkleinern",
+  "Show the whole map": "Ganze Karte zeigen",
+  Prerequisite: "Voraussetzung",
+  Variant: "Variante",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
+    "Ziehen zum Verschieben, Scrollen zum Zoomen; auf ein Konzept zeigen hebt seine Beziehungen hervor.",
 };

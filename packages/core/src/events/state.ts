@@ -54,6 +54,12 @@ export interface EncounterState {
   locator: Locator;
   selection: string;
   explanation: Explanation;
+  /** The reader's own note, if any. */
+  note?: string;
+  /** Recorded without an explanation (imported from Zotero) and explained afterwards. */
+  explainedLater?: true;
+  /** When an encounter recorded without an explanation was explained; absent for one explained when it was recorded. */
+  explainedAt?: number;
   flags: EncounterFlag[];
   device: string;
   createdAt: number;

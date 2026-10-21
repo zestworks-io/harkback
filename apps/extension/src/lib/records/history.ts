@@ -25,6 +25,25 @@ export function sourceUrl(state: State, sourceId: string, t?: number): string | 
   return candidates.find((u) => u !== undefined && /^https?:\/\//i.test(u)) ?? null;
 }
 
+/** A text fragment's parts must not hold the characters that separate them. */
+const fragmentPart = (s: string): string => encodeURIComponent(s).replace(/-/g, "%2D").replace(/,/g, "%2C");
+
+/**
+ * The page address that opens scrolled to the quoted passage and marks it (a text fragment, `#:~:text=`). A long passage
+ * is named by its first and last words. Null when the page cannot be opened that way (no web address, or a video).
+ */
+export function evidenceLink(url: string | null, evidence: string | null): string | null {
+  if (!url || !evidence || !/^https?:\/\//i.test(url) || /[?&]t=\d/.test(url)) return null;
+  const words = evidence.replace(/\s+/g, " ").trim().split(" ");
+  if (words.join("").length < 8) return null;
+  const text =
+    words.length <= 10
+      ? fragmentPart(words.join(" "))
+      : `${fragmentPart(words.slice(0, 5).join(" "))},${fragmentPart(words.slice(-5).join(" "))}`;
+  // After the page's own fragment, if it has one: an app that routes by it still opens the right page.
+  return `${url}${url.includes("#") ? "" : "#"}:~:text=${text}`;
+}
+
 export interface HistoryEntry {
   encounterId: string;
   date: string;
@@ -39,6 +58,10 @@ export interface HistoryEntry {
   tier: Tier;
   selection: string;
   explanation: string;
+  /** Opens the source at the passage the explanation quotes, for one defined in the source. */
+  evidenceUrl: string | null;
+  /** The reader's own note on the look-up. */
+  note?: string;
   /** The conversation after the explanation, oldest first. */
   followUps: FollowUp[];
 }
@@ -67,6 +90,11 @@ export function historyEntries(state: State, conceptId: string): HistoryEntry[] 
       tier: e.explanation.tier,
       selection: e.selection,
       explanation: e.explanation.text,
+      evidenceUrl:
+        e.explanation.tier === "defined_in_source"
+          ? evidenceLink(sourceUrl(state, e.sourceId, e.locator.t), e.explanation.evidence_span)
+          : null,
+      ...(e.note && { note: e.note }),
       followUps: e.actions.flatMap((a) =>
         a.action === "followed_up" && a.detail?.question ? [{ at: a.at, question: a.detail.question, answer: a.detail.answer ?? "" }] : [],
       ),
@@ -85,7 +113,7 @@ export function historyModel(state: State, query = ""): HistoryConcept[] {
     const entries = nameHit
       ? all
       : all.filter((e) =>
-          [e.selection, e.explanation, e.sourceTitle, ...e.followUps.flatMap((f) => [f.question, f.answer])].some((s) =>
+          [e.selection, e.explanation, e.note ?? "", e.sourceTitle, ...e.followUps.flatMap((f) => [f.question, f.answer])].some((s) =>
             s.toLowerCase().includes(q),
           ),
         );

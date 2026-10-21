@@ -144,6 +144,15 @@ describe("comparing with an earlier look-up", () => {
       code: "sensitive_compare",
     });
   });
+
+  it("explains as usual when the earlier look-up was imported without an explanation", () => {
+    const w = world();
+    w.source("arxiv:2106.09685", "normal", "LoRA paper");
+    const earlier = w.encounter(w.concept("LoRA"), "arxiv:2106.09685", "");
+    const plan = planOf(planExplain(req({ mode: "compare", earlierEncounterId: earlier }), ctx, settings(), w.state()));
+    expect(plan.prompt.messages[1]!.content).not.toContain("Earlier explanation:");
+    expect(plan.prompt.messages[1]!.content).not.toContain("<earlier_content>");
+  });
 });
 
 describe("a model is needed before a question is worth asking", () => {

@@ -80,9 +80,28 @@ export function sensitiveStated(rules: readonly SiteRule[], url: string): boolea
   return stated?.sensitive ?? null;
 }
 
+/** A recorded source's identifiers. */
+interface SourceIds {
+  url?: string;
+  arxiv?: string;
+  doi?: string;
+}
+
+/**
+ * The address site rules are matched against for a recorded source: the page it was read on, or else the page its
+ * paper has on arxiv.org or doi.org, so a paper imported from Zotero or read from a local file follows the rules for those sites.
+ */
+export function ruleUrlOf(ids: SourceIds): string | undefined {
+  if (ids.url !== undefined) return ids.url;
+  if (ids.arxiv) return `https://arxiv.org/abs/${ids.arxiv}`;
+  if (ids.doi) return `https://doi.org/${ids.doi}`;
+  return undefined;
+}
+
 /** Whether the reader's site rules call a recorded source sensitive, whatever it was recorded as. */
-export function sensitiveBySiteRule(rules: readonly SiteRule[], source: { ids: { url?: string } }): boolean {
-  return source.ids.url !== undefined && effectiveRule(rules, source.ids.url).sensitive;
+export function sensitiveBySiteRule(rules: readonly SiteRule[], source: { ids: SourceIds }): boolean {
+  const url = ruleUrlOf(source.ids);
+  return url !== undefined && effectiveRule(rules, url).sensitive;
 }
 
 /** Match patterns for chrome.permissions / registerContentScripts. Match patterns cannot carry ports. */

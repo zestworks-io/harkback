@@ -243,9 +243,6 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "Sensitive source": "مصدر حساس",
   "No concepts to show yet.": "لا توجد مفاهيم للعرض بعد.",
   "Concept graph": "مخطط المفاهيم",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "سهم أزرق: متطلب سابق · سهم بنفسجي: صيغة متفرعة · متقطع: ذو صلة",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "أخضر: تم فهمه · أصفر باهت: غير راسخ · أصفر: مربك · أزرق: جديد · حلقة متقطعة: لم يُشرح بعد",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "بطاقة واحدة لكل مفهوم كنص مفصول بعلامات جدولة؛ افتحها في Anki عبر ملف ← استيراد.",
   "Export Anki cards": "تصدير بطاقات Anki",
@@ -445,8 +442,25 @@ export const pages_ar: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "لا مصطلحات جديدة في تظليلاتك.",
   "Terms found: {n}. Longer highlights left out: {m}.": "المصطلحات التي وُجدت: {n}. التظليلات الطويلة المستبعدة: {m}.",
   "Import ticked terms": "استورد المصطلحات المحددة",
+  "highlighted by {name}": "ظلّله {name}",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "قد يكون الملف الذي ليس ورقة منشورة مستندًا خاصًا، لذا تُسجَّل المصطلحات المأخوذة منه على أنها حساسة.",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "عند الاستيراد من Zotero يُرسَل مفتاح Zotero API إلى api.zotero.org فقط، لقراءة تظليلاتك والأوراق التي هي فيها؛ ولا يُكتب شيء في Zotero.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "عند الاستيراد من Zotero يُرسَل مفتاح Zotero API إلى api.zotero.org فقط، لقراءة تظليلاتك والأوراق التي هي فيها؛ ولا يُكتب شيء في Zotero. عند شرح المصطلحات المستوردة يُرسَل كل مصطلح وعنوان ورقته إلى نموذجك.",
+  "Your note: ": "ملاحظتك: ",
+  "Explain them with my model": "اشرحها بنموذجي",
+  "Explained {done} of {total}; waiting for the rate limit…": "شُرح {done} من {total}؛ بانتظار حد الطلبات…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "شُرح: {done}. تعذّر شرح: {failed}. {error}",
+  "Explained: {done}.": "شُرح: {done}.",
+  "Explaining {done} of {total}…": "جارٍ شرح {done} من {total}…",
+  "Look-ups from Zotero not explained yet: {n}.": "عمليات بحث من Zotero لم تُشرح بعد: {n}.",
+  Stop: "إيقاف",
+  "See the quoted passage on the page": "اعرض المقطع المقتبس في الصفحة",
+  "Zoom in": "تكبير",
+  "Zoom out": "تصغير",
+  "Show the whole map": "عرض الخريطة كاملة",
+  Prerequisite: "مفهوم سابق",
+  Variant: "متغيّر",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
+    "اسحب للتحريك ومرّر للتكبير؛ أشِر إلى مفهوم لإبراز علاقاته.",
 };

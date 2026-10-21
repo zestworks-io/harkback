@@ -2,6 +2,34 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Added
+
+- **See the passage an explanation quotes.** When an explanation is _Defined in source_, the card has _Show it on the page_: the page scrolls to the passage the model quoted and marks it for a few seconds. In History, the _Defined in source_ label of such an entry opens its page at that passage (a text fragment, which Chrome and Edge highlight).
+- **Explain the terms imported from Zotero.** History says how many look-ups from Zotero are not explained yet and offers _Explain them with my model_. Each is explained in turn from its name and its paper's title, with the model your settings choose for that paper: a term from a sensitive file only goes to a local model. The run waits when the rate limit is reached, goes on past a term it cannot explain, and can be stopped. The explanation is recorded on the imported look-up, which then counts for review like any other, due a day after it was explained.
+- **Zotero group libraries.** _Find highlights_ also reads the group libraries the key may read, and shows the group next to each term. A highlight another member made is marked with their name and left unticked. Each library keeps its own progress.
+- **Your comment on a Zotero highlight is kept as your note** on the look-up. History shows notes and searches them, and the Markdown and notes exports include them.
+- Backups made with this version contain two new event types, `encounter.noted` and `encounter.explained`; an older version skips them.
+
+### Changed
+
+- **The graph opens whole and stays readable at any zoom.** Labels and lines keep their size on screen as you zoom, and labels are placed again for the zoom: zoomed out, fewer fit; zoomed in, all of them. Labels avoid crossing lines where they can, and circles grow a little when zoomed out so they can still be pointed at. Pointing at a concept, or moving to it with Tab, brings forward its relations and neighbours. The map has + / − / whole-map buttons, and the legend shows the colours and lines it describes. A concept not explained yet is no longer a link that goes nowhere. The map is laid out again when the window changes size.
+- **History reads your records less often.** It read every record again after each term explained from Zotero and on every return to the tab; it now reads them once a run ends, and at most about once a second while other tabs record, and leaves the page as it is when nothing changed (a panned graph or a half-typed review answer stays).
+- The History and Settings pages are split into smaller parts (the graph, review, model and site rows each have their own file), with no change in what they do.
+
+### Fixed
+
+- **The passage marked by _Show it on the page_ stays on its text** in a panel that scrolls on its own: the marks follow the text as anything scrolls, and are cut off at the panel's edge. They are removed when you move to another page.
+- **Stop ends a wait for the rate limit at once** while explaining terms imported from Zotero, instead of after up to two minutes.
+- **Deleting a model a site rule used no longer blocks Save.** The site goes back to the default model.
+- **The explanation card no longer offers Stop after an error** that cannot be retried.
+- **Site rules apply to papers recorded without a web address.** A paper imported from Zotero, or a local PDF recognised by its arXiv stamp, is named by its arXiv id or DOI but has no address, so a rule for `arxiv.org` or `doi.org` (turned off, sensitive, or a model of its own) did not apply to it. Such a rule now applies as it would on the paper's arXiv or DOI page: when explaining imported terms, in backups without sensitive sources, and in contributions.
+- **A contribution leaves out terms only highlighted in Zotero.** They were counted as look-ups once the paper's open licence was known.
+- **One highlight with an over-long arXiv id or DOI no longer stops a Zotero import.** The paper is named by its other id, or recorded as a Zotero file, and a highlight that still cannot be recorded is skipped instead of failing the whole import.
+- **Comparing with an earlier explanation that is only a Zotero highlight** asks for a plain explanation instead of comparing with nothing.
+- **Check my answer** in review sent an empty explanation when the term's latest look-up was imported from Zotero; it uses the latest explained one.
+
 ## 1.0.5 - 2026-10-20
 
 ### Added

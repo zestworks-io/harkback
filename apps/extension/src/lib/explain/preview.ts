@@ -1,5 +1,5 @@
 import { findCandidates, type State } from "@harkback/core";
-import { understandingOf } from "../records/concept-detail";
+import { isExplained, understandingOf } from "../records/concept-detail";
 import { applySiteRules } from "./explain";
 import type { ErrorCode, PrivacyFields } from "../messaging/messages";
 import { chooseModel } from "../models/model-policy";
@@ -38,7 +38,7 @@ export function classifyTerms(state: State, terms: readonly string[], now: numbe
     if (!concept || concept.muted || seen.has(id)) continue;
     seen.add(id);
     // A term only highlighted in Zotero was never explained: it is still new to the reader.
-    if (!(state.encountersByConcept.get(id) ?? []).some((e) => state.encounters.get(e)?.explanation.text !== "")) {
+    if (!isExplained(state, id)) {
       out.push({ term, conceptId: null, name: term, status: "new" });
       continue;
     }

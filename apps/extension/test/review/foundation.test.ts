@@ -38,9 +38,13 @@ describe("foundationGaps", () => {
     const rank = studied("Matrix rank", "review_hard");
     needs(lora, rank);
     needs(lora, w.concept("Low-rank structure")); // mentioned, never explained
+    const highlighted = w.concept("Adapter");
+    w.encounter(highlighted, "s1", ""); // only highlighted in Zotero
+    needs(lora, highlighted);
     const gaps = foundationGaps(w.state(), lora);
     expect(gaps.map((g) => [g.name, g.reason])).toEqual([
       ["Matrix rank", "shaky"],
+      ["Adapter", "unstudied"],
       ["Low-rank structure", "unstudied"],
     ]);
   });

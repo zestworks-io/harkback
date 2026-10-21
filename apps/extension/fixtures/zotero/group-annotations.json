@@ -1,0 +1,61 @@
+[
+  {
+    "key": "GANNRLHF",
+    "version": 40,
+    "library": {
+      "type": "group",
+      "id": 777001,
+      "name": "Reading group",
+      "links": {
+        "alternate": {
+          "href": "https://www.zotero.org/groups/reading_group",
+          "type": "text/html"
+        }
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.zotero.org/groups/777001/items/GANNRLHF",
+        "type": "application/json"
+      },
+      "alternate": {
+        "href": "https://www.zotero.org/groups/reading_group/items/GANNRLHF",
+        "type": "text/html"
+      },
+      "up": {
+        "href": "https://api.zotero.org/groups/777001/items/GATTRLHF",
+        "type": "application/json"
+      }
+    },
+    "meta": {
+      "createdByUser": {
+        "id": 4242424,
+        "username": "reader",
+        "name": "",
+        "links": {
+          "alternate": {
+            "href": "https://www.zotero.org/reader",
+            "type": "text/html"
+          }
+        }
+      }
+    },
+    "data": {
+      "key": "GANNRLHF",
+      "version": 40,
+      "parentItem": "GATTRLHF",
+      "itemType": "annotation",
+      "annotationType": "highlight",
+      "annotationText": "RLHF",
+      "annotationComment": "",
+      "annotationColor": "#ffd400",
+      "annotationPageLabel": "2",
+      "annotationSortIndex": "00001|000125|00117",
+      "annotationPosition": "{\"pageIndex\":1,\"rects\":[[48.09,651.132,90.1,675.042]]}",
+      "tags": [],
+      "relations": {},
+      "dateAdded": "2026-09-18T10:38:12Z",
+      "dateModified": "2026-09-18T10:38:21Z"
+    }
+  }
+]

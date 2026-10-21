@@ -241,9 +241,6 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "Sensitive source": "민감한 출처",
   "No concepts to show yet.": "표시할 개념이 아직 없습니다.",
   "Concept graph": "개념 그래프",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related": "파란 화살표: 선행 개념 · 보라 화살표: 변형 · 점선: 관련",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "녹색: 이해함 · 연노랑: 가물가물 · 노랑: 아직 헷갈림 · 파랑: 처음 접함 · 점선 원: 아직 설명 없음",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "개념마다 카드 한 장을 탭으로 구분된 텍스트로 만듭니다. Anki에서 파일 → 가져오기로 여세요.",
   "Export Anki cards": "Anki 카드 내보내기",
@@ -445,8 +442,25 @@ export const pages_ko: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "하이라이트에 새 용어가 없습니다.",
   "Terms found: {n}. Longer highlights left out: {m}.": "찾은 용어: {n}. 제외한 긴 하이라이트: {m}.",
   "Import ticked terms": "선택한 용어 가져오기",
+  "highlighted by {name}": "{name} 님의 하이라이트",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "출판된 논문이 아닌 파일은 개인 문서일 수 있으므로, 그 파일에서 가져온 용어는 민감한 것으로 기록됩니다.",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "Zotero에서 가져올 때 Zotero API 키는 하이라이트와 그 논문을 읽기 위해 api.zotero.org로만 전송됩니다. Zotero에는 아무것도 쓰지 않습니다.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "Zotero에서 가져올 때 Zotero API 키는 하이라이트와 그 논문을 읽기 위해 api.zotero.org로만 전송됩니다. Zotero에는 아무것도 쓰지 않습니다. 가져온 용어를 설명할 때는 각 용어와 그 논문의 제목이 내 모델로 전송됩니다.",
+  "Your note: ": "내 메모: ",
+  "Explain them with my model": "내 모델로 설명하기",
+  "Explained {done} of {total}; waiting for the rate limit…": "{total}개 중 {done}개 설명함. 속도 제한을 기다리는 중…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "설명함: {done}. 설명하지 못함: {failed}. {error}",
+  "Explained: {done}.": "설명함: {done}.",
+  "Explaining {done} of {total}…": "{total}개 중 {done}개 설명하는 중…",
+  "Look-ups from Zotero not explained yet: {n}.": "Zotero에서 가져와 아직 설명하지 않은 조회: {n}.",
+  Stop: "중지",
+  "See the quoted passage on the page": "원래 페이지에서 인용된 부분 보기",
+  "Zoom in": "확대",
+  "Zoom out": "축소",
+  "Show the whole map": "전체 지도 보기",
+  Prerequisite: "선수 개념",
+  Variant: "변형",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
+    "드래그하여 이동하고 스크롤하여 확대/축소합니다. 개념을 가리키면 관계가 강조됩니다.",
 };

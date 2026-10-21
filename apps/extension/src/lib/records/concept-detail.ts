@@ -48,6 +48,12 @@ function groupFor<T>(groups: { prerequisites: T; variants: T; related: T }, rel:
   return rel === "prerequisite" ? groups.prerequisites : rel === "variant_of" ? groups.variants : groups.related;
 }
 
+/** Whether a concept has at least one recorded explanation: a term only highlighted in Zotero has none yet. */
+export function isExplained(state: State, conceptId: string): boolean {
+  const id = state.representative.get(conceptId) ?? conceptId;
+  return (state.encountersByConcept.get(id) ?? []).some((e) => state.encounters.get(e)?.explanation.text !== "");
+}
+
 /** The most recent decisive action across all encounters of the concept decides. */
 export function understandingOf(state: State, conceptId: string): Understanding {
   const id = state.representative.get(conceptId) ?? conceptId;
@@ -79,7 +85,7 @@ export function conceptDetail(state: State, conceptId: string): ConceptDetail | 
       conceptId: otherId,
       name: other.canonicalName,
       aliases: other.names.filter((n) => n !== other.canonicalName),
-      studied: !other.isPlaceholder,
+      studied: isExplained(state, otherId),
       edgeId: edge.id,
       confirmed: edge.status === "confirmed",
     };

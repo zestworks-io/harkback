@@ -47,6 +47,7 @@ export interface RequestDeps {
   saveSettings(settings: Settings): Promise<void>;
   /** Asks the model whether a typed answer matches the stored explanation; the model, rate limit and sensitivity rules are the background's. */
   checkAnswer(conceptId: string, answer: string): Promise<ResponseMap["check-answer"]>;
+  explainImported(encounterId: string): Promise<ResponseMap["explain-imported"]>;
   /** Which model a scan would use, without sending anything. */
   previewPlan(req: { url: string; sourceId: string } & PrivacyFields): Promise<ResponseMap["preview-plan"]>;
   /** Asks a model for the key terms of a page and sorts them by what the reader knows; nothing is recorded. */
@@ -244,6 +245,9 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       await deps.append((f) => [f.make("encounter.action", { encounter_id: encounterId, action: msg.action })]);
       return { ok: true };
     }
+    case "explain-imported":
+      if (typeof msg.encounterId !== "string") return { ok: false, code: "internal" };
+      return deps.explainImported(msg.encounterId);
     case "check-answer": {
       const answer = typeof msg.answer === "string" ? msg.answer.trim().slice(0, MAX_ANSWER_CHARS) : "";
       if (!answer) return { ok: false, code: "internal" };

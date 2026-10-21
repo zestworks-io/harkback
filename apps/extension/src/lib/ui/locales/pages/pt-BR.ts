@@ -244,10 +244,6 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "Sensitive source": "Fonte sensível",
   "No concepts to show yet.": "Ainda não há conceitos para mostrar.",
   "Concept graph": "Grafo de conceitos",
-  "Blue arrow: prerequisite · Purple arrow: variant · Dashed: related":
-    "Seta azul: pré-requisito · Seta roxa: variante · Tracejada: relacionado",
-  "Green: understood · Pale yellow: shaky · Yellow: confused · Blue: new · Dashed ring: not explained yet":
-    "Verde: entendido · Amarelo-claro: incerto · Amarelo: confuso · Azul: novo · Círculo tracejado: ainda não explicado",
   "One card per concept as tab-separated text; open it in Anki with File → Import.":
     "Um cartão por conceito em texto separado por tabulações; abra no Anki com Arquivo → Importar.",
   "Export Anki cards": "Exportar cartões para o Anki",
@@ -451,8 +447,25 @@ export const pages_ptBR: Readonly<Record<string, string>> = {
   "No new terms in your highlights.": "Nenhum termo novo nos seus destaques.",
   "Terms found: {n}. Longer highlights left out: {m}.": "Termos encontrados: {n}. Destaques longos deixados de fora: {m}.",
   "Import ticked terms": "Importar os termos marcados",
+  "highlighted by {name}": "destacado por {name}",
   "A file that is not a published paper may be a private document, so terms from it are recorded as sensitive.":
     "Um arquivo que não é um artigo publicado pode ser um documento privado, então os termos dele são registrados como sensíveis.",
-  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero.":
-    "Ao importar do Zotero, sua chave de API do Zotero é enviada apenas para api.zotero.org, para ler seus destaques e os artigos em que estão; nada é gravado no Zotero.",
+  "Importing from Zotero sends your Zotero API key only to api.zotero.org, to read your highlights and the papers they are in; nothing is written to Zotero. Explaining the imported terms sends each term and its paper's title to your model.":
+    "Ao importar do Zotero, sua chave de API do Zotero é enviada apenas para api.zotero.org, para ler seus destaques e os artigos em que estão; nada é gravado no Zotero. Ao explicar os termos importados, cada termo e o título do artigo dele são enviados para o seu modelo.",
+  "Your note: ": "Sua nota: ",
+  "Explain them with my model": "Explicar com meu modelo",
+  "Explained {done} of {total}; waiting for the rate limit…": "{done} de {total} explicados; aguardando o limite de solicitações…",
+  "Explained: {done}. Could not explain: {failed}. {error}": "Explicados: {done}. Não foi possível explicar: {failed}. {error}",
+  "Explained: {done}.": "Explicados: {done}.",
+  "Explaining {done} of {total}…": "Explicando {done} de {total}…",
+  "Look-ups from Zotero not explained yet: {n}.": "Consultas do Zotero ainda não explicadas: {n}.",
+  Stop: "Parar",
+  "See the quoted passage on the page": "Ver o trecho citado na página",
+  "Zoom in": "Aproximar",
+  "Zoom out": "Afastar",
+  "Show the whole map": "Ver o mapa inteiro",
+  Prerequisite: "Pré-requisito",
+  Variant: "Variante",
+  "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
+    "Arraste para mover, role para ampliar; aponte para um conceito para destacar suas relações.",
 };

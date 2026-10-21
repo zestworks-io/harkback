@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { buildGraph, graphModel, layoutGraph, shortLabel, type GraphNode } from "../../src/lib/records/graph";
+import {
+  buildGraph,
+  crosses,
+  edgeSegments,
+  graphModel,
+  layoutGraph,
+  placeLabels,
+  shortLabel,
+  type GraphNode,
+} from "../../src/lib/records/graph";
 import { world } from "../helpers";
 
 function build() {
@@ -86,7 +95,14 @@ describe("graphModel", () => {
   });
 });
 
-const node = (id: string, name: string, degree: number, studied = true) => ({ id, name, studied, understanding: "new" as const, degree });
+const node = (id: string, name: string, degree: number, studied = true) => ({
+  id,
+  name,
+  studied,
+  explained: studied,
+  understanding: "new" as const,
+  degree,
+});
 
 describe("layoutGraph", () => {
   it("is deterministic, finite and inside the frame", () => {
@@ -180,9 +196,45 @@ describe("layoutGraph", () => {
       id: `n${i}`,
       name: `N${i}`,
       studied: true,
+      explained: true,
       understanding: "new" as const,
       degree: 0,
     }));
     for (const n of layoutGraph({ nodes: same, edges: [] }).nodes) expect(Number.isFinite(n.x)).toBe(true);
+  });
+
+  it("places fewer labels when they are drawn larger on the map, and keeps them off the lines where it can", () => {
+    const nodes = Array.from({ length: 30 }, (_, i) => node(`n${String(i).padStart(2, "0")}`, `concept number ${i}`, 2));
+    const edges = nodes.slice(1).map((n, i) => ({ id: `e${i}`, from: nodes[i % 5]!.id, to: n.id, rel: "related" as const }));
+    const g = layoutGraph({ nodes, edges }, 960, 640);
+    const frame = { x0: 0, y0: 0, x1: g.width, y1: g.height };
+    const segments = edgeSegments(g.nodes, g.edges);
+    const shownAt = (scale: number) => {
+      const copy = g.nodes.map((n) => ({ ...n }));
+      placeLabels(copy, frame, scale, segments);
+      return copy.filter((n) => n.labelShown).length;
+    };
+    expect(shownAt(2.5)).toBeLessThan(shownAt(1));
+    expect(shownAt(0.5)).toBeGreaterThanOrEqual(shownAt(1));
+  });
+
+  it("tells whether a line passes through a box", () => {
+    const box = { x0: 0, y0: 0, x1: 10, y1: 10 };
+    expect(crosses({ x1: -5, y1: 5, x2: 15, y2: 5 }, box)).toBe(true);
+    expect(crosses({ x1: 2, y1: 2, x2: 3, y2: 3 }, box)).toBe(true);
+    expect(crosses({ x1: -5, y1: -5, x2: -1, y2: 20 }, box)).toBe(false);
+    expect(crosses({ x1: 11, y1: 0, x2: 20, y2: 10 }, box)).toBe(false);
+  });
+
+  it("draws a term only highlighted in Zotero as not explained yet, and hides it with the others", () => {
+    const w = world();
+    w.source("s1");
+    const imported = w.concept("Imported only");
+    w.encounter(imported, "s1", "");
+    const known = w.concept("Explained");
+    w.encounter(known, "s1");
+    const shown = graphModel(w.state()).nodes.find((n) => n.id === imported)!;
+    expect(shown).toMatchObject({ studied: true, explained: false });
+    expect(graphModel(w.state(), { unexplained: false }).nodes.map((n) => n.id)).toEqual([known]);
   });
 });

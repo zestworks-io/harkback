@@ -15,6 +15,18 @@ describe("sensitiveBySiteRule", () => {
     expect(sensitiveBySiteRule(rules, { ids: { url: "https://other.example.com/doc" } })).toBe(false);
   });
 
+  it("applies the rules for arxiv.org and doi.org to a paper recorded without an address", () => {
+    const papers = [
+      { pattern: "arxiv.org", sensitive: true },
+      { pattern: "https://doi.org/10.5555", sensitive: true },
+    ];
+    expect(sensitiveBySiteRule(papers, { ids: { arxiv: "2106.09685" } })).toBe(true);
+    expect(sensitiveBySiteRule(papers, { ids: { doi: "10.5555/x" } })).toBe(true);
+    expect(sensitiveBySiteRule(papers, { ids: { doi: "10.1000/y" } })).toBe(false);
+    // The page it was read on decides when there is one.
+    expect(sensitiveBySiteRule(papers, { ids: { url: "https://mirror.example/p", arxiv: "2106.09685" } })).toBe(false);
+  });
+
   it("has no opinion about a source with no address", () => {
     expect(sensitiveBySiteRule(rules, { ids: {} })).toBe(false);
   });

@@ -58,6 +58,8 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
       case "encounter.created":
         return !e.payload || !sensitiveEncounters.has(e.payload.encounter_id);
       case "encounter.action":
+      case "encounter.noted":
+      case "encounter.explained":
         return !e.payload || !sensitiveEncounters.has(e.payload.encounter_id);
       case "encounter.deleted":
         return !sensitiveEncounters.has(e.payload.encounter_id);

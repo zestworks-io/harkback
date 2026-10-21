@@ -405,6 +405,16 @@ test("draws the concept graph and opens a concept from it", async ({ context, sw
   await expect(page.locator("[data-hb=graph]")).toBeVisible();
   const node = page.locator("[data-hb=graph-node]", { hasText: "LoRA" }).first();
   await expect(node).toBeVisible();
+  // Zoom in and back out to the whole map with the buttons.
+  const graph = page.locator("[data-hb=graph]");
+  const whole = await graph.getAttribute("viewBox");
+  await page.locator("[data-hb=graph-zoom-in]").click();
+  expect(await graph.getAttribute("viewBox")).not.toBe(whole);
+  await page.locator("[data-hb=graph-fit]").click();
+  expect(await graph.getAttribute("viewBox")).toBe(whole);
+  // A concept only mentioned has no page of its own, so it is not a link.
+  for (const unexplained of await page.locator("[data-hb=graph-node].unstudied").all())
+    expect(await unexplained.evaluate((el) => el.tagName)).toBe("g");
   await node.click();
   await expect(page.locator("[data-hb=concept-detail] h2")).toHaveText("LoRA");
 });

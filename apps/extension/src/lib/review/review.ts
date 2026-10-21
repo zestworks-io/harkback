@@ -67,8 +67,10 @@ function scheduleOf(
     .filter((e) => e.explanation.text !== "");
   const latest = encounters.at(-1);
   if (!latest) return null;
+  // A term imported without an explanation was looked up, for review, when it was explained.
+  const lookedUpAt = (e: (typeof encounters)[number]): number => e.explainedAt ?? e.createdAt;
   const answers = encounters
-    .flatMap((e) => e.actions.map((a) => ({ ...a, lookedUpAt: e.createdAt })))
+    .flatMap((e) => e.actions.map((a) => ({ ...a, lookedUpAt: lookedUpAt(e) })))
     .flatMap((a) => {
       const grade = gradeOf(a.action);
       if (grade === null) return [];
@@ -85,12 +87,12 @@ function scheduleOf(
   }
   if (!memory)
     return {
-      dueAt: latest.createdAt + UNANSWERED_DAYS * DAY_MS,
+      dueAt: lookedUpAt(latest) + UNANSWERED_DAYS * DAY_MS,
       memory,
       answers: 0,
       lapses: 0,
       leech: false,
-      lastAt: latest.createdAt,
+      lastAt: lookedUpAt(latest),
       latestId: latest.id,
     };
   const lapses = answers.slice(-LEECH_WINDOW).filter((a) => a.grade === AGAIN).length;

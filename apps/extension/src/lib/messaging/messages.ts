@@ -24,7 +24,8 @@ export type PortIn =
 /** Background → content script, on the "explain" port. */
 export type PortOut =
   | { type: "delta"; text: string }
-  | { type: "explained"; explanation: string; tier: Tier }
+  /** `evidence`: the passage of the page the explanation quotes, when it was found there (defined in source). */
+  | { type: "explained"; explanation: string; tier: Tier; evidence?: string }
   | { type: "ask"; name: string; daysAgo: number }
   | { type: "done"; encounterId: string | null; recorded: boolean; sensitive: boolean }
   | { type: "followup_delta"; text: string }
@@ -73,6 +74,7 @@ export type Request =
   | { type: "remember-site"; sensitive: boolean }
   | { type: "import-events"; events: HarkEvent[] }
   | { type: "import-zotero"; terms: ZoteroTerm[] }
+  | { type: "explain-imported"; encounterId: string }
   | { type: "delete-encounter"; encounterId: string }
   | { type: "review-answer"; conceptId: string; action: ReviewAction }
   | { type: "check-answer"; conceptId: string; answer: string }
@@ -105,6 +107,8 @@ export interface ResponseMap {
   "import-events": { ok: boolean; added?: number };
   /** `added`: how many highlights were recorded. */
   "import-zotero": { ok: boolean; added?: number };
+  /** Explains one look-up recorded without an explanation, and records the explanation on it. */
+  "explain-imported": { ok: true } | { ok: false; code: ErrorCode; retryAfterMs?: number };
   "delete-encounter": { ok: boolean };
   "review-answer": { ok: boolean };
   /** A model's opinion of an answer given from memory. `suggested` is only a hint: the reader grades. */
@@ -148,6 +152,7 @@ const REQUEST_TYPES = new Set<string>([
   "remember-site",
   "import-events",
   "import-zotero",
+  "explain-imported",
   "delete-encounter",
   "review-answer",
   "check-answer",

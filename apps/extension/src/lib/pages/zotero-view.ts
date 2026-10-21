@@ -1,7 +1,7 @@
 import { h } from "../ui/dom";
 import type { Lang } from "../ui/languages";
 import { pick } from "../ui/pick";
-import { readLibrary, ZoteroError, type ZoteroClient, type ZoteroErrorCode } from "../zotero/client";
+import { libraryPath, readLibrary, ZoteroError, type ZoteroClient, type ZoteroErrorCode, type ZoteroLibrary } from "../zotero/client";
 import { findTerms, type ZoteroTerm } from "../zotero/highlights";
 
 /** What was read from a library before: the version to ask for changes since, and the highlights already decided on. */
@@ -11,24 +11,44 @@ export interface ZoteroProgress {
   decided: string[];
 }
 
+/** The progress kept for a library in storage; 1.0.5 kept the reader's own library under the bare user id. */
+export function storedProgress(stored: unknown, path: string): ZoteroProgress | null {
+  if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return null;
+  const all = stored as Record<string, ZoteroProgress | undefined>;
+  return all[path] ?? all[/^users\/(\d+)$/.exec(path)?.[1] ?? ""] ?? null;
+}
+
 export interface ZoteroViewDeps {
   lang(): Lang;
   key(): string;
   /** Asks the browser for access to the Zotero API. Called first in the click, which the browser's prompt needs. */
   grant(): Promise<boolean>;
   client(key: string): ZoteroClient;
-  /** Kept for each library, so changing keys and back does not offer the same highlights again. */
-  loadProgress(userID: number): Promise<ZoteroProgress | null>;
-  saveProgress(userID: number, p: ZoteroProgress): Promise<void>;
+  /**
+   * Kept for each library, by its path (`users/123`, `groups/456`), so changing keys and back does not offer the same
+   * highlights again.
+   */
+  loadProgress(path: string): Promise<ZoteroProgress | null>;
+  saveProgress(path: string, p: ZoteroProgress): Promise<void>;
   record(terms: ZoteroTerm[]): Promise<{ ok: boolean; added?: number }>;
 }
+
+/** What one library offered: its terms, and the progress to keep once they are decided. */
+interface FoundIn {
+  lib: ZoteroLibrary;
+  progress: ZoteroProgress;
+  terms: ZoteroTerm[];
+}
+
+/** A highlight's key is only unique in its library. */
+const pickKey = (lib: ZoteroLibrary, t: ZoteroTerm): string => `${libraryPath(lib)}/${t.annotationKey}`;
 
 type Problem = ZoteroErrorCode | "denied" | "no-key" | "import";
 type Phase =
   | { kind: "idle" }
   | { kind: "reading" }
   | { kind: "problem"; problem: Problem }
-  | { kind: "found"; userID: number; progress: ZoteroProgress; terms: ZoteroTerm[]; passages: number; picked: Set<string> }
+  | { kind: "found"; libraries: FoundIn[]; passages: number; picked: Set<string> }
   | { kind: "done"; added: number };
 
 /**
@@ -50,21 +70,37 @@ export function zoteroView(deps: ZoteroViewDeps): { element: HTMLElement; paint(
     set({ kind: "reading" });
     try {
       const client = deps.client(key);
-      const { userID } = await client.user();
-      const known = (await deps.loadProgress(userID)) ?? { version: 0, decided: [] };
-      const library = await readLibrary(client, userID, known.version);
-      const found = findTerms(library.annotations, library.items, new Set(known.decided), userID);
-      // A highlight whose file or paper could not be read (in the trash, or not synced yet) is asked for again next time.
-      const progress = { ...known, version: found.orphans > 0 ? known.version : library.version };
-      // With nothing to offer there is nothing to decide, but the next search can still start from here.
-      if (found.terms.length === 0) await save(userID, progress);
+      const { userID, libraries } = await client.libraries();
+      const found: FoundIn[] = [];
+      let passages = 0;
+      let failure: ZoteroError | null = null;
+      for (const lib of libraries) {
+        const path = libraryPath(lib);
+        const known = (await deps.loadProgress(path)) ?? { version: 0, decided: [] };
+        let library: Awaited<ReturnType<typeof readLibrary>>;
+        try {
+          library = await readLibrary(client, lib, known.version);
+        } catch (e) {
+          // A group that cannot be read now (left, or failing) does not hide what the other libraries hold.
+          if (lib.type === "user" || !(e instanceof ZoteroError) || e.code === "key" || e.code === "network") throw e;
+          failure = e;
+          continue;
+        }
+        const terms = findTerms(library.annotations, library.items, new Set(known.decided), lib, userID);
+        passages += terms.passages;
+        // A highlight whose file or paper could not be read (in the trash, or not synced yet) is asked for again next time.
+        const progress = { ...known, version: terms.orphans > 0 ? known.version : library.version };
+        // With nothing to offer there is nothing to decide, but the next search can still start from here.
+        if (terms.terms.length === 0) await save(path, progress);
+        else found.push({ lib, progress, terms: terms.terms });
+      }
+      if (found.length === 0 && failure) throw failure;
       set({
         kind: "found",
-        userID,
-        progress,
-        terms: found.terms,
-        passages: found.passages,
-        picked: new Set(found.terms.map((t) => t.annotationKey)),
+        libraries: found,
+        passages,
+        // Another member's highlights in a group are offered, but not ticked: they are not the reader's look-ups.
+        picked: new Set(found.flatMap((f) => f.terms.filter((t) => !t.highlightedBy).map((t) => pickKey(f.lib, t)))),
       });
     } catch (e) {
       set({ kind: "problem", problem: e instanceof ZoteroError ? e.code : "server" });
@@ -72,7 +108,7 @@ export function zoteroView(deps: ZoteroViewDeps): { element: HTMLElement; paint(
   }
 
   async function importPicked(found: Extract<Phase, { kind: "found" }>): Promise<void> {
-    const terms = found.terms.filter((t) => found.picked.has(t.annotationKey));
+    const terms = found.libraries.flatMap((f) => f.terms.filter((t) => found.picked.has(pickKey(f.lib, t))));
     set({ kind: "reading" });
     let r: { ok: boolean; added?: number } | undefined;
     try {
@@ -82,15 +118,17 @@ export function zoteroView(deps: ZoteroViewDeps): { element: HTMLElement; paint(
     }
     if (!r?.ok) return set({ kind: "problem", problem: "import" });
     // Every highlight offered was decided: imported, or left unticked.
-    const decided = [...new Set([...found.progress.decided, ...found.terms.map((t) => t.annotationKey)])];
-    await save(found.userID, { ...found.progress, decided });
+    for (const f of found.libraries) {
+      const decided = [...new Set([...f.progress.decided, ...f.terms.map((t) => t.annotationKey)])];
+      await save(libraryPath(f.lib), { ...f.progress, decided });
+    }
     set({ kind: "done", added: r.added ?? terms.length });
   }
 
   /** Progress that cannot be saved only costs a longer search next time: what was recorded is not recorded twice. */
-  async function save(userID: number, p: ZoteroProgress): Promise<void> {
+  async function save(path: string, p: ZoteroProgress): Promise<void> {
     try {
-      await deps.saveProgress(userID, p);
+      await deps.saveProgress(path, p);
     } catch {
       // Kept as it was.
     }
@@ -135,26 +173,28 @@ export function zoteroView(deps: ZoteroViewDeps): { element: HTMLElement; paint(
     else if (phase.kind === "done") status.textContent = L("已导入的查词：{n}。", "Look-ups imported: {n}.", { n: phase.added });
     else if (phase.kind === "found") {
       const found = phase;
+      const all = found.libraries.flatMap((f) => f.terms.map((t) => ({ lib: f.lib, t })));
       status.textContent =
-        found.terms.length === 0
+        all.length === 0
           ? L("你的划线里没有新的术语。", "No new terms in your highlights.")
           : L("找到的术语：{n}。较长的划线没有列出：{m}。", "Terms found: {n}. Longer highlights left out: {m}.", {
-              n: found.terms.length,
+              n: all.length,
               m: found.passages,
             });
-      if (found.terms.length > 0) {
+      if (all.length > 0) {
         const importButton = h(
           "button",
           { type: "button", className: "small primary", "data-hb": "zotero-import" },
           L("导入勾选的术语", "Import ticked terms"),
         );
         importButton.addEventListener("click", () => void importPicked(found));
-        const rows = found.terms.map((t) => {
+        const rows = all.map(({ lib, t }) => {
+          const key = pickKey(lib, t);
           const box = h("input", { type: "checkbox", "data-hb": "zotero-term" }) as HTMLInputElement;
-          box.checked = found.picked.has(t.annotationKey);
+          box.checked = found.picked.has(key);
           box.addEventListener("change", () => {
-            if (box.checked) found.picked.add(t.annotationKey);
-            else found.picked.delete(t.annotationKey);
+            if (box.checked) found.picked.add(key);
+            else found.picked.delete(key);
           });
           return h(
             "li",
@@ -166,12 +206,19 @@ export function zoteroView(deps: ZoteroViewDeps): { element: HTMLElement; paint(
               " ",
               h("strong", { dir: "auto" }, t.term),
               " ",
-              h("span", { className: "muted", dir: "auto" }, t.paper.title),
+              h("span", { className: "muted", dir: "auto" }, t.group ? `${t.paper.title} · ${t.group}` : t.paper.title),
+              t.highlightedBy
+                ? h(
+                    "span",
+                    { className: "muted", dir: "auto", "data-hb": "zotero-highlighted-by" },
+                    ` · ${L("{name} 的划线", "highlighted by {name}", { name: t.highlightedBy })}`,
+                  )
+                : null,
             ),
           );
         });
         parts.push(h("ul", { className: "zotero-terms", "data-hb": "zotero-terms" }, ...rows), importButton);
-        if (found.terms.some((t) => t.paper.sensitive)) {
+        if (all.some(({ t }) => t.paper.sensitive)) {
           parts.push(
             h(
               "p",

@@ -23,6 +23,7 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   daysAgo: "{n} 天前",
   related: "你沒查過「{a}」，但 {n} 天前弄懂了「{b}」",
   thenExplained: "當時的解釋：{text}",
+  showEvidence: "在頁面上顯示",
   highlightedInZotero: "在 Zotero 裡劃過，還沒解釋過。",
   whyDirect: "劃線原因：頁面上的「{text}」就是你查過的「{name}」。",
   whyRelated: "劃線原因：頁面上的「{text}」與你弄懂的「{via}」有關。",

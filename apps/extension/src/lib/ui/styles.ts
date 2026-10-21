@@ -74,6 +74,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-body.hb-loading { color: var(--hb-muted); animation: hb-pulse 1.4s ease-in-out infinite; }
 @keyframes hb-pulse { 50% { opacity: 0.45; } }
 .hb-link { color: var(--hb-accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+button.hb-link { background: none; border: 0; padding: 0; font: inherit; font-size: 11.5px; }
+.hb-evidence { position: absolute; pointer-events: none; border-radius: 3px; background: rgba(250, 204, 21, 0.38); box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.38); transition: opacity 0.8s; }
 .hb-note { color: var(--hb-muted); font-size: 12.5px; margin-top: 8px; }
 .hb-note:empty { display: none; }
 .hb-error { color: var(--hb-error); font-size: 13.5px; }

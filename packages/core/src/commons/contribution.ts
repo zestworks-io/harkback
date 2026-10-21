@@ -90,6 +90,8 @@ export function buildContribution(state: State, scope: ContributionScope, alsoSe
     if (scope.scope === "this_record" && e.id !== scope.target) continue;
     if (scope.scope === "this_source" && e.sourceId !== scope.target) continue;
     if (!isContributable(state, e.sourceId, alsoSensitive)) continue;
+    // A term only highlighted in Zotero and never explained was not looked up.
+    if (e.explanation.text === "") continue;
     const conceptId = state.representative.get(e.conceptId) ?? e.conceptId;
     const concept = state.concepts.get(conceptId);
     if (!concept) continue;

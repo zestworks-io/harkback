@@ -23,6 +23,7 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   daysAgo: "{n} 日前",
   related: "「{a}」は調べていませんが、{n} 日前に「{b}」を理解しています",
   thenExplained: "以前の解説：{text}",
+  showEvidence: "ページ上で表示",
   highlightedInZotero: "Zotero でハイライト済み。まだ解説していません。",
   whyDirect: "下線の理由：このページの「{text}」は、以前に調べた用語「{name}」です。",
   whyRelated: "下線の理由：このページの「{text}」は、以前に理解した「{via}」に関連しています。",

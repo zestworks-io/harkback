@@ -3,7 +3,7 @@ import { applySiteRules } from "../explain/explain";
 import type { ErrorCode } from "../messaging/messages";
 import { chooseModel } from "../models/model-policy";
 import type { ModelConfig, Settings } from "../storage/settings";
-import { effectiveRule } from "../source/site-rules";
+import { effectiveRule, ruleUrlOf } from "../source/site-rules";
 
 export type CheckRoute =
   | { kind: "ok"; model: ModelConfig; remote: boolean; sensitive: boolean; term: string; explanation: string }
@@ -18,12 +18,13 @@ export function routeCheck(settings: Settings, state: State, conceptId: string):
   if (!settings.review.modelCheck) return { kind: "error", code: "internal" };
   const id = state.representative.get(conceptId) ?? conceptId;
   const concept = state.concepts.get(id);
-  const latest = state.encounters.get(state.encountersByConcept.get(id)?.at(-1) ?? "");
+  // The explanation review showed: the latest look-up that has one (a term only highlighted in Zotero has none).
+  const latest = (state.encountersByConcept.get(id) ?? []).map((e) => state.encounters.get(e)!).findLast((e) => e.explanation.text !== "");
   if (!concept || concept.isPlaceholder || !latest) return { kind: "error", code: "expired" };
   const ruled = applySiteRules(state, settings.sites);
   const source = ruled.sources.get(latest.sourceId);
   const sensitive = isSensitiveSource(ruled, latest.sourceId);
-  const chosen = chooseModel(settings, effectiveRule(settings.sites, source?.ids.url ?? ""), sensitive);
+  const chosen = chooseModel(settings, effectiveRule(settings.sites, (source && ruleUrlOf(source.ids)) ?? ""), sensitive);
   if (chosen.kind === "error") return { kind: "error", code: chosen.code };
   return {
     kind: "ok",

@@ -46,5 +46,6 @@ export const CARD_LIMITS = {
   maxExplanationLength: 20000,
   maxEvidenceLength: 1000,
   maxSelectionLength: 200,
+  maxNoteLength: 2000,
   maxModelNameLength: 100,
 } as const;

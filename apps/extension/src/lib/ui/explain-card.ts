@@ -97,13 +97,26 @@ export class ExplainCard {
     this.render(this.body, text);
   }
 
-  setExplained(text: string, tier: Tier): void {
+  /** `showEvidence`: shows where the page says it, when the explanation was found there. */
+  setExplained(text: string, tier: Tier, showEvidence?: () => void): void {
     this.hasText = true;
     this.footer.querySelector('[data-hb="stop"]')?.remove();
     this.body.classList.remove("hb-loading");
     this.render(this.body, text);
     const label = t(this.lang, tier === "defined_in_source" ? "tierDefined" : "tierExternal");
-    this.meta.replaceChildren(h("span", { className: `hb-tier hb-${tier}`, "data-hb": "tier" }, label));
+    this.meta.replaceChildren(
+      h("span", { className: `hb-tier hb-${tier}`, "data-hb": "tier" }, label),
+      ...(showEvidence
+        ? [
+            " ",
+            h(
+              "button",
+              { type: "button", className: "hb-link", "data-hb": "show-evidence", onclick: () => showEvidence() },
+              t(this.lang, "showEvidence"),
+            ),
+          ]
+        : []),
+    );
   }
 
   ask(name: string, daysAgo: number): void {
@@ -176,6 +189,8 @@ export class ExplainCard {
     const box = h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs));
     if (this.hasText) this.note.replaceChildren(box);
     else this.body.replaceChildren(box);
+    // Nothing is under way any more, whatever the footer offers next.
+    this.footer.querySelector('[data-hb="stop"]')?.remove();
     const others = MODEL_SPECIFIC.has(code) && this.models.length > 1 ? this.models : [];
     if (RETRYABLE.has(code) || others.length > 0) {
       this.footer.replaceChildren(

@@ -1,0 +1,15 @@
+{
+  "key": "P9NiFoyLeZu2bZNvvuQPDWsd",
+  "userID": 4242424,
+  "username": "reader",
+  "displayName": "A Reader",
+  "name": "Harkback",
+  "access": {
+    "groups": {
+      "777001": {
+        "library": true,
+        "write": false
+      }
+    }
+  }
+}
