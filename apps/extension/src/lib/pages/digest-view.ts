@@ -35,10 +35,10 @@ export function digestView({ digest: d, lang, conceptHref, isCurrentWeek, goto }
   const L = (zh: string, en: string, vars?: Record<string, string | number>) => pick(lang, zh, en, vars);
   const nav = (label: string, offset: -1 | 0 | 1, hb: string, disabled = false) =>
     h("button", { type: "button", className: "small-btn", "data-hb": hb, disabled, onclick: () => goto(offset) }, label);
-  const tile = (label: string, value: number, note?: string) =>
+  const tile = (label: string, value: number, note?: string, kind = "") =>
     h(
       "div",
-      { className: "digest-tile" },
+      { className: kind ? `digest-tile ${kind}` : "digest-tile" },
       h("div", { className: "digest-num" }, value),
       h("div", { className: "digest-label" }, label),
       note ? h("div", { className: "digest-note" }, note) : null,
@@ -78,6 +78,7 @@ export function digestView({ digest: d, lang, conceptHref, isCurrentWeek, goto }
         ...d.stillConfused.map((c) => h("li", {}, conceptLink(c.conceptId, c.name))),
       ),
     );
+  const met = d.freshCount + d.revisitedCount;
   if (d.isEmpty) {
     return h(
       "div",
@@ -96,16 +97,13 @@ export function digestView({ digest: d, lang, conceptHref, isCurrentWeek, goto }
     h(
       "div",
       { className: "digest-tiles" },
-      tile(
-        L("遇到的术语", "Terms met"),
-        d.freshCount + d.revisitedCount,
-        comparisonText(d.freshCount + d.revisitedCount, d.previousMet, lang),
-      ),
+      tile(L("遇到的术语", "Terms met"), met, comparisonText(met, d.previousMet, lang)),
       tile(L("新术语", "New terms"), d.freshCount),
       tile(L("重温的术语", "Revisited"), d.revisitedCount),
-      tile(L("记住了", "Remembered"), d.remembered),
-      tile(L("勉强记得", "Hard"), d.shaky),
-      tile(L("仍然困惑", "Confused"), d.confused),
+      tile(L("重逢提示", "Reunion hints"), d.reunions, d.reunions > 0 ? L("用上了 {n} 个", "{n} used", { n: d.reunionsUsed }) : undefined),
+      tile(L("记住了", "Remembered"), d.remembered, undefined, d.remembered > 0 ? "remembered" : ""),
+      tile(L("勉强记得", "Hard"), d.shaky, undefined, d.shaky > 0 ? "hard" : ""),
+      tile(L("仍然困惑", "Confused"), d.confused, undefined, d.confused > 0 ? "confused" : ""),
       tile(L("活跃天数", "Active days"), d.activeDays),
     ),
     d.met.length > 0
@@ -124,6 +122,14 @@ export function digestView({ digest: d, lang, conceptHref, isCurrentWeek, goto }
               ),
             ),
           ),
+          // The list is cut short in a busy week; say how many it leaves out, so it agrees with the count above.
+          met > d.met.length
+            ? h(
+                "p",
+                { className: "digest-more", "data-hb": "digest-met-more" },
+                L("还有 {n} 个", "and {n} more", { n: met - d.met.length }),
+              )
+            : null,
         )
       : null,
     d.stillConfused.length > 0 ? stillConfusedSection() : null,
@@ -134,7 +140,12 @@ export function digestView({ digest: d, lang, conceptHref, isCurrentWeek, goto }
             "ul",
             { className: "digest-list", "data-hb": "digest-sources" },
             ...d.sources.map((s) =>
-              h("li", {}, s.title, h("span", { className: "digest-count" }, ` · ${L("{n} 次", "{n} look-ups", { n: s.lookups })}`)),
+              h(
+                "li",
+                {},
+                s.title,
+                h("span", { className: "digest-count" }, ` · ${L("{n} 次", "{n#one=# look-up|other=# look-ups}", { n: s.lookups })}`),
+              ),
             ),
           ),
         )

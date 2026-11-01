@@ -321,8 +321,10 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Revisited: "다시 만난 용어",
   "Active days": "활동한 날",
   "Terms you met": "이번 주에 만난 용어",
+  "and {n} more": "외 {n}개",
+  "{n} used": "{n}개 활용",
   "Where you read": "읽은 곳",
-  "{n} look-ups": "{n}회 찾아봄",
+  "{n#one=# look-up|other=# look-ups}": "{n}회 찾아봄",
   "New connections": "새 연결",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "새 용어는 찾아본 다음 날 복습 대상이 되며, 그 뒤에는 각 답변 결과에 따라 잊어버릴 즈음에 다음 복습이 잡힙니다.",

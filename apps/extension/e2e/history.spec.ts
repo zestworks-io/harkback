@@ -432,3 +432,121 @@ test("importing a backup that is already there adds nothing and says so", async 
   await expect(page.locator("[data-hb=status]")).toContainText("Imported 0 new events");
   expect(await readEvents(sw)).toHaveLength(before.length);
 });
+
+test("pointing at or tabbing to a concept brings out its relations, and letting go clears them", async ({
+  context,
+  sw,
+  stub,
+  extensionId,
+}) => {
+  await seedSettings(sw, stubSettings(stub.url, { language: "en" }));
+  // LoRA with four concepts it only mentions: a star, so each leaf's neighbours are just itself and LoRA.
+  const card = {
+    match: null,
+    canonical: "LoRA",
+    aliases: [],
+    domain: "ml",
+    broader: [],
+    variants: ["QLoRA"],
+    prerequisites: ["Fine-tuning", "Matrix rank", "Transformer"],
+    confidence: { broader: 0.9, variants: 0.9, prerequisites: 0.9 },
+  };
+  stub.queue.push({
+    body: `<explanation>LoRA 是一个测试解释。</explanation>\n<evidence>NONE</evidence>\n<card>${JSON.stringify(card)}</card>`,
+  });
+  await lookUpLora(context);
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/library.html#graph`);
+  const graph = page.locator("[data-hb=graph]");
+  await expect(graph.locator("[data-hb=graph-node]")).toHaveCount(5);
+  await expect(graph.locator(".edge")).toHaveCount(4);
+
+  /** Whether the map is highlighting, and the names of the concepts brought forward. */
+  const highlight = () =>
+    graph.evaluate((svg) => ({
+      focusing: svg.classList.contains("focusing"),
+      near: [...svg.querySelectorAll("[data-hb=graph-node].near")]
+        .map((n) => n.querySelector("title")!.textContent!.split(" — ")[0]!)
+        .sort(),
+      nearEdges: svg.querySelectorAll(".edge.near").length,
+    }));
+  const none = { focusing: false, near: [], nearEdges: 0 };
+  const nodeNamed = (name: string) =>
+    graph.locator("[data-hb=graph-node]").filter({ has: page.locator(`title:text-is("${name} — Not explained yet")`) });
+  const lora = graph.locator("a[data-hb=graph-node]");
+  const hover = async (loc: typeof lora) => {
+    const box = (await loc.locator("circle").boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  };
+  const away = () => page.mouse.move(2, 2);
+  const leaves = ["Fine-tuning", "Matrix rank", "QLoRA", "Transformer"];
+
+  expect(await highlight()).toEqual(none);
+
+  // Mouse only: pointing at a leaf brings out it and LoRA; pointing at LoRA brings out everything; leaving clears it.
+  await hover(nodeNamed("Fine-tuning"));
+  expect(await highlight()).toEqual({ focusing: true, near: ["Fine-tuning", "LoRA"], nearEdges: 1 });
+  await hover(lora);
+  expect(await highlight()).toEqual({ focusing: true, near: [...leaves, "LoRA"].sort(), nearEdges: 4 });
+  await away();
+  expect(await highlight()).toEqual(none);
+
+  // Tab only: tab until the keyboard reaches the map, then through every concept; each one is highlighted in turn.
+  await page.locator("body").click({ position: { x: 1, y: 1 } });
+  const onNode = () => page.evaluate(() => document.activeElement?.getAttribute("data-hb") === "graph-node");
+  for (let i = 0; i < 60 && !(await onNode()); i++) await page.keyboard.press("Tab");
+  expect(await onNode()).toBe(true);
+  const visited: string[] = [];
+  while (await onNode()) {
+    const id = await page.evaluate(() => document.activeElement!.getAttribute("data-id")!);
+    const isHub = (await lora.getAttribute("data-id")) === id;
+    const h = await highlight();
+    expect(h.focusing).toBe(true);
+    expect(h.near).toContain("LoRA");
+    expect(h.near).toHaveLength(isHub ? 5 : 2);
+    visited.push(isHub ? "LoRA" : h.near.find((n) => n !== "LoRA")!);
+    await page.keyboard.press("Tab");
+  }
+  expect(visited.sort()).toEqual([...leaves, "LoRA"].sort());
+  // Tabbing out of the map, onto the zoom buttons below it, lets go of the highlight.
+  expect(await page.evaluate(() => document.activeElement?.getAttribute("data-hb"))).toMatch(/^graph-/);
+  expect(await highlight()).toEqual(none);
+
+  // Mixed: with the keyboard on a leaf, pointing at another and then away comes back to the keyboard's concept.
+  await page.keyboard.press("Shift+Tab");
+  expect(await onNode()).toBe(true);
+  const kept = await highlight();
+  expect(kept.focusing).toBe(true);
+  const other = leaves.find((n) => !kept.near.includes(n))!;
+  await hover(nodeNamed(other));
+  expect(await highlight()).toEqual({ focusing: true, near: [other, "LoRA"].sort(), nearEdges: 1 });
+  await away();
+  expect(await highlight()).toEqual(kept);
+
+  // A concept not explained yet, clicked with the mouse, lets go of the highlight once the pointer leaves it, whether or not
+  // the keyboard was on another concept before.
+  for (const fresh of [false, true]) {
+    if (fresh) {
+      await page.reload();
+      await expect(graph.locator("[data-hb=graph-node]")).toHaveCount(5);
+    }
+    await nodeNamed(other).click();
+    expect(await page.evaluate(() => document.activeElement?.querySelector("title")?.textContent)).toContain(other);
+    expect(await highlight()).toEqual({ focusing: true, near: [other, "LoRA"].sort(), nearEdges: 1 });
+    await away();
+    expect(await highlight()).toEqual(none);
+  }
+
+  // Zooming sizes the arrowheads together with the lines, not a frame later.
+  const sizes = await graph.evaluate((svg) => {
+    const box = svg.getBoundingClientRect();
+    svg.dispatchEvent(
+      new WheelEvent("wheel", { deltaY: -100, clientX: box.x + box.width / 2, clientY: box.y + box.height / 2, cancelable: true }),
+    );
+    return {
+      u: Number(svg.style.getPropertyValue("--u")),
+      arrows: [...svg.querySelectorAll("marker")].map((m) => Number(m.getAttribute("markerWidth"))),
+    };
+  });
+  for (const w of sizes.arrows) expect(w).toBeCloseTo(9 * sizes.u, 5);
+});

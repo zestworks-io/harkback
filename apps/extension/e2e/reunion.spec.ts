@@ -12,13 +12,23 @@ async function hover(page: Page, selector: string): Promise<void> {
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 }
 
-test("shows a reunion on another paper and records that the reader remembers", async ({ context, sw, stub }) => {
+const shownEvents = async (sw: Parameters<typeof readEvents>[0]) => (await readEvents(sw)).filter((e) => e.type === "reunion.shown");
+
+test("shows a reunion on another paper and records that the reader remembers", async ({ context, sw, stub, extensionId }) => {
   await seedSettings(sw, stubSettings(stub.url));
   await lookUpLoraOnFirstPaper(context);
 
   const second = await openArxiv(context, "2305.14314");
   const marks = second.locator("[data-hb=mark]");
   await expect(marks).toHaveCount(1);
+  // Offering it is recorded once, for the paper it was offered on, and not again when the page is read again.
+  await expect
+    .poll(async () => (await shownEvents(sw)).map((e) => (e.payload as { source_id: string }).source_id))
+    .toEqual(["arxiv:2305.14314"]);
+  await second.reload();
+  await expect(marks).toHaveCount(1);
+  await second.waitForTimeout(500);
+  expect(await shownEvents(sw)).toHaveLength(1);
   await hover(second, "#t-lora");
   const card = second.locator("[data-hb=reunion-card]");
   await expect(card.locator("[data-hb=reunion-title]")).toHaveText(
@@ -31,6 +41,13 @@ test("shows a reunion on another paper and records that the reader remembers", a
   await expect
     .poll(async () => (await readEvents(sw)).some((e) => e.type === "encounter.action" && e.payload?.action === "reunion_recalled"))
     .toBe(true);
+
+  // The digest counts it, and that it was used.
+  const library = await context.newPage();
+  await library.goto(`chrome-extension://${extensionId}/library.html#digest`);
+  const tile = library.locator(".digest-tile", { has: library.locator(".digest-label", { hasText: "重逢提示" }) });
+  await expect(tile.locator(".digest-num")).toHaveText("1");
+  await expect(tile.locator(".digest-note")).toHaveText("用上了 1 个");
 });
 
 test("does not show reunions on the page where the concept was looked up", async ({ context, sw, stub }) => {
@@ -39,6 +56,7 @@ test("does not show reunions on the page where the concept was looked up", async
   const again = await openArxiv(context, "2106.09685");
   await again.waitForTimeout(1000);
   await expect(again.locator("[data-hb=mark]")).toHaveCount(0);
+  expect(await shownEvents(sw)).toEqual([]);
 });
 
 test("muting stops the reunion", async ({ context, sw, stub }) => {
@@ -83,4 +101,23 @@ test("compare from a reunion records a new explanation and marks the earlier one
     .poll(async () => (await readEvents(sw)).some((e) => e.type === "encounter.action" && e.payload?.action === "reunion_compare"))
     .toBe(true);
   expect(stub.requests.at(-1)!.body.messages[1]!.content).toContain("<earlier_content>");
+});
+
+test("a reunion shown on another tab leaves an open, zoomed graph as it is", async ({ context, sw, stub, extensionId }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  await lookUpLoraOnFirstPaper(context);
+  const library = await context.newPage();
+  await library.goto(`chrome-extension://${extensionId}/library.html#graph`);
+  const graph = library.locator("[data-hb=graph]");
+  await expect(graph).toBeVisible();
+  await library.locator("[data-hb=graph-zoom-in]").click();
+  const zoomed = await graph.getAttribute("viewBox");
+
+  const second = await openArxiv(context, "2305.14314");
+  await expect(second.locator("[data-hb=mark]")).toHaveCount(1);
+  await expect.poll(async () => (await shownEvents(sw)).length).toBe(1);
+  // The library hears of the change, and reads it after at most about a second.
+  await library.bringToFront();
+  await library.waitForTimeout(1500);
+  expect(await graph.getAttribute("viewBox")).toBe(zoomed);
 });

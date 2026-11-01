@@ -189,68 +189,193 @@ function components(n: number, links: readonly (readonly [number, number])[]): n
   return [...groups.values()].sort((a, b) => b.length - a.length || a[0]! - b[0]!);
 }
 
-/** Relations pull, every pair pushes apart and the middle holds the group together; positions are relative to 0, 0. */
-function forceLayout(points: { x: number; y: number; r: number }[], links: readonly (readonly [number, number])[], rounds: number): void {
+/**
+ * How long each relation is drawn: a concept with many relations gets longer lines, so the concepts around it have room
+ * for their labels instead of piling up on it.
+ */
+function linkLengths(n: number, links: readonly (readonly [number, number])[]): number[] {
+  // Two relations between the same two concepts (a prerequisite that is also related) count as one neighbour.
+  const degree = new Array<number>(n).fill(0);
+  const pairs = new Set<number>();
+  for (const [a, b] of links) {
+    const key = Math.min(a, b) * n + Math.max(a, b);
+    if (pairs.has(key)) continue;
+    pairs.add(key);
+    degree[a]!++;
+    degree[b]!++;
+  }
+  return links.map(([a, b]) => IDEAL * Math.max(1, 0.55 * Math.sqrt(Math.max(degree[a]!, degree[b]!))));
+}
+
+/** The length of the shortest path between every two nodes of one connected group, along the relations. */
+function pathLengths(n: number, links: readonly (readonly [number, number])[]): Float64Array[] {
+  const lengths = linkLengths(n, links);
+  const next: { to: number; len: number }[][] = Array.from({ length: n }, () => []);
+  links.forEach(([a, b], i) => {
+    next[a]!.push({ to: b, len: lengths[i]! });
+    next[b]!.push({ to: a, len: lengths[i]! });
+  });
+  return Array.from({ length: n }, (_, from) => {
+    // Dijkstra with a plain scan: groups are at most a few hundred nodes.
+    const dist = new Float64Array(n).fill(Infinity);
+    const done = new Uint8Array(n);
+    dist[from] = 0;
+    for (let round = 0; round < n; round++) {
+      let u = -1;
+      for (let i = 0; i < n; i++) if (!done[i] && (u < 0 || dist[i]! < dist[u]!)) u = i;
+      if (u < 0 || dist[u] === Infinity) break;
+      done[u] = 1;
+      for (const { to, len } of next[u]!) if (dist[u]! + len < dist[to]!) dist[to] = dist[u]! + len;
+    }
+    return dist;
+  });
+}
+
+/**
+ * A starting picture from the distances alone (classical scaling): the two main directions of the squared distances,
+ * found by power iteration from fixed vectors, so the same records always give the same picture.
+ */
+function classicalScaling(dist: Float64Array[]): { x: number; y: number }[] {
+  const n = dist.length;
+  // B = -1/2 · J D² J, with J the centring matrix, kept as one flat array.
+  const b = new Float64Array(n * n);
+  const rowMean = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) rowMean[i]! += dist[i]![j]! * dist[i]![j]!;
+    rowMean[i]! /= n;
+  }
+  let mean = 0;
+  for (let i = 0; i < n; i++) mean += rowMean[i]! / n;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) b[i * n + j] = -0.5 * (dist[i]![j]! * dist[i]![j]! - rowMean[i]! - rowMean[j]! + mean);
+  /** B times v. */
+  const timesB = (v: Float64Array) => {
+    const w = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      let s = 0;
+      for (let j = 0; j < n; j++) s += b[i * n + j]! * v[j]!;
+      w[i] = s;
+    }
+    return w;
+  };
+  const axes: { v: Float64Array; value: number }[] = [];
+  /** Directions already found, kept apart from the next one. */
+  const avoid: Float64Array[] = [];
+  let skipped = 0;
+  for (let k = 0; k < 2; k++) {
+    let v = Float64Array.from({ length: n }, (_, i) => (k === 0 ? Math.cos(i + 0.5) : Math.sin(2 * i + 1)));
+    /** No direction is left apart from the ones found: the distances fit fewer dimensions, and this axis adds nothing. */
+    let flat = false;
+    // Only a starting point: the stress rounds that follow settle the details.
+    for (let iter = 0; iter < 60; iter++) {
+      const w = timesB(v);
+      // Keep it apart from the directions already found or set aside.
+      for (const a of avoid) {
+        let dot = 0;
+        for (let i = 0; i < n; i++) dot += w[i]! * a[i]!;
+        for (let i = 0; i < n; i++) w[i]! -= dot * a[i]!;
+      }
+      let norm = 0;
+      for (let i = 0; i < n; i++) norm += w[i]! * w[i]!;
+      norm = Math.sqrt(norm);
+      if (norm < 1e-9) {
+        flat = true;
+        break;
+      }
+      for (let i = 0; i < n; i++) w[i]! /= norm;
+      v = w;
+    }
+    // Power iteration finds the largest eigenvalue by size, and graph distances can give a negative one, which is no
+    // direction of the picture: set it aside and look again (a few times at most; stress settles the rest).
+    const bv = timesB(v);
+    let rayleigh = 0;
+    for (let i = 0; i < n; i++) rayleigh += v[i]! * bv[i]!;
+    if (flat) {
+      axes.push({ v, value: 0 });
+      continue;
+    }
+    if (rayleigh < 0 && skipped < 3) {
+      skipped++;
+      avoid.push(v);
+      k--;
+      continue;
+    }
+    axes.push({ v, value: Math.max(0, rayleigh) });
+    avoid.push(v);
+  }
+  return Array.from({ length: n }, (_, i) => ({
+    x: axes[0]!.v[i]! * Math.sqrt(axes[0]!.value),
+    y: axes[1]!.v[i]! * Math.sqrt(axes[1]!.value),
+  }));
+}
+
+/**
+ * Places one connected group so that the distance between every two concepts is as close as it can be to the length of
+ * the path between them (stress majorization): relations come out an even length, branches spread out instead of folding
+ * over each other, and the same records always give the same picture. Positions are relative to 0, 0.
+ */
+function stressLayout(points: { x: number; y: number; r: number }[], links: readonly (readonly [number, number])[], rounds: number): void {
   const n = points.length;
   if (n === 1) {
     points[0]!.x = 0;
     points[0]!.y = 0;
     return;
   }
-  // Start on a circle in a fixed order, so the same records always give the same picture.
-  const start = IDEAL * Math.max(1, Math.sqrt(n) * 0.6);
-  points.forEach((p, i) => {
-    const angle = (2 * Math.PI * i) / n;
-    p.x = start * Math.cos(angle);
-    p.y = start * Math.sin(angle);
+  // Two concepts are kept no further apart than a group of this many would span if it were round: a long chain of
+  // relations then curls up to fit the window instead of running off it in a straight line. Rounder groups never reach it.
+  const reach = Math.max(6, 2 * Math.sqrt(n)) * IDEAL;
+  const dist = pathLengths(n, links).map((row) => row.map((d) => Math.min(d, reach)));
+  const xs = new Float64Array(n);
+  const ys = new Float64Array(n);
+  classicalScaling(dist).forEach((p, i) => {
+    xs[i] = p.x;
+    ys[i] = p.y;
   });
-  const dx = new Float64Array(n);
-  const dy = new Float64Array(n);
+  // Each pair counts by one over its distance squared, so near neighbours matter most.
+  const weight = dist.map((row) => row.map((d) => (d > 0 ? 1 / (d * d) : 0)));
+  const weightSum = weight.map((row) => row.reduce((s, w) => s + w, 0));
   for (let round = 0; round < rounds; round++) {
-    const cooling = 1 - round / rounds;
-    dx.fill(0);
-    dy.fill(0);
+    let moved = 0;
     for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        let vx = points[i]!.x - points[j]!.x;
-        let vy = points[i]!.y - points[j]!.y;
-        let d = Math.hypot(vx, vy);
-        if (d < 0.01) {
-          // Two nodes on one spot: separate them in a fixed direction.
-          vx = 1;
-          vy = 0;
+      const target = dist[i]!;
+      const w = weight[i]!;
+      const px = xs[i]!;
+      const py = ys[i]!;
+      let sx = 0;
+      let sy = 0;
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const qx = xs[j]!;
+        const qy = ys[j]!;
+        let vx = px - qx;
+        let vy = py - qy;
+        let d = Math.sqrt(vx * vx + vy * vy);
+        if (d < 1e-6) {
+          // Two nodes on one spot (two leaves of one concept start there): part them in a direction fixed by their order.
+          // The pair shares one angle and is pushed in opposite directions along it.
+          const angle = (Math.min(i, j) * 7 + Math.max(i, j)) * 2.399963;
+          const away = i < j ? 1 : -1;
+          vx = away * Math.cos(angle);
+          vy = away * Math.sin(angle);
           d = 1;
         }
-        const push = (IDEAL * IDEAL) / d;
-        const fx = (vx / d) * push;
-        const fy = (vy / d) * push;
-        dx[i]! += fx;
-        dy[i]! += fy;
-        dx[j]! -= fx;
-        dy[j]! -= fy;
+        const pull = (target[j]! / d) * w[j]!;
+        sx += w[j]! * qx + pull * vx;
+        sy += w[j]! * qy + pull * vy;
       }
+      const nx = sx / weightSum[i]!;
+      const ny = sy / weightSum[i]!;
+      moved = Math.max(moved, Math.abs(nx - px) + Math.abs(ny - py));
+      xs[i] = nx;
+      ys[i] = ny;
     }
-    for (const [a, b] of links) {
-      const vx = points[a]!.x - points[b]!.x;
-      const vy = points[a]!.y - points[b]!.y;
-      const d = Math.max(0.01, Math.hypot(vx, vy));
-      const pull = (d * d) / IDEAL;
-      dx[a]! -= (vx / d) * pull;
-      dy[a]! -= (vy / d) * pull;
-      dx[b]! += (vx / d) * pull;
-      dy[b]! += (vy / d) * pull;
-    }
-    const step = IDEAL * 0.5 * cooling + 1;
-    for (let i = 0; i < n; i++) {
-      const p = points[i]!;
-      dx[i]! -= p.x * 0.05;
-      dy[i]! -= p.y * 0.05;
-      const d = Math.max(0.01, Math.hypot(dx[i]!, dy[i]!));
-      const move = Math.min(d, step);
-      p.x += (dx[i]! / d) * move;
-      p.y += (dy[i]! / d) * move;
-    }
+    // Stop once no concept moves by more than about half a pixel.
+    if (moved < 0.5) break;
   }
+  points.forEach((p, i) => {
+    p.x = xs[i]!;
+    p.y = ys[i]!;
+  });
   // Circles that still touch are moved apart, so each one can be seen and clicked.
   for (let round = 0; round < 100; round++) {
     let moved = false;
@@ -280,7 +405,7 @@ function forceLayout(points: { x: number; y: number; r: number }[], links: reado
   }
 }
 
-/** The box a label takes at one of four places around its circle, with text `scale` times its usual size. */
+/** The box a label takes at one of the places around its circle, with text `scale` times its usual size. */
 function labelBox(node: GraphNode, place: number, scale: number): { box: Box; x: number; y: number; anchor: GraphNode["labelAnchor"] } {
   const w = labelWidth(node.label) * scale;
   const font = FONT * scale;
@@ -304,14 +429,36 @@ function labelBox(node: GraphNode, place: number, scale: number): { box: Box; x:
         anchor: "start",
         box: { x0: x + r + pad, y0: y - tall / 2, x1: x + r + pad + w, y1: y + tall / 2 },
       };
-    default: // left
+    case 3: // left
       return {
         x: x - r - pad,
         y: y + font / 3,
         anchor: "end",
         box: { x0: x - r - pad - w, y0: y - tall / 2, x1: x - r - pad, y1: y + tall / 2 },
       };
+    default: {
+      // The four corners: above or below, starting at the circle's right or ending at its left.
+      const right = place === 4 || place === 5;
+      const below = place === 5 || place === 7;
+      const side = r * 0.7 + pad / 2;
+      const y0 = below ? y + side : y - side - tall;
+      return {
+        x: right ? x + side : x - side,
+        y: y0 + font,
+        anchor: right ? "start" : "end",
+        box: { x0: right ? x + side : x - side - w, y0, x1: right ? x + side + w : x - side, y1: y0 + tall },
+      };
+    }
   }
+}
+
+/** How many places around a circle a label is tried at. */
+const LABEL_PLACES = 8;
+
+/** Whether one cost is lower than another, comparing the first figure that differs. */
+function cheaper(a: readonly number[], b: readonly number[]): boolean {
+  for (let k = 0; k < a.length; k++) if (a[k] !== (b[k] ?? Infinity)) return a[k]! < (b[k] ?? Infinity);
+  return false;
 }
 
 /** A relation as drawn: a straight line between two circles. */
@@ -357,29 +504,51 @@ export function crosses(s: Segment, b: Box): boolean {
 }
 
 /**
- * Places each label above, below, right or left of its circle, wherever it covers no circle and no label placed before,
+ * Places each label above, below, right, left or at a corner of its circle, wherever it covers no circle and no label placed before,
  * preferring the place that crosses the fewest lines. Studied concepts and the best connected go first; a label with no
  * free place is shown only on hover. `scale` is the size the text is drawn at, in units of the map: zoomed out, labels take
  * more of the map and fewer of them fit.
+ *
+ * `others` are circles drawn behind these nodes (the faded ones while a concept is pointed at): a label avoids them where
+ * it can but may cover them. With `always`, every label is shown, at the place that covers the fewest labels and circles,
+ * for when the names must be read whatever the crowding.
  */
-export function placeLabels(nodes: GraphNode[], frame: Box, scale = 1, segments: readonly Segment[] = []): void {
-  const circles: Box[] = nodes.map((n) => ({ x0: n.x - n.r, y0: n.y - n.r, x1: n.x + n.r, y1: n.y + n.r }));
+export function placeLabels(
+  nodes: GraphNode[],
+  frame: Box,
+  scale = 1,
+  segments: readonly Segment[] = [],
+  { others = [], always = false }: { others?: readonly { x: number; y: number; r: number }[]; always?: boolean } = {},
+): void {
+  // A label keeps a little clear of every other circle, so it is not read as that circle's name.
+  const clear = 3 * scale;
+  const around = (n: { x: number; y: number; r: number }): Box => ({
+    x0: n.x - n.r - clear,
+    y0: n.y - n.r - clear,
+    x1: n.x + n.r + clear,
+    y1: n.y + n.r + clear,
+  });
+  const circles: Box[] = nodes.map(around);
+  const behind: Box[] = others.map(around);
   const placed: Box[] = [];
   const order = nodes
     .map((_, i) => i)
     .sort((a, b) => Number(nodes[b]!.studied) - Number(nodes[a]!.studied) || nodes[b]!.degree - nodes[a]!.degree || a - b);
+  const count = (boxes: readonly Box[], box: Box, skip = -1) => boxes.reduce((n, b, j) => n + Number(j !== skip && overlaps(b, box)), 0);
   for (const i of order) {
     const node = nodes[i]!;
     let chosen: ReturnType<typeof labelBox> | undefined;
-    let fewest = Infinity;
-    for (let place = 0; place < 4 && fewest > 0; place++) {
+    /** What a place costs, compared in order: labels and circles it covers, then circles behind it, then lines it crosses. */
+    let best: number[] = [Infinity];
+    for (let place = 0; place < LABEL_PLACES && best.some((v) => v > 0); place++) {
       const c = labelBox(node, place, scale);
-      const inside = c.box.x0 >= frame.x0 && c.box.x1 <= frame.x1 && c.box.y0 >= frame.y0 && c.box.y1 <= frame.y1;
-      const free = inside && !placed.some((b) => overlaps(b, c.box)) && !circles.some((b, j) => j !== i && overlaps(b, c.box));
-      if (!free) continue;
-      const crossed = segments.reduce((n, s) => n + Number(crosses(s, c.box)), 0);
-      if (crossed < fewest) {
-        fewest = crossed;
+      const outside = Number(!(c.box.x0 >= frame.x0 && c.box.x1 <= frame.x1 && c.box.y0 >= frame.y0 && c.box.y1 <= frame.y1));
+      const covered = count(placed, c.box) + count(circles, c.box, i);
+      if ((outside || covered > 0) && !always) continue;
+      // Even when every label must be shown, one inside the map beats one cut off at its edge.
+      const cost = [outside, covered, count(behind, c.box), segments.reduce((n, s) => n + Number(crosses(s, c.box)), 0)];
+      if (cheaper(cost, best)) {
+        best = cost;
         chosen = c;
       }
     }
@@ -418,7 +587,7 @@ export function layoutGraph(model: GraphModel, width = 900, height = 600, rounds
     const local = new Map(members.map((m, i) => [m, i]));
     const points = members.map((m) => nodes[m]!);
     const own = links.flatMap(([a, b]) => (local.has(a) ? [[local.get(a)!, local.get(b)!] as const] : []));
-    forceLayout(points, own, rounds);
+    stressLayout(points, own, rounds);
     const box: Box = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
     for (const p of points) {
       const half = Math.max(p.r, labelWidth(p.label) / 2);

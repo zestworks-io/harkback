@@ -8,6 +8,7 @@ import {
   matcherEntriesFromState,
   MAX_PREVIEW_PAGE_CHARS,
   REVIEW_ACTIONS,
+  sameSource,
   type EventFactory,
   isSensitiveSource,
   type Hit,
@@ -133,6 +134,28 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       const rep = (await deps.getState()).representative.get(msg.conceptId);
       if (incognito || !rep || typeof msg.sourceId !== "string" || msg.sourceId === "") return { ok: false };
       await deps.append((f) => [f.make("reunion.dismissed", { concept_id: rep, source_id: msg.sourceId })]);
+      return { ok: true };
+    }
+    case "reunions-shown": {
+      if (incognito || !Array.isArray(msg.conceptIds) || typeof msg.sourceId !== "string" || msg.sourceId === "") return { ok: false };
+      if (effectiveRule((await deps.loadSettings()).sites, sender.url ?? "").disabled) return { ok: false };
+      const state = await deps.getState();
+      const now = new Date(deps.now());
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const already = new Set<string>();
+      // Oldest first: only today's, at the end, are looked at.
+      for (let i = state.reunionsShown.length - 1; i >= 0; i--) {
+        const r = state.reunionsShown[i]!;
+        if (r.at < startOfDay) break;
+        if (sameSource(state, r.sourceId, msg.sourceId)) already.add(r.conceptId);
+      }
+      const fresh = new Set<string>();
+      for (const id of msg.conceptIds.slice(0, 50)) {
+        const rep = typeof id === "string" ? state.representative.get(id) : undefined;
+        if (rep && !already.has(rep)) fresh.add(rep);
+      }
+      if (fresh.size > 0)
+        await deps.append((f) => [...fresh].map((rep) => f.make("reunion.shown", { concept_id: rep, source_id: msg.sourceId })));
       return { ok: true };
     }
     case "mark-sensitive": {

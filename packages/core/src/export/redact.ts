@@ -64,6 +64,7 @@ export function withoutSensitive(events: readonly HarkEvent[], alsoSensitive: (s
       case "encounter.deleted":
         return !sensitiveEncounters.has(e.payload.encounter_id);
       case "reunion.dismissed":
+      case "reunion.shown":
         return !isSensitiveSource(state, e.payload.source_id) && !isHidden(e.payload.concept_id);
       case "concept.alias_confirmed":
       case "concept.alias_rejected":

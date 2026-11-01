@@ -16,6 +16,17 @@
   --defined-soft: rgba(21, 128, 61, 0.1);
   --external: #a16207;
   --external-soft: rgba(161, 98, 7, 0.1);
+  /* The concept graph: one hue per level of understanding, and quiet lines so the concepts stand out. */
+  --shaky: #d97706;
+  --shaky-soft: rgba(217, 119, 6, 0.14);
+  --confused: #dc2626;
+  --confused-soft: rgba(220, 38, 38, 0.1);
+  /* Darker shades for text on the soft backgrounds, which the brighter ones above are too light to read on. */
+  --shaky-text: #92400e;
+  --confused-text: #b91c1c;
+  --variant: #9333ea;
+  --edge: #52525b;
+  --edge-soft: #a1a1aa;
   --ring: rgba(24, 24, 27, 0.14);
   --err: #b91c1c;
   --ok: #15803d;
@@ -40,6 +51,15 @@
     --defined-soft: rgba(74, 222, 128, 0.12);
     --external: #facc15;
     --external-soft: rgba(250, 204, 21, 0.12);
+    --shaky: #fbbf24;
+    --shaky-soft: rgba(251, 191, 36, 0.16);
+    --confused: #f87171;
+    --confused-soft: rgba(248, 113, 113, 0.14);
+    --shaky-text: #fbbf24;
+    --confused-text: #f87171;
+    --variant: #c084fc;
+    --edge: #a1a1aa;
+    --edge-soft: #52525b;
     --ring: rgba(250, 250, 250, 0.16);
     --err: #f87171;
     --ok: #4ade80;
@@ -62,6 +82,15 @@
   --defined-soft: rgba(74, 222, 128, 0.12);
   --external: #facc15;
   --external-soft: rgba(250, 204, 21, 0.12);
+  --shaky: #fbbf24;
+  --shaky-soft: rgba(251, 191, 36, 0.16);
+  --confused: #f87171;
+  --confused-soft: rgba(248, 113, 113, 0.14);
+  --shaky-text: #fbbf24;
+  --confused-text: #f87171;
+  --variant: #c084fc;
+  --edge: #a1a1aa;
+  --edge-soft: #52525b;
   --ring: rgba(250, 250, 250, 0.16);
   --err: #f87171;
   --ok: #4ade80;

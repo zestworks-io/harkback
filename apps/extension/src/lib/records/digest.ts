@@ -54,12 +54,22 @@ export interface Digest {
   confused: number;
   /** Days of the week with a look-up or an answer. */
   activeDays: number;
+  /**
+   * Reunions offered this week: each term at most once a day on each page. Never fewer than `reunionsUsed`, since a
+   * reunion used was offered, though a week recorded before offers were has none of them.
+   */
+  reunions: number;
+  /** Reunions answered with "I remember", "Explain again" or "Compare". */
+  reunionsUsed: number;
   /** Terms you are currently confused about, most recently touched first. */
   stillConfused: (DigestConcept | { conceptId: string; name: string; understanding: Understanding; lookups: 0; fresh: false })[];
   sources: DigestSource[];
   connections: DigestConnection[];
   isEmpty: boolean;
 }
+
+/** The answers on a reunion card that use it: "Don't show again" is not one. */
+const REUNION_USES: ReadonlySet<string> = new Set(["reunion_recalled", "reunion_reexplain", "reunion_compare"]);
 
 const inRange = (t: number, r: WeekRange): boolean => t >= r.start && t < r.end;
 const dayKey = (t: number): string => {
@@ -87,6 +97,7 @@ export function buildDigest(state: State, range: WeekRange, limits: DigestLimits
   let remembered = 0;
   let shaky = 0;
   let confused = 0;
+  let reunionsUsed = 0;
   const lastTouch = new Map<string, number>();
 
   for (const e of state.encounters.values()) {
@@ -102,6 +113,7 @@ export function buildDigest(state: State, range: WeekRange, limits: DigestLimits
     for (const a of e.actions) {
       if (!inRange(a.at, range)) continue;
       days.add(dayKey(a.at));
+      if (REUNION_USES.has(a.action)) reunionsUsed++;
       const grade = gradeOf(a.action);
       if (grade === 1) confused++;
       else if (grade === 2) shaky++;
@@ -154,6 +166,8 @@ export function buildDigest(state: State, range: WeekRange, limits: DigestLimits
   }
   connections.sort((a, b) => a.from.name.localeCompare(b.from.name, "en") || a.to.name.localeCompare(b.to.name, "en"));
 
+  const reunions = Math.max(state.reunionsShown.filter((r) => inRange(r.at, range)).length, reunionsUsed);
+
   return {
     range,
     met: all.slice(0, limits.concepts ?? 30),
@@ -164,9 +178,11 @@ export function buildDigest(state: State, range: WeekRange, limits: DigestLimits
     shaky,
     confused,
     activeDays: days.size,
+    reunions,
+    reunionsUsed,
     stillConfused,
     sources,
     connections: connections.slice(0, limits.connections ?? 10),
-    isEmpty: all.length === 0 && remembered === 0 && shaky === 0 && confused === 0,
+    isEmpty: all.length === 0 && remembered === 0 && shaky === 0 && confused === 0 && reunions === 0,
   };
 }

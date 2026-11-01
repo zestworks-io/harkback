@@ -44,6 +44,48 @@ describe("digestView", () => {
     expect(el.querySelector('[data-hb="digest-met"]')).toBeNull();
   });
 
+  it("says how many terms a busy week's list leaves out", () => {
+    const w = world(at(10, 6));
+    w.source("s1");
+    for (let i = 0; i < 4; i++) w.encounter(w.concept(`Term ${i}`), "s1");
+    const digest = buildDigest(w.state(), weekOf(at(10, 7)), { concepts: 3 });
+    const el = digestView({ digest, lang: "en", conceptHref: (id) => `#concept=${id}`, isCurrentWeek: true, goto: vi.fn() });
+    expect(el.querySelectorAll('[data-hb="digest-met"] li')).toHaveLength(3);
+    expect(el.querySelector('[data-hb="digest-met-more"]')!.textContent).toBe("and 1 more");
+    expect(view().el.querySelector('[data-hb="digest-met-more"]')).toBeNull();
+    // Arabic says one and two left out in words of their own.
+    const more = (concepts: number) =>
+      digestView({
+        digest: buildDigest(w.state(), weekOf(at(10, 7)), { concepts }),
+        lang: "ar",
+        conceptHref: (id) => `#concept=${id}`,
+        isCurrentWeek: true,
+        goto: vi.fn(),
+      }).querySelector('[data-hb="digest-met-more"]')!.textContent;
+    expect(more(3)).toBe("ومصطلح آخر");
+    expect(more(2)).toBe("ومصطلحان آخران");
+    expect(more(1)).toBe("و3 مصطلحات أخرى");
+  });
+
+  it("shows how many reunions were offered and used, with no note when there were none", () => {
+    const tileOf = (el: HTMLElement) =>
+      [...el.querySelectorAll(".digest-tile")].find((t) => t.querySelector(".digest-label")!.textContent === "Reunion hints")!;
+    expect(tileOf(view().el).querySelector(".digest-num")!.textContent).toBe("0");
+    expect(tileOf(view().el).querySelector(".digest-note")).toBeNull();
+
+    const w = world(at(10, 6));
+    w.source("s1");
+    const lora = w.concept("LoRA");
+    w.encounter(lora, "s1");
+    w.events.push(w.f.make("reunion.shown", { concept_id: lora, source_id: "s2" }));
+    w.events.push(w.f.make("reunion.shown", { concept_id: lora, source_id: "s3" }));
+    w.events.push(w.f.make("encounter.action", { encounter_id: w.state().encountersByConcept.get(lora)![0]!, action: "reunion_recalled" }));
+    const digest = buildDigest(w.state(), weekOf(at(10, 7)));
+    const tile = tileOf(digestView({ digest, lang: "en", conceptHref: (id) => `#concept=${id}`, isCurrentWeek: true, goto: vi.fn() }));
+    expect(tile.querySelector(".digest-num")!.textContent).toBe("2");
+    expect(tile.querySelector(".digest-note")!.textContent).toBe("1 used");
+  });
+
   it("is written in the chosen language", () => {
     expect(view("zh").el.textContent).toContain("遇到的术语");
   });

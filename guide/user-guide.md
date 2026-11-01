@@ -74,6 +74,8 @@ A page that only mentions a _variant_ of something you understood (for example `
 
 Card buttons: **I remember**, **Explain again** (from another angle), **Compare usages** (the model contrasts the two contexts), **Don't show again**.
 
+Each reunion hint shown is recorded, at most once a day for each term on each page, so the [weekly digest](#weekly-digest) can say how often you meet your terms again. Showing a hint is not a look-up: it does not move when the term is next shown or due for review.
+
 Pages that load more text, or a single-page app that moves to another page without reloading, are rescanned on their own.
 
 ## Concepts and spellings
@@ -121,13 +123,13 @@ To turn it off, clear **Offer "Check my answer" in review** under Review in sett
 
 ## Weekly digest
 
-**Digest** on the History page shows one week, Monday to Sunday: how many terms you met (new and revisited, compared with the week before), how many answers were remembered, hard or forgotten, the days you were active, the terms you are still confused about, where you read most, and the connections between concepts that appeared that week. Use _Previous week_ and _Next week_ to move. It is built on your computer from your records and calls no model.
+**Digest** on the History page shows one week, Monday to Sunday: how many terms you met (new and revisited, compared with the week before), how many answers were remembered, hard or forgotten, the days you were active, how many reunion hints you were shown and how many of them you used (_I remember_, _Explain again_ or _Compare usages_), the terms you met (the first 30, and how many more), the terms you are still confused about, where you read most, and the connections between concepts that appeared that week. Use _Previous week_ and _Next week_ to move. It is built on your computer from your records and calls no model.
 
 ## Graph
 
-**Graph** on the History page draws your concepts as a map. Fill colour shows how well you understood a concept (green understood, pale yellow shaky, yellow confused, blue new); a dashed ring marks a concept that something points to but you have not explained yet. Blue arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
+**Graph** on the History page draws your concepts as a map. Colour shows how well you understood a concept: a filled circle is a clear answer (green understood, red confused), a ring is not settled yet (amber shaky, blue new), and a dashed grey ring marks a concept that something points to but you have not explained yet. Grey arrows run from a concept to its prerequisites, purple arrows from a variant to what it varies, and dashed lines join related concepts.
 
-Drag to move, scroll or use the + and − buttons to zoom, and ⤢ to see the whole map again; click a concept to open it. Pointing at a concept (or moving to it with Tab) brings forward its relations and the concepts at their other ends, and fades the rest. Each group of connected concepts is drawn on its own, and the groups sit side by side. The map opens whole unless that would make it too small to point at; then it opens on its best-connected concept. Labels keep their size at any zoom and are placed where they cover no other label or circle, and cross as few lines as they can; zoomed out, fewer fit, and a label with no free place appears when you point at its circle. The search box filters the graph to matching concepts and their neighbours, and _Show concepts not explained yet_ hides the dashed rings when you untick it. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
+Drag to move, scroll or use the + and − buttons to zoom, and ⤢ to see the whole map again; click a concept to open it. Pointing at a concept (or moving to it with Tab) brings forward its relations and the concepts at their other ends, and fades the rest. Each group of connected concepts is drawn on its own, with every two concepts as far apart as the relations between them, so branches spread out instead of folding over each other; the groups sit side by side. The map opens whole unless that would make it too small to point at; then it opens on its best-connected concept. Labels keep their size at any zoom and are placed where they cover no other label or circle, and cross as few lines as they can; zoomed out, fewer fit, and a label with no free place appears when you point at its circle. Pointing at a concept also hides the other names and places its neighbours' names again among themselves, so they can all be read. On a wide window the graph takes the whole width of the page. The search box filters the graph to matching concepts and their neighbours, and _Show concepts not explained yet_ hides the dashed rings when you untick it. Only the 150 best-connected concepts are drawn, and weak or rejected relations are left out until you confirm them on the concept page.
 
 ## History
 

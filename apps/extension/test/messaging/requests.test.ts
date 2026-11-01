@@ -123,6 +123,28 @@ describe("writes", () => {
     expect(written[2]!.payload).toMatchObject({ source_id: "arxiv:1", sensitivity: "sensitive" });
   });
 
+  it("records the reunions shown on a page once a day for each term, and none in a private window or on a disabled site", async () => {
+    const { deps, written, conceptId, w } = setup();
+    const other = w.concept("QLoRA");
+    // QLoRA was already shown on this paper today, under another id of it; LoRA only two days ago.
+    w.source("arxiv:2", "normal", "T", { arxiv: "2", doi: "10.1/two" });
+    w.setTime(NOW + DAY);
+    w.events.push(w.f.make("reunion.shown", { concept_id: other, source_id: "doi:10.1/two" }));
+    w.setTime(NOW - DAY);
+    w.events.push(w.f.make("reunion.shown", { concept_id: conceptId, source_id: "arxiv:2" }));
+    const msg: Request = { type: "reunions-shown", conceptIds: [conceptId, other, conceptId, "nope"], sourceId: "arxiv:2" };
+    expect(await handleRequest(deps, msg, page)).toEqual({ ok: true });
+    expect(written.map((e) => [e.type, e.payload])).toEqual([["reunion.shown", { concept_id: conceptId, source_id: "arxiv:2" }]]);
+
+    for (const [d, sender] of [
+      [setup().deps, priv],
+      [setup({ sites: [{ pattern: "arxiv.org", disabled: true }] }).deps, page],
+    ] as const)
+      expect(await handleRequest(d, msg, sender)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { ...msg, sourceId: "" }, page)).toEqual({ ok: false });
+    expect(await handleRequest(deps, { ...msg, conceptIds: "x" as never }, page)).toEqual({ ok: false });
+  });
+
   it("records that a term means something else on a page, and refuses an empty page or a private window", async () => {
     const { deps, written, conceptId } = setup();
     expect(await handleRequest(deps, { type: "dismiss-reunion", conceptId, sourceId: "arxiv:9" }, page)).toEqual({ ok: true });

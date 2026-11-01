@@ -2,6 +2,32 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Added
+
+- **The digest counts your reunions.** A new _Reunion hints_ figure says how many reunion hints you were shown that week and how many of them you used: _I remember_, _Explain again_ or _Compare usages_. Each hint shown is recorded once a day for each term and page; showing one does not count as a look-up, so it does not change when the term is next shown or due for review. Weeks before this version count only the hints you used.
+- Backups made with this version contain a new event type, `reunion.shown`; an older version skips it.
+
+### Changed
+
+- **A clearer graph.** Concepts are placed so that every two are as far apart as the relations between them: relations come out an even length, branches spread out instead of trailing in a long line, and a concept with many relations has room around it for its neighbours' names. A larger library now usually fits the window when the graph opens. Labels are also tried at the corners of a circle, so more of them fit, and pointing at a concept places its neighbours' names again so none of them land on each other.
+- **Each level of understanding has its own colour** on the graph, in the digest and on the concept page: green understood, amber shaky, red confused, blue new. Shaky and confused were two shades of one yellow, and new concepts and prerequisite arrows were the same blue; prerequisite arrows are now grey.
+- The digest's figures sit in two even rows of four where there is room, instead of five and two.
+- **The graph takes the width of a wide window**, instead of the narrow column of the other pages, so more of a larger library's names fit when it opens.
+- A long chain of relations curls up to fit the window instead of running off it in a straight line.
+- Arrowheads keep their size on screen at any zoom, like the lines; zoomed in, they used to grow large.
+- Pointing at a concept hides the names of the faded concepts, so its neighbours' names stand clear of them, and a name now keeps a little clear of every other circle, so it is not read as that circle's name.
+- The "New" mark in the digest is blue, like a new concept on the graph, instead of the amber that now means shaky.
+- The graph's zoom buttons sit below the map, beside the key, instead of over its top corner, where they hid the concepts and names under them.
+- Pointing at a concept shows the names of all its neighbours, even where there is no free place for one, and keeps them off the faded circles where it can.
+
+### Fixed
+
+- **A backup from a newer version restores without errors.** An event of a type this version does not know is set aside and ignored, as the data format guide says, instead of being reported as an invalid line.
+- The digest said "1 look-ups"; it now says "1 look-up" (and the singular in French, Spanish and Portuguese).
+- In a week with more than 30 terms, the digest's list stopped at 30 without saying so; it now says how many more there were.
+
 ## 1.0.6 - 2026-10-20
 
 ### Added

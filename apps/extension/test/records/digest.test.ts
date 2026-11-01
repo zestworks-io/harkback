@@ -99,6 +99,45 @@ describe("buildDigest", () => {
     expect(buildDigest(w.state(), weekOf(at(2026, 9, 30))).connections.map((c) => c.to.name)).toEqual(["Matrix rank"]);
   });
 
+  it("counts the reunions shown this week and how many the reader used", () => {
+    const { w, ids } = scenario();
+    const shown = (conceptId: string, sourceId: string, t: number) => {
+      w.setTime(t);
+      w.events.push(w.f.make("reunion.shown", { concept_id: conceptId, source_id: sourceId }));
+    };
+    shown(ids.lora, "s2", at(2026, 10, 6));
+    shown(ids.lora, "s3", at(2026, 10, 8));
+    shown(ids.rank, "s3", at(2026, 10, 8));
+    // Last week's, not counted.
+    shown(ids.lora, "s4", at(2026, 10, 2));
+    const week = weekOf(at(2026, 10, 7));
+    expect(buildDigest(w.state(), week)).toMatchObject({ reunions: 3, reunionsUsed: 0 });
+    // "I remember" and "Explain again" are uses; "Understood" on the same look-up is not.
+    const lora = w.state().encountersByConcept.get(ids.lora)![0]!;
+    w.setTime(at(2026, 10, 8, 14));
+    w.events.push(w.f.make("encounter.action", { encounter_id: lora, action: "reunion_recalled" }));
+    w.events.push(w.f.make("encounter.action", { encounter_id: lora, action: "reunion_reexplain" }));
+    expect(buildDigest(w.state(), week)).toMatchObject({ reunions: 3, reunionsUsed: 2 });
+  });
+
+  it("counts a used reunion as shown in a week recorded before reunions shown were, and a week with only reunions is not empty", () => {
+    const w = world(at(2026, 9, 29));
+    w.source("s1");
+    const lora = w.concept("LoRA");
+    const e = w.encounter(lora, "s1");
+    w.setTime(at(2026, 10, 6));
+    w.events.push(w.f.make("encounter.action", { encounter_id: e, action: "reunion_recalled" }));
+    w.events.push(w.f.make("encounter.action", { encounter_id: e, action: "reunion_compare" }));
+    expect(buildDigest(w.state(), weekOf(at(2026, 10, 7)))).toMatchObject({ reunions: 2, reunionsUsed: 2, isEmpty: false });
+    const v = world(at(2026, 9, 29));
+    v.source("s1");
+    const c = v.concept("LoRA");
+    v.encounter(c, "s1");
+    v.setTime(at(2026, 10, 6));
+    v.events.push(v.f.make("reunion.shown", { concept_id: c, source_id: "s2" }));
+    expect(buildDigest(v.state(), weekOf(at(2026, 10, 7)))).toMatchObject({ reunions: 1, isEmpty: false });
+  });
+
   it("is empty for a week with nothing in it", () => {
     const { w } = scenario();
     const d = buildDigest(w.state(), weekOf(at(2026, 11, 2)));

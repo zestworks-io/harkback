@@ -1,7 +1,7 @@
 import { DAY_MS, type State } from "@harkback/core";
 import { DOMAINS, type Domain } from "@harkback/spec";
 import type { Understanding } from "../records/concept-detail";
-import { buildGraph, edgeSegments, placeLabels } from "../records/graph";
+import { buildGraph, edgeSegments, placeLabels, type GraphNode } from "../records/graph";
 import { h } from "../ui/dom";
 import type { Lang } from "../ui/languages";
 import { pick } from "../ui/pick";
@@ -43,6 +43,8 @@ const GRAPH_WIDTH = 960;
 const GRAPH_HEIGHT = 640;
 /** The smallest scale a map opens at, so its circles stay big enough to point at. */
 const MIN_GRAPH_SCALE = 0.45;
+/** The size of an arrowhead on screen, in pixels. */
+const ARROW = 9;
 
 /** A drop-down that redraws the map when it changes and keeps the keyboard where it was. */
 function graphSelect(
@@ -182,13 +184,16 @@ export function graphView(deps: GraphViewDeps): HTMLElement {
         viewBox: "0 0 10 10",
         refX: 10,
         refY: 5,
-        markerWidth: 7,
-        markerHeight: 7,
+        // Sized in units of the map and set again as the map is zoomed, so arrowheads keep their size on screen like the lines.
+        markerUnits: "userSpaceOnUse",
+        markerWidth: ARROW,
+        markerHeight: ARROW,
         orient: "auto-start-reverse",
       },
       svgEl("path", { d: "M0 0 L10 5 L0 10 z" }),
     );
-  svg.append(svgEl("defs", {}, marker("prerequisite"), marker("variant_of")));
+  const markers = [marker("prerequisite"), marker("variant_of")];
+  svg.append(svgEl("defs", {}, ...markers));
   const at = new Map(g.nodes.map((n) => [n.id, n]));
   /** Each concept's relations as drawn, and the concepts at their other ends: what pointing at a concept brings forward. */
   const touching = new Map<string, { lines: SVGElement[]; ids: Set<string> }>();
@@ -259,20 +264,49 @@ export function graphView(deps: GraphViewDeps): HTMLElement {
     node.append(svgEl("title", {}, document.createTextNode(title)));
     nodeLayer.append(node);
     nodeEls.set(n.id, { el: node, text, circle });
-    const bring = () => {
-      const near = touching.get(n.id) ?? { lines: [], ids: new Set([n.id]) };
-      svg.classList.add("focusing");
-      for (const line of near.lines) line.classList.add("near");
-      for (const id of near.ids) nodeEls.get(id)?.el.classList.add("near");
-    };
-    const leave = () => {
-      svg.classList.remove("focusing");
-      for (const el of svg.querySelectorAll(".near")) el.classList.remove("near");
-    };
-    node.addEventListener("pointerenter", bring);
-    node.addEventListener("pointerleave", leave);
-    node.addEventListener("focus", bring);
+    node.addEventListener("pointerenter", () => bring((pointed = n.id)));
+    node.addEventListener("pointerleave", () => {
+      pointed = null;
+      leave();
+    });
+    node.addEventListener("focus", () => bring(n.id));
     node.addEventListener("blur", leave);
+  }
+  /** The concept brought forward, if any. */
+  let focused: string | null = null;
+  /** The concept under the pointer, if any. */
+  let pointed: string | null = null;
+  const nearOf = (id: string) => touching.get(id) ?? { lines: [], ids: new Set([id]) };
+  const clearNear = () => {
+    for (const el of svg.querySelectorAll(".near")) el.classList.remove("near");
+  };
+  function bring(id: string): void {
+    // A click fires pointerenter and then focus for the same concept: place its neighbours once.
+    if (id === focused) return;
+    clearNear();
+    // The concept brought forward before may have had other neighbours, whose names were placed again around it.
+    if (focused !== null) showLabels(placed);
+    focused = id;
+    const near = nearOf(id);
+    svg.classList.add("focusing");
+    for (const line of near.lines) line.classList.add("near");
+    for (const other of near.ids) nodeEls.get(other)?.el.classList.add("near");
+    placeNear(id, near.ids);
+  }
+  /** Brings forward the concept under the pointer, else the one the keyboard is on, else none. */
+  function leave(): void {
+    const active = document.activeElement;
+    // Only focus moved with the keyboard counts: a concept focused by a click lets go when the pointer leaves it.
+    const keyboard =
+      active && svg.contains(active) && active.matches(":focus-visible")
+        ? active.closest("[data-hb=graph-node]")?.getAttribute("data-id")
+        : null;
+    const kept = pointed ?? keyboard;
+    if (kept) return bring(kept);
+    focused = null;
+    svg.classList.remove("focusing");
+    clearNear();
+    showLabels(placed);
   }
 
   const segments = edgeSegments(g.nodes, g.edges);
@@ -281,32 +315,77 @@ export function graphView(deps: GraphViewDeps): HTMLElement {
     const ctm = (svg as SVGGraphicsElement).getScreenCTM?.();
     return ctm && ctm.a > 0 ? 1 / ctm.a : Math.max(view.w / (width || view.w), view.h / (height || view.h));
   };
-  /** Places the labels again for the size they are now drawn at: zoomed out, fewer fit; zoomed in, all of them. */
-  let shownScale = NaN;
-  const placeAll = () => {
-    const scale = unitsPerPixel();
-    svg.style.setProperty("--u", String(scale));
-    if (Math.abs(scale - shownScale) < 0.02) return;
-    shownScale = scale;
-    const grow = Math.min(Math.max(scale, 1), 1.6);
-    for (const n of g.nodes) radius.set(n.id, n.r * grow);
-    for (const l of lines) trim(l);
-    // Labels are placed around the circles as drawn; the layout's own radii stay as they were.
-    const drawn = g.nodes.map((n) => ({ ...n, r: radius.get(n.id)! }));
-    placeLabels(drawn, { x0: 0, y0: 0, x1: g.width, y1: g.height }, scale, segments);
-    for (const n of drawn) {
-      const { text, circle } = nodeEls.get(n.id)!;
-      circle.setAttribute("r", String(n.r));
+  const frame = { x0: 0, y0: 0, x1: g.width, y1: g.height };
+  /** Draws labels where they were placed; a label with no free place is left for hover. */
+  const showLabels = (nodes: readonly GraphNode[]) => {
+    for (const n of nodes) {
+      const { text } = nodeEls.get(n.id)!;
       text.setAttribute("x", String(n.labelX));
       text.setAttribute("y", String(n.labelY));
       text.setAttribute("text-anchor", n.labelAnchor);
       text.classList.toggle("crowded", !n.labelShown);
     }
   };
+  /** The labels as placed for the whole map at the size it is drawn at. */
+  let placed: GraphNode[] = g.nodes;
+  /**
+   * Pointing at a concept places the labels of it and its neighbours again among themselves, so the names that were
+   * crowded out can be read without landing on each other. The concept pointed at goes first; every one of the names is
+   * shown, since reading them is why the concept was pointed at, and they keep off the faded circles where they can. They
+   * keep to the part of the map in view where they can, so a name is not drawn past the edge of the window.
+   */
+  const placeNear = (id: string, ids: ReadonlySet<string>) => {
+    const near = placed.filter((p) => ids.has(p.id)).map((p) => (p.id === id ? { ...p, studied: true, degree: Infinity } : { ...p }));
+    const others = placed.filter((p) => !ids.has(p.id));
+    placeLabels(near, inView(), shownScale || 1, edgeSegments(near, g.edges), { others, always: true });
+    showLabels(near);
+  };
+  /** The part of the map shown in the window, which is all of it before the map is on the page. */
+  const inView = () => {
+    const box = svg.getBoundingClientRect();
+    if (!(box.width > 0 && box.height > 0)) return frame;
+    // The part of the map in the window: the page may be scrolled so that some of the map is out of sight.
+    const a = toMap(Math.max(box.left, 0), Math.max(box.top, 0));
+    const b = toMap(Math.min(box.right, window.innerWidth), Math.min(box.bottom, window.innerHeight));
+    const shown = { x0: Math.max(frame.x0, a.x), y0: Math.max(frame.y0, a.y), x1: Math.min(frame.x1, b.x), y1: Math.min(frame.y1, b.y) };
+    return shown.x1 > shown.x0 && shown.y1 > shown.y0 ? shown : frame;
+  };
+  /** Lines and arrowheads keep their size on screen at any zoom. */
+  const sizeStrokes = (scale: number) => {
+    svg.style.setProperty("--u", String(scale));
+    for (const m of markers) {
+      m.setAttribute("markerWidth", String(ARROW * scale));
+      m.setAttribute("markerHeight", String(ARROW * scale));
+    }
+  };
+  /** Places the labels again for the size they are now drawn at: zoomed out, fewer fit; zoomed in, all of them. */
+  let shownScale = NaN;
+  const placeAll = () => {
+    const scale = unitsPerPixel();
+    sizeStrokes(scale);
+    if (Math.abs(scale - shownScale) < 0.02) {
+      // Too small a zoom to place every label again, but the part in view moved: the names brought out keep inside it.
+      if (focused !== null) placeNear(focused, nearOf(focused).ids);
+      return;
+    }
+    shownScale = scale;
+    const grow = Math.min(Math.max(scale, 1), 1.6);
+    for (const n of g.nodes) radius.set(n.id, n.r * grow);
+    for (const l of lines) trim(l);
+    // Labels are placed around the circles as drawn; the layout's own radii stay as they were.
+    const drawn = g.nodes.map((n) => ({ ...n, r: radius.get(n.id)! }));
+    placeLabels(drawn, frame, scale, segments);
+    for (const n of drawn) nodeEls.get(n.id)!.circle.setAttribute("r", String(n.r));
+    placed = drawn;
+    showLabels(drawn);
+    // Zoomed while a concept is pointed at: its neighbours' names are placed again for the new size.
+    if (focused !== null) placeNear(focused, nearOf(focused).ids);
+  };
   let placing = 0;
   const apply = () => {
     svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
-    svg.style.setProperty("--u", String(unitsPerPixel()));
+    // Set with the view, not a frame later, so lines and arrowheads do not lag behind the zoom.
+    sizeStrokes(unitsPerPixel());
     cancelAnimationFrame(placing);
     placing = requestAnimationFrame(placeAll);
   };
@@ -357,8 +436,11 @@ export function graphView(deps: GraphViewDeps): HTMLElement {
     svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
   });
   const end = () => {
+    if (!drag) return;
     drag = null;
     svg.classList.remove("dragging");
+    // Moved while a concept is brought forward: its neighbours' names are placed again for the part now in view.
+    if (focused !== null) placeNear(focused, nearOf(focused).ids);
   };
   svg.addEventListener("pointerup", end);
   svg.addEventListener("pointercancel", end);
@@ -397,34 +479,39 @@ export function graphView(deps: GraphViewDeps): HTMLElement {
       "div",
       { className: "graph-wrap" },
       svg,
-      controls,
       h(
         "div",
-        { className: "legend", "data-hb": "graph-legend" },
+        { className: "graph-foot" },
         h(
           "div",
-          { className: "legend-row" },
-          key(lineSwatch("prerequisite"), L("前置概念", "Prerequisite")),
-          key(lineSwatch("variant_of"), L("变体", "Variant")),
-          key(lineSwatch("related"), L("相关", "Related")),
-        ),
-        h(
-          "div",
-          { className: "legend-row" },
-          key(swatch("understood"), L("已理解", "Understood")),
-          key(swatch("shaky"), L("不太牢", "Shaky")),
-          key(swatch("confused"), L("仍困惑", "Confused")),
-          key(swatch("new"), L("新", "New")),
-          key(swatch("unstudied"), L("还没解释过", "Not explained yet")),
-        ),
-        h(
-          "div",
-          { className: "legend-hint" },
-          L(
-            "拖动移动，滚轮缩放；指向一个概念会突出它的关系。",
-            "Drag to move, scroll to zoom; point at a concept to bring out its relations.",
+          { className: "legend", "data-hb": "graph-legend" },
+          h(
+            "div",
+            { className: "legend-row" },
+            key(lineSwatch("prerequisite"), L("前置概念", "Prerequisite")),
+            key(lineSwatch("variant_of"), L("变体", "Variant")),
+            key(lineSwatch("related"), L("相关", "Related")),
+          ),
+          h(
+            "div",
+            { className: "legend-row" },
+            key(swatch("understood"), L("已理解", "Understood")),
+            key(swatch("shaky"), L("不太牢", "Shaky")),
+            key(swatch("confused"), L("仍困惑", "Confused")),
+            key(swatch("new"), L("新", "New")),
+            key(swatch("unstudied"), L("还没解释过", "Not explained yet")),
+          ),
+          h(
+            "div",
+            { className: "legend-hint" },
+            L(
+              "拖动移动，滚轮缩放；指向一个概念会突出它的关系。",
+              "Drag to move, scroll to zoom; point at a concept to bring out its relations.",
+            ),
           ),
         ),
+        // Below the map rather than over it, so the buttons never cover a concept or its name.
+        controls,
       ),
     ),
   );

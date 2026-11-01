@@ -330,8 +330,10 @@ export const pages_de: Readonly<Record<string, string>> = {
   Revisited: "Wieder begegnet",
   "Active days": "Aktive Tage",
   "Terms you met": "Begriffe, denen Sie begegnet sind",
+  "and {n} more": "und {n} weitere",
+  "{n} used": "{n} genutzt",
   "Where you read": "Wo Sie gelesen haben",
-  "{n} look-ups": "{n}-mal nachgeschlagen",
+  "{n#one=# look-up|other=# look-ups}": "{n}-mal nachgeschlagen",
   "New connections": "Neue Verbindungen",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "Ein neuer Begriff ist einen Tag nach dem Nachschlagen fällig; danach wird die nächste Wiederholung auf den Zeitpunkt gelegt, an dem Sie ihn zu vergessen drohen, je nachdem, wie jede Antwort ausfiel.",

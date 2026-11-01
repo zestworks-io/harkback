@@ -324,8 +324,10 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Revisited: "再び出会った用語",
   "Active days": "アクティブな日数",
   "Terms you met": "今週出会った用語",
+  "and {n} more": "ほか {n} 件",
+  "{n} used": "{n} 件を活用",
   "Where you read": "読んだ場所",
-  "{n} look-ups": "調べもの {n} 件",
+  "{n#one=# look-up|other=# look-ups}": "調べもの {n} 件",
   "New connections": "新しいつながり",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "新しい用語は調べた翌日に復習の対象になります。その後は、各回の答えに応じて、忘れかけるころに次の復習が設定されます。",

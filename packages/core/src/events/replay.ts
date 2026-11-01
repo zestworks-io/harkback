@@ -38,6 +38,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
   const later: EventOf<"encounter.noted" | "encounter.explained">[] = [];
   const mutes: (EventOf<"concept.muted"> | EventOf<"concept.unmuted">)[] = [];
   const dismissals: EventOf<"reunion.dismissed">[] = [];
+  const shownReunions: EventOf<"reunion.shown">[] = [];
   const consents: State["consents"] = [];
   const proposals: EventOf<"edge.proposed">[] = [];
   const statuses: [EventOf<"edge.confirmed"> | EventOf<"edge.rejected">, number][] = [];
@@ -88,6 +89,9 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
         break;
       case "reunion.dismissed":
         dismissals.push(e);
+        break;
+      case "reunion.shown":
+        shownReunions.push(e);
         break;
       case "edge.proposed":
         proposals.push(e);
@@ -183,6 +187,12 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     else if (!list.includes(d.payload.source_id)) list.push(d.payload.source_id);
   }
 
+  const reunionsShown: State["reunionsShown"] = [];
+  for (const r of shownReunions) {
+    const rep = representative.get(r.payload.concept_id);
+    if (rep) reunionsShown.push({ conceptId: rep, sourceId: r.payload.source_id, at: Date.parse(r.ts) });
+  }
+
   const edges = new Map<string, EdgeState>();
   /** Old edge id -> the new one and where its encounter moved, for relations whose explained concept moved with it. */
   const movedEdges = new Map<string, { id: string; at: number }>();
@@ -247,6 +257,7 @@ export function replay(events: readonly HarkEvent[], options: ReplayOptions = {}
     sourceIdentity: resolveSourceIdentity(sorted),
     edges,
     dismissed,
+    reunionsShown,
     consents,
     warnings,
   };

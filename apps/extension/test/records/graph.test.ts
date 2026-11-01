@@ -105,6 +105,34 @@ const node = (id: string, name: string, degree: number, studied = true) => ({
 });
 
 describe("layoutGraph", () => {
+  it("curls a long chain of relations up instead of drawing it as one straight line", () => {
+    const n = 40;
+    const g = layoutGraph({
+      nodes: Array.from({ length: n }, (_, i) => ({
+        id: `c${i}`,
+        name: `C${i}`,
+        studied: true,
+        explained: true,
+        understanding: "new" as const,
+        degree: i === 0 || i === n - 1 ? 1 : 2,
+      })),
+      edges: Array.from({ length: n - 1 }, (_, i) => ({ id: `e${i}`, from: `c${i}`, to: `c${i + 1}`, rel: "prerequisite" as const })),
+    });
+    const span = (k: "x" | "y") => Math.max(...g.nodes.map((p) => p[k])) - Math.min(...g.nodes.map((p) => p[k]));
+    expect(Math.min(span("x"), span("y")) / Math.max(span("x"), span("y"))).toBeGreaterThan(0.4);
+  });
+
+  it("draws a pair and a short chain of relations level", () => {
+    for (const n of [2, 4]) {
+      const g = layoutGraph({
+        nodes: Array.from({ length: n }, (_, i) => node(`c${i}`, `C${i}`, i === 0 || i === n - 1 ? 1 : 2)),
+        edges: Array.from({ length: n - 1 }, (_, i) => ({ id: `e${i}`, from: `c${i}`, to: `c${i + 1}`, rel: "related" as const })),
+      });
+      const ys = g.nodes.map((p) => p.y);
+      expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(1);
+    }
+  });
+
   it("is deterministic, finite and inside the frame", () => {
     const { w } = build();
     const a = buildGraph(w.state(), { width: 800, height: 500 });
@@ -216,6 +244,50 @@ describe("layoutGraph", () => {
     };
     expect(shownAt(2.5)).toBeLessThan(shownAt(1));
     expect(shownAt(0.5)).toBeGreaterThanOrEqual(shownAt(1));
+  });
+
+  it("shows every label when asked to, and keeps labels off the circles behind where it can", () => {
+    const placed = (label: string, x: number) => ({
+      ...node(label, label, 1),
+      x,
+      y: 50,
+      r: 6,
+      label,
+      labelX: 0,
+      labelY: 0,
+      labelAnchor: "middle" as const,
+      labelShown: false,
+    });
+    // A frame with room only beside the circles, and three circles in a row: the middle one has no free place.
+    const frame = { x0: 0, y0: 30, x1: 400, y1: 70 };
+    const crowded = () => [placed("first", 160), placed("middle", 200), placed("last", 240)];
+    const usual = crowded();
+    placeLabels(usual, frame);
+    expect(usual.filter((n) => n.labelShown).map((n) => n.id)).toEqual(["first", "last"]);
+    const always = crowded();
+    placeLabels(always, frame, 1, [], { always: true });
+    expect(always.every((n) => n.labelShown)).toBe(true);
+    // A faded circle right above a lone concept: its name goes elsewhere rather than over it.
+    const lone = [placed("x", 100)];
+    placeLabels(lone, { x0: 0, y0: 0, x1: 200, y1: 100 }, 1, [], { others: [{ x: 100, y: 30, r: 8 }] });
+    expect(lone[0]!.labelShown).toBe(true);
+    expect(lone[0]!.labelY).toBeGreaterThan(50);
+    // At the right edge of the part in view, with faded circles above and below: shown on the left, not past the edge.
+    const fenced = {
+      others: [
+        { x: 190, y: 30, r: 8 },
+        { x: 190, y: 70, r: 8 },
+      ],
+      always: true,
+    };
+    const edge = [placed("x", 190)];
+    placeLabels(edge, { x0: 0, y0: 0, x1: 200, y1: 100 }, 1, [], fenced);
+    expect(edge[0]!.labelAnchor).toBe("end");
+    expect(edge[0]!.labelX).toBeLessThan(190);
+    // The same concept with room to its right takes the right.
+    const open = [placed("x", 190)];
+    placeLabels(open, { x0: 0, y0: 0, x1: 400, y1: 100 }, 1, [], fenced);
+    expect(open[0]!.labelAnchor).toBe("start");
   });
 
   it("tells whether a line passes through a box", () => {

@@ -34,6 +34,13 @@ describe("parseEvent", () => {
     expect(r.kind).toBe("future");
   });
 
+  it("keeps an event of a type it does not know as future, even in the same envelope version", () => {
+    expect(parseEvent({ ...base, type: "something.new", payload: { anything: 1 } }).kind).toBe("future");
+    // A known type with a bad payload is still invalid, and an event with no type at all.
+    expect(parseEvent({ ...base, type: "concept.created", payload: {} }).kind).toBe("invalid");
+    expect(parseEvent({ ...base, payload: {} }).kind).toBe("invalid");
+  });
+
   it("accepts a compacted encounter.created with null payload", () => {
     const r = parseEvent({ ...base, type: "encounter.created", payload: null });
     expect(r.kind).toBe("event");

@@ -322,8 +322,10 @@ export const pages_ar: Readonly<Record<string, string>> = {
   Revisited: "مصطلحات عدتَ إليها",
   "Active days": "أيام النشاط",
   "Terms you met": "المصطلحات التي صادفتها",
+  "and {n} more": "{n#one=ومصطلح آخر|two=ومصطلحان آخران|few=و# مصطلحات أخرى|many=و# مصطلحًا آخر|other=و# مصطلح آخر}",
+  "{n} used": "المستخدَم: {n}",
   "Where you read": "أين قرأتَ",
-  "{n} look-ups": "{n#one=عملية بحث واحدة|two=عمليتا بحث|few=# عمليات بحث|many=# عملية بحث|other=# عملية بحث}",
+  "{n#one=# look-up|other=# look-ups}": "{n#one=عملية بحث واحدة|two=عمليتا بحث|few=# عمليات بحث|many=# عملية بحث|other=# عملية بحث}",
   "New connections": "روابط جديدة",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "يحين موعد المصطلح الجديد بعد يوم من البحث عنه؛ وبعد ذلك يُضبط موعد المراجعة التالية على الوقت الذي توشك فيه أن تنساه، بحسب نتيجة كل إجابة.",

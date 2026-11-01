@@ -86,6 +86,8 @@ export const encounterActionPayload = z.object({
 });
 
 export const reunionDismissedPayload = z.object({ concept_id: ulidSchema, source_id: sourceIdSchema });
+/** A reunion was offered on a source (underlined), recorded at most once a day for each concept and source. */
+export const reunionShownPayload = z.object({ concept_id: ulidSchema, source_id: sourceIdSchema });
 
 export const encounterDeletedPayload = z.object({ encounter_id: ulidSchema });
 /** The reader's own note on an encounter, such as the comment on a highlight imported from Zotero; empty text removes it. */
@@ -146,6 +148,8 @@ export const eventSchema = z.discriminatedUnion("type", [
   ev("encounter.noted", encounterNotedPayload.nullable()),
   ev("encounter.explained", encounterExplainedPayload.nullable()),
   ev("reunion.dismissed", reunionDismissedPayload),
+  // Only a record of what was offered: it touches nothing, so it never moves when the next reunion is due.
+  ev("reunion.shown", reunionShownPayload),
   ev("edge.proposed", edgeProposedPayload),
   ev("edge.confirmed", edgeStatusPayload),
   ev("edge.rejected", edgeStatusPayload),

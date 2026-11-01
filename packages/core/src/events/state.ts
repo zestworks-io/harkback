@@ -111,6 +111,8 @@ export interface State {
   edges: Map<string, EdgeState>;
   /** Representative concept id -> ids of the sources where the reader said the term means something else. */
   dismissed: Map<string, string[]>;
+  /** Reunions offered, oldest first, under the representative concept: a record only, which touches nothing. */
+  reunionsShown: { conceptId: string; sourceId: string; at: number }[];
   /** What the reader agreed to contribute to the data commons, oldest first. */
   consents: { scope: ConsentScope; target: string | null; at: number }[];
   warnings: string[];

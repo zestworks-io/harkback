@@ -95,6 +95,8 @@ export class ContentApp {
    * is asked about as a whole.
    */
   private readonly reunions = new Map<string, { key: string; card: ReunionCard }[]>();
+  /** Reunions already reported as shown, by day, page and concept: a caption shows the same ones again and again. */
+  private readonly reported = new Set<string>();
   /** Concepts the reader has answered for on this video; not shown again on it. */
   private readonly answered = new Set<string>();
   /** What the reader chose about pages that looked private, by source, for as long as this page lives. */
@@ -285,6 +287,27 @@ export class ContentApp {
     if (entries.length === 0) return;
     this.layer ??= new ReunionLayer(this.ensureOverlay(), this.lang, (card, action, range) => this.onReunionAction(card, action, range));
     this.layer.show(entries);
+    this.reportShown(
+      sourceId,
+      entries.map((e) => e.card),
+    );
+  }
+
+  /** Records which reunions were offered, so the digest can say how often they happen. */
+  private reportShown(sourceId: string, cards: readonly ReunionCard[]): void {
+    const day = new Date().toDateString();
+    const keyOf = (id: string) => `${day}\u0000${sourceId}\u0000${id}`;
+    const fresh = [...new Set(cards.map((c) => c.conceptId))].filter((id) => !this.reported.has(keyOf(id)));
+    if (fresh.length === 0) return;
+    for (const id of fresh) this.reported.add(keyOf(id));
+    // Not recorded (the background was restarting): forget them, so the next scan of the page tries again.
+    const retry = () => {
+      for (const id of fresh) this.reported.delete(keyOf(id));
+    };
+    this.rpc
+      .request({ type: "reunions-shown", conceptIds: fresh, sourceId })
+      .then((r) => r.ok || retry())
+      .catch(retry);
   }
 
   /** The caption has held still: read it again. */

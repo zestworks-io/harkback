@@ -1,4 +1,5 @@
 import { exportMarkdown, formatTimestamp, parseJsonl, replay, withoutSensitive, type State } from "@harkback/core";
+import type { HarkEvent } from "@harkback/spec";
 import { browser } from "wxt/browser";
 import { ankiTsv } from "../../lib/export/anki";
 import { h } from "../../lib/ui/dom";
@@ -49,6 +50,9 @@ async function main(): Promise<void> {
   let state: State = replay(initial);
   /** How many events the page last read on its own: a refresh with no new ones leaves the page as it is. */
   let readCount = initial.length;
+  /** Reunions offered are only counted, in the digest: recording one on another tab leaves every other view as it is. */
+  const countsOnly = (e: HarkEvent): boolean => e.type === "reunion.shown";
+  let shapingCount = initial.filter((e) => !countsOnly(e)).length;
 
   const root = document.getElementById("app")!;
   const list = h("div", { "data-hb": "history" });
@@ -711,6 +715,8 @@ async function main(): Promise<void> {
         : historyModel(state, search.value).flatMap((c) => c.entries.map((e) => e.encounterId));
     queueMicrotask(renderBar);
     toolbar.hidden = !onList() && location.hash !== "#graph" && location.hash !== "#digest";
+    // The map takes the width of a wide window; the other pages keep a column that reads well.
+    document.body.classList.toggle("graph-page", location.hash === "#graph");
     for (const el of toolbar.querySelectorAll<HTMLElement>("[data-list-only]")) el.hidden = !onList();
     reviewLink.textContent = L("复习 ({n})", "Review ({n})", { n: review.dueCount() });
     if (location.hash === "#review") {
@@ -790,6 +796,10 @@ async function main(): Promise<void> {
     if (events.length === readCount) return;
     readCount = events.length;
     state = replay(events);
+    const shaping = events.filter((e) => !countsOnly(e)).length;
+    const onlyCounts = shaping === shapingCount;
+    shapingCount = shaping;
+    if (onlyCounts && location.hash !== "#digest") return;
     draw();
   }, 1000);
   const refreshQuietly = (): void => void refresh().catch(() => undefined);

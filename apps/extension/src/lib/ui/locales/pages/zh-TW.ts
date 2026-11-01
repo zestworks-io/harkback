@@ -316,8 +316,10 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Revisited: "重溫的術語",
   "Active days": "活躍天數",
   "Terms you met": "本週遇到的術語",
+  "and {n} more": "還有 {n} 個",
+  "{n} used": "用上了 {n} 個",
   "Where you read": "閱讀來源",
-  "{n} look-ups": "{n} 次查詢",
+  "{n#one=# look-up|other=# look-ups}": "{n} 次查詢",
   "New connections": "新的關係",
   "A new term is due a day after you look it up; after that the next review is set for when you are about to forget it, based on how each answer went.":
     "新術語在查詢一天後到期；之後根據你每次的評分，在你快要忘記時安排下一次複習。",
