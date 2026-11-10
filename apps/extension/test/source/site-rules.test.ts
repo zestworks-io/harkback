@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveRule, mergeSiteRules, onPrivateByDefaultSite, sensitiveStated } from "../../src/lib/source/site-rules";
+import { effectiveRule, mergeSiteRules, onPrivateByDefaultSite, sensitiveStated, withAutoScan } from "../../src/lib/source/site-rules";
 import type { SiteRule } from "../../src/lib/storage/settings";
 
 describe("a host name written with a trailing dot", () => {
@@ -44,6 +44,27 @@ describe("merging the site rules a settings page saves with those saved elsewher
   it("matches rules by site, however the pattern is written", () => {
     expect(mergeSiteRules([], [{ pattern: "*.Example.com" }], [{ pattern: "example.com", sensitive: true }])).toEqual([
       { pattern: "*.Example.com", sensitive: true },
+    ]);
+  });
+});
+
+describe("turning a site on", () => {
+  it("adds the switch to the site's own rule and keeps its other settings and the other rules", () => {
+    const rules: SiteRule[] = [
+      { pattern: "example.com", sensitive: true },
+      { pattern: "https://example.com/docs", autoScan: false },
+    ];
+    expect(withAutoScan(rules, "example.com")).toEqual([
+      { pattern: "example.com", sensitive: true, autoScan: true },
+      { pattern: "https://example.com/docs", autoScan: false },
+    ]);
+    expect(rules[0]).toEqual({ pattern: "example.com", sensitive: true });
+  });
+
+  it("adds a rule for a site that has none, even when a broader rule covers it", () => {
+    expect(withAutoScan([{ pattern: "github.io", disabled: false }], "me.github.io")).toEqual([
+      { pattern: "github.io", disabled: false },
+      { pattern: "me.github.io", autoScan: true },
     ]);
   });
 });

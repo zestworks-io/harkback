@@ -115,6 +115,19 @@ export function hostPermissionPatterns(pattern: string): string[] {
   return [`*://${p}/*`, `*://*.${p}/*`];
 }
 
+/** `raw` as the name of a whole site ("example.com"), as the site-access window takes it; null for a URL prefix or anything else. */
+export function siteName(raw: unknown): string | null {
+  const p = typeof raw === "string" ? normalizePattern(raw) : null;
+  return p && !isPrefix(p) ? p : null;
+}
+
+/** The rules with `site` (a domain) scanned automatically: its own rule gains the switch, or a new rule is added for it. */
+export function withAutoScan(rules: readonly SiteRule[], site: string): SiteRule[] {
+  return rules.some((r) => normalizePattern(r.pattern) === site)
+    ? rules.map((r) => (normalizePattern(r.pattern) === site ? { ...r, autoScan: true } : r))
+    : [...rules, { pattern: site, autoScan: true }];
+}
+
 export function originPattern(url: string): string | null {
   try {
     const u = new URL(url);

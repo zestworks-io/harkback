@@ -10,6 +10,7 @@ const info: PageInfo = {
   enabled: true,
   autoScan: false,
   scan: true,
+  underlines: null,
   incognito: false,
   language: "en",
   strings: {},

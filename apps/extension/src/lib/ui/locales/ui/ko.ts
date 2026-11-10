@@ -82,5 +82,8 @@ export const ui_ko: Readonly<Record<StringKey, string>> = {
   previewGenerated: "모델이 작성함 · 기록되지 않음",
   previewLocal: "페이지 텍스트는 이 컴퓨터 밖으로 나가지 않습니다(로컬 모델 {model}).",
   previewRemote: "페이지 텍스트가 원격 모델 {model}(으)로 전송됩니다.",
+  siteHintsOn: "이 사이트의 재회 힌트: 켜짐",
+  siteHintsOff: "이 사이트의 재회 힌트: 꺼짐",
+  siteTurnOn: "켜기",
   previewCovered: "전체 {total}자 중 앞부분 {n}자만 스캔했으므로 페이지 뒤쪽의 용어는 빠져 있습니다.",
 };

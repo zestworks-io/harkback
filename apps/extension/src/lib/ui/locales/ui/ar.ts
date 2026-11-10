@@ -82,6 +82,9 @@ export const ui_ar: Readonly<Record<StringKey, string>> = {
   previewGenerated: "كتبه النموذج ولم يُسجَّل",
   previewLocal: "يبقى نص الصفحة على هذا الحاسوب: النموذج المحلي {model}.",
   previewRemote: "سيُرسَل نص الصفحة إلى النموذج البعيد {model}.",
+  siteHintsOn: "تلميحات اللقاء في هذا الموقع: مفعّلة",
+  siteHintsOff: "تلميحات اللقاء في هذا الموقع: متوقفة",
+  siteTurnOn: "تفعيل",
   previewCovered:
     "لم يُفحص سوى أول {n#one=حرف واحد|two=حرفين|few=# أحرف|many=# حرفًا|other=# حرف} من أصل {total}، لذا فالمصطلحات الواردة لاحقًا في الصفحة غير مشمولة.",
 };

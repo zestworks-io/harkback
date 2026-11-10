@@ -40,6 +40,12 @@ export interface PageInfo {
   autoScan: boolean;
   /** Reunions may be shown (enabled and not in a private window). */
   scan: boolean;
+  /**
+   * Whether reunion hints appear on this site by themselves, without a click: on for arXiv and for an auto-scanned site the
+   * browser gave access to. Null where the question does not arise: a private window, a disabled site, a page that is not a
+   * web page.
+   */
+  underlines: "on" | "off" | null;
   incognito: boolean;
   language: Lang;
   /** The explain card and reunion text for `language`, when it is not Chinese or English. */
@@ -74,6 +80,10 @@ export type Request =
   | ({ type: "source-status"; sourceId: string } & PrivacyFields)
   /** Makes the choice for the whole site this message came from, as a site rule. */
   | { type: "remember-site"; sensitive: boolean }
+  /** From a page: open the window that asks to show reunion hints on its site by themselves. */
+  | { type: "open-site-access" }
+  /** From that window, once the browser gave access: scan `site` automatically and tell its open pages. */
+  | { type: "enable-site"; site: string }
   | { type: "import-events"; events: HarkEvent[] }
   | { type: "import-zotero"; terms: ZoteroTerm[] }
   | { type: "explain-imported"; encounterId: string }
@@ -107,6 +117,8 @@ export interface ResponseMap {
   /** `byRule`: a site rule makes the page sensitive, which the reader cannot undo from the page. */
   "source-status": { status: Gate; byRule?: true };
   "remember-site": { ok: boolean };
+  "open-site-access": { ok: boolean };
+  "enable-site": { ok: boolean };
   "import-events": { ok: boolean; added?: number };
   /** `added`: how many highlights were recorded. */
   "import-zotero": { ok: boolean; added?: number };
@@ -140,7 +152,7 @@ export interface ResponseMap {
 }
 
 /** Background → content script, via tabs.sendMessage. */
-export type TabMessage = { type: "hello" } | { type: "preview" } | { type: "explain-selection" };
+export type TabMessage = { type: "hello" } | { type: "preview" } | { type: "explain-selection" } | { type: "site-access" };
 
 const REQUEST_TYPES = new Set<string>([
   "page-info",
@@ -154,6 +166,8 @@ const REQUEST_TYPES = new Set<string>([
   "choose-normal",
   "source-status",
   "remember-site",
+  "open-site-access",
+  "enable-site",
   "import-events",
   "import-zotero",
   "explain-imported",

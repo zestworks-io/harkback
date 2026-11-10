@@ -55,6 +55,8 @@ export default defineConfig({
             "http://127.0.0.1/*",
             "*://blog.example.com/*",
             "*://*.blog.example.com/*",
+            "*://example.github.io/*",
+            "*://*.example.github.io/*",
             "*://youtube.com/*",
             "*://*.youtube.com/*",
             "*://github.com/*",

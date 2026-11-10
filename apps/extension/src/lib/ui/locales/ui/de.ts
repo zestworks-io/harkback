@@ -86,5 +86,8 @@ export const ui_de: Readonly<Record<StringKey, string>> = {
   previewGenerated: "Vom Modell geschrieben, nicht gespeichert",
   previewLocal: "Der Seitentext bleibt auf diesem Computer: lokales Modell {model}.",
   previewRemote: "Der Seitentext wird an das Remote-Modell {model} gesendet.",
+  siteHintsOn: "Wiedersehens-Hinweise auf dieser Website: an",
+  siteHintsOff: "Wiedersehens-Hinweise auf dieser Website: aus",
+  siteTurnOn: "Einschalten",
   previewCovered: "Nur die ersten {n} von {total} Zeichen wurden gescannt; Begriffe weiter hinten auf der Seite fehlen daher.",
 };

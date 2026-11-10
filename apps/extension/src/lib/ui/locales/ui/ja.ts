@@ -85,5 +85,8 @@ export const ui_ja: Readonly<Record<StringKey, string>> = {
   previewGenerated: "モデルによる生成（記録されません）",
   previewLocal: "ページの文章はこのコンピューターから出ません（ローカルモデル {model}）。",
   previewRemote: "ページの文章はリモートモデル {model} に送られます。",
+  siteHintsOn: "このサイトの再会ヒント：オン",
+  siteHintsOff: "このサイトの再会ヒント：オフ",
+  siteTurnOn: "オンにする",
   previewCovered: "先頭の {n} 文字（全 {total} 文字）だけをスキャンしたため、ページ後半の用語は含まれていません。",
 };

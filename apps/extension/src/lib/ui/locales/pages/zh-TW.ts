@@ -458,4 +458,15 @@ export const pages_zhTW: Readonly<Record<string, string>> = {
   Prerequisite: "前置概念",
   Variant: "變體",
   "Drag to move, scroll to zoom; point at a concept to bring out its relations.": "拖曳移動，滾輪縮放；指向一個概念會突顯它的關係。",
+  "This window was opened without a site.": "這個視窗開啟時沒有指定網站。",
+  Close: "關閉",
+  Allow: "允許",
+  "The browser did not give access, so nothing changed.": "瀏覽器沒有授予存取權限，所以什麼都沒改。",
+  "It could not be saved; please try again.": "沒能儲存，請再試一次。",
+  "Show reunion hints on {site}?": "在 {site} 上顯示重逢提示？",
+  "Terms you have looked up before will be underlined whenever they appear on this site, without clicking Harkback first.":
+    "你查過的術語出現在這個網站上時會直接標出來，不用先點 Harkback 的按鈕。",
+  "Finding them happens on your computer: no page text is sent anywhere unless you press Explain or Scan. Your browser will then ask you to allow Harkback on this site.":
+    "查找這些術語只在你的電腦上進行。除非你按「解釋」或「掃描」，頁面文字不會傳送到任何地方。接下來瀏覽器會請你允許 Harkback 存取這個網站。",
+  "Not now": "以後再說",
 };

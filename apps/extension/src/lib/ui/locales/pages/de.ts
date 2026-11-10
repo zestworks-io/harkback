@@ -475,4 +475,15 @@ export const pages_de: Readonly<Record<string, string>> = {
   Variant: "Variante",
   "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
     "Ziehen zum Verschieben, Scrollen zum Zoomen; auf ein Konzept zeigen hebt seine Beziehungen hervor.",
+  "This window was opened without a site.": "Dieses Fenster wurde ohne Website geöffnet.",
+  Close: "Schließen",
+  Allow: "Erlauben",
+  "The browser did not give access, so nothing changed.": "Der Browser hat keinen Zugriff gewährt, daher hat sich nichts geändert.",
+  "It could not be saved; please try again.": "Speichern hat nicht geklappt; bitte erneut versuchen.",
+  "Show reunion hints on {site}?": "Wiedersehens-Hinweise auf {site} anzeigen?",
+  "Terms you have looked up before will be underlined whenever they appear on this site, without clicking Harkback first.":
+    "Begriffe, die du schon nachgeschlagen hast, werden auf dieser Website unterstrichen, sobald sie vorkommen, ohne dass du erst Harkback anklickst.",
+  "Finding them happens on your computer: no page text is sent anywhere unless you press Explain or Scan. Your browser will then ask you to allow Harkback on this site.":
+    "Das Finden geschieht auf deinem Computer: Kein Seitentext wird gesendet, außer du drückst Erklären oder Scannen. Danach fragt dein Browser, ob Harkback auf dieser Website erlaubt sein soll.",
+  "Not now": "Jetzt nicht",
 };

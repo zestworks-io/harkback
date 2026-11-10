@@ -28,6 +28,7 @@ const GROUPS: { status: PreviewStatus; title: StringKey }[] = [
 export class PreviewPanel {
   readonly el: HTMLElement;
   private readonly body = h("div", { className: "hb-body" });
+  private readonly site = h("div", { className: "hb-site", "data-hb": "site-status", hidden: true });
   private readonly footer = h("div", { className: "hb-footer" });
 
   constructor(
@@ -43,7 +44,7 @@ export class PreviewPanel {
       "div",
       { className: "hb-card hb-preview", "data-hb": "preview", role: "dialog", dir: dirOf(lang), lang: htmlLang(lang) },
       close,
-      h("div", { className: "hb-head" }, h("strong", {}, t(lang, "previewTitle"))),
+      h("div", { className: "hb-head" }, h("strong", {}, t(lang, "previewTitle")), this.site),
       h("div", { className: "hb-scroll" }, this.body),
       h("div", { className: "hb-compose" }, this.footer),
     );
@@ -95,6 +96,26 @@ export class PreviewPanel {
     this.body.replaceChildren(choiceBox(this.lang, (choice, remember) => this.handlers.onChoose(choice, remember)));
     this.footer.replaceChildren(
       h("button", { type: "button", className: "hb-quiet", onclick: () => this.handlers.onClose() }, t(this.lang, "close")),
+    );
+  }
+
+  /** Whether reunion hints appear on this site by themselves, with a way to turn them on; nothing when that does not apply. */
+  siteStatus(status: "on" | "off" | null, onTurnOn: () => void): void {
+    this.site.hidden = status === null;
+    this.site.dataset.status = status ?? "";
+    if (status === null) return void this.site.replaceChildren();
+    this.site.replaceChildren(
+      h("span", {}, t(this.lang, status === "on" ? "siteHintsOn" : "siteHintsOff")),
+      ...(status === "off"
+        ? [
+            " · ",
+            h(
+              "button",
+              { type: "button", className: "hb-link", "data-hb": "site-turn-on", onclick: () => onTurnOn() },
+              t(this.lang, "siteTurnOn"),
+            ),
+          ]
+        : []),
     );
   }
 

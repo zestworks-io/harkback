@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fine-tuning on a laptop | Example Dev Blog</title>
+<meta name="description" content="How we fine-tuned a model on one GPU.">
+</head>
+<body>
+<header><nav><a href="/">Home</a> <a href="/posts/">Posts</a></nav></header>
+<main><article class="post">
+<h1>Fine-tuning on a laptop</h1>
+<p id="p-intro">We wanted to adapt a seven-billion-parameter model to our support tickets without renting a cluster. This post walks through the setup, what it cost, and what we would do differently next time.</p>
+<p>Here is the whole training configuration:</p>
+<pre id="code-config"><code><span class="kn">from</span> <span id="k-peft" class="nn">peft</span> <span class="kn">import</span> get_peft_model
+# CodeOnlyTerm: rank of the LoRA update
+config = make_config(r=8, alpha=16)
+model = get_peft_model(model, config)</code></pre>
+<p id="p-inline">The <code id="i-lora">LoRA</code> adapters add only a few million trainable parameters, so the optimizer state fits next to the frozen weights on one card. Training took about three hours.</p>
+<p id="p-outro">Merging the adapters back into the weights afterwards means serving costs nothing extra.</p>
+</article></main>
+<footer>Example Dev Blog</footer>
+</body>
+</html>

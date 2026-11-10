@@ -81,5 +81,8 @@ export const ui_zhTW: Readonly<Record<StringKey, string>> = {
   previewGenerated: "由模型撰寫，不會記錄",
   previewLocal: "頁面文字會留在這台電腦上：使用本機模型 {model}。",
   previewRemote: "頁面文字會傳送給遠端模型 {model}。",
+  siteHintsOn: "本站重逢提示：已開啟",
+  siteHintsOff: "本站重逢提示：未開啟",
+  siteTurnOn: "開啟",
   previewCovered: "只掃描了前 {n} 個字元（共 {total} 個），頁面後段的術語不在其中。",
 };

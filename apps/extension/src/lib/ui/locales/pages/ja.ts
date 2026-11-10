@@ -468,4 +468,15 @@ export const pages_ja: Readonly<Record<string, string>> = {
   Variant: "バリエーション",
   "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
     "ドラッグで移動、スクロールでズーム。概念を指すとその関係が強調されます。",
+  "This window was opened without a site.": "このウィンドウはサイトの指定なしで開かれました。",
+  Close: "閉じる",
+  Allow: "許可",
+  "The browser did not give access, so nothing changed.": "ブラウザがアクセスを許可しなかったため、何も変更されていません。",
+  "It could not be saved; please try again.": "保存できませんでした。もう一度お試しください。",
+  "Show reunion hints on {site}?": "{site} で再会ヒントを表示しますか？",
+  "Terms you have looked up before will be underlined whenever they appear on this site, without clicking Harkback first.":
+    "以前に調べた用語がこのサイトに出てくると、Harkback をクリックしなくても下線が引かれます。",
+  "Finding them happens on your computer: no page text is sent anywhere unless you press Explain or Scan. Your browser will then ask you to allow Harkback on this site.":
+    "用語の検出はお使いのコンピューター上で行われます。「解説」か「スキャン」を押さない限り、ページの文章はどこにも送信されません。このあとブラウザが、このサイトで Harkback を許可するか尋ねます。",
+  "Not now": "今はしない",
 };

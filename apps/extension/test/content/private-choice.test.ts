@@ -17,6 +17,7 @@ const info = (): PageInfo => ({
   enabled: true,
   autoScan: false,
   scan: true,
+  underlines: null,
   incognito,
   language: "en",
   strings: {},

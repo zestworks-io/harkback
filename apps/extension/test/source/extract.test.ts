@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { contextForRange, extractPage, firstSentence, ownHosts, rangeFor } from "../../src/lib/source/extract";
+import { contextForRange, extractPage, firstSentence, inCodeBlock, ownHosts, proseText, rangeFor } from "../../src/lib/source/extract";
 
 // happy-dom binds every Range to the window's document, so fixtures are loaded into it rather than a parsed copy.
 const load = (name: string): Document => {
@@ -170,5 +170,63 @@ describe("firstSentence", () => {
   it("splits on Latin and CJK sentence ends", () => {
     expect(firstSentence("低秩适配。第二句。")).toBe("低秩适配。");
     expect(firstSentence("No end")).toBe("No end");
+  });
+});
+
+describe("code blocks", () => {
+  it("knows which text is in a code block, and leaves inline code with the prose", () => {
+    const post = extractPage(load("devblog/post.html"), "https://example.github.io/posts/fine-tuning/");
+    const inBlock = post.text.indexOf("CodeOnlyTerm");
+    const inline = post.text.indexOf("LoRA adapters");
+    expect(inBlock).toBeGreaterThan(0);
+    expect(inCodeBlock(post, inBlock)).toBe(true);
+    expect(inCodeBlock(post, inline)).toBe(false);
+    expect(inCodeBlock(post, post.text.indexOf("We wanted"))).toBe(false);
+    expect(inCodeBlock(post, -1)).toBe(false);
+
+    const prose = proseText(post);
+    expect(prose).not.toContain("CodeOnlyTerm");
+    expect(prose).not.toContain("get_peft_model");
+    expect(prose).toContain("The LoRA adapters add only");
+    expect(prose).toContain("Here is the whole training configuration:\nThe LoRA adapters");
+  });
+
+  it("gives the whole text back for a page without code blocks", () => {
+    expect(proseText(page)).toBe(page.text);
+  });
+
+  it("reads a pre of plain text as prose, and the lines of an embedded gist as code", () => {
+    document.documentElement.innerHTML = `<body><main>
+      <p>Intro paragraph about adapters.</p>
+      <pre id="mail">From: someone
+LoRA works well for us.</pre>
+      <div class="gist"><table><tr><td class="blob-code blob-code-inner">config = GistOnlyTerm()</td></tr></table></div>
+    </main></body>`;
+    const mail = extractPage(document, "https://lists.example.org/pipermail/2026/001.html", document.querySelector("main")!);
+    expect(inCodeBlock(mail, mail.text.indexOf("LoRA works"))).toBe(false);
+    expect(inCodeBlock(mail, mail.text.indexOf("GistOnlyTerm"))).toBe(true);
+    expect(proseText(mail)).toContain("LoRA works well");
+    expect(proseText(mail)).not.toContain("GistOnlyTerm");
+  });
+
+  it("reads a highlighted pre without code, as Sphinx and GitHub READMEs write one, as code", () => {
+    document.documentElement.innerHTML = `<body><main>
+      <p>Some prose first.</p>
+      <div class="highlight-python notranslate"><div class="highlight"><pre><span class="n">SphinxOnlyTerm</span> = 1</pre></div></div>
+      <div class="highlight highlight-source-shell"><pre>ReadmeOnlyTerm --help</pre></div>
+      <pre class="language-rust">PrismOnlyTerm</pre>
+      <pre>Plain preformatted prose.</pre>
+    </main></body>`;
+    const docs = extractPage(document, "https://docs.example.org/", document.querySelector("main")!);
+    const prose = proseText(docs);
+    for (const term of ["SphinxOnlyTerm", "ReadmeOnlyTerm", "PrismOnlyTerm"]) expect(prose).not.toContain(term);
+    expect(prose).toContain("Plain preformatted prose.");
+  });
+
+  it("does not count the page itself as code when its text sits inside a code sample", () => {
+    document.documentElement.innerHTML = `<body><pre><code><span id="root">Everything here is the page.</span></code></pre></body>`;
+    const inside = extractPage(document, "https://example.org/", document.getElementById("root")!);
+    expect(inCodeBlock(inside, 0)).toBe(false);
+    expect(proseText(inside)).toBe("Everything here is the page.");
   });
 });

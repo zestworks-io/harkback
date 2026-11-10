@@ -87,3 +87,23 @@ describe("PreviewPanel", () => {
     expect(handlers.onExplain).toHaveBeenCalledOnce();
   });
 });
+
+describe("PreviewPanel site status", () => {
+  it("says whether reunion hints are on for the site, offers to turn them on when off, and hides when it does not apply", () => {
+    const { panel, q } = setup();
+    const turnOn = vi.fn();
+    panel.siteStatus("off", turnOn);
+    expect(q("site-status")!.hidden).toBe(false);
+    expect(q("site-status")!.textContent).toBe("Reunion hints on this site: Off · Turn on");
+    q("site-turn-on")!.click();
+    expect(turnOn).toHaveBeenCalledTimes(1);
+
+    panel.siteStatus("on", turnOn);
+    expect(q("site-status")!.textContent).toBe("Reunion hints on this site: On");
+    expect(q("site-turn-on")).toBeNull();
+
+    panel.siteStatus(null, turnOn);
+    expect(q("site-status")!.hidden).toBe(true);
+    expect(q("site-status")!.textContent).toBe("");
+  });
+});

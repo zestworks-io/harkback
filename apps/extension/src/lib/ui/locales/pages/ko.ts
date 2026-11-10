@@ -465,4 +465,15 @@ export const pages_ko: Readonly<Record<string, string>> = {
   Variant: "변형",
   "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
     "드래그하여 이동하고 스크롤하여 확대/축소합니다. 개념을 가리키면 관계가 강조됩니다.",
+  "This window was opened without a site.": "사이트를 지정하지 않고 이 창이 열렸습니다.",
+  Close: "닫기",
+  Allow: "허용",
+  "The browser did not give access, so nothing changed.": "브라우저가 접근을 허용하지 않아 아무것도 바뀌지 않았습니다.",
+  "It could not be saved; please try again.": "저장하지 못했습니다. 다시 시도해 주세요.",
+  "Show reunion hints on {site}?": "{site}에서 재회 힌트를 표시할까요?",
+  "Terms you have looked up before will be underlined whenever they appear on this site, without clicking Harkback first.":
+    "전에 찾아본 용어가 이 사이트에 나오면 Harkback을 먼저 누르지 않아도 밑줄이 그어집니다.",
+  "Finding them happens on your computer: no page text is sent anywhere unless you press Explain or Scan. Your browser will then ask you to allow Harkback on this site.":
+    "용어 찾기는 내 컴퓨터에서 이루어집니다. '설명'이나 '스캔'을 누르지 않는 한 페이지 텍스트는 어디로도 전송되지 않습니다. 이어서 브라우저가 이 사이트에서 Harkback을 허용할지 묻습니다.",
+  "Not now": "나중에",
 };

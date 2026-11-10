@@ -83,6 +83,9 @@ const zh = {
   previewGenerated: "模型生成，不会记录",
   previewLocal: "页面文字会留在本机，使用本机模型 {model}。",
   previewRemote: "页面文字会发送给远程模型 {model}。",
+  siteHintsOn: "本站重逢提示：已开启",
+  siteHintsOff: "本站重逢提示：未开启",
+  siteTurnOn: "开启",
   previewCovered: "只扫描了页面开头的 {n} 个字符（共 {total} 个），后面的术语不在其中。",
 } as const;
 
@@ -170,6 +173,9 @@ const en: Record<StringKey, string> = {
   previewGenerated: "Written by the model, not recorded",
   previewLocal: "The page text stays on this computer: local model {model}.",
   previewRemote: "The page text will be sent to the remote model {model}.",
+  siteHintsOn: "Reunion hints on this site: On",
+  siteHintsOff: "Reunion hints on this site: Off",
+  siteTurnOn: "Turn on",
   previewCovered: "Only the first {n} of {total} characters were scanned, so terms later in the page are missing.",
 };
 

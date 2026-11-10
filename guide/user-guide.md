@@ -52,7 +52,7 @@ Click the toolbar button, press `Alt+Shift+P`, or choose **Harkback: Preview thi
 | **New to you**     | You have never looked it up (or only saw it named as a prerequisite).           |
 | **Known**          | Understood and not yet due. Collapsed, because it is not what to look at first. |
 
-**Preview** beside a term shows the explanation you were given earlier, with no model call. For a new term the model writes a short explanation. Nothing from a preview is recorded; to keep a term, select it on the page and explain it as usual. The model sees only the page text, never your concept list, and a sensitive page only uses a local model. A scan reads the first 16,000 characters of a page; for a longer page the panel says how much was left out, so terms further down are not listed. In a private window every term counts as new, because your records are not read there.
+**Preview** beside a term shows the explanation you were given earlier, with no model call. For a new term the model writes a short explanation. Nothing from a preview is recorded; to keep a term, select it on the page and explain it as usual. The model sees only the page text, never your concept list, and a sensitive page only uses a local model. Code samples are left out of a scan, so a page full of code does not use up the limit. A scan reads the first 16,000 characters of a page; for a longer page the panel says how much was left out, so terms further down are not listed. In a private window every term counts as new, because your records are not read there.
 
 ## Follow-up questions
 
@@ -61,6 +61,8 @@ Click the toolbar button, press `Alt+Shift+P`, or choose **Harkback: Preview thi
 ## Reunions
 
 When a page contains a term you have looked up before, Harkback underlines the first occurrence. Hover to open the card.
+
+**Where hints appear by themselves.** On arXiv, and on sites you have turned on, hints appear as soon as a page loads. On any other site Harkback runs only after you click it (the toolbar button, the shortcut or the right-click menu), so the hints for a page appear then. The panel the toolbar button opens says which it is, _Reunion hints on this site: On_ or _Off_. With _Off_, **Turn on** opens a page for that site in a tab next to the one you are reading; press **Allow**, then allow access when the browser asks (it asks for the site and its subdomains). The tab then closes and you are back on your page. The site is added under [Site rules](#site-rules) with _Auto-scan_ ticked, the hints appear on the open page at once, and from then on with no click. Finding the terms happens on your computer: no page text is sent anywhere unless you press Explain or Scan. In a private window, on a disabled site, and on pages that are not web pages, the panel says nothing about it.
 
 A reunion is shown only if:
 
@@ -77,6 +79,8 @@ Card buttons: **I remember**, **Explain again** (from another angle), **Compare 
 Each reunion hint shown is recorded, at most once a day for each term on each page, so the [weekly digest](#weekly-digest) can say how often you meet your terms again. Showing a hint is not a look-up: it does not move when the term is next shown or due for review.
 
 Pages that load more text, or a single-page app that moves to another page without reloading, are rescanned on their own.
+
+Code samples (blocks of code set apart from the text) are left alone: a term that appears there is a name in the code, so it is not underlined, and the first place it appears in the text around the code is used instead. Code written inline in a sentence is part of the text and is underlined as usual. You can still select a name in a code sample and explain it.
 
 ## Concepts and spellings
 

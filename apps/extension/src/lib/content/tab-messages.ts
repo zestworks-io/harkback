@@ -13,6 +13,7 @@ export function listenForTabMessages(app: ContentApp): void {
       void app.activate().catch(() => undefined);
       void app.offerPreview().catch(() => undefined);
     } else if (m?.type === "explain-selection") void app.explainSelection();
+    else if (m?.type === "site-access") void app.siteAccessChanged().catch(() => undefined);
     return false;
   });
 }

@@ -85,5 +85,8 @@ export const ui_ptBR: Readonly<Record<StringKey, string>> = {
   previewGenerated: "Escrito pelo modelo, não registrado",
   previewLocal: "O texto da página permanece neste computador: modelo local {model}.",
   previewRemote: "O texto da página será enviado ao modelo remoto {model}.",
+  siteHintsOn: "Avisos de reencontro neste site: ativados",
+  siteHintsOff: "Avisos de reencontro neste site: desativados",
+  siteTurnOn: "Ativar",
   previewCovered: "Apenas os primeiros {n} de {total} caracteres foram analisados, então os termos mais adiante na página não aparecem.",
 };

@@ -18,6 +18,9 @@ function setup(settings: unknown = {}) {
   const written: HarkEvent[] = [];
   const imported: HarkEvent[] = [];
   const calls = { compact: 0, backup: 0, sync: 0 };
+  const granted = new Set<string>();
+  const opened: { site: string; tabId: number | undefined }[] = [];
+  const notified: string[] = [];
   const checked: { conceptId: string; answer: string }[] = [];
   const explained: string[] = [];
   const saved: Settings[] = [];
@@ -53,9 +56,12 @@ function setup(settings: unknown = {}) {
     previewTerms: async () => ({ ok: true as const, terms: [], model: "m", remote: false }),
     previewExplain: async () => ({ ok: true as const, explanation: "x", stored: false }),
     syncContentScripts: async () => void calls.sync++,
+    hasOrigin: async (pattern: string) => granted.has(pattern),
+    openSiteAccess: async (site: string, tabId: number | undefined) => void opened.push({ site, tabId }),
+    notifySiteAccess: async (site: string) => void notified.push(site),
     now: () => NOW + DAY,
   };
-  return { deps, written, imported, calls, checked, explained, saved, previewed, conceptId, encounterId, w };
+  return { deps, written, imported, calls, checked, explained, saved, previewed, conceptId, encounterId, w, granted, opened, notified };
 }
 
 const page = { url: "https://arxiv.org/abs/2", tab: { id: 1, incognito: false } };
@@ -90,6 +96,70 @@ describe("page-info", () => {
     expect(await pageInfo(deps, "https://off.example.com/x", false)).toMatchObject({ enabled: false, scan: false, entries: [] });
     expect(await pageInfo(deps, "https://blog.example.com/x", false)).toMatchObject({ enabled: true, autoScan: true });
     expect(await pageInfo(deps, "https://other.example.com/x", false)).toMatchObject({ enabled: true, autoScan: false });
+  });
+});
+
+describe("reunion hints on a site by themselves", () => {
+  const blog = { url: "https://blog.example.com/posts/1", tab: { id: 7, incognito: false } };
+
+  it("are on for arXiv, and for an auto-scanned site only once the browser gave access", async () => {
+    const { deps, granted } = setup({ sites: [{ pattern: "blog.example.com", autoScan: true }] });
+    expect((await pageInfo(deps, "https://arxiv.org/abs/2", false)).underlines).toBe("on");
+    expect((await pageInfo(deps, "https://blog.example.com/x", false)).underlines).toBe("off");
+    granted.add("https://blog.example.com/*");
+    expect((await pageInfo(deps, "https://blog.example.com/x", false)).underlines).toBe("on");
+    // Access without a rule is not enough: nothing would run there.
+    granted.add("https://other.example.com/*");
+    expect((await pageInfo(deps, "https://other.example.com/x", false)).underlines).toBe("off");
+    // A host written with a trailing dot is the same site.
+    expect((await pageInfo(deps, "https://blog.example.com./x", false)).underlines).toBe("on");
+  });
+
+  it("say nothing in the PDF reader, whose hints do not depend on the PDF's site, and do not open the window from it", async () => {
+    const { deps, opened } = setup();
+    expect((await pageInfo(deps, "https://blog.example.com/paper.pdf", false, true)).underlines).toBeNull();
+    const reader = { url: "https://blog.example.com/paper.pdf", tab: { id: 3 }, reader: true };
+    expect(await handleRequest(deps, { type: "open-site-access" }, reader)).toEqual({ ok: false });
+    expect(opened).toEqual([]);
+  });
+
+  it("say nothing in a private window, on a disabled site, or on a page that is not a web page", async () => {
+    const { deps } = setup({ sites: [{ pattern: "off.example.com", disabled: true }] });
+    expect((await pageInfo(deps, "https://arxiv.org/abs/2", true)).underlines).toBeNull();
+    expect((await pageInfo(deps, "https://off.example.com/x", false)).underlines).toBeNull();
+    expect((await pageInfo(deps, "file:///Users/me/notes.html", false)).underlines).toBeNull();
+  });
+
+  it("open the window for the sender's own site, and refuse a private window, a disabled site or another kind of page", async () => {
+    const { deps, opened } = setup({ sites: [{ pattern: "off.example.com", disabled: true }] });
+    expect(await handleRequest(deps, { type: "open-site-access" }, blog)).toEqual({ ok: true });
+    expect(opened).toEqual([{ site: "blog.example.com", tabId: 7 }]);
+    expect(await handleRequest(deps, { type: "open-site-access" }, { ...blog, tab: { id: 7, incognito: true } })).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "open-site-access" }, { url: "https://off.example.com/a", tab: { id: 8 } })).toEqual({
+      ok: false,
+    });
+    expect(await handleRequest(deps, { type: "open-site-access" }, { url: "file:///x.html", tab: { id: 9 } })).toEqual({ ok: false });
+    expect(opened).toHaveLength(1);
+  });
+
+  it("turn the site on as a rule of its own, keep its other settings, and tell its open pages", async () => {
+    const { deps, saved, calls, notified } = setup({ sites: [{ pattern: "github.com", sensitive: true }] });
+    expect(await handleRequest(deps, { type: "enable-site", site: "github.com" }, {})).toEqual({ ok: true });
+    expect(saved[0]!.sites).toEqual([{ pattern: "github.com", sensitive: true, autoScan: true }]);
+    expect(calls.sync).toBe(1);
+    expect(notified).toEqual(["github.com"]);
+    expect(await handleRequest(deps, { type: "enable-site", site: "Blog.Example.com" }, {})).toEqual({ ok: true });
+    expect(saved[1]!.sites).toContainEqual({ pattern: "blog.example.com", autoScan: true });
+    expect(notified).toEqual(["github.com", "blog.example.com"]);
+  });
+
+  it("refuse a site disabled while the window was open, and anything but a site name", async () => {
+    const { deps, saved } = setup({ sites: [{ pattern: "example.org", disabled: true }] });
+    expect(await handleRequest(deps, { type: "enable-site", site: "example.org" }, {})).toEqual({ ok: false });
+    expect(await handleRequest(deps, { type: "enable-site", site: "docs.example.org" }, {})).toEqual({ ok: false });
+    for (const site of ["https://example.com/docs", "", "not a site", 42 as unknown as string])
+      expect(await handleRequest(deps, { type: "enable-site", site }, {})).toEqual({ ok: false });
+    expect(saved).toEqual([]);
   });
 });
 

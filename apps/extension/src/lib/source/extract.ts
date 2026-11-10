@@ -71,6 +71,8 @@ export interface Block {
   start: number;
   end: number;
   section: string;
+  /** Part of a code sample, not the prose around it. */
+  code?: boolean;
 }
 
 export interface ExtractedPage {
@@ -125,6 +127,23 @@ function blockOf(node: Node, root: Element): Element {
     el = el.parentElement;
   }
   return root;
+}
+
+/**
+ * Whether `el`, below `root`, is in a code sample: a `pre` holding `code` or marked by a highlighter, or the
+ * lines of an embedded gist. A `pre` of plain text (a .txt file, a mailing-list post) is prose. Inline `code` is prose too:
+ * in a sentence it is often the term itself.
+ */
+/** Classes highlighters put on a `pre` or around it when it holds no `code`: Pygments and Sphinx, GitHub, Pandoc, Prism, highlight.js. */
+const HIGHLIGHTED = /(^|\s)(highlight\S*|sourceCode|language-\S+|lang-\S+|hljs|prettyprint|codehilite)(\s|$)/;
+
+function inCodeSample(el: Element, root: Element): boolean {
+  for (let x: Element | null = el; x && x !== root; x = x.parentElement) {
+    if (x.localName === "pre" && (x.querySelector("code") || HIGHLIGHTED.test(`${x.className} ${x.parentElement?.className ?? ""}`)))
+      return true;
+    if (x.classList.contains("blob-code")) return true;
+  }
+  return false;
 }
 
 function commonAncestor(a: Element, b: Element): Element {
@@ -184,6 +203,7 @@ export function extractPage(doc: Document, url: string, rootOverride?: Element):
       if (text.length > 0) text += "\n";
       if (HEADING.test(el.localName)) section = normalizeWs(el.textContent ?? "");
       block = { id: `b${blocks.length}`, el, start: text.length, end: text.length, section };
+      if (inCodeSample(el, root)) block.code = true;
       blocks.push(block);
       current = block;
     }
@@ -233,13 +253,30 @@ function segmentAt(segments: readonly Segment[], offset: number): Segment | null
   return null;
 }
 
+/** The last block that starts at or before `offset`; blocks are in page order. */
 function blockAt(blocks: readonly Block[], offset: number): Block | null {
+  let lo = 0;
+  let hi = blocks.length - 1;
   let found: Block | null = null;
-  for (const b of blocks) {
-    if (b.start > offset) break;
-    found = b;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (blocks[mid]!.start <= offset) {
+      found = blocks[mid]!;
+      lo = mid + 1;
+    } else hi = mid - 1;
   }
   return found;
+}
+
+/** Whether the text at `offset` is in a code sample. */
+export function inCodeBlock(page: ExtractedPage, offset: number): boolean {
+  return blockAt(page.blocks, offset)?.code === true;
+}
+
+/** The page text without its code samples, for asking a model about the prose. */
+export function proseText(page: ExtractedPage): string {
+  const prose = page.blocks.filter((b) => !b.code);
+  return prose.length === page.blocks.length ? page.text : prose.map((b) => page.text.slice(b.start, b.end)).join("\n");
 }
 
 export function rangeFor(page: ExtractedPage, start: number, end: number): Range | null {

@@ -465,4 +465,15 @@ export const pages_ar: Readonly<Record<string, string>> = {
   Variant: "متغيّر",
   "Drag to move, scroll to zoom; point at a concept to bring out its relations.":
     "اسحب للتحريك ومرّر للتكبير؛ أشِر إلى مفهوم لإبراز علاقاته.",
+  "This window was opened without a site.": "فُتحت هذه النافذة دون تحديد موقع.",
+  Close: "إغلاق",
+  Allow: "السماح",
+  "The browser did not give access, so nothing changed.": "لم يمنح المتصفح الإذن بالوصول، لذا لم يتغير شيء.",
+  "It could not be saved; please try again.": "تعذّر الحفظ؛ يُرجى المحاولة مرة أخرى.",
+  "Show reunion hints on {site}?": "هل تريد عرض تلميحات اللقاء في {site}؟",
+  "Terms you have looked up before will be underlined whenever they appear on this site, without clicking Harkback first.":
+    "ستُوضع خطوط تحت المصطلحات التي بحثت عنها من قبل كلما ظهرت في هذا الموقع، دون الحاجة إلى النقر على Harkback أولًا.",
+  "Finding them happens on your computer: no page text is sent anywhere unless you press Explain or Scan. Your browser will then ask you to allow Harkback on this site.":
+    "يجري البحث عنها على جهازك: لا يُرسَل أي نص من الصفحة إلى أي مكان إلا إذا ضغطت «اشرح» أو «افحص». بعد ذلك سيطلب منك المتصفح السماح لـ Harkback بالعمل في هذا الموقع.",
+  "Not now": "ليس الآن",
 };

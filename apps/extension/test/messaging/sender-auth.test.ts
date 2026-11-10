@@ -68,6 +68,13 @@ describe("allowed", () => {
     expect(allowed("reunions", "page")).toBe(false);
   });
 
+  it("lets a web page open the window that asks to turn its site on, but only that window turn a site on", () => {
+    expect(allowed("open-site-access", "content")).toBe(true);
+    expect(allowed("enable-site", "page")).toBe(true);
+    expect(allowed("enable-site", "content")).toBe(false);
+    expect(allowed("enable-site", "reader")).toBe(false);
+  });
+
   it("lets the lock on a page and the library both unmark a sensitive source", () => {
     for (const kind of ["page", "content", "reader"] as const) expect(allowed("mark-normal", kind)).toBe(true);
   });

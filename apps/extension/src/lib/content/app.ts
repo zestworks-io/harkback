@@ -1,6 +1,14 @@
 import { locateEvidence, Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain/explain";
-import { contextForRange, extractPage, rangeFor, type ExtractedPage, type SelectionContext } from "../source/extract";
+import {
+  contextForRange,
+  extractPage,
+  inCodeBlock,
+  proseText,
+  rangeFor,
+  type ExtractedPage,
+  type SelectionContext,
+} from "../source/extract";
 import { h } from "../ui/dom";
 import type { PageInfo, PortIn, PortOut, PrivacyFields } from "../messaging/messages";
 import type { PreviewTerm } from "../explain/preview";
@@ -244,8 +252,9 @@ export class ContentApp {
     const firstPerKey = new Map<string, Hit>();
     if (this.matcher?.entries !== info.entries) this.matcher = { entries: info.entries, value: new Matcher(info.entries) };
     // Live text is captions, often written by speech recognition: lower case, letters spelled out, names misheard.
+    // A term in a code sample is a name in the code, not the reader meeting it again.
     for (const hit of this.matcher.value.scan(page.text, { speech: this.live() !== null }))
-      if (!firstPerKey.has(hit.key)) firstPerKey.set(hit.key, hit);
+      if (!firstPerKey.has(hit.key) && !inCodeBlock(page, hit.start)) firstPerKey.set(hit.key, hit);
     if (firstPerKey.size === 0) {
       this.layer?.clear();
       return;
@@ -329,6 +338,16 @@ export class ContentApp {
     void this.refresh().catch(() => undefined);
   };
 
+  /** Opens the window that asks the browser for access to this site; it tells this page when it was given. */
+  private readonly openSiteAccess = (): void => void this.rpc.request({ type: "open-site-access" }).catch(() => undefined);
+
+  /** The reader turned this site on from the preview panel: say so there, and show the hints at once. */
+  async siteAccessChanged(): Promise<void> {
+    const info = this.take(await this.rpc.request({ type: "page-info" }));
+    this.previewPanel?.siteStatus(info.underlines, this.openSiteAccess);
+    if (info.enabled) await this.activate(info);
+  }
+
   /** Records may have changed since the page opened (a single-page site never reloads): read the page info again. */
   private async refresh(): Promise<void> {
     const info = this.take(await this.rpc.request({ type: "page-info" }));
@@ -404,18 +423,17 @@ export class ContentApp {
     const panel: PreviewPanel = new PreviewPanel(this.lang, {
       onScan: () => {
         panel.scanning();
-        const page = (this.page ??= this.extract());
+        // Code samples would use up the limit with names, not the concepts the page explains.
+        const text = proseText((this.page ??= this.extract()));
         // A long page is read only up to a limit; the reader is told how much was left out.
         const note =
-          page.text.length > MAX_PREVIEW_PAGE_CHARS
-            ? t(this.lang, "previewCovered", { n: MAX_PREVIEW_PAGE_CHARS, total: page.text.length })
-            : "";
+          text.length > MAX_PREVIEW_PAGE_CHARS ? t(this.lang, "previewCovered", { n: MAX_PREVIEW_PAGE_CHARS, total: text.length }) : "";
         this.rpc
           .request({
             type: "preview-terms",
             sourceId: source.source_id,
             title: source.title,
-            text: page.text.slice(0, MAX_PREVIEW_PAGE_CHARS),
+            text: text.slice(0, MAX_PREVIEW_PAGE_CHARS),
             ...this.privacyFields(source.source_id),
           })
           .then(
@@ -428,7 +446,7 @@ export class ContentApp {
           );
       },
       onExplain: (term: PreviewTerm) => {
-        const text = (this.page ??= this.extract()).text;
+        const text = proseText((this.page ??= this.extract()));
         // Not `toLowerCase().indexOf`: some letters change length when lower-cased, which would shift the offset.
         const at = new RegExp(term.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i").exec(text)?.index ?? -1;
         const context = at < 0 ? "" : text.slice(Math.max(0, at - PREVIEW_CONTEXT_CHARS), at + term.term.length + PREVIEW_CONTEXT_CHARS);
@@ -449,6 +467,7 @@ export class ContentApp {
       onClose: () => this.closePreview(),
       ...(readableUrl ? { onOpenReadable: () => void window.open(readableUrl, "_blank", "noopener") } : {}),
     });
+    panel.siteStatus(this.info.underlines, this.openSiteAccess);
     this.previewPanel = panel;
     this.ensureOverlay().root.append(panel.el);
     if (unreadable) panel.unavailable("unreadable_page");

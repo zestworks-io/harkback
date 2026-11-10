@@ -536,6 +536,29 @@ export default defineBackground(() => {
       sync();
       await syncing;
     },
+    // Match patterns cannot name an IPv6 address, so asking about one throws: it is then not on.
+    hasOrigin: (pattern) => browser.permissions.contains({ origins: [pattern] }).catch(() => false),
+    async openSiteAccess(site, tabId) {
+      const query = new URLSearchParams({ site });
+      // A tab of its own, next to the page: the browser asks for site access only after a click on an extension page.
+      const opener = tabId === undefined ? undefined : await browser.tabs.get(tabId).catch(() => undefined);
+      await browser.tabs.create({
+        url: browser.runtime.getURL(`/site-access.html?${query}`),
+        active: true,
+        ...(opener?.id !== undefined && { openerTabId: opener.id, index: opener.index + 1, windowId: opener.windowId }),
+      });
+    },
+    async notifySiteAccess(site) {
+      // Every open page of the site: the extension may now see their addresses, as it was just given access to them.
+      const tabs = await browser.tabs.query({ url: hostPermissionPatterns(site) });
+      await Promise.all(
+        tabs.map((tab) =>
+          tab.id === undefined
+            ? undefined
+            : browser.tabs.sendMessage(tab.id, { type: "site-access" } satisfies TabMessage).catch(() => undefined),
+        ),
+      );
+    },
     now: Date.now,
   };
 
@@ -543,7 +566,7 @@ export default defineBackground(() => {
     if (!isRequest(message)) return false;
     const kind = senderKind(sender, browser.runtime.id, extensionOrigin);
     if (!kind || !allowed(message.type, kind)) return false;
-    const from = kind === "reader" ? { ...sender, url: readerSource(sender.url) } : sender;
+    const from = kind === "reader" ? { ...sender, url: readerSource(sender.url), reader: true } : sender;
     handleRequest(requestDeps, message, from).then(sendResponse, () => sendResponse({ ok: false }));
     return true;
   });

@@ -20,7 +20,15 @@ import { reunionCards } from "../records/reunion-cards";
 import type { SenderInfo } from "./sender-auth";
 import type { Settings } from "../storage/settings";
 import { gateSource, isChoice, isPrivacy } from "../source/privacy-gate";
-import { effectiveRule, normalizePattern, sensitiveBySiteRule, sensitiveStated, siteHost } from "../source/site-rules";
+import {
+  effectiveRule,
+  normalizePattern,
+  sensitiveBySiteRule,
+  sensitiveStated,
+  siteHost,
+  siteName,
+  withAutoScan,
+} from "../source/site-rules";
 import { isArxivUrl } from "../source/source-id";
 import { UI_STRINGS } from "../ui/locales/ui";
 import { buildImportEvents, isZoteroTerm } from "../zotero/highlights";
@@ -73,7 +81,33 @@ export interface RequestDeps {
     } & PrivacyFields,
   ): Promise<ResponseMap["preview-explain"]>;
   syncContentScripts(): Promise<void>;
+  /** Whether the browser gave the extension access to the pages of an origin pattern (`https://example.com/*`). */
+  hasOrigin(pattern: string): Promise<boolean>;
+  /** Opens the page that asks to show reunion hints on `site` by themselves, next to the page in `tabId`. */
+  openSiteAccess(site: string, tabId: number | undefined): Promise<void>;
+  /** Tells the open pages of `site` that it was just turned on. */
+  notifySiteAccess(site: string): Promise<void>;
   now(): number;
+}
+
+/** The site of a web page, as a site rule names it ("example.com"); null for anything else. */
+function siteOf(url: string | undefined): string | null {
+  try {
+    const u = new URL(url ?? "");
+    return u.protocol === "http:" || u.protocol === "https:" ? normalizePattern(siteHost(u)) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** One read-modify-write of the site rules at a time, so two tabs answering at once both keep their rule. */
+async function writeSites(deps: RequestDeps, change: (sites: Settings["sites"]) => Settings["sites"]): Promise<void> {
+  const write = siteWrites.then(async () => {
+    const settings = await deps.loadSettings();
+    await deps.saveSettings({ ...settings, sites: change(settings.sites) });
+  });
+  siteWrites = write.catch(() => undefined);
+  await write;
 }
 
 /** The page's privacy hint and the reader's choice, when they are what they should be; a message is not a trusted channel. */
@@ -89,15 +123,27 @@ function isHit(h: unknown): h is Hit {
   return typeof x?.key === "string" && typeof x.text === "string" && Number.isInteger(x.start) && Number.isInteger(x.end);
 }
 
-export async function pageInfo(deps: RequestDeps, url: string, incognito: boolean): Promise<PageInfo> {
+/** `reader`: the PDF reader page, whose hints do not depend on the PDF's site. */
+export async function pageInfo(deps: RequestDeps, url: string, incognito: boolean, reader = false): Promise<PageInfo> {
   const settings = await deps.loadSettings();
   const rule = effectiveRule(settings.sites, url);
   const enabled = !rule.disabled;
   const scan = enabled && !incognito;
+  const autoScan = enabled && (rule.autoScan || isArxivUrl(url));
+  const site = siteOf(url);
+  // An auto-scan rule does nothing until the browser gives access to the site, so that is checked too. The pattern names
+  // the host as the rules do, without a trailing dot.
+  const underlines =
+    !scan || reader || site === null
+      ? null
+      : autoScan && (isArxivUrl(url) || (await deps.hasOrigin(`${new URL(url).protocol}//${site}/*`).catch(() => false)))
+        ? ("on" as const)
+        : ("off" as const);
   return {
     enabled,
-    autoScan: enabled && (rule.autoScan || isArxivUrl(url)),
+    autoScan,
     scan,
+    underlines,
     incognito,
     language: settings.language,
     strings: UI_STRINGS[settings.language] ?? {},
@@ -112,7 +158,7 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
   const incognito = sender.tab?.incognito === true;
   switch (msg.type) {
     case "page-info":
-      return pageInfo(deps, sender.url ?? "", incognito);
+      return pageInfo(deps, sender.url ?? "", incognito, sender.reader === true);
     case "reunions": {
       const settings = await deps.loadSettings();
       if (incognito || effectiveRule(settings.sites, sender.url ?? "").disabled || !Array.isArray(msg.hits)) return { cards: [] };
@@ -204,26 +250,32 @@ export async function handleRequest(deps: RequestDeps, msg: Request, sender: Sen
       };
     }
     case "remember-site": {
-      let host: string | null = null;
-      try {
-        const u = new URL(sender.url ?? "");
-        host = u.protocol === "http:" || u.protocol === "https:" ? normalizePattern(siteHost(u)) : null;
-      } catch {
-        host = null;
-      }
-      if (incognito || !host) return { ok: false };
-      const site = host;
+      const site = siteOf(sender.url);
+      if (incognito || !site) return { ok: false };
       const sensitive = msg.sensitive === true;
-      // One read-modify-write at a time, so two tabs answering at once both keep their rule.
-      const write = siteWrites.then(async () => {
-        const settings = await deps.loadSettings();
-        const sites = settings.sites.some((r) => normalizePattern(r.pattern) === site)
-          ? settings.sites.map((r) => (normalizePattern(r.pattern) === site ? { ...r, sensitive } : r))
-          : [...settings.sites, { pattern: site, sensitive }];
-        await deps.saveSettings({ ...settings, sites });
-      });
-      siteWrites = write.catch(() => undefined);
-      await write;
+      await writeSites(deps, (sites) =>
+        sites.some((r) => normalizePattern(r.pattern) === site)
+          ? sites.map((r) => (normalizePattern(r.pattern) === site ? { ...r, sensitive } : r))
+          : [...sites, { pattern: site, sensitive }],
+      );
+      return { ok: true };
+    }
+    case "open-site-access": {
+      // The site is the sender's own, never one the message names.
+      const site = siteOf(sender.url);
+      if (incognito || sender.reader || !site || effectiveRule((await deps.loadSettings()).sites, sender.url ?? "").disabled)
+        return { ok: false };
+      await deps.openSiteAccess(site, sender.tab?.id);
+      return { ok: true };
+    }
+    case "enable-site": {
+      // A whole site only: the window is opened for a page's site, never for a path.
+      const site = siteName(msg.site);
+      // The site may have been disabled in settings while the window was open.
+      if (!site || effectiveRule((await deps.loadSettings()).sites, `https://${site}/`).disabled) return { ok: false };
+      await writeSites(deps, (sites) => withAutoScan(sites, site));
+      await deps.syncContentScripts();
+      await deps.notifySiteAccess(site).catch(() => undefined);
       return { ok: true };
     }
     case "import-events": {

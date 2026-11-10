@@ -55,6 +55,7 @@ export const test = base.extend<{ stub: StubServer; context: BrowserContext; sw:
     await context.route("https://docs.google.com/**", (route) =>
       page(/\/(pub|mobilebasic)\/?$/.test(pathOf(route)) ? "gdocs/pub.html" : "gdocs/edit.html")(route),
     );
+    await context.route("https://example.github.io/**", (route) => page("devblog/post.html")(route));
     await context.route("https://www.youtube.com/**", (route) =>
       route.fulfill({ contentType: "text/html; charset=utf-8", body: fixture("youtube/watch.html") }),
     );

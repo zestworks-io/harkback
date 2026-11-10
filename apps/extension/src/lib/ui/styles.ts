@@ -78,6 +78,16 @@ button.hb-link { background: none; border: 0; padding: 0; font: inherit; font-si
 .hb-evidence { position: absolute; pointer-events: none; border-radius: 3px; background: rgba(250, 204, 21, 0.38); box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.38); transition: opacity 0.8s; }
 .hb-note { color: var(--hb-muted); font-size: 12.5px; margin-top: 8px; }
 .hb-note:empty { display: none; }
+.hb-site {
+  display: flex; width: fit-content; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; line-height: 1.6; color: var(--hb-fg); background: var(--hb-subtle);
+}
+.hb-site::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--hb-muted); }
+.hb-site[data-status="on"] { color: var(--hb-defined); background: var(--hb-defined-soft); }
+.hb-site[data-status="on"]::before { background: var(--hb-defined); }
+.hb-site[hidden] { display: none; }
+.hb-site button.hb-link { font-size: inherit; font-weight: 600; text-decoration: none; }
+.hb-site button.hb-link:hover { text-decoration: underline; }
 .hb-error { color: var(--hb-error); font-size: 13.5px; }
 
 .hb-footer { display: flex; flex-wrap: wrap; gap: 6px; }

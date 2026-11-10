@@ -4,6 +4,8 @@ export interface SenderInfo {
   id?: string;
   url?: string;
   tab?: { id?: number; incognito?: boolean; url?: string };
+  /** Set by the background for the PDF reader page, whose `url` it has replaced with the PDF's. */
+  reader?: boolean;
 }
 
 export type SenderKind = "content" | "page" | "reader";
@@ -52,6 +54,7 @@ const PAGE_ONLY = new Set<Request["type"]>([
   "set-muted",
   "backup-now",
   "settings-changed",
+  "enable-site",
 ]);
 
 /** Unmarking from the lock on a page, or from the library; a page may already tell a whole site it is fine (`remember-site`). */

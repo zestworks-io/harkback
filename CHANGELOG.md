@@ -2,6 +2,17 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Added
+
+- **See whether reunion hints are on for a site, and turn them on there.** The panel the toolbar button opens now says _Reunion hints on this site: On_ or _Off_. Hints appear by themselves only on arXiv and on sites you turned on; elsewhere Harkback waits for a click, which was easy to mistake for "no terms I know here". With _Off_, **Turn on** opens a page for the site in a tab next to yours: press **Allow**, allow access when the browser asks, and the hints appear on the open page at once and on every visit after. It adds the same _Auto-scan_ rule as the settings page does.
+
+### Changed
+
+- **Code samples are left alone.** On blogs and other pages with code, a term you have looked up is no longer underlined inside a block of code, where it is a name in the code; the first place it appears in the text is underlined instead. Code written inline in a sentence is still underlined. Selecting a name in a code sample and explaining it works as before.
+- The page preview leaves code samples out of what it sends to the model, so a page full of code does not use up the 16,000 characters a scan reads.
+
 ## 1.0.7 - 2026-11-01
 
 ### Added
