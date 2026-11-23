@@ -43,3 +43,14 @@ test("the shortcut message explains the current selection", async ({ context, sw
   }).toPass({ timeout: 20_000 });
   expect(stub.requests).toHaveLength(1);
 });
+
+test("the Explain button goes away when the shortcut opens the card", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  const page = await openArxiv(context, "2106.09685");
+  await page.locator("#t-lora").dblclick();
+  await expect(page.locator("[data-hb=explain-button]")).toBeVisible();
+  await page.bringToFront();
+  await sendToActiveTab(sw, { type: "explain-selection" });
+  await expect(page.locator("[data-hb=card]")).toBeVisible();
+  await expect(page.locator("[data-hb=explain-button]")).toHaveCount(0);
+});

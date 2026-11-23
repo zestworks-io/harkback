@@ -10,7 +10,6 @@ const TEX = math.getAttribute("alttext")!;
 
 const result: FormulaResult = {
   gist: "Each query is compared with every key and the values are averaged.",
-  aloud: "Attention of Q, K, V equals softmax of Q K transpose over root d k, times V.",
   symbols: [
     { tex: "Q", meaning: "queries", source: "page", quote: "Q, K and V are the matrices of queries, keys and values" },
     { tex: "K", meaning: "keys", source: "page", quote: "Q, K and V are the matrices of queries, keys and values" },
@@ -48,7 +47,6 @@ describe("ExplainCard for a formula", () => {
     const { q, card } = setup();
     expect(q("formula-gist")!.textContent).toContain("Each query is compared");
     expect(card.el.querySelectorAll('[data-hb="symbol"]')).toHaveLength(5);
-    expect(q("formula-aloud-open")).not.toBeNull();
     expect(q("followup-open")).not.toBeNull();
     expect(q("reexplain")).not.toBeNull();
     expect(q("understood")).toBeNull();
@@ -82,11 +80,12 @@ describe("ExplainCard for a formula", () => {
     expect(card.el.querySelectorAll(".hb-hl")).toHaveLength(0);
   });
 
-  it("labels where each meaning comes from", () => {
+  it("shows a symbol and its meaning, without saying where the meaning comes from", () => {
     const { row } = setup();
-    expect(row("Q").textContent).toContain("Defined on this page");
-    expect(row("\\mathrm{softmax}").textContent).toContain("Standard notation");
-    expect(row("Z").textContent).toContain("Not defined on this page");
+    for (const tex of ["Q", "\\mathrm{softmax}", "Z"]) {
+      expect(row(tex).querySelector(".hb-sym-meaning")!.textContent).not.toBe("");
+      expect(row(tex).textContent).not.toMatch(/defined on this page|standard notation/i);
+    }
   });
 
   it("shows the quote on the page when asked, and only offers that when the page has it", () => {
@@ -105,13 +104,6 @@ describe("ExplainCard for a formula", () => {
     expect(q("formula-warning")!.textContent).toBe("Read from the PDF; symbols may be inexact");
     expect(q("formula")!.querySelector("math")).toBeNull();
     expect(q("formula")!.getAttribute("data-tex")).toBe(TEX);
-  });
-
-  it("reveals how it is read aloud", () => {
-    const { q } = setup();
-    expect(q("formula-aloud")).toBeNull();
-    q("formula-aloud-open")!.click();
-    expect(q("formula-aloud")!.textContent).toContain("softmax of Q K transpose");
   });
 
   it("explains again, and offers the whole formula from a symbol card", () => {
@@ -138,7 +130,7 @@ describe("ExplainCard: the copy of the page's formula", () => {
       "text/html",
     )
     .querySelector("math")!;
-  const res: FormulaResult = { gist: "g", aloud: "", symbols: [{ tex: "K", meaning: "keys", source: "standard", quote: null }] };
+  const res: FormulaResult = { gist: "g", symbols: [{ tex: "K", meaning: "keys", source: "standard", quote: null }] };
 
   function show() {
     const card = new ExplainCard("en", {} as ExplainCardHandlers);
@@ -163,11 +155,45 @@ describe("ExplainCard: the copy of the page's formula", () => {
   });
 });
 
-describe("audit: read aloud", () => {
-  it("is offered only when there is a spoken line", () => {
+describe("while a formula's symbols are still being written", () => {
+  const pending = (card: ExplainCard) => card.el.querySelector('[data-hb="symbols-pending"]');
+
+  it("says so under the gist until the rows arrive", () => {
     const card = new ExplainCard("en", {} as ExplainCardHandlers);
-    card.setFormula({ tex: TEX }, { ...result, aloud: "" });
-    card.formulaDone(false);
-    expect(card.el.querySelector('[data-hb="formula-aloud-open"]')).toBeNull();
+    card.setFormulaStreaming("");
+    expect(pending(card)).toBeNull();
+    card.setFormulaStreaming("Each query is compared");
+    card.setFormulaStreaming("Each query is compared with every key.");
+    expect(card.el.querySelectorAll('[data-hb="symbols-pending"]')).toHaveLength(1);
+    expect(pending(card)!.textContent).toBe("Explaining each symbol…");
+    card.setFormula({ tex: TEX }, result);
+    expect(pending(card)).toBeNull();
+  });
+
+  it("stops saying so on an error", () => {
+    const card = new ExplainCard("en", { onRetry: vi.fn() } as unknown as ExplainCardHandlers);
+    card.setFormulaStreaming("Each query is compared");
+    card.error("network");
+    expect(pending(card)).toBeNull();
+  });
+});
+
+describe("math written in a formula's explanation", () => {
+  it("is drawn as math in the gist and in a symbol's meaning", () => {
+    const card = new ExplainCard("en", {} as ExplainCardHandlers);
+    card.setFormula(
+      { tex: TEX },
+      {
+        gist: String.raw`Scores are scaled by the square root of \(d_{k}\), and $5 costs stay text.`,
+        symbols: [{ tex: "Q", meaning: String.raw`queries, one row per position $i$`, source: "standard", quote: null }],
+      },
+    );
+    const gist = card.el.querySelector('[data-hb="formula-gist"]')!;
+    expect(gist.textContent).not.toContain(String.raw`\(`);
+    expect(gist.querySelector(".hb-math")!.getAttribute("data-tex")).toBe("d_{k}");
+    expect(gist.textContent).toContain("$5 costs stay text");
+    const meaning = card.el.querySelector(".hb-sym-meaning")!;
+    expect(meaning.querySelector(".hb-math")!.getAttribute("data-tex")).toBe("i");
+    expect(meaning.textContent).not.toContain("$");
   });
 });

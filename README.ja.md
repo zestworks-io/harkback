@@ -297,7 +297,7 @@ pnpm e2e           # Chromium でのエンドツーエンドテスト（一度 `
 pnpm format:check  # フォーマット
 ```
 
-Microsoft Edge Add-ons 向けのリリースをパッケージ化するには、`pnpm zip:edge` を実行します（`store/edge/README.md` を参照）。Chrome ウェブストア向けのリリースをパッケージ化するには、`apps/extension/package.json` の `version` を上げてから `pnpm release` を実行します。チェックを実行し、本番用の拡張機能をビルドし、パッケージを検証して、`apps/extension/.output/harkback-<version>-chrome.zip` を書き出します。zip だけをビルドするには `tools/package.sh --skip-checks` を使います。
+Microsoft Edge Add-ons 向けのリリースをパッケージ化するには、`pnpm zip:edge` を実行します（`store/edge/README.md` を参照）。Chrome ウェブストア向けのリリースをパッケージ化するには、`apps/extension/package.json` の `version` を上げてから `pnpm release` を実行します。チェックを実行し、本番用の拡張機能をビルドし、パッケージを検証して、`releases/harkback-<version>-chrome.zip` を書き出します。zip だけをビルドするには `tools/package.sh --skip-checks` を使います。
 
 エンドツーエンドテストは、ビルドした拡張機能を Chromium に読み込み、`apps/extension/fixtures` から arXiv のページを配信し、ローカルのスタブモデルサーバーと通信します。論文を読む、解説する、記録する、履歴ページ、ほかの論文での再会という全体のループを網羅しています。`apps/extension/e2e` を参照してください。
 

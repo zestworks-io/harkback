@@ -296,7 +296,7 @@ pnpm e2e           # 在 Chromium 中的端對端測試（先執行一次 `pnpm 
 pnpm format:check  # 格式
 ```
 
-要為 Microsoft Edge Add-ons 打包發行版，請執行 `pnpm zip:edge`（見 `store/edge/README.md`）。要為 Chrome 線上應用程式商店打包發行版，請先提高 `apps/extension/package.json` 中的 `version`，然後執行 `pnpm release`。它會執行檢查、建置正式版擴充功能、驗證封裝，並寫出 `apps/extension/.output/harkback-<version>-chrome.zip`。只想建置 zip，請使用 `tools/package.sh --skip-checks`。
+要為 Microsoft Edge Add-ons 打包發行版，請執行 `pnpm zip:edge`（見 `store/edge/README.md`）。要為 Chrome 線上應用程式商店打包發行版，請先提高 `apps/extension/package.json` 中的 `version`，然後執行 `pnpm release`。它會執行檢查、建置正式版擴充功能、驗證封裝，並寫出 `releases/harkback-<version>-chrome.zip`。只想建置 zip，請使用 `tools/package.sh --skip-checks`。
 
 端對端測試會把建置好的擴充功能載入 Chromium，從 `apps/extension/fixtures` 提供 arXiv 頁面，並與一個本機的模擬模型伺服器通訊。它們涵蓋整個流程：讀取論文、解釋、記錄、歷史頁，以及在其他論文上的重逢。見 `apps/extension/e2e`。
 

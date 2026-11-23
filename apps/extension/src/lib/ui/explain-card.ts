@@ -69,7 +69,8 @@ export class ExplainCard {
   private hasText = false;
   private closed = false;
   private formula: FormulaView | null = null;
-  private aloud: (() => void) | null = null;
+  /** Under a formula's streamed gist: its symbol rows come only with the whole reply, so the card says they are on the way. */
+  private symbolsPending: HTMLElement | null = null;
 
   constructor(
     private readonly lang: Lang,
@@ -107,16 +108,24 @@ export class ExplainCard {
 
   setFormulaStreaming(gist: string): void {
     this.setStreaming(gist);
+    if (!this.hasText || this.symbolsPending) return;
+    this.symbolsPending = h("p", { className: "hb-pending", "data-hb": "symbols-pending" }, t(this.lang, "formulaSymbolsPending"));
+    this.body.after(this.symbolsPending);
+  }
+
+  private endSymbolsPending(): void {
+    this.symbolsPending?.remove();
+    this.symbolsPending = null;
   }
 
   /** A formula's explanation, which replaces whatever was streamed. */
   setFormula(view: FormulaView, result: FormulaResult): void {
     this.hasText = true;
     this.formula = view;
+    this.endSymbolsPending();
     this.footer.querySelector('[data-hb="stop"]')?.remove();
     this.body.classList.remove("hb-loading");
-    const { body, aloud } = formulaBody(this.lang, view, result);
-    this.aloud = aloud;
+    const body = formulaBody(this.lang, view, result);
     this.meta.replaceChildren();
     this.body.replaceChildren(...body);
   }
@@ -130,7 +139,6 @@ export class ExplainCard {
     const whole = this.formula?.onExplainWhole;
     this.footer.replaceChildren(
       ...(whole ? [button("explain-whole", t(this.lang, "formulaExplainWhole"), whole, "hb-primary")] : []),
-      ...(this.aloud ? [button("formula-aloud-open", t(this.lang, "formulaReadAloud"), () => this.aloud?.())] : []),
       h("span", { className: "hb-spacer" }),
       ...(this.compose.childElementCount > 0 ? [] : [button("followup-open", t(this.lang, "followUp"), () => this.openFollowUp())]),
       button("reexplain", t(this.lang, "reexplain"), () => this.handlers.onReexplain?.()),
@@ -226,6 +234,8 @@ export class ExplainCard {
 
   error(code: ErrorCode, retryAfterMs?: number): void {
     this.asking = false;
+    this.endSymbolsPending();
+    this.body.classList.remove("hb-loading");
     const box = h("div", { className: "hb-error", "data-hb": "error" }, errorText(this.lang, code, retryAfterMs));
     if (this.hasText) this.note.replaceChildren(box);
     else this.body.replaceChildren(box);

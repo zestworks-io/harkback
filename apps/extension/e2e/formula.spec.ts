@@ -10,7 +10,6 @@ const readerUrl = (extensionId: string, src: string) => `chrome-extension://${ex
 const attentionReply: StubReply = {
   body: [
     "<gist>Each query is compared with every key, and the values are averaged by those weights.</gist>",
-    "<aloud>Attention of Q, K, V equals softmax of Q K transpose over root d k, times V.</aloud>",
     "<symbols>",
     JSON.stringify([
       { tex: "Q", meaning: "queries", source: "page", quote: "Q, K and V are the matrices of queries, keys and values" },
@@ -28,7 +27,7 @@ const attentionReply: StubReply = {
   ].join(""),
 };
 const symbolReply: StubReply = {
-  body: '<gist>d_k is the length of each query and key vector.</gist><aloud>d sub k</aloud><symbols>[{"tex":"d_{k}","meaning":"dimension of queries and keys","source":"page","quote":"Let d_{k} denote the dimension of the queries and keys"}]</symbols>',
+  body: '<gist>d_k is the length of each query and key vector.</gist><symbols>[{"tex":"d_{k}","meaning":"dimension of queries and keys","source":"page","quote":"Let d_{k} denote the dimension of the queries and keys"}]</symbols>',
 };
 
 /** Selects the contents of `selector` and presses the explain shortcut. */
@@ -160,7 +159,7 @@ test("in the PDF reader, a paper without an HTML version gets a card that says i
 }) => {
   await seedSettings(sw, stubSettings(stub.url));
   stub.queue.push({
-    body: "<gist>The loss adds up the negative log-probability of each token.</gist><aloud>L equals minus sum of log p of x i</aloud><symbols>[]</symbols>",
+    body: "<gist>The loss adds up the negative log-probability of each token.</gist><symbols>[]</symbols>",
   });
   const page = await context.newPage();
   await page.goto(readerUrl(extensionId, `${stub.url}/pdf/nohtml.pdf`));
@@ -210,15 +209,13 @@ test("Stop while the arXiv version is looked up closes the card and asks nothing
   expect(stub.requests).toHaveLength(0);
 });
 
-test("a formula's card explains it again from another angle, and reads it aloud on request", async ({ context, sw, stub }) => {
+test("a formula's card explains it again from another angle", async ({ context, sw, stub }) => {
   await seedSettings(sw, stubSettings(stub.url));
   stub.queue.push(attentionReply, attentionReply);
   const page = await openArxiv(context, "1706.03762");
   await explainContents(page, sw, "#m-attention");
   const card = page.locator("[data-hb=card]");
-  await expect(card.locator("[data-hb=formula-aloud]")).toHaveCount(0);
-  await card.locator("[data-hb=formula-aloud-open]").click();
-  await expect(card.locator("[data-hb=formula-aloud]")).toContainText("softmax of Q K transpose");
+  await expect(card.locator("[data-hb=symbol]")).toHaveCount(5);
   await card.locator("[data-hb=reexplain]").click();
   await expect(card.locator("[data-hb=symbol]")).toHaveCount(5);
   expect(stub.requests).toHaveLength(2);
@@ -260,4 +257,19 @@ test("in the PDF reader, a new selection replaces the open card at once, and the
   await expect(cards.locator("[data-hb=formula-gist]")).toHaveCount(0);
   await expect(page.locator("[data-hb=understood]")).toBeEnabled();
   await expect(cards).toHaveCount(1);
+});
+
+test("a formula card's buttons keep clear of the close button", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  stub.queue.push(attentionReply);
+  const page = await openArxiv(context, "1706.03762");
+  await explainContents(page, sw, "#m-attention");
+  const card = page.locator("[data-hb=card]");
+  await expect(card.locator("[data-hb=reexplain]")).toBeVisible();
+  const close = (await card.locator("[data-hb=close]").boundingBox())!;
+  for (const button of await card.locator(".hb-footer button").all()) {
+    const b = (await button.boundingBox())!;
+    const overlaps = b.x < close.x + close.width && close.x < b.x + b.width && b.y < close.y + close.height && close.y < b.y + b.height;
+    expect(overlaps, (await button.textContent()) ?? "").toBe(false);
+  }
 });

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Chrome Web Store package: harkback-<version>-chrome.zip in apps/extension/.output/.
+# Builds the Chrome Web Store package: releases/harkback-<version>-chrome.zip.
 # Usage: tools/package.sh [--skip-checks]
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -8,7 +8,8 @@ skip_checks=0
 [[ "${1:-}" == "--skip-checks" ]] && skip_checks=1
 
 version=$(node -p "require('./apps/extension/package.json').version")
-zip="apps/extension/.output/harkback-${version}-chrome.zip"
+built="apps/extension/.output/harkback-${version}-chrome.zip"
+zip="releases/harkback-${version}-chrome.zip"
 
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "warning: the working tree has uncommitted changes; the package will include them." >&2
@@ -23,8 +24,11 @@ if [[ $skip_checks -eq 0 ]]; then
   pnpm check:build
 fi
 
-rm -f "$zip"
+rm -f "$built" "$zip"
 pnpm zip
+# Kept outside the build folder, where it is easy to find.
+mkdir -p releases
+mv "$built" "$zip"
 
 # The package must be the production build: right version, no test hosts, no source maps, icons present.
 node - "$zip" "$version" <<'JS'

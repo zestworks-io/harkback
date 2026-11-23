@@ -554,6 +554,8 @@ export class ContentApp {
   explain(range: Range, opts: ExplainOptions): void {
     // A page that draws its text has nothing of the document to read; what is selected there is its menus.
     if (profileFor(this.source?.url ?? location.href)?.readable === false) return;
+    // However the explanation was asked for (the shortcut, the menu), the Explain button would sit on top of its card.
+    this.hideTrigger();
     const page = (this.page ??= this.extract());
     const live = this.live();
     // Each explanation asked for counts; one whose formula lookup comes back after a newer one was asked for is dropped.

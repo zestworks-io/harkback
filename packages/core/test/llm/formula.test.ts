@@ -43,7 +43,7 @@ describe("buildFormulaPrompt", () => {
   });
 });
 
-const out = (symbols: string) => `<gist>Adds a low-rank update.</gist><aloud>W zero plus B A</aloud><symbols>${symbols}</symbols>`;
+const out = (symbols: string) => `<gist>Adds a low-rank update.</gist><symbols>${symbols}</symbols>`;
 
 describe("parseFormulaOutput", () => {
   it("reads the gist, the spoken line and the symbols", () => {
@@ -52,7 +52,6 @@ describe("parseFormulaOutput", () => {
       req,
     );
     expect(r.gist).toBe("Adds a low-rank update.");
-    expect(r.aloud).toBe("W zero plus B A");
     expect(r.symbols).toEqual([{ tex: "W_0", meaning: "frozen weights", source: "page", quote: "W_0 is the pretrained weight matrix" }]);
   });
 
@@ -122,17 +121,56 @@ describe("parseFormulaOutput", () => {
   });
 });
 
+describe("parseFormulaOutput: symbol lists written loosely", () => {
+  const attention: FormulaRequest = {
+    ...req,
+    tex: String.raw`\mathrm{Attention}(Q,K,V)=\mathrm{softmax}(\frac{QK^{T}}{\sqrt{d_{k}}})V`,
+    paragraph: "",
+    definitions: [],
+  };
+  const texs = (raw: string) => parseFormulaOutput(raw, attention).symbols.map((s) => s.tex);
+  const head = "<gist>g</gist>";
+
+  it("reads LaTeX written with single backslashes, which is not valid JSON", () => {
+    expect(
+      texs(
+        head +
+          String.raw`<symbols>[{"tex": "\sqrt{d_k}", "meaning": "scale", "source": "standard", "quote": null}, {"tex": "\frac{QK^T}{\sqrt{d_k}}", "meaning": "scores", "source": "standard", "quote": null}]</symbols>`,
+      ),
+    ).toEqual([String.raw`\sqrt{d_k}`, String.raw`\frac{QK^T}{\sqrt{d_k}}`]);
+  });
+
+  it("unwraps a symbol written in math delimiters", () => {
+    expect(
+      texs(
+        head +
+          String.raw`<symbols>[{"tex": "$Q$", "meaning": "q", "source": "standard", "quote": null}, {"tex": "\\(d_k\\)", "meaning": "d", "source": "standard", "quote": null}]</symbols>`,
+      ),
+    ).toEqual(["Q", "d_k"]);
+  });
+
+  it("accepts other names for the symbol and its meaning", () => {
+    expect(texs(head + '<symbols>[{"symbol": "Q", "description": "queries", "source": "standard", "quote": null}]</symbols>')).toEqual([
+      "Q",
+    ]);
+  });
+
+  it("reads a symbol list left after the other blocks without its tag", () => {
+    expect(texs(head + '\n[{"tex": "V", "meaning": "values", "source": "standard", "quote": null}]')).toEqual(["V"]);
+  });
+});
+
 describe("streamingFormulaGist", () => {
   it("returns the text of an unfinished gist", () => {
     expect(streamingFormulaGist("<gist>Adds a low-ra")).toBe("Adds a low-ra");
-    expect(streamingFormulaGist("<gist>Adds.</gist><aloud>W")).toBe("Adds.");
+    expect(streamingFormulaGist("<gist>Adds.</gist><symbols>[")).toBe("Adds.");
     expect(streamingFormulaGist("<gi")).toBe("");
   });
 
   it("stops an untagged gist at the first block", () => {
     expect(streamingFormulaGist('It adds an update. <symbols> {"tex": "W_0"')).toBe("It adds an update.");
     expect(streamingFormulaGist("It adds an update. <sym")).toBe("It adds an update.");
-    expect(streamingFormulaGist("<aloud>W zero")).toBe("");
+    expect(streamingFormulaGist("<symbols>[{")).toBe("");
   });
 });
 

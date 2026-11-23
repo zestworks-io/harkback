@@ -297,7 +297,7 @@ pnpm e2e           # Chromium에서의 엔드투엔드 테스트 (먼저 `pnpm e
 pnpm format:check  # 서식
 ```
 
-Microsoft Edge Add-ons용 릴리스를 패키징하려면 `pnpm zip:edge`를 실행합니다(`store/edge/README.md` 참고). Chrome 웹 스토어용 릴리스를 패키징하려면 `apps/extension/package.json`의 `version`을 올린 뒤 `pnpm release`를 실행합니다. 검사를 실행하고, 프로덕션 확장 프로그램을 빌드하고, 패키지를 검증한 뒤 `apps/extension/.output/harkback-<version>-chrome.zip`을 씁니다. zip만 빌드하려면 `tools/package.sh --skip-checks`를 사용합니다.
+Microsoft Edge Add-ons용 릴리스를 패키징하려면 `pnpm zip:edge`를 실행합니다(`store/edge/README.md` 참고). Chrome 웹 스토어용 릴리스를 패키징하려면 `apps/extension/package.json`의 `version`을 올린 뒤 `pnpm release`를 실행합니다. 검사를 실행하고, 프로덕션 확장 프로그램을 빌드하고, 패키지를 검증한 뒤 `releases/harkback-<version>-chrome.zip`을 씁니다. zip만 빌드하려면 `tools/package.sh --skip-checks`를 사용합니다.
 
 엔드투엔드 테스트는 빌드한 확장 프로그램을 Chromium에 로드하고, `apps/extension/fixtures`에서 arXiv 페이지를 제공하며, 로컬 스텁 모델 서버와 통신합니다. 논문 읽기, 설명, 기록, 기록 페이지, 다른 논문에서의 재회까지 전체 흐름을 다룹니다. `apps/extension/e2e`를 참고하세요.
 

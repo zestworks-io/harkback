@@ -109,7 +109,7 @@ To add a field, write its passages and concepts in a folder of its own under `ca
 
 1. Move the _Unreleased_ entries in [CHANGELOG.md](CHANGELOG.md) under a new version heading with the date.
 2. Bump `version` in `apps/extension/package.json`.
-3. `pnpm release` runs every check, builds the production extension, verifies the package and writes `apps/extension/.output/harkback-<version>-chrome.zip`.
+3. `pnpm release` runs every check, builds the production extension, verifies the package and writes `releases/harkback-<version>-chrome.zip`.
 4. Tag the commit `v<version>` and attach the zip.
 
 If a release changes permissions, update `PRIVACY.md`, the website's privacy pages and `store/privacy-practices.md` together.

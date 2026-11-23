@@ -45,6 +45,8 @@ test("shows model errors and records nothing", async ({ context, sw, stub }) => 
   const page = await openArxiv(context, "2106.09685");
   await explainWord(page, "#t-lora");
   await expect(page.locator("[data-hb=error]")).toContainText("API key");
+  // The error stays still: the body no longer pulses as though it were loading.
+  await expect(page.locator("[data-hb=card] .hb-body.hb-loading")).toHaveCount(0);
   expect((await readEvents(sw)).filter((e) => e.type === "encounter.created")).toHaveLength(0);
 });
 

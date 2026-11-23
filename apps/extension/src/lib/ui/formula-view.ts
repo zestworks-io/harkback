@@ -1,6 +1,7 @@
 import { texKey, type FormulaResult, type FormulaSymbol } from "@harkback/core";
 import { SCRIPTED, texOfMathml } from "../source/formula";
 import { h } from "./dom";
+import { renderTextWithMath } from "./markdown";
 import { renderMath } from "./math";
 import { t, type Lang } from "./strings";
 
@@ -18,8 +19,6 @@ export interface FormulaView {
   /** On the card of one symbol: explain the formula it is in. */
   onExplainWhole?: () => void;
 }
-
-const SOURCE_LABEL = { page: "symbolDefined", standard: "symbolStandard", none: "symbolUndefined" } as const;
 
 const MATHML = "http://www.w3.org/1998/Math/MathML";
 /** Presentation MathML: what is drawn, and nothing that links, loads or styles. */
@@ -106,13 +105,12 @@ function symbolRow(lang: Lang, s: FormulaSymbol, formula: HTMLElement, view: For
       );
     }
   }
-  // The label is always shown; the quote only while the row is pointed at.
+  // The page's defining sentence shows only while the row is pointed at.
   const row = h(
     "div",
     { className: "hb-sym", "data-hb": "symbol", "data-tex": s.tex, tabindex: "0" },
     h("span", { className: "hb-sym-tex", dir: "ltr" }, renderMath(s.tex, false)),
-    h("span", { className: "hb-sym-meaning", dir: "auto" }, s.meaning),
-    h("span", { className: `hb-sym-source hb-src-${s.source}` }, t(lang, SOURCE_LABEL[s.source])),
+    h("span", { className: "hb-sym-meaning", dir: "auto" }, renderTextWithMath(s.meaning)),
     detail,
   );
   const places = placesOf(formula, s.tex);
@@ -137,25 +135,18 @@ function symbolRow(lang: Lang, s: FormulaSymbol, formula: HTMLElement, view: For
   return row;
 }
 
-/** The body of a formula's card: the formula, what it says, a row per symbol and, when asked, how to read it aloud. */
-export function formulaBody(lang: Lang, view: FormulaView, result: FormulaResult): { body: HTMLElement[]; aloud: (() => void) | null } {
+/** The body of a formula's card: the formula, what it says, and a row per symbol. */
+export function formulaBody(lang: Lang, view: FormulaView, result: FormulaResult): HTMLElement[] {
   const formula = formulaBlock(view);
   const rows = h("div", { className: "hb-syms", "data-hb": "symbols" }, ...result.symbols.map((s) => symbolRow(lang, s, formula, view)));
   const gist = h(
     "p",
     { className: "hb-gist", "data-hb": "formula-gist", dir: "auto" },
     view.symbol ? "" : h("b", {}, `${t(lang, "formulaWhat")}: `),
-    result.gist,
+    renderTextWithMath(result.gist),
   );
   const body: HTMLElement[] = [formula];
   if (view.note === "pdf_text") body.push(h("div", { className: "hb-warn", "data-hb": "formula-warning" }, t(lang, "formulaFromPdf")));
   body.push(gist, rows);
-  // Offered only when the model said how to read the formula.
-  const aloud = !result.aloud
-    ? null
-    : () => {
-        if (rows.parentElement?.querySelector('[data-hb="formula-aloud"]')) return;
-        rows.after(h("p", { className: "hb-aloud", "data-hb": "formula-aloud", dir: "auto" }, result.aloud));
-      };
-  return { body, aloud };
+  return body;
 }

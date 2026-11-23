@@ -291,7 +291,7 @@ pnpm e2e           # Chromium 端到端测试（首次运行 `pnpm exec playwrig
 pnpm format:check  # 格式
 ```
 
-要为 Microsoft Edge Add-ons 打包发布版本，运行 `pnpm zip:edge`（见 `store/edge/README.md`）。要为 Chrome 应用商店打包发布版本，先提高 `apps/extension/package.json` 中的 `version`，再运行 `pnpm release`。它会运行各项检查、构建生产版扩展、校验安装包，并写出 `apps/extension/.output/harkback-<version>-chrome.zip`。只想构建 zip，用 `tools/package.sh --skip-checks`。
+要为 Microsoft Edge Add-ons 打包发布版本，运行 `pnpm zip:edge`（见 `store/edge/README.md`）。要为 Chrome 应用商店打包发布版本，先提高 `apps/extension/package.json` 中的 `version`，再运行 `pnpm release`。它会运行各项检查、构建生产版扩展、校验安装包，并写出 `releases/harkback-<version>-chrome.zip`。只想构建 zip，用 `tools/package.sh --skip-checks`。
 
 端到端测试会把构建好的扩展加载进 Chromium，从 `apps/extension/fixtures` 提供 arXiv 页面，并连接本地的模型桩服务。它们覆盖完整闭环：读论文、解释、记录、历史页，以及在其他论文上的重逢提示。见 `apps/extension/e2e`。
 

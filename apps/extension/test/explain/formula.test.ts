@@ -83,7 +83,7 @@ describe("planFormula", () => {
 
 describe("answerFormula", () => {
   const raw =
-    '<gist>Adds a low-rank update.</gist><aloud>W zero plus B A</aloud><symbols>[{"tex":"W_0","meaning":"frozen weights","source":"page","quote":"W_0 is the pretrained weight matrix"}]</symbols>';
+    '<gist>Adds a low-rank update.</gist><symbols>[{"tex":"W_0","meaning":"frozen weights","source":"page","quote":"W_0 is the pretrained weight matrix"}]</symbols>';
 
   it("streams the gist, posts the result, and finishes without recording", async () => {
     const plan = planFormula(req(), ctx, settings(), world().state());
@@ -111,7 +111,7 @@ describe("answerFormula", () => {
     const plan = planFormula(req(), ctx, settings(), world().state());
     if (plan.kind !== "ok") throw new Error(plan.code);
     const posted: PortOut[] = [];
-    const empty = "<aloud>W zero</aloud><symbols>[]</symbols>";
+    const empty = "<symbols>[]</symbols>";
     await expect(answerFormula(plan, { stream: async () => empty, post: (m) => posted.push(m), sensitive: false })).rejects.toMatchObject({
       code: "http",
     });
@@ -121,7 +121,6 @@ describe("answerFormula", () => {
   it("gives follow-up questions the formula and what the card said", () => {
     const text = formulaFollowUpContext({
       gist: "Adds a low-rank update.",
-      aloud: "",
       symbols: [{ tex: "W_0", meaning: "frozen weights", source: "page", quote: null }],
     });
     expect(text).toBe("Adds a low-rank update.\nW_0: frozen weights");

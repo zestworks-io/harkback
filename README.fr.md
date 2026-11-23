@@ -298,7 +298,7 @@ pnpm e2e           # tests de bout en bout dans Chromium (lancez une fois `pnpm 
 pnpm format:check  # formatage
 ```
 
-Pour empaqueter une version pour Microsoft Edge Add-ons, lancez `pnpm zip:edge` (voir `store/edge/README.md`). Pour empaqueter une version pour le Chrome Web Store, incrémentez `version` dans `apps/extension/package.json`, puis lancez `pnpm release`. Cette commande exécute les vérifications, construit l'extension de production, vérifie le paquet et écrit `apps/extension/.output/harkback-<version>-chrome.zip`. Utilisez `tools/package.sh --skip-checks` pour ne construire que le zip.
+Pour empaqueter une version pour Microsoft Edge Add-ons, lancez `pnpm zip:edge` (voir `store/edge/README.md`). Pour empaqueter une version pour le Chrome Web Store, incrémentez `version` dans `apps/extension/package.json`, puis lancez `pnpm release`. Cette commande exécute les vérifications, construit l'extension de production, vérifie le paquet et écrit `releases/harkback-<version>-chrome.zip`. Utilisez `tools/package.sh --skip-checks` pour ne construire que le zip.
 
 Les tests de bout en bout chargent l'extension construite dans Chromium, servent des pages arXiv depuis `apps/extension/fixtures` et dialoguent avec un serveur de modèle factice local. Ils couvrent toute la boucle : lire un article, expliquer, enregistrer, la page d'historique et les retrouvailles sur d'autres articles. Voir `apps/extension/e2e`.
 

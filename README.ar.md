@@ -299,7 +299,7 @@ pnpm e2e           # end-to-end tests in Chromium (run `pnpm exec playwright ins
 pnpm format:check  # formatting
 ```
 
-لتجهيز إصدار لـ Microsoft Edge Add-ons شغّل `pnpm zip:edge` (انظر `store/edge/README.md`). ولتجهيز إصدار لمتجر Chrome الإلكتروني، ارفع `version` في `apps/extension/package.json`، ثم شغّل `pnpm release`. فهو يُجري الفحوص ويبني الإضافة للإنتاج ويتحقق من الحزمة ويكتب `apps/extension/.output/harkback-<version>-chrome.zip`. واستخدم `tools/package.sh --skip-checks` لبناء ملف zip فقط.
+لتجهيز إصدار لـ Microsoft Edge Add-ons شغّل `pnpm zip:edge` (انظر `store/edge/README.md`). ولتجهيز إصدار لمتجر Chrome الإلكتروني، ارفع `version` في `apps/extension/package.json`، ثم شغّل `pnpm release`. فهو يُجري الفحوص ويبني الإضافة للإنتاج ويتحقق من الحزمة ويكتب `releases/harkback-<version>-chrome.zip`. واستخدم `tools/package.sh --skip-checks` لبناء ملف zip فقط.
 
 تحمّل اختبارات الطرف إلى الطرف (end-to-end) الإضافة المبنية في Chromium، وتخدم صفحات arXiv من `apps/extension/fixtures`، وتتحدث إلى خادم نموذج وهمي محلي. وهي تغطي الدورة كلها: قراءة ورقة، والشرح، والتسجيل، وصفحة السجل، وتلميحات اللقاء في أوراق أخرى. انظر `apps/extension/e2e`.
 

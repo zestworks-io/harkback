@@ -2,16 +2,18 @@
 
 All notable changes to Harkback. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## Unreleased
+## 1.0.10 - 2026-11-23
 
 ### Added
 
-- **Explain a formula.** Select a formula, or one symbol of it, on an arXiv HTML page and press _Explain_. The card says in plain words what the formula says and gives each symbol a row: what it means in this paper, and whether the paper defines it (_Defined on this page_, with the sentence it is defined in), it is _Standard notation_, or it is _Not defined on this page_. Pointing at a row lights the symbol up in the formula; _Show on page_ scrolls to the defining sentence. _Read aloud_ says how the formula is read, and _Ask a question_ and _Explain again_ work as for terms. A selected symbol gets a card of its own, with _Explain the whole formula_. The sentences that define the symbols are looked for on the whole page, in a notation section, before the formula and in the "where …" sentence after it, and a definition is only shown as the paper's when its quote is found on the page. In the PDF reader, a formula of an arXiv paper is read from the paper's HTML version on arxiv.org when it has one, by its equation number or its characters; otherwise the card is built from the PDF's characters and says _Read from the PDF; symbols may be inexact_. Formula explanations are not saved, and they go to the same model under the same privacy rules as terms: a sensitive page only to a local model, and nothing on a site you turned off, which includes not asking arxiv.org for the HTML version when arxiv.org is turned off. Prose with a little math in it is still explained as a term.
+- **Explain a formula.** Select a formula, or one symbol of it, on an arXiv HTML page and press _Explain_. The card says in plain words what the formula says and gives each symbol a row saying what it means in this paper. The rows come after the plain-words part, and until they do the card says _Explaining each symbol…_. Pointing at a row lights the symbol up in the formula and, when the paper defines the symbol, shows the sentence it is defined in; _Show on page_ scrolls to it. _Ask a question_ and _Explain again_ work as for terms. A selected symbol gets a card of its own, with _Explain the whole formula_. The sentences that define the symbols are looked for on the whole page, in a notation section, before the formula and in the "where …" sentence after it, and a definition is only shown as the paper's when its quote is found on the page. In the PDF reader, a formula of an arXiv paper is read from the paper's HTML version on arxiv.org when it has one, by its equation number or its characters; otherwise the card is built from the PDF's characters and says _Read from the PDF; symbols may be inexact_. Formula explanations are not saved, and they go to the same model under the same privacy rules as terms: a sensitive page only to a local model, and nothing on a site you turned off, which includes not asking arxiv.org for the HTML version when arxiv.org is turned off. Prose with a little math in it is still explained as a term.
 
 ### Fixed
 
 - **Replies from Chrome's built-in model.** A small on-device model sometimes leaves out the tags around its answer, or writes the term's details as a JSON code block. The card now shows only its explanation, the details are still read and saved, and a reply with no explanation at all is an error you can retry instead of a card full of JSON.
 - **One card at a time in the PDF reader.** Selecting something new closes the open card at once, rather than after the selection has been looked up; selecting the same text again keeps its card and asks nothing more. _Stop_ on a card that is still looking a formula up now closes it.
+- **Errors stay still.** An error that arrives before any text no longer pulses like a card that is still loading.
+- **The Explain button gets out of the way.** Opening a card with the shortcut or the menu removes the button, which used to stay on top of the card.
 
 ## 1.0.9 - 2026-11-11
 

@@ -3,11 +3,13 @@ import { renderMath } from "./math";
 
 const WORD = String.raw`[\p{L}\p{N}_]`;
 const CODE = /(`[^`\n]+`)/.source;
-// `_` only emphasises at word edges, so snake_case stays text; `$` only opens a formula when it hugs its content and is not followed by a digit, so prices stay text.
+// `$` only opens a formula when it hugs its content and is not followed by a digit, so prices stay text.
+const MATH = String.raw`(\$(?:[^\s$]|[^\s$][^$\n]*?[^\s$])\$(?!\d)|\\\([^\n]+?\\\))`;
+// `_` only emphasises at word edges, so snake_case stays text.
 const INLINE = new RegExp(
   [
     CODE,
-    String.raw`(\$(?:[^\s$]|[^\s$][^$\n]*?[^\s$])\$(?!\d)|\\\([^\n]+?\\\))`,
+    MATH,
     String.raw`(\*\*[^*\n]+\*\*|(?<!${WORD})__[^_\n]+__(?!${WORD}))`,
     String.raw`(\*[^*\s][^*\n]*\*|(?<!${WORD})_[^_\s](?:[^_\n]*[^_\s])?_(?!${WORD}))`,
     String.raw`(!?\[[^\]\n]*\]\((?:[^()\s]|\([^()\s]*\))*\))`,
@@ -25,6 +27,22 @@ function safeUrl(raw: string): string | null {
   }
 }
 
+const mathOf = (tok: string) => renderMath(tok.startsWith("$") ? tok.slice(1, -1) : tok.slice(2, -2), false);
+
+/** Text with its inline math (`$…$`, `\(…\)`) drawn, and nothing else read as markup. */
+export function renderTextWithMath(text: string): DocumentFragment {
+  const frag = document.createDocumentFragment();
+  let last = 0;
+  for (const m of text.matchAll(new RegExp(MATH, "gu"))) {
+    const at = m.index ?? 0;
+    if (at > last) frag.append(text.slice(last, at));
+    frag.append(mathOf(m[0]));
+    last = at + m[0].length;
+  }
+  if (last < text.length) frag.append(text.slice(last));
+  return frag;
+}
+
 function renderInline(text: string, parent: Node): void {
   let last = 0;
   for (const m of text.matchAll(INLINE)) {
@@ -32,7 +50,7 @@ function renderInline(text: string, parent: Node): void {
     if (at > last) parent.appendChild(document.createTextNode(text.slice(last, at)));
     const tok = m[0];
     if (m[1]) parent.appendChild(h("code", {}, tok.slice(1, -1)));
-    else if (m[2]) parent.appendChild(renderMath(tok.startsWith("$") ? tok.slice(1, -1) : tok.slice(2, -2), false));
+    else if (m[2]) parent.appendChild(mathOf(tok));
     else if (m[3]) {
       const strong = h("strong");
       renderInline(tok.slice(2, -2), strong);

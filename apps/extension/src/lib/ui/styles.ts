@@ -66,15 +66,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-formula .hb-hl { background: var(--hb-accent-soft); color: var(--hb-accent); border-radius: 3px; }
 .hb-warn { margin: 0 0 8px; color: var(--hb-external); font-size: 12.5px; }
 .hb-gist { margin: 0 0 8px; }
+.hb-pending { margin: 8px 0 0; color: var(--hb-muted); font-size: 13px; animation: hb-pulse 1.4s ease-in-out infinite; }
 .hb-syms { display: flex; flex-direction: column; border-top: 1px solid var(--hb-border); }
-.hb-sym { display: grid; grid-template-columns: minmax(44px, auto) 1fr auto; gap: 2px 10px; align-items: baseline; padding: 5px 4px; border-bottom: 1px solid var(--hb-border); font-size: 13.5px; outline: none; cursor: default; }
+.hb-sym { display: grid; grid-template-columns: minmax(44px, auto) 1fr; gap: 2px 10px; align-items: baseline; padding: 5px 4px; border-bottom: 1px solid var(--hb-border); font-size: 13.5px; outline: none; cursor: default; }
 .hb-sym.hb-on, .hb-sym:focus-visible { background: var(--hb-accent-soft); }
 .hb-sym-tex { text-align: center; }
-.hb-sym-source { color: var(--hb-muted); font-size: 11.5px; white-space: nowrap; }
-.hb-src-page { color: var(--hb-defined); }
 .hb-sym-detail { grid-column: 2 / -1; color: var(--hb-muted); font-size: 12.5px; }
 .hb-sym-detail q { font-style: italic; }
-.hb-aloud { margin: 8px 0 0; color: var(--hb-muted); font-style: italic; font-size: 13px; }
 .hb-math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", Georgia, "Times New Roman", serif; font-size: 1.05em; white-space: normal; }
 .hb-math i { font-style: italic; }
 .hb-math sub, .hb-math sup { font-size: 0.72em; line-height: 0; }
@@ -107,6 +105,8 @@ button.hb-link { background: none; border: 0; padding: 0; font: inherit; font-si
 
 .hb-footer { display: flex; flex-wrap: wrap; gap: 6px; }
 .hb-footer:empty { display: none; }
+/* With no meta line above (a formula's card, or one still loading), the buttons share the close button's row. */
+.hb-meta:empty + .hb-footer { margin-inline-end: 28px; }
 .hb-lock { position: fixed; inset-inline-end: 16px; bottom: 16px; max-width: 320px; background: var(--hb-bg); color: var(--hb-fg); border: 1px solid var(--hb-border); border-radius: 10px; padding: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); z-index: 2147483000; }
 .hb-lock[hidden] { display: none; }
 .hb-lock .hb-choice { margin-top: 8px; padding: 4px; }
@@ -176,5 +176,5 @@ button.hb-trigger:hover:not(:disabled) { background: var(--hb-primary); color: v
 .hb-mark { position: absolute; height: 0; border-bottom: 2px dashed rgba(46, 75, 214, 0.6); pointer-events: none; }
 @media (prefers-color-scheme: dark) { :host(:not([data-theme="light"])) .hb-mark { border-bottom-color: rgba(142, 162, 255, 0.7); } }
 :host([data-theme="dark"]) .hb-mark { border-bottom-color: rgba(142, 162, 255, 0.7); }
-@media (prefers-reduced-motion: reduce) { .hb-card, .hb-trigger, .hb-body.hb-loading { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hb-card, .hb-trigger, .hb-body.hb-loading, .hb-pending { animation: none; } }
 `;

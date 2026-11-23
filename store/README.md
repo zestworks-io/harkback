@@ -6,7 +6,7 @@ Everything the dashboard asks for, in one place. Files here are inputs for you t
 
 | Dashboard field                               | Source                                                                            |
 | --------------------------------------------- | --------------------------------------------------------------------------------- |
-| Package                                       | `pnpm release` → `apps/extension/.output/harkback-<version>-chrome.zip`           |
+| Package                                       | `pnpm release` → `releases/harkback-<version>-chrome.zip`                         |
 | Name, summary, description                    | `listing.en.md` (default); add each `listing.<language>.md` as a listing language |
 | Screenshots (1280×800, up to 5)               | `assets/1-explain.png` … `assets/5-privacy.png`                                   |
 | Small promo tile (440×280)                    | `assets/promo-small-440x280.png`                                                  |

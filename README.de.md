@@ -298,7 +298,7 @@ pnpm e2e           # End-to-End-Tests in Chromium (einmal `pnpm exec playwright 
 pnpm format:check  # Formatierung
 ```
 
-Um ein Release für Microsoft Edge Add-ons zu paketieren, führen Sie `pnpm zip:edge` aus (siehe `store/edge/README.md`). Um ein Release für den Chrome Web Store zu paketieren, erhöhen Sie `version` in `apps/extension/package.json` und führen dann `pnpm release` aus. Das führt die Prüfungen aus, baut die Produktionserweiterung, verifiziert das Paket und schreibt `apps/extension/.output/harkback-<version>-chrome.zip`. Mit `tools/package.sh --skip-checks` wird nur das Zip gebaut.
+Um ein Release für Microsoft Edge Add-ons zu paketieren, führen Sie `pnpm zip:edge` aus (siehe `store/edge/README.md`). Um ein Release für den Chrome Web Store zu paketieren, erhöhen Sie `version` in `apps/extension/package.json` und führen dann `pnpm release` aus. Das führt die Prüfungen aus, baut die Produktionserweiterung, verifiziert das Paket und schreibt `releases/harkback-<version>-chrome.zip`. Mit `tools/package.sh --skip-checks` wird nur das Zip gebaut.
 
 Die End-to-End-Tests laden die gebaute Erweiterung in Chromium, liefern arXiv-Seiten aus `apps/extension/fixtures` aus und sprechen mit einem lokalen Stub-Modellserver. Sie decken den ganzen Kreislauf ab: einen Artikel lesen, erklären, aufzeichnen, die Verlaufsseite und Wiedersehens-Hinweise in anderen Artikeln. Siehe `apps/extension/e2e`.
 

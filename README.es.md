@@ -298,7 +298,7 @@ pnpm e2e           # pruebas de extremo a extremo en Chromium (ejecuta una vez `
 pnpm format:check  # formato
 ```
 
-Para empaquetar una versión para Microsoft Edge Add-ons, ejecuta `pnpm zip:edge` (consulta `store/edge/README.md`). Para empaquetar una versión para Chrome Web Store, sube `version` en `apps/extension/package.json` y luego ejecuta `pnpm release`. Ejecuta las comprobaciones, construye la extensión de producción, verifica el paquete y escribe `apps/extension/.output/harkback-<version>-chrome.zip`. Usa `tools/package.sh --skip-checks` para construir solo el zip.
+Para empaquetar una versión para Microsoft Edge Add-ons, ejecuta `pnpm zip:edge` (consulta `store/edge/README.md`). Para empaquetar una versión para Chrome Web Store, sube `version` en `apps/extension/package.json` y luego ejecuta `pnpm release`. Ejecuta las comprobaciones, construye la extensión de producción, verifica el paquete y escribe `releases/harkback-<version>-chrome.zip`. Usa `tools/package.sh --skip-checks` para construir solo el zip.
 
 Las pruebas de extremo a extremo cargan la extensión compilada en Chromium, sirven páginas de arXiv desde `apps/extension/fixtures` y hablan con un servidor de modelo simulado local. Cubren todo el ciclo: leer un artículo, explicar, registrar, la página del historial y los reencuentros en otros artículos. Consulta `apps/extension/e2e`.
 
