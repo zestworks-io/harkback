@@ -6,6 +6,10 @@ import { renderMarkdown } from "./markdown";
 import type { ErrorCode } from "../messaging/messages";
 import type { Choice } from "../source/privacy-gate";
 import { errorText, t, type Lang } from "./strings";
+import { formulaBody, type FormulaView } from "./formula-view";
+import type { FormulaResult } from "@harkback/core";
+
+export type { FormulaView };
 
 export type CardAction = "marked_understood" | "marked_confused";
 
@@ -22,6 +26,8 @@ export interface ExplainCardHandlers {
   /** Stop the explanation or follow-up that is being written. */
   onCancel(): void;
   onClose(): void;
+  /** A formula's card: explain it again, from another angle. */
+  onReexplain?(): void;
 }
 
 export interface CardModel {
@@ -62,6 +68,8 @@ export class ExplainCard {
   private asking = false;
   private hasText = false;
   private closed = false;
+  private formula: FormulaView | null = null;
+  private aloud: (() => void) | null = null;
 
   constructor(
     private readonly lang: Lang,
@@ -95,6 +103,38 @@ export class ExplainCard {
     this.hasText = true;
     this.body.classList.remove("hb-loading");
     this.render(this.body, text);
+  }
+
+  setFormulaStreaming(gist: string): void {
+    this.setStreaming(gist);
+  }
+
+  /** A formula's explanation, which replaces whatever was streamed. */
+  setFormula(view: FormulaView, result: FormulaResult): void {
+    this.hasText = true;
+    this.formula = view;
+    this.footer.querySelector('[data-hb="stop"]')?.remove();
+    this.body.classList.remove("hb-loading");
+    const { body, aloud } = formulaBody(this.lang, view, result);
+    this.aloud = aloud;
+    this.meta.replaceChildren();
+    this.body.replaceChildren(...body);
+  }
+
+  /** A formula's card once it is written: nothing was recorded, so it offers only what it can do here. */
+  formulaDone(sensitiveSource: boolean): void {
+    this.note.textContent = t(this.lang, sensitiveSource ? "sensitiveSource" : "formulaNotRecorded");
+    if (sensitiveSource) this.note.append(" ", t(this.lang, "formulaNotRecorded"));
+    const button = (hb: string, label: string, onclick: () => void, className = "hb-quiet") =>
+      h("button", { type: "button", className, "data-hb": hb, onclick }, label);
+    const whole = this.formula?.onExplainWhole;
+    this.footer.replaceChildren(
+      ...(whole ? [button("explain-whole", t(this.lang, "formulaExplainWhole"), whole, "hb-primary")] : []),
+      ...(this.aloud ? [button("formula-aloud-open", t(this.lang, "formulaReadAloud"), () => this.aloud?.())] : []),
+      h("span", { className: "hb-spacer" }),
+      ...(this.compose.childElementCount > 0 ? [] : [button("followup-open", t(this.lang, "followUp"), () => this.openFollowUp())]),
+      button("reexplain", t(this.lang, "reexplain"), () => this.handlers.onReexplain?.()),
+    );
   }
 
   /** `showEvidence`: shows where the page says it, when the explanation was found there. */

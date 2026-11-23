@@ -1,6 +1,6 @@
 import { h } from "./dom";
 
-const SYMBOLS: Record<string, string> = {
+export const SYMBOLS: Record<string, string> = {
   alpha: "α",
   beta: "β",
   gamma: "γ",

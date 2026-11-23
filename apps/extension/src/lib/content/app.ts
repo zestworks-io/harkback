@@ -1,5 +1,7 @@
 import { locateEvidence, Matcher, MAX_PREVIEW_PAGE_CHARS, type Hit, type MatcherEntry } from "@harkback/core";
 import type { ExplainRequestMsg } from "../explain/explain";
+import type { FormulaRequestMsg } from "../explain/formula";
+import { definitionsFor, formulaSelection } from "../source/formula";
 import {
   contextForRange,
   extractPage,
@@ -16,7 +18,7 @@ import type { ReunionCard } from "../records/reunion-cards";
 import type { Choice } from "../source/privacy-gate";
 import { profileFor, type Privacy } from "../source/site-profiles";
 import { detectSource, type DetectedSource } from "../source/source-id";
-import { ExplainCard } from "../ui/explain-card";
+import { ExplainCard, type ExplainCardHandlers, type FormulaView } from "../ui/explain-card";
 import { dirOf } from "../ui/languages";
 import { createOverlay, placeNear, runsRtl, visibleRects, type Overlay } from "../ui/overlay";
 import { LockChip } from "../ui/lock-chip";
@@ -39,6 +41,23 @@ export interface ExplainOptions {
   modelId?: string;
   /** The selected text, kept for a retry: a caption line may be gone from the page, and its Range with it. */
   text?: string;
+  /** The formula the selection is; null once it is known not to be one, undefined before anyone looked. */
+  formula?: FormulaPick | null;
+}
+
+/** A selection that is a formula, or a symbol of one: what is asked about it, and how its card shows it. */
+export interface FormulaPick {
+  request: FormulaRequestMsg;
+  view: { tex: string; symbol?: string; original?: Element; note?: "pdf_text" };
+  /** Whether the quotes are on the page shown, so Show on page can find them. */
+  quotesOnPage: boolean;
+}
+
+/** The same formula, asked about as a whole. */
+function wholeFormula(pick: FormulaPick): FormulaPick {
+  const { symbol: _r, ...request } = pick.request;
+  const { symbol: _v, ...view } = pick.view;
+  return { ...pick, request, view };
 }
 
 interface Session {
@@ -48,6 +67,21 @@ interface Session {
   ping: ReturnType<typeof setInterval>;
   encounterId: string | null;
   finished: boolean;
+  /** Set for a formula's card. */
+  formula?: FormulaView;
+  /** What was selected, and how it was asked about: the same again keeps this card. */
+  range: Range;
+  mode: ExplainOptions["mode"];
+}
+
+/** Whether two ranges cover the same text. */
+function sameRange(a: Range, b: Range): boolean {
+  try {
+    return a.compareBoundaryPoints(Range.START_TO_START, b) === 0 && a.compareBoundaryPoints(Range.END_TO_END, b) === 0;
+  } catch {
+    // In different documents.
+    return false;
+  }
 }
 
 function lastRect(range: Range): DOMRect | null {
@@ -78,6 +112,8 @@ export interface PageSource {
   /** Where the text is; undefined to find it as for any web page. */
   root(): Element | undefined;
   live?: LiveSource;
+  /** The formula a selection is, for a page that finds it its own way (the PDF reader); null when it is not one. */
+  formula?(range: Range, page: ExtractedPage, mayLookUp: () => Promise<boolean>): Promise<FormulaPick | null>;
 }
 
 export class ContentApp {
@@ -110,6 +146,9 @@ export class ContentApp {
   /** What the reader chose about pages that looked private, by source, for as long as this page lives. */
   private readonly choices = new Map<string, Choice>();
   private lockChip: LockChip | null = null;
+  private explainGen = 0;
+  /** The card shown while the page source looks a formula up; `done` once closed or replaced. */
+  private lookup: { card: ExplainCard; done: boolean } | null = null;
   private lockGen = 0;
 
   constructor(
@@ -517,10 +556,41 @@ export class ContentApp {
     if (profileFor(this.source?.url ?? location.href)?.readable === false) return;
     const page = (this.page ??= this.extract());
     const live = this.live();
+    // Each explanation asked for counts; one whose formula lookup comes back after a newer one was asked for is dropped.
+    const asked = ++this.explainGen;
+    this.closeLookup();
+    // Explaining a hinted term, or comparing it with an earlier look-up, is about that term even inside a formula.
+    const formulaAllowed = opts.mode !== "compare" && !opts.earlierEncounterId && !opts.conceptId;
+    if (opts.formula === undefined && !live && formulaAllowed) {
+      const find = this.source?.formula;
+      if (find) {
+        // The same selection asked about again while its card is open keeps that card, as on a web page.
+        if (this.session && this.session.mode === opts.mode && sameRange(this.session.range, range)) return;
+        // Anything else replaces it now, not once the lookup is back, so two cards are never open at once.
+        this.endSession();
+        // The lookup may wait on the network: a card shows at once, and closing it drops the lookup.
+        const waiting = new ExplainCard(this.lang, this.waitingHandlers(), this.info?.models ?? []);
+        const lookup = { card: waiting, done: false };
+        this.lookup = lookup;
+        placeNear(waiting.el, lastRect(range), 380, runsRtl(range));
+        this.ensureOverlay().root.append(waiting.el);
+        const source = this.detect();
+        void find(range, page, () => this.mayLookUp(source))
+          .catch(() => null)
+          .then((formula) => {
+            if (asked !== this.explainGen || lookup.done) return;
+            this.closeLookup();
+            this.explain(range, { ...opts, formula });
+          });
+        return;
+      }
+      opts = { ...opts, formula: this.formulaOnPage(range, page) };
+    }
+    const pick = opts.formula ?? null;
     // Selected in the captions, or elsewhere on the page (the description, a comment): the latter is read like any page.
     const ctx = (live ? live.context(opts.text ?? range.toString()) : null) ?? contextForRange(page, range);
     if (!ctx) return;
-    const selection = ctx.selection.slice(0, MAX_SELECTION);
+    const selection = (pick ? (pick.request.symbol ?? pick.request.tex) : ctx.selection).slice(0, MAX_SELECTION);
     const key = `${opts.mode}\u0000${selection}\u0000${ctx.paragraphId}`;
     // A second click or shortcut press for the same selection while its card is open.
     if (this.session?.key === key) return;
@@ -541,8 +611,23 @@ export class ContentApp {
       ...(opts.earlierEncounterId ? { earlierEncounterId: opts.earlierEncounterId } : {}),
       ...(opts.conceptId ? { conceptId: opts.conceptId } : {}),
       ...(opts.modelId ? { modelId: opts.modelId } : {}),
+      ...(pick ? { formula: pick.request } : {}),
       ...this.privacyFields(source.source_id),
     };
+    const formulaView: FormulaView | undefined = pick
+      ? {
+          ...pick.view,
+          ...(pick.quotesOnPage ? { showOnPage: (quote: string) => this.showEvidence(quote) } : {}),
+          ...(pick.request.symbol
+            ? {
+                onExplainWhole: () => {
+                  this.endSession();
+                  this.explain(range, { ...opts, mode: "explain", formula: wholeFormula(pick) });
+                },
+              }
+            : {}),
+        }
+      : undefined;
 
     const port = this.rpc.connect();
     const send = (m: PortIn) => {
@@ -554,9 +639,12 @@ export class ContentApp {
     };
     const session: Session = {
       key,
+      range,
+      mode: opts.mode,
       port,
       encounterId: null,
       finished: false,
+      ...(formulaView ? { formula: formulaView } : {}),
       ping: setInterval(() => send({ type: "ping" }), PING_MS),
       card: new ExplainCard(
         this.lang,
@@ -588,6 +676,11 @@ export class ContentApp {
             this.explain(range, { ...opts, text: ctx.selection, modelId });
           },
           onCancel: () => send({ type: "cancel" }),
+          onReexplain: () => {
+            if (this.session !== session) return;
+            this.endSession();
+            this.explain(range, { ...opts, mode: "reexplain", text: ctx.selection });
+          },
           onClose: () => {
             if (this.session === session) this.endSession();
           },
@@ -620,10 +713,17 @@ export class ContentApp {
       case "ask":
         s.card.ask(m.name, m.daysAgo);
         break;
+      case "formula_delta":
+        s.card.setFormulaStreaming(m.gist);
+        break;
+      case "formula":
+        if (s.formula) s.card.setFormula({ ...s.formula, ...(m.approximate ? { note: "pdf_text" as const } : {}) }, m.result);
+        break;
       case "done":
         s.finished = true;
         s.encounterId = m.encounterId;
-        s.card.done(m.recorded, m.sensitive);
+        if (s.formula) s.card.formulaDone(m.sensitive);
+        else s.card.done(m.recorded, m.sensitive);
         break;
       case "followup_delta":
         s.card.followUpDelta(m.text);
@@ -639,6 +739,59 @@ export class ContentApp {
         if (m.code === "needs_choice") s.card.choose();
         else s.card.error(m.code, m.retryAfterMs);
         break;
+    }
+  }
+
+  /** The formula a selection on a web page is, read from the page's math markup. */
+  private formulaOnPage(range: Range, page: ExtractedPage): FormulaPick | null {
+    const sel = formulaSelection(range);
+    if (!sel) return null;
+    return {
+      request: { tex: sel.tex, ...(sel.symbol ? { symbol: sel.symbol } : {}), definitions: definitionsFor(page, sel.tex, sel.element) },
+      view: { tex: sel.tex, ...(sel.symbol ? { symbol: sel.symbol } : {}), original: sel.element },
+      quotesOnPage: true,
+    };
+  }
+
+  /** Ends the card shown while a formula is looked up, without cancelling anything else. */
+  private closeLookup(): void {
+    const l = this.lookup;
+    if (!l) return;
+    this.lookup = null;
+    l.done = true;
+    l.card.close();
+  }
+
+  private waitingHandlers(): ExplainCardHandlers {
+    const none = () => undefined;
+    return {
+      onAnswer: none,
+      onAction: none,
+      onFollowUp: none,
+      onMarkSensitive: none,
+      onChoose: none,
+      onRetry: none,
+      onRetryWith: none,
+      // Stop while the formula is looked up: nothing is asked, and the card goes.
+      onCancel: () => this.closeLookup(),
+      // Closed by the reader: the lookup's answer is dropped.
+      onClose: () => {
+        if (this.lookup && !this.lookup.done) {
+          this.lookup.done = true;
+          this.lookup = null;
+        }
+      },
+    };
+  }
+
+  /** Whether the page source may ask an outside site about this document: a normal source, in a normal window. */
+  private async mayLookUp(source: DetectedSource): Promise<boolean> {
+    if (this.info?.incognito || this.info?.enabled === false) return false;
+    try {
+      const answer = await this.rpc.request({ type: "source-status", sourceId: source.source_id, ...this.privacyFields(source.source_id) });
+      return answer.status === "normal";
+    } catch {
+      return false;
     }
   }
 

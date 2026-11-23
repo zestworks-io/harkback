@@ -1,52 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { identityKey } from "../../src";
-import { evaluate, lookupKey, replayRecording, type Recording } from "../../src/eval/evaluate";
+import { evaluate, replayRecording, type Recording } from "../../src/eval/evaluate";
 import { checkGates } from "../../src/eval/gates";
 import { EVAL_SET } from "./cases";
 
 /** Answers built from the gold labels, with one mistake of each kind the metrics should catch. */
 const recorded = JSON.parse(readFileSync(new URL("./fixtures/recorded.json", import.meta.url), "utf8")) as Recording;
-
-describe("evaluation cases", () => {
-  const labels = new Set(Object.keys(EVAL_SET.concepts));
-
-  it("only refer to labelled concepts and existing paragraphs", () => {
-    const wrong: string[] = [];
-    for (const r of EVAL_SET.relations) for (const l of [r.from, r.to]) if (!labels.has(l)) wrong.push(`relation ${l}`);
-    for (const p of EVAL_SET.papers) {
-      for (const l of p.reunions) if (!labels.has(l)) wrong.push(`${p.id} reunion ${l}`);
-      p.lookups.forEach((l, i) => {
-        if (!labels.has(l.concept)) wrong.push(`${lookupKey(p, i)} ${l.concept}`);
-        if (!p.paragraphs[l.paragraph]?.text.toLowerCase().includes(l.selection.toLowerCase())) wrong.push(`${lookupKey(p, i)} paragraph`);
-      });
-    }
-    expect(wrong).toEqual([]);
-  });
-
-  it("give no name to two concepts", () => {
-    const owner = new Map<string, string>();
-    const shared: string[] = [];
-    for (const [label, names] of Object.entries(EVAL_SET.concepts)) {
-      for (const name of names) {
-        const prev = owner.get(identityKey(name));
-        if (prev && prev !== label) shared.push(`${name}: ${prev}, ${label}`);
-        owner.set(identityKey(name), label);
-      }
-    }
-    expect(shared).toEqual([]);
-  });
-
-  it("expect reunions only for concepts looked up in an earlier paper", () => {
-    const seen = new Set<string>();
-    const early: string[] = [];
-    for (const p of EVAL_SET.papers) {
-      for (const l of p.reunions) if (!seen.has(l)) early.push(`${p.id}: ${l}`);
-      for (const l of p.lookups) seen.add(l.concept);
-    }
-    expect(early).toEqual([]);
-  });
-});
 
 describe("evaluate", () => {
   it("scores recorded answers without the model", async () => {

@@ -1,4 +1,4 @@
-import type { Grade, Hit, MatcherEntry, ReviewAction, Verdict } from "@harkback/core";
+import type { FormulaResult, Grade, Hit, MatcherEntry, ReviewAction, Verdict } from "@harkback/core";
 import type { ConsentScope, HarkEvent, Tier } from "@harkback/spec";
 import type { ExplainRequestMsg, PlanError } from "../explain/explain";
 import type { ModelErrorCode } from "../models/model-client";
@@ -27,6 +27,9 @@ export type PortOut =
   /** `evidence`: the passage of the page the explanation quotes, when it was found there (defined in source). */
   | { type: "explained"; explanation: string; tier: Tier; evidence?: string }
   | { type: "ask"; name: string; daysAgo: number }
+  /** A formula's explanation: the gist while it is written, then all of it. */
+  | { type: "formula_delta"; gist: string }
+  | { type: "formula"; result: FormulaResult; approximate: boolean }
   | { type: "done"; encounterId: string | null; recorded: boolean; sensitive: boolean }
   | { type: "followup_delta"; text: string }
   | { type: "followup_done"; answer: string }

@@ -94,15 +94,59 @@ function parseCard(text: string | null, labels: ReadonlyMap<string, string>, lan
   };
 }
 
+/** A card's JSON written without its tag: an object that opens with one of the card's keys. */
+const CARD_START = /\{\s*"(?:match|canonical|aliases)"\s*:/;
+/** A code fence holding JSON, which a reply without tags may put its card in. */
+const JSON_FENCE = /```[ \t]*(?:json)?[ \t]*\n?(\{[\s\S]*?)(?:```|$)/gi;
+
+/** The end of the `{…}` starting at `start`, with strings skipped; the text's end when it is not closed. */
+function objectEnd(text: string, start: number): number {
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (c === "\\") i++;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) return i + 1;
+  }
+  return text.length;
+}
+
+/**
+ * A reply that left out the explanation tag, which small models do: the prose is the explanation, and a card written
+ * without its tag (in a JSON code fence, or bare) is taken out of it and read as the card.
+ */
+function untaggedReply(raw: string): { explanation: string; card: string | null } {
+  let card = block(raw, "card");
+  let text = raw.replace(/<(evidence|card)>[\s\S]*?(?:<\/\1>|$)/gi, "");
+  text = text.replace(JSON_FENCE, (whole, body: string) => {
+    if (!CARD_START.test(body)) return whole;
+    card ??= body;
+    return "";
+  });
+  for (let m = CARD_START.exec(text); m; m = CARD_START.exec(text)) {
+    const end = objectEnd(text, m.index);
+    card ??= text.slice(m.index, end);
+    text = text.slice(0, m.index) + text.slice(end);
+  }
+  return { explanation: text.replace(/<\/?(?:explanation|evidence|card)>/gi, "").trim(), card };
+}
+
 /** `language` is the explain language; a card's translations are kept only when they are written in it. */
 export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string>, language = "en"): ParsedOutput {
   const explanation = block(raw, "explanation");
   if (explanation === null) {
-    const text = raw
-      .replace(/<(evidence|card)>[\s\S]*?<\/\1>/gi, "")
-      .trim()
-      .slice(0, CARD_LIMITS.maxExplanationLength);
-    return { explanation: text, evidence: null, card: null, flags: ["card_missing"] };
+    const loose = untaggedReply(raw);
+    const card = parseCard(loose.card, labels, language);
+    return {
+      explanation: loose.explanation.slice(0, CARD_LIMITS.maxExplanationLength),
+      evidence: null,
+      card,
+      flags: card ? [] : ["card_missing"],
+    };
   }
   const ev = block(raw, "evidence");
   const evidence = !ev || /^none$/i.test(ev) || ev.length > CARD_LIMITS.maxEvidenceLength ? null : ev;
@@ -117,7 +161,11 @@ export function parseModelOutput(raw: string, labels: ReadonlyMap<string, string
 
 export function streamingExplanation(partial: string): string {
   const start = partial.search(/<explanation>/i);
-  if (start < 0) return /^\s*</.test(partial) ? "" : partial;
+  if (start < 0) {
+    // No tag: the prose so far, up to a tag or a card in JSON, without a tag or fence still being written.
+    const cut = partial.search(/<\/?(?:explanation|evidence|card)>|```\s*(?:json)?\s*(?:\{|$)|\{\s*"/i);
+    return (cut >= 0 ? partial.slice(0, cut) : partial).replace(/(?:<\/?[a-z]*|`{1,3}[a-z]*)$/i, "").trim();
+  }
   const body = partial.slice(start + "<explanation>".length);
   const end = body.search(/<\/explanation>/i);
   if (end >= 0) return body.slice(0, end).trim();

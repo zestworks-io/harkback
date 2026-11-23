@@ -60,6 +60,21 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--hb-accent);
 .hb-body strong { font-weight: 650; }
 .hb-body pre { overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--hb-subtle); }
 .hb-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+
+.hb-formula { margin: 0 0 10px; padding: 10px 12px; border-radius: 8px; background: var(--hb-subtle); text-align: center; overflow-x: auto; font-size: 16px; }
+.hb-formula math { font-size: 1.05em; }
+.hb-formula .hb-hl { background: var(--hb-accent-soft); color: var(--hb-accent); border-radius: 3px; }
+.hb-warn { margin: 0 0 8px; color: var(--hb-external); font-size: 12.5px; }
+.hb-gist { margin: 0 0 8px; }
+.hb-syms { display: flex; flex-direction: column; border-top: 1px solid var(--hb-border); }
+.hb-sym { display: grid; grid-template-columns: minmax(44px, auto) 1fr auto; gap: 2px 10px; align-items: baseline; padding: 5px 4px; border-bottom: 1px solid var(--hb-border); font-size: 13.5px; outline: none; cursor: default; }
+.hb-sym.hb-on, .hb-sym:focus-visible { background: var(--hb-accent-soft); }
+.hb-sym-tex { text-align: center; }
+.hb-sym-source { color: var(--hb-muted); font-size: 11.5px; white-space: nowrap; }
+.hb-src-page { color: var(--hb-defined); }
+.hb-sym-detail { grid-column: 2 / -1; color: var(--hb-muted); font-size: 12.5px; }
+.hb-sym-detail q { font-style: italic; }
+.hb-aloud { margin: 8px 0 0; color: var(--hb-muted); font-style: italic; font-size: 13px; }
 .hb-math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", Georgia, "Times New Roman", serif; font-size: 1.05em; white-space: normal; }
 .hb-math i { font-style: italic; }
 .hb-math sub, .hb-math sup { font-size: 0.72em; line-height: 0; }

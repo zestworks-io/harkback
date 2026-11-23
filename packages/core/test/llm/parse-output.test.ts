@@ -42,6 +42,32 @@ describe("parseModelOutput", () => {
     expect(r).toEqual({ explanation: "LoRA 是一种微调方法。", evidence: null, card: null, flags: ["card_missing"] });
   });
 
+  // What a small built-in model writes: no tags, the card as a fenced JSON block, before or after the prose.
+  const json = '{"match": "c1", "canonical": "Scaled Dot-Product Attention", "aliases": ["Scaled Dot Product Attention"], "domain": "ml"}';
+
+  it("lifts an untagged card in a code fence out of the explanation", () => {
+    const r = parseModelOutput("```json\n" + json + "\n```\nIt scales dot products by the key size.", labels);
+    expect(r.explanation).toBe("It scales dot products by the key size.");
+    expect(r.card?.canonical).toBe("Scaled Dot-Product Attention");
+    expect(r.card?.matchConceptId).toBe("CONCEPT_1");
+    expect(r.flags).toEqual([]);
+  });
+
+  it("lifts a bare untagged card, and an unclosed card block, out of the explanation", () => {
+    expect(parseModelOutput("It scales dot products. " + json, labels).explanation).toBe("It scales dot products.");
+    const r = parseModelOutput("It scales dot products.\n<card>" + json, labels);
+    expect(r.explanation).toBe("It scales dot products.");
+    expect(r.card?.canonical).toBe("Scaled Dot-Product Attention");
+  });
+
+  it("leaves an explanation empty when the reply is only a card", () => {
+    expect(parseModelOutput("```json\n" + json + "\n```", labels).explanation).toBe("");
+  });
+
+  it("keeps braces of prose that are not a card", () => {
+    expect(parseModelOutput("A set {1, 2} has two elements.", labels).explanation).toBe("A set {1, 2} has two elements.");
+  });
+
   it("flags a malformed card", () => {
     const r = parseModelOutput(out("{not json"), labels);
     expect(r.card).toBeNull();
@@ -89,6 +115,9 @@ describe("streamingExplanation", () => {
     expect(streamingExplanation("<explanation>低秩适配。</expla")).toBe("低秩适配。");
     expect(streamingExplanation("<explanation>低秩适配。</explanation><evidence>")).toBe("低秩适配。");
     expect(streamingExplanation("No tags at all")).toBe("No tags at all");
+    expect(streamingExplanation("It scales. <card>{")).toBe("It scales.");
+    expect(streamingExplanation('It scales. ```json\n{"match"')).toBe("It scales.");
+    expect(streamingExplanation('{"match": "c1"')).toBe("");
   });
 });
 

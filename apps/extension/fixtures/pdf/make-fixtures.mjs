@@ -140,6 +140,41 @@ async function scanOf(source, title) {
   ]);
 }
 
+/** An arXiv paper with a numbered equation; its HTML version is served in e2e builds. */
+const attention = pdf(
+  [
+    [
+      text(72, 760, 8, "arXiv:1706.03762v7 [cs.CL] 2 Aug 2023"),
+      text(72, 730, 16, "Attention Is All You Need"),
+      text(72, 690, 13, "3 Scaled Dot-Product Attention"),
+      lines(72, 668, 10, 12, [
+        "We compute the dot products of the query with all keys, divide each by the square root of",
+        "the key dimension, and apply a softmax function to obtain the weights on the values.",
+      ]),
+      text(200, 620, 10, "Attention(Q, K, V) = softmax(QKT/dk)V"),
+      text(520, 620, 10, "(1)"),
+      lines(72, 596, 10, 12, ["where Q, K and V are the matrices of queries, keys and values."]),
+    ].join("\n"),
+  ],
+  "Attention Is All You Need",
+);
+/** An arXiv paper whose HTML version does not exist. */
+const nohtml = pdf(
+  [
+    [
+      text(72, 760, 8, "arXiv:2401.99999v1 [cs.LG] 1 Jan 2024"),
+      text(72, 730, 16, "A Paper Without an HTML Version"),
+      lines(72, 690, 10, 12, ["The training objective is the negative log-likelihood of the tokens."]),
+      text(200, 650, 10, "L = -sum log p(xi)"),
+      text(520, 650, 10, "(1)"),
+      lines(72, 626, 10, 12, ["where p is the probability the model gives each token."]),
+    ].join("\n"),
+  ],
+  "A Paper Without an HTML Version",
+);
+
 writeFileSync(path.join(here, "paper.pdf"), paper);
+writeFileSync(path.join(here, "attention.pdf"), attention);
+writeFileSync(path.join(here, "nohtml.pdf"), nohtml);
 writeFileSync(path.join(here, "columns.pdf"), columns);
 writeFileSync(path.join(here, "scanned.pdf"), await scanOf(paper, "Adapters for Small Language Models (scan)"));

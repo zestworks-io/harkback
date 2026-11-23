@@ -175,3 +175,23 @@ test("shows the passage an explanation quotes, on the page and from History", as
     "https://arxiv.org/html/2106.09685#:~:text=We%20propose%20Low%2DRank%20Adaptation%2C%20or,freezes%20the%20pre%2Dtrained%20model%20weights",
   );
 });
+
+test("a reply without tags shows its prose, not the card's JSON, and a reply with only JSON is an error", async ({ context, sw, stub }) => {
+  await seedSettings(sw, stubSettings(stub.url));
+  const json = '{"match": null, "canonical": "LoRA", "aliases": ["Low-Rank Adaptation"], "domain": "ml"}';
+  stub.queue.push(
+    { body: "```json\n" + json + "\n```\nLoRA adds small trainable matrices beside frozen weights." },
+    { body: "```json\n" + json + "\n```" },
+  );
+  const page = await openArxiv(context, "2106.09685");
+  await explainWord(page, "#t-lora");
+  const card = page.locator("[data-hb=card]");
+  await expect(card.locator("[data-hb=explanation]")).toHaveText("LoRA adds small trainable matrices beside frozen weights.");
+  await expect(card).not.toContainText("canonical");
+  await expect(card.locator("[data-hb=understood]")).toBeEnabled();
+  await card.locator("[data-hb=close]").click();
+
+  await explainWord(page, "#t-lora");
+  await expect(card.locator("[data-hb=error]")).toBeVisible();
+  await expect(card).not.toContainText("canonical");
+});

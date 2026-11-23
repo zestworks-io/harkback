@@ -16,6 +16,7 @@ export * from "./concepts/matcher";
 export * from "./concepts/reunion";
 export * from "./llm/languages";
 export * from "./llm/prompt";
+export * from "./llm/formula";
 export * from "./llm/parse-output";
 export * from "./llm/evidence";
 export * from "./llm/record";

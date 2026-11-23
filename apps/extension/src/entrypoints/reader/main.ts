@@ -11,6 +11,9 @@ import { DEFAULT_LANGUAGES, normalizeLanguages } from "../../lib/ocr/languages";
 import { languagePanel } from "../../lib/ocr/panel";
 import { getChoice, getPack, installedPacks, putChoice } from "../../lib/ocr/store";
 import { takeHandoff } from "../../lib/pdf/handoff";
+import { createArxivHtml } from "../../lib/pdf/arxiv-html";
+import { pdfFormula } from "../../lib/pdf/formula-source";
+import { effectiveRule } from "../../lib/source/site-rules";
 import { createScanner, type Scanner } from "../../lib/pdf/scan";
 import { mountViewer, type ScanProgress, type Viewer } from "../../lib/pdf/viewer";
 import { withDefaults } from "../../lib/storage/settings";
@@ -166,6 +169,14 @@ async function main(): Promise<void> {
     url: src,
     detect: () => source,
     root: () => host,
+    formula: pdfFormula(
+      source.ids.arxiv ?? null,
+      createArxivHtml({
+        fetch: (input, init) => fetch(input, init),
+        siteOff: async () =>
+          effectiveRule(withDefaults((await browser.storage.local.get("settings")).settings).sites, "https://arxiv.org/").disabled,
+      }),
+    ),
   });
   listenForTabMessages(app);
   const ocrAssets = new URL("ocr/", browser.runtime.getURL("/reader.html")).href;

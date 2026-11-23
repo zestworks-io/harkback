@@ -11,6 +11,7 @@ import {
   streamingExplanation,
   withoutSensitive,
   type EventFactory,
+  type State,
 } from "@harkback/core";
 import type { HarkEvent } from "@harkback/spec";
 import { browser, type Browser } from "wxt/browser";
@@ -28,6 +29,7 @@ import {
   type ExplainRecord,
   type ExplainRequestMsg,
 } from "../lib/explain/explain";
+import { answerFormula, formulaFollowUpContext, planFormula, type FormulaRequestMsg } from "../lib/explain/formula";
 import {
   isRequest,
   type ErrorCode,
@@ -172,7 +174,6 @@ export default defineBackground(() => {
     type Turn = { question: string; answer: string };
     let last: {
       req: ExplainRequestMsg;
-      plan: ExplainPlan;
       explanation: string;
       encounterId: string | null;
       /** Follow-ups answered before the explanation was recorded. */
@@ -229,6 +230,7 @@ export default defineBackground(() => {
       try {
         const settings = await loadSettings();
         const state = await getState();
+        if (req.formula) return await startFormula({ ...req, formula: req.formula }, settings, state);
         const planned = planExplain(req, { url, incognito }, settings, state);
         if (planned.kind === "error") return post({ type: "error", code: planned.code });
         const { plan } = planned;
@@ -247,7 +249,9 @@ export default defineBackground(() => {
         });
         // The model took a while: join against what is recorded now, not what was when the request started.
         const outcome = finishExplain(raw, plan, req, await getState());
-        last = { req, plan, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
+        // A reply with nothing to show (a small model that wrote only the card): an error to retry, not an empty card.
+        if (!outcome.parsed.explanation.trim()) throw new ModelError("http", "the reply had no explanation");
+        last = { req, explanation: outcome.parsed.explanation, encounterId: null, unsaved: [] };
         post({
           type: "explained",
           explanation: outcome.parsed.explanation,
@@ -272,6 +276,25 @@ export default defineBackground(() => {
       } finally {
         busy = false;
       }
+    }
+
+    async function startFormula(req: ExplainRequestMsg & { formula: FormulaRequestMsg }, settings: Settings, state: State): Promise<void> {
+      const plan = planFormula(req, { url, incognito }, settings, state);
+      if (plan.kind === "error") return post({ type: "error", code: plan.code });
+      if (!(await canReach(plan.model))) return post({ type: "error", code: "no_permission" });
+      const asked = Date.now();
+      const rate = await acquireRate(settings, asked);
+      if (!rate.ok) return post({ type: "error", code: "local_rate", retryAfterMs: rate.retryAfterMs });
+      const result = await answerFormula(plan, {
+        stream: (onDelta) =>
+          streamChat(plan.model, plan.messages, onDelta, { signal: begin(), ...timeoutsOf(settings) }).catch(async (e: unknown) => {
+            await refundRate(asked);
+            throw e;
+          }),
+        post,
+        sensitive: isSensitiveSource(state, req.source.source_id),
+      });
+      last = { req, explanation: formulaFollowUpContext(result), encounterId: null, unsaved: [] };
     }
 
     async function answer(sameConcept: boolean): Promise<void> {
@@ -310,7 +333,8 @@ export default defineBackground(() => {
           throw e;
         });
         const turn = { question: q, answer: reply.slice(0, FOLLOW_UP_ANSWER_CHARS) };
-        if (!incognito) {
+        // A formula's explanation is not recorded, and neither is talk about it.
+        if (!incognito && !l.req.formula) {
           // Until the explanation itself is recorded there is nothing to attach the conversation to; it is saved right after.
           if (l.encounterId) await saveFollowUp(l.encounterId, turn);
           else l.unsaved.push(turn);

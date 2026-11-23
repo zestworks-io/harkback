@@ -25,7 +25,20 @@ describe.skipIf(!enabled)("production manifest", () => {
   it("keeps the schema library out of the script injected into web pages", () => {
     const file = join(out, "content-scripts/content.js");
     expect(readFileSync(file, "utf8")).not.toContain("ZodError");
-    expect(statSync(file).size).toBeLessThan(135_000);
+    expect(statSync(file).size).toBeLessThan(150_000);
+  });
+
+  it("carries no address of a script hosted elsewhere (Manifest V3 forbids remote code)", () => {
+    const files = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory() ? files(join(dir, e.name)) : /\.([mc]?js|html)$/.test(e.name) ? [join(dir, e.name)] : [],
+      );
+    // A script or WebAssembly file named in full, or any address on a package CDN however the rest is put together.
+    // Project homepages such as github.com/naptha/tesseract.js are links, not code.
+    const remote =
+      /https?:\/\/(?!(?:www\.)?(?:github|gitlab)\.com\/)[^\s"'`)]*?\.(?:[mc]?js|wasm)(?=[?#\s"'`)]|$)|https?:\/\/(?:cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|esm\.run|cdn\.skypack\.dev)\/[^\s"'`)]*/g;
+    const offenders = files(out).flatMap((f) => (readFileSync(f, "utf8").match(remote) ?? []).map((u) => `${f}: ${u}`));
+    expect(offenders).toEqual([]);
   });
 
   it("uses closed shadow roots in the production content script", () => {

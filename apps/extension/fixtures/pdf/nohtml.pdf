@@ -1,0 +1,41 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 407 >>
+stream
+BT /F1 8 Tf 72 760 Td (arXiv:2401.99999v1 [cs.LG] 1 Jan 2024) Tj ET
+BT /F1 16 Tf 72 730 Td (A Paper Without an HTML Version) Tj ET
+BT /F1 10 Tf 72 690 Td (The training objective is the negative log-likelihood of the tokens.) Tj ET
+BT /F1 10 Tf 200 650 Td (L = -sum log p\(xi\)) Tj ET
+BT /F1 10 Tf 520 650 Td (\(1\)) Tj ET
+BT /F1 10 Tf 72 626 Td (where p is the probability the model gives each token.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Title (A Paper Without an HTML Version) >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+0000000769 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R /Info 6 0 R >>
+startxref
+831
+%%EOF

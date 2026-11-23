@@ -79,12 +79,13 @@ Add it to `Request`, `ResponseMap` and `REQUEST_TYPES` in `lib/messaging/message
 
 ## Measuring explanation quality
 
-`pnpm eval` reads a labelled set of short passages on efficient fine-tuning (`packages/core/test/eval/cases`) in order, the way the extension would: it matches known terms and picks reunions when a paper opens, and for each lookup builds the real explain prompt, asks the model, parses the answer, checks the evidence and records the events. It then compares the result with the gold labels. It needs a real model, so it is not part of `pnpm test`; run it when you change the prompt, the parser, the matcher or the model you recommend.
+`pnpm eval` reads labelled sets of short passages (`packages/core/test/eval/cases`), one per field: `ml` (efficient fine-tuning) and `quantum` (quantum computing). It reads each set in order, the way the extension would: it matches known terms and picks reunions when a paper opens, and for each lookup builds the real explain prompt, asks the model, parses the answer, checks the evidence and records the events. It then compares the result with the gold labels. It needs a real model, so it is not part of `pnpm test`; run it when you change the prompt, the parser, the matcher or the model you recommend.
 
 ```sh
 HB_EVAL_BASE_URL=https://api.openai.com/v1 HB_EVAL_API_KEY=… HB_EVAL_MODEL=<model> pnpm eval --record run.json
 pnpm eval --replay run.json                        # score saved answers again, offline
-pnpm eval --replay run.json --baseline base.json   # base.json: {"bCubedF1": 0.93}
+pnpm eval --replay run.json --baseline base.json   # base.json: {"bCubedF1": 0.93}, or one per set: {"ml": {"bCubedF1": 0.93}}
+pnpm eval --set quantum --record quantum.json      # one field only
 ```
 
 Any OpenAI-compatible endpoint works, including a local Ollama (`http://localhost:11434/v1`). The command prints each metric, every miss (a wrong reunion, join, edge or evidence) and the release gates, and exits with 1 when a gate fails:
@@ -96,7 +97,13 @@ Any OpenAI-compatible endpoint works, including a local Ollama (`http://localhos
 | `defined_in_source` precision: evidence that passed the check and really is a definition | at least 90%                        |
 | B-cubed F1 of the concept clusters                                                       | no lower than the recorded baseline |
 
-When a miss is a missing label rather than a mistake (a correct broader term the set does not list, say), add it to `cases/concepts.ts`. `test/eval/evaluate.test.ts` scores the recorded answers in `test/eval/fixtures/recorded.json` offline; a change to the cases or the scoring updates the numbers it expects, and a new lookup needs an answer in the recording.
+Each set is scored and gated on its own, since reunions only reach back within one reader's history. When a miss is a missing label rather than a mistake (a correct broader term the set does not list, say), add it to that set's `concepts.ts`. `test/eval/evaluate.test.ts` scores the recorded answers in `test/eval/fixtures/recorded.json` offline; a change to the cases or the scoring updates the numbers it expects, and a new lookup needs an answer in the recording. `test/eval/sets.test.ts` checks every set's labels for consistency, and scores answers built from each set's own labels, which must come out right throughout: a miss there means the expected reunions disagree with the concepts' names and relations. It cannot check whether a lookup is really defined in its paper; that label is for you to get right.
+
+To add a field, write its passages and concepts in a folder of its own under `cases/` (see `cases/quantum`), add it to `EVAL_SETS` in `cases/index.ts`, and give its papers ids no other set uses.
+
+### Formulas
+
+`pnpm eval:formula` measures how formulas are found and read on five openly licensed arXiv papers, with no model: selecting display equations and symbols on the HTML pages, finding the sentences that define symbols, and matching lines of the real PDFs to the HTML version's equations. Its quality bars run in `pnpm test` too; a wrong PDF equation fails it outright. The pages, PDF text and labels are in `apps/extension/test/eval/formula` (see its `NOTICE.md`).
 
 ## Releasing
 

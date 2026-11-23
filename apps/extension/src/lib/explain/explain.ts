@@ -24,6 +24,7 @@ import { gateSource, type Choice } from "../source/privacy-gate";
 import type { Privacy } from "../source/site-profiles";
 import { effectiveRule, sensitiveBySiteRule } from "../source/site-rules";
 import type { DetectedSource } from "../source/source-id";
+import type { FormulaRequestMsg } from "./formula";
 
 export interface ExplainRequestMsg {
   mode: "explain" | "reexplain" | "compare";
@@ -46,6 +47,8 @@ export interface ExplainRequestMsg {
   privacy?: Privacy;
   /** The reader's answer to that question on this page, for when it could not be recorded. */
   choice?: Choice;
+  /** Set when the selection is a formula or a symbol of one: explained as such, and never recorded. */
+  formula?: FormulaRequestMsg;
 }
 
 export interface PageContext {

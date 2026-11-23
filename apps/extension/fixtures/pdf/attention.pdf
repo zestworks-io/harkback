@@ -1,0 +1,43 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 629 >>
+stream
+BT /F1 8 Tf 72 760 Td (arXiv:1706.03762v7 [cs.CL] 2 Aug 2023) Tj ET
+BT /F1 16 Tf 72 730 Td (Attention Is All You Need) Tj ET
+BT /F1 13 Tf 72 690 Td (3 Scaled Dot-Product Attention) Tj ET
+BT /F1 10 Tf 72 668 Td (We compute the dot products of the query with all keys, divide each by the square root of) Tj ET
+BT /F1 10 Tf 72 656 Td (the key dimension, and apply a softmax function to obtain the weights on the values.) Tj ET
+BT /F1 10 Tf 200 620 Td (Attention\(Q, K, V\) = softmax\(QKT/dk\)V) Tj ET
+BT /F1 10 Tf 520 620 Td (\(1\)) Tj ET
+BT /F1 10 Tf 72 596 Td (where Q, K and V are the matrices of queries, keys and values.) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Title (Attention Is All You Need) >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000311 00000 n 
+0000000991 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R /Info 6 0 R >>
+startxref
+1047
+%%EOF
